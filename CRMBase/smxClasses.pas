@@ -685,102 +685,42 @@ type
     property LibManager: TsmxCustomLibraryManager read FLibManager write SetLibraryManager;
   end;}
 
-  { TsmxCustomMenuPoint }
-
-  TsmxCustomMenuPoint = class(TsmxControlCell)
-  public
-    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
-    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
-  end;
-
-  { TsmxCustomMasterMenu }
-
-  TsmxCustomMasterMenu = class(TsmxControlCell)
-  private
-    FMenuPointList: TList;
-    function GetMenuPoint(Index: Integer): TsmxCustomMenuPoint;
-    function GetMenuPointCount: Integer;
-  protected
-    procedure DestroyChilds; override;
-    procedure InstallParent; override;
-    //procedure UnInstallParent; override;
-
-    property MenuPointList: TList read FMenuPointList;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-    function FindMenuPointByCfgID(ACfgID: Integer): TsmxCustomMenuPoint;
-    function MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint; virtual;
-
-    property MenuPointCount: Integer read GetMenuPointCount;
-    property MenuPoints[Index: Integer]: TsmxCustomMenuPoint read GetMenuPoint; default;
-  end;
-
-  { TsmxCustomToolBoard }
-
-  TsmxCustomToolBoard = class(TsmxControlCell)
-  public
-    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
-    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
-  end;
-
-  { TsmxCustomControlBoard }
-
-  TsmxCustomControlBoard = class(TsmxControlCell)
-  private
-    FToolBoardList: TList;
-    function GetToolBoard(Index: Integer): TsmxCustomToolBoard;
-    function GetToolBoardCount: Integer;
-  protected
-    procedure DestroyChilds; override;
-    procedure InstallParent; override;
-    //procedure UnInstallParent; override;
-
-    property ToolBoardList: TList read FToolBoardList;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-    function FindToolBoardByCfgID(ACfgID: Integer): TsmxCustomToolBoard;
-    procedure Prepare(Forcibly: Boolean = False); override;
-
-    property ToolBoardCount: Integer read GetToolBoardCount;
-    property ToolBoards[Index: Integer]: TsmxCustomToolBoard read GetToolBoard; default;
-  end;
-
   { TsmxCustomAlgorithmList }
 
   TsmxCustomAlgorithmList = class(TsmxBaseCell)
   private
     FAlgorithmList: TList;
-    FMasterMenu: TsmxCustomMasterMenu;
-    FControlBoard: TsmxCustomControlBoard;
+    //FMasterMenu: TsmxCustomMasterMenu;
+    //FControlBoard: TsmxCustomControlBoard;
     FIsCreateToolButton: Boolean;
     FIsCreateMenuPoint: Boolean;
     function GetAlgorithm(Index: Integer): TsmxCustomAlgorithm;
     function GetAlgorithmCount: Integer;
-    procedure AddAlgorithmsTo(ACell: TsmxControlCell);
-    procedure DelAlgorithmsTo(ACell: TsmxControlCell); 
+    //procedure AddAlgorithmsTo(ACell: TsmxControlCell);
+    //procedure DelAlgorithmsTo(ACell: TsmxControlCell);
   protected
     procedure DestroyChilds; override;
     procedure InstallParent; override;
     //procedure UnInstallParent; override;
-    procedure SetIsCreateMenuPoint(Value: Boolean); virtual;
-    procedure SetIsCreateToolButton(Value: Boolean); virtual;
-    procedure SetMasterMenu(Value: TsmxCustomMasterMenu); virtual;
-    procedure SetControlBoard(Value: TsmxCustomControlBoard); virtual;
+    //procedure SetIsCreateMenuPoint(Value: Boolean); virtual;
+    //procedure SetIsCreateToolButton(Value: Boolean); virtual;
+    //procedure SetMasterMenu(Value: TsmxCustomMasterMenu); virtual;
+    //procedure SetControlBoard(Value: TsmxCustomControlBoard); virtual;
 
     property AlgorithmList: TList read FAlgorithmList;
   public
     constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
     function FindAlgorithmByCfgID(ACfgID: Integer): TsmxCustomAlgorithm;
+    procedure AddAlgorithmsTo(ACell: TsmxControlCell); virtual;
+    procedure DelAlgorithmsTo(ACell: TsmxControlCell); virtual;
 
     property AlgorithmCount: Integer read GetAlgorithmCount;
     property Algorithms[Index: Integer]: TsmxCustomAlgorithm read GetAlgorithm; default;
-    property MasterMenu: TsmxCustomMasterMenu read FMasterMenu write SetMasterMenu;
-    property ControlBoard: TsmxCustomControlBoard read FControlBoard write SetControlBoard;
-    property IsCreateToolButton: Boolean read FIsCreateToolButton write SetIsCreateToolButton default False;
-    property IsCreateMenuPoint: Boolean read FIsCreateMenuPoint write SetIsCreateMenuPoint default False;
+    //property MasterMenu: TsmxCustomMasterMenu read FMasterMenu write SetMasterMenu;
+    //property ControlBoard: TsmxCustomControlBoard read FControlBoard write SetControlBoard;
+    property IsCreateToolButton: Boolean read FIsCreateToolButton write FIsCreateToolButton default False;
+    property IsCreateMenuPoint: Boolean read FIsCreateMenuPoint write FIsCreateMenuPoint default False;
   end;
 
   { TsmxCustomFilter }
@@ -911,6 +851,68 @@ type
     property Pages[Index: Integer]: TsmxCustomPage read GetPage; default;
   end;
 
+  { TsmxCustomMenuPoint }
+
+  TsmxCustomMenuPoint = class(TsmxControlCell)
+  public
+    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
+    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
+  end;
+
+  { TsmxCustomMasterMenu }
+
+  TsmxCustomMasterMenu = class(TsmxControlCell)
+  private
+    FMenuPointList: TList;
+    function GetMenuPoint(Index: Integer): TsmxCustomMenuPoint;
+    function GetMenuPointCount: Integer;
+  protected
+    procedure DestroyChilds; override;
+    procedure InstallParent; override;
+    //procedure UnInstallParent; override;
+
+    property MenuPointList: TList read FMenuPointList;
+  public
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+    function FindMenuPointByCfgID(ACfgID: Integer): TsmxCustomMenuPoint;
+    function MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint; virtual;
+
+    property MenuPointCount: Integer read GetMenuPointCount;
+    property MenuPoints[Index: Integer]: TsmxCustomMenuPoint read GetMenuPoint; default;
+  end;
+
+  { TsmxCustomToolBoard }
+
+  TsmxCustomToolBoard = class(TsmxControlCell)
+  public
+    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
+    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); virtual;
+  end;
+
+  { TsmxCustomControlBoard }
+
+  TsmxCustomControlBoard = class(TsmxControlCell)
+  private
+    FToolBoardList: TList;
+    function GetToolBoard(Index: Integer): TsmxCustomToolBoard;
+    function GetToolBoardCount: Integer;
+  protected
+    procedure DestroyChilds; override;
+    procedure InstallParent; override;
+    //procedure UnInstallParent; override;
+
+    property ToolBoardList: TList read FToolBoardList;
+  public
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+    function FindToolBoardByCfgID(ACfgID: Integer): TsmxCustomToolBoard;
+    procedure Prepare(Forcibly: Boolean = False); override;
+
+    property ToolBoardCount: Integer read GetToolBoardCount;
+    property ToolBoards[Index: Integer]: TsmxCustomToolBoard read GetToolBoard; default;
+  end;
+
   { TsmxCustomStatusBoard }
 
   TsmxCustomStatusBoard = class(TsmxControlCell)
@@ -991,7 +993,8 @@ type
 implementation
 
 uses
-  DB, Variants, ComObj, StrUtils{, XMLDoc}, smxFuncs, smxClassFuncs, smxConsts;
+  DB, Variants, ComObj, StrUtils{, XMLDoc}, smxFuncs, smxClassFuncs, smxDBTypes,
+  smxConsts;
 
 { TsmxBaseCfg }
 
@@ -1037,7 +1040,7 @@ procedure TsmxBaseCfg.Initialize;
 begin
   try
     Clear;
-    LoadCfg;
+    LoadCfg; 
     ReadCfg;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
@@ -1154,7 +1157,7 @@ begin
   FCfgDatabaseIntf := ADatabase;
   FCfgID := ACfgID;
   FCfg := NewCfg(Self, FCfgDatabaseIntf, FCfgID);
-  FCfg.Initialize;
+  FCfg.Initialize;  
   FCellList := TList.Create;
 end;
 
@@ -2452,13 +2455,13 @@ begin
 end;
 
 function TsmxDBConnection.CreateDatabaseAsFunc: IsmxDatabase;
-var FuncCreateDatabase: TsmxFuncCreateDatabase;
+var FuncNewDatabase: TsmxFuncNewDatabase;
 begin
   if Assigned(FLibraryManager) then
-    @FuncCreateDatabase := FLibraryManager.GetProcedure(FLibraryName, FFunctionNameOrProgID) else
-    FuncCreateDatabase := nil;
-  if Assigned(FuncCreateDatabase) then
-    Result := FuncCreateDatabase else
+    @FuncNewDatabase := FLibraryManager.GetProcedure(FLibraryName, FFunctionNameOrProgID) else
+    FuncNewDatabase := nil;
+  if Assigned(FuncNewDatabase) then
+    Result := FuncNewDatabase else
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
 end;
 
@@ -2514,13 +2517,11 @@ end;
 
 procedure TsmxDBConnection.SetDatabaseName(Value: String);
 begin
-  if FDatabaseName <> '' then
-    if Assigned(FDatabaseManager) then
-      FDatabaseManager.RemoveDBConnection(Self);
+  if (FDatabaseName <> '') and Assigned(FDatabaseManager) then
+    FDatabaseManager.RemoveDBConnection(Self);
   FDatabaseName := Value;
-  if FDatabaseName <> '' then
-    if Assigned(FDatabaseManager) then
-      FDatabaseManager.InsertDBConnection(Self);
+  if (FDatabaseName <> '') and Assigned(FDatabaseManager) then
+    FDatabaseManager.InsertDBConnection(Self);
 end;
 
 procedure TsmxDBConnection.SetLibraryManager(Value: TsmxCustomLibraryManager);
@@ -2530,10 +2531,10 @@ end;
 
 procedure TsmxDBConnection.SetDatabaseManager(Value: TsmxCustomDatabaseManager);
 begin
-  if Assigned(FDatabaseManager) then
+  if Assigned(FDatabaseManager) and (FDatabaseName <> '') then
     FDatabaseManager.RemoveDBConnection(Self);
   FDatabaseManager := Value;
-  if Assigned(FDatabaseManager) then
+  if Assigned(FDatabaseManager) and (FDatabaseName <> '') then
     FDatabaseManager.InsertDBConnection(Self);
 end;
 
@@ -2761,169 +2762,6 @@ begin
   FLibManager := Value;
 end;}
 
-{ TsmxCustomMenuPoint }
-
-procedure TsmxCustomMenuPoint.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
-begin
-end;
-
-procedure TsmxCustomMenuPoint.DelAlgorithm(Algorithm: TsmxCustomAlgorithm);
-begin
-end;
-
-{ TsmxCustomMasterMenu }
-
-constructor TsmxCustomMasterMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FMenuPointList := TList.Create;
-  CreateChilds;
-  InitChilds;
-end;
-
-destructor TsmxCustomMasterMenu.Destroy;
-begin
-  DestroyChilds;
-  FMenuPointList.Free;
-  inherited Destroy;
-end;
-
-procedure TsmxCustomMasterMenu.DestroyChilds;
-var i: Integer;
-begin
-  for i := FMenuPointList.Count - 1 downto 0 do
-  begin
-    TsmxCustomMenuPoint(FMenuPointList[i]).Free;
-    FMenuPointList.Delete(i);
-  end;
-end;
-
-function TsmxCustomMasterMenu.FindMenuPointByCfgID(ACfgID: Integer): TsmxCustomMenuPoint;
-var i: Integer;
-begin
-  Result := nil;
-  for i := 0 to MenuPointCount - 1 do
-    if MenuPoints[i].CfgID = ACfgID then
-    begin
-      Result := MenuPoints[i];
-      Break;
-    end;
-end;
-
-function TsmxCustomMasterMenu.GetMenuPoint(Index: Integer): TsmxCustomMenuPoint;
-begin
-  Result := TsmxCustomMenuPoint(FMenuPointList[Index]);
-end;
-
-function TsmxCustomMasterMenu.GetMenuPointCount: Integer;
-begin
-  Result := FMenuPointList.Count;
-end;
-
-function TsmxCustomMasterMenu.MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint;
-begin
-  Result := nil;
-end;
-
-procedure TsmxCustomMasterMenu.InstallParent;
-var i: Integer; mp: TsmxCustomMenuPoint;
-begin
-  for i := 0 to MenuPointCount - 1 do
-  begin
-    mp := MenuPointParent(MenuPoints[i].CfgID);
-    if Assigned(mp) then
-      MenuPoints[i].ParentCell := mp else
-      MenuPoints[i].ParentCell := Self;
-  end;
-end;
-
-{procedure TsmxCustomMasterMenu.UnInstallParent;
-var i: Integer;
-begin
-  for i := 0 to MenuPointCount - 1 do
-    MenuPoints[i].ParentCell := nil;
-end;}
-
-{ TsmxCustomToolBoard }
-
-procedure TsmxCustomToolBoard.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
-begin
-end;
-
-procedure TsmxCustomToolBoard.DelAlgorithm(Algorithm: TsmxCustomAlgorithm);
-begin
-end;
-
-{ TsmxCustomControlBoard }
-
-constructor TsmxCustomControlBoard.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FToolBoardList := TList.Create;
-  CreateChilds;
-  InitChilds;
-end;
-
-destructor TsmxCustomControlBoard.Destroy;
-begin
-  DestroyChilds;
-  FToolBoardList.Free;
-  inherited Destroy;
-end;
-
-procedure TsmxCustomControlBoard.DestroyChilds;
-var i: Integer;
-begin
-  for i := FToolBoardList.Count - 1 downto 0 do
-  begin
-    TsmxCustomToolBoard(FToolBoardList[i]).Free;
-    FToolBoardList.Delete(i);
-  end;
-end;
-
-function TsmxCustomControlBoard.FindToolBoardByCfgID(ACfgID: Integer): TsmxCustomToolBoard;
-var i: Integer;
-begin
-  Result := nil;
-  for i := 0 to ToolBoardCount - 1 do
-    if ToolBoards[i].CfgID = ACfgID then
-    begin
-      Result := ToolBoards[i];
-      Break;
-    end;
-end;
-
-function TsmxCustomControlBoard.GetToolBoard(Index: Integer): TsmxCustomToolBoard;
-begin
-  Result := TsmxCustomToolBoard(FToolBoardList[Index]);
-end;
-
-function TsmxCustomControlBoard.GetToolBoardCount: Integer;
-begin
-  Result := FToolBoardList.Count;
-end;
-
-procedure TsmxCustomControlBoard.InstallParent;
-var i: Integer;
-begin
-  for i := 0 to ToolBoardCount - 1 do
-    ToolBoards[i].ParentCell := Self;
-end;
-
-{procedure TsmxCustomControlBoard.UnInstallParent;
-var i: Integer;
-begin
-  for i := 0 to ToolBoardCount - 1 do
-    ToolBoards[i].ParentCell := nil;
-end;}
-
-procedure TsmxCustomControlBoard.Prepare(Forcibly: Boolean = False);
-var i: Integer;
-begin
-  for i := 0 to ToolBoardCount - 1 do
-    ToolBoards[i].Prepare(Forcibly);
-end;
-
 { TsmxCustomAlgorithmList }
 
 constructor TsmxCustomAlgorithmList.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
@@ -2990,7 +2828,7 @@ end;}
 procedure TsmxCustomAlgorithmList.AddAlgorithmsTo(ACell: TsmxControlCell);
 var i: Integer; mp: TsmxCustomMenuPoint; tb: TsmxCustomToolBoard;
 begin
-  if ACell is TsmxCustomMasterMenu then
+  if ACell is TsmxCustomMasterMenu and FIsCreateMenuPoint then
   begin
     for i := 0 to AlgorithmCount - 1 do
     begin
@@ -2999,7 +2837,7 @@ begin
         mp.AddAlgorithm(Algorithms[i]);
     end;
   end else
-  if ACell is TsmxCustomControlBoard then
+  if ACell is TsmxCustomControlBoard and FIsCreateToolButton then
   begin
     for i := AlgorithmCount - 1 downto 0 do
     begin
@@ -3033,7 +2871,7 @@ begin
   end;
 end;
 
-procedure TsmxCustomAlgorithmList.SetMasterMenu(Value: TsmxCustomMasterMenu);
+{procedure TsmxCustomAlgorithmList.SetMasterMenu(Value: TsmxCustomMasterMenu);
 begin
   if Assigned(FMasterMenu) and FIsCreateMenuPoint then
     DelAlgorithmsTo(FMasterMenu);
@@ -3067,7 +2905,7 @@ begin
   FIsCreateToolButton := Value;
   if Assigned(FControlBoard) and FIsCreateToolButton then
     AddAlgorithmsTo(FControlBoard);
-end;
+end;}
 
 { TsmxCustomFilter }
 
@@ -3474,6 +3312,169 @@ begin
     p.Prepare(Forcibly);
 end;
 
+{ TsmxCustomMenuPoint }
+
+procedure TsmxCustomMenuPoint.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
+begin
+end;
+
+procedure TsmxCustomMenuPoint.DelAlgorithm(Algorithm: TsmxCustomAlgorithm);
+begin
+end;
+
+{ TsmxCustomMasterMenu }
+
+constructor TsmxCustomMasterMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+begin
+  inherited Create(AOwner, ADatabase, ACfgID);
+  FMenuPointList := TList.Create;
+  CreateChilds;
+  InitChilds;
+end;
+
+destructor TsmxCustomMasterMenu.Destroy;
+begin
+  DestroyChilds;
+  FMenuPointList.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxCustomMasterMenu.DestroyChilds;
+var i: Integer;
+begin
+  for i := FMenuPointList.Count - 1 downto 0 do
+  begin
+    TsmxCustomMenuPoint(FMenuPointList[i]).Free;
+    FMenuPointList.Delete(i);
+  end;
+end;
+
+function TsmxCustomMasterMenu.FindMenuPointByCfgID(ACfgID: Integer): TsmxCustomMenuPoint;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to MenuPointCount - 1 do
+    if MenuPoints[i].CfgID = ACfgID then
+    begin
+      Result := MenuPoints[i];
+      Break;
+    end;
+end;
+
+function TsmxCustomMasterMenu.GetMenuPoint(Index: Integer): TsmxCustomMenuPoint;
+begin
+  Result := TsmxCustomMenuPoint(FMenuPointList[Index]);
+end;
+
+function TsmxCustomMasterMenu.GetMenuPointCount: Integer;
+begin
+  Result := FMenuPointList.Count;
+end;
+
+function TsmxCustomMasterMenu.MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint;
+begin
+  Result := nil;
+end;
+
+procedure TsmxCustomMasterMenu.InstallParent;
+var i: Integer; mp: TsmxCustomMenuPoint;
+begin
+  for i := 0 to MenuPointCount - 1 do
+  begin
+    mp := MenuPointParent(MenuPoints[i].CfgID);
+    if Assigned(mp) then
+      MenuPoints[i].ParentCell := mp else
+      MenuPoints[i].ParentCell := Self;
+  end;
+end;
+
+{procedure TsmxCustomMasterMenu.UnInstallParent;
+var i: Integer;
+begin
+  for i := 0 to MenuPointCount - 1 do
+    MenuPoints[i].ParentCell := nil;
+end;}
+
+{ TsmxCustomToolBoard }
+
+procedure TsmxCustomToolBoard.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
+begin
+end;
+
+procedure TsmxCustomToolBoard.DelAlgorithm(Algorithm: TsmxCustomAlgorithm);
+begin
+end;
+
+{ TsmxCustomControlBoard }
+
+constructor TsmxCustomControlBoard.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+begin
+  inherited Create(AOwner, ADatabase, ACfgID);
+  FToolBoardList := TList.Create;
+  CreateChilds;
+  InitChilds;
+end;
+
+destructor TsmxCustomControlBoard.Destroy;
+begin
+  DestroyChilds;
+  FToolBoardList.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxCustomControlBoard.DestroyChilds;
+var i: Integer;
+begin
+  for i := FToolBoardList.Count - 1 downto 0 do
+  begin
+    TsmxCustomToolBoard(FToolBoardList[i]).Free;
+    FToolBoardList.Delete(i);
+  end;
+end;
+
+function TsmxCustomControlBoard.FindToolBoardByCfgID(ACfgID: Integer): TsmxCustomToolBoard;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to ToolBoardCount - 1 do
+    if ToolBoards[i].CfgID = ACfgID then
+    begin
+      Result := ToolBoards[i];
+      Break;
+    end;
+end;
+
+function TsmxCustomControlBoard.GetToolBoard(Index: Integer): TsmxCustomToolBoard;
+begin
+  Result := TsmxCustomToolBoard(FToolBoardList[Index]);
+end;
+
+function TsmxCustomControlBoard.GetToolBoardCount: Integer;
+begin
+  Result := FToolBoardList.Count;
+end;
+
+procedure TsmxCustomControlBoard.InstallParent;
+var i: Integer;
+begin
+  for i := 0 to ToolBoardCount - 1 do
+    ToolBoards[i].ParentCell := Self;
+end;
+
+{procedure TsmxCustomControlBoard.UnInstallParent;
+var i: Integer;
+begin
+  for i := 0 to ToolBoardCount - 1 do
+    ToolBoards[i].ParentCell := nil;
+end;}
+
+procedure TsmxCustomControlBoard.Prepare(Forcibly: Boolean = False);
+var i: Integer;
+begin
+  for i := 0 to ToolBoardCount - 1 do
+    ToolBoards[i].Prepare(Forcibly);
+end;
+
 { TsmxCustomForm }
 
 constructor TsmxCustomForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
@@ -3495,7 +3496,7 @@ begin
   FStateCfg := TsmxStateCfg.CreateByIntfID(Self, CfgDatabase, CfgID, FIntfID);
   FStateCfg.Initialize;
   FPageManagerList := TList.Create;
-  CreateChilds;
+  CreateChilds; 
   InitChilds;
 end;
 

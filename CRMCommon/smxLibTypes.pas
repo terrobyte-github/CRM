@@ -3,7 +3,7 @@ unit smxLibTypes;
 interface
 
 uses
-  Classes, smxDBIntf;
+  Classes;
 
 type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;

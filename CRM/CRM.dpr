@@ -10,19 +10,8 @@ uses
 begin
   Application.Initialize;
 
-  {Initialize;
-  if ConnectDatabase and CreateMainForm then
-    Application.Run;}
-
   Initialize;
-  if ConnectDatabase('CRM')
-    ////and CheckUser
-    and CreateMainForm then
-  begin
-    //CallBack[1] := Integer(Database);
-    //LoadPackages;
-    Application.Run;
-    //UnLoadPackages;
-    DisconnectDatabase;
-  end;
+  if LogIn and CreateMainForm then
+    Application.Run else
+    Application.Terminate;
 end.

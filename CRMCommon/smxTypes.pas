@@ -61,8 +61,6 @@ type
     Visible: Boolean;
   end;
 
-  TsmxFuncDatabaseCLSID = function: TGUID;
-
   TsmxGenerationMode = (gmFunction, gmCOM);
 
   TsmxProjectConnection = record
@@ -77,7 +75,9 @@ type
     Params: ShortString;
   end;
 
-  TsmxFuncLoadResource = function(AName: String): TResourceStream;
+  TsmxFuncDatabaseCLSID = function: TGUID;
+
+  TsmxFuncNewResource = function(AName: String): TResourceStream;
 
 implementation
 

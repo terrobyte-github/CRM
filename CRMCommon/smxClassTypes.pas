@@ -3,7 +3,7 @@ unit smxClassTypes;
 interface
 
 uses
-  Classes, Windows, smxClasses, smxDBIntf;
+  Classes, Windows, smxClasses;
 
 type
   TsmxProcAlgExecute = procedure(Algorithm: TsmxCustomAlgorithm; Params: Variant);

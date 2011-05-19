@@ -4,7 +4,7 @@ uses
   ShareMem,
   Forms,
   smxConf in 'smxConf.pas' {frmConf},
-  smxProject in 'smxProject.pas' {frmProject},
+  smxProjects in 'smxProjects.pas' {frmProjects},
   smxDBIntf in '..\CRMCommon\smxDBIntf.pas',
   smxTypes in '..\CRMCommon\smxTypes.pas',
   smxFuncs in '..\CRMCommon\smxFuncs.pas',

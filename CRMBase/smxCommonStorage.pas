@@ -127,12 +127,13 @@ begin
 end;
 
 function TsmxCommonStorage.FindByName(AParamName: String): Variant;
-var p: TsmxCommonParam;
+//var p: TsmxCommonParam;
 begin
-  p := FParamList.FindByName(AParamName);
+  {p := FParamList.FindByName(AParamName);
   if Assigned(p) then
     Result := p.ParamValue else
-    Result := Null;
+    Result := Null;}
+  Result := GetValue(AParamName);  
 end;
 
 function TsmxCommonStorage.GetValue(Name: String): Variant;

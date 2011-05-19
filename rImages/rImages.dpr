@@ -13,7 +13,7 @@ uses
 
 exports
   LibInfo,
-  LoadResource;
+  NewResource;
 
 begin
   FillInfo(1, 0, nil, [ltResource]);

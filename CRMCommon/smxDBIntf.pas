@@ -47,9 +47,7 @@ type
     property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     property Params: TStrings read GetParams write SetParams;
   end;
-
-  TsmxFuncCreateDatabase = function: IsmxDatabase;
-
+  
   { IsmxField }
 
   TsmxFieldKind = TFieldKind;

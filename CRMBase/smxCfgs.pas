@@ -1662,7 +1662,7 @@ begin
   begin
     ItemCaption := n.Attributes['caption'];
     ItemImageIndex := n.Attributes['imageindex'];
-  end;
+  end; 
 end;
 
 procedure TsmxMenuPointCfg.WriteCfg;
@@ -1798,7 +1798,7 @@ begin
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'menuitem' then
         AddUnits(n.ChildNodes[i], MenuUnits.Root);
-  end;
+  end; 
 end;
 
 procedure TsmxMasterMenuCfg.WriteCfg;

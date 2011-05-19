@@ -48,6 +48,8 @@ type
     FLibList: TsmxLibItems;
     FProgVersMajor: Word;
     FProgVersMinor: Word;
+    FLibPath: String;
+    FProcLibInfoName: String;
     function GetLibrary(Index: Integer): THandle;
     function GetLibraryCount: Integer;
     procedure DestroyLibs;
@@ -74,6 +76,8 @@ type
 
     property LibraryCount: Integer read GetLibraryCount;
     property Libraries[Index: Integer]: THandle read GetLibrary; default;
+    property LibPath: String read FLibPath write FLibPath;
+    property ProcLibInfoName: String read FProcLibInfoName write FProcLibInfoName;
   end;
 
 function LibManager: TsmxLibraryManager;
@@ -232,9 +236,10 @@ var ProcLibInfo: TsmxProcLibInfo;
 begin
   Result := False;
   ClearLibInfo(ALibInfo);
+  //Finalize(ALibInfo);
   if ALibHandle > 0 then
   begin
-    @ProcLibInfo := GetProcAddress(ALibHandle, PChar(SProcLibInfoName));
+    @ProcLibInfo := GetProcAddress(ALibHandle, PChar(ProcLibInfoName) {PChar(SProcLibInfoName)});
     if Assigned(ProcLibInfo) then
     begin
       ProcLibInfo(ALibInfo);
@@ -322,7 +327,7 @@ end;
 
 function TsmxLibraryManager.GetLibHandle(ALibName: String): THandle;
 begin
-  Result := LoadLibrary(PChar(ALibName));
+  Result := LoadLibrary(PChar(FLibPath + ALibName));
   if Result <= HINSTANCE_ERROR then
     Result := 0;
 end;

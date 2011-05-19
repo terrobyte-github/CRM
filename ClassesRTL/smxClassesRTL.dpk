@@ -39,6 +39,7 @@ contains
   smxClassFuncs in '..\CRMCommon\smxClassFuncs.pas',
   smxConsts in '..\CRMCommon\smxConsts.pas',
   smxDBIntf in '..\CRMCommon\smxDBIntf.pas',
-  smxFuncs in '..\CRMCommon\smxFuncs.pas';
+  smxFuncs in '..\CRMCommon\smxFuncs.pas',
+  smxDBTypes in '..\CRMCommon\smxDBTypes.pas';
 
 end.

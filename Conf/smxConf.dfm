@@ -149,10 +149,10 @@ object frmConf: TfrmConf
     end
     object Button1: TButton
       Left = 576
-      Top = 41
+      Top = 9
       Width = 75
       Height = 25
-      Caption = #1048#1079#1084#1077#1085#1080#1090#1100
+      Caption = #1055#1088#1086#1077#1082#1090#1099'...'
       TabOrder = 7
       OnClick = Button1Click
     end
@@ -198,33 +198,6 @@ object frmConf: TfrmConf
       ParentFont = False
       TabOrder = 10
       OnClick = CheckBox1Click
-    end
-    object Button2: TButton
-      Left = 576
-      Top = 8
-      Width = 75
-      Height = 25
-      Caption = #1044#1086#1073#1072#1074#1080#1090#1100
-      TabOrder = 11
-      OnClick = Button2Click
-    end
-    object Button3: TButton
-      Left = 664
-      Top = 8
-      Width = 75
-      Height = 25
-      Caption = #1059#1076#1072#1083#1080#1090#1100
-      TabOrder = 12
-      OnClick = Button3Click
-    end
-    object Button8: TButton
-      Left = 664
-      Top = 41
-      Width = 75
-      Height = 25
-      Caption = #1047#1072#1087#1080#1089#1072#1090#1100
-      TabOrder = 13
-      OnClick = Button8Click
     end
   end
   object StatusBar1: TStatusBar

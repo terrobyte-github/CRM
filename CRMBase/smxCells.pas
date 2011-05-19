@@ -330,7 +330,7 @@ type
     function GetCfg: TsmxLibAlgorithmCfg;
   protected
     procedure AddParams; override;
-    procedure ExecProc(Sender: TObject); virtual;
+    procedure ProcExec(Sender: TObject); virtual;
     procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
 
     property Cfg: TsmxLibAlgorithmCfg read GetCfg;
@@ -561,7 +561,7 @@ type
   private
     FForm: TForm;
   protected
-    procedure CloseProc(Sender: TObject; var Action: TCloseAction); virtual;
+    procedure ProcClose(Sender: TObject; var Action: TCloseAction); virtual;
     function GetFormModalResult:  TModalResult; override;
     function GetInternalObject: TObject; override;
     function GetCellAlign: TAlign; override;
@@ -615,8 +615,8 @@ type
     //FForm: TForm;
     //procedure SetForm(AForm: TForm);
   protected
-    procedure CloseProc(Sender: TObject; var Action: TCloseAction); virtual;
-    procedure CloseQueryProc(Sender: TObject; var CanClose: Boolean); virtual;
+    procedure ProcClose(Sender: TObject; var Action: TCloseAction); virtual;
+    procedure ProcCloseQuery(Sender: TObject; var CanClose: Boolean); virtual;
     function GetInternalObject: TObject; override;
     function GetCellAlign: TAlign; override;
     function GetCellEnable: Boolean; override;
@@ -2088,7 +2088,7 @@ begin
   end;
 end;
 
-procedure TsmxLibAlgorithm.ExecProc(Sender: TObject);
+procedure TsmxLibAlgorithm.ProcExec(Sender: TObject);
 begin
   Execute;
 end;
@@ -2262,7 +2262,7 @@ begin
   FAction.Hint := Cfg.AlgCaption;
   FAction.ShortCut := TShortCut(Cfg.AlgHotKey);
   FAction.ImageIndex := TImageIndex(Cfg.AlgImageIndex);
-  FAction.OnExecute := ExecProc;
+  FAction.OnExecute := ProcExec;
 end;
 
 destructor TsmxActionLibAlgorithm.Destroy;
@@ -2420,7 +2420,7 @@ end;
 { TsmxMenuItem }
 
 constructor TsmxMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
+begin 
   inherited Create(AOwner, ADatabase, ACfgID);
   FMenuItem := TMenuItem.Create(Self);
   FMenuItem.Caption := Cfg.ItemCaption;
@@ -2518,7 +2518,7 @@ procedure TsmxMasterMenu.CreateChilds;
   begin
     with AUnit do
       if CfgID > 0 then
-      begin
+      begin 
         c := NewCell(Self, CfgDatabase, CfgID);
         if c is TsmxCustomMenuPoint then
           MenuPointList.Add(c) else
@@ -2581,7 +2581,7 @@ end;
 
 constructor TsmxMainMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
-  inherited Create(AOwner, ADatabase, ACfgID);
+  inherited Create(AOwner, ADatabase, ACfgID); 
   FMainMenu := TMainMenu.Create(Self);
   //FMainMenu.Images := ImageList;
   InstallParent;
@@ -3175,7 +3175,7 @@ begin
   Free;
 end;
 
-procedure TsmxStandardForm.CloseProc(Sender: TObject; var Action: TCloseAction);
+procedure TsmxStandardForm.ProcClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caNone;
   CloseForm;
@@ -3287,7 +3287,7 @@ end;
 
 procedure TsmxStandardForm.ShowForm;
 begin
-  Form.OnClose := CloseProc;
+  Form.OnClose := ProcClose;
   Form.Show;
   Prepare;
 end;
@@ -3311,17 +3311,21 @@ begin
       FForm.Menu := TMainMenu(c);
   end;
   if Assigned(AlgorithmList) and Assigned(MasterMenu) then
-    AlgorithmList.MasterMenu := MasterMenu;
+    //AlgorithmList.MasterMenu := MasterMenu;
+    AlgorithmList.AddAlgorithmsTo(MasterMenu);
   if Assigned(AlgorithmList) and Assigned(ControlBoard) then
-    AlgorithmList.ControlBoard := ControlBoard;
+    //AlgorithmList.ControlBoard := ControlBoard;
+    AlgorithmList.AddAlgorithmsTo(ControlBoard);
 end;
 
 procedure TsmxStandardForm.UnInitialize;
 begin
   if Assigned(AlgorithmList) and Assigned(MasterMenu) then
-    AlgorithmList.MasterMenu := nil;
+    //AlgorithmList.MasterMenu := nil;
+    AlgorithmList.DelAlgorithmsTo(MasterMenu);
   if Assigned(AlgorithmList) and Assigned(ControlBoard) then
-    AlgorithmList.ControlBoard := nil;
+    //AlgorithmList.ControlBoard := nil;
+    AlgorithmList.DelAlgorithmsTo(ControlBoard);
   FForm.Menu := nil;
 end;
 
@@ -3344,7 +3348,7 @@ begin
   with Cfg.MainMenu do
     if CfgID > 0 then
     begin
-      c := NewCell(Self, CfgDatabase, CfgID);
+      c := NewCell(Self, CfgDatabase, CfgID); 
       if c is TsmxCustomMasterMenu then
         MasterMenu := TsmxCustomMasterMenu(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
@@ -3470,14 +3474,14 @@ begin
   Free;
 end;
 
-procedure TsmxMainForm.CloseProc(Sender: TObject; var Action: TCloseAction);
+procedure TsmxMainForm.ProcClose(Sender: TObject; var Action: TCloseAction);
 begin
   CloseForm;
 end;
 
-procedure TsmxMainForm.CloseQueryProc(Sender: TObject; var CanClose: Boolean);
+procedure TsmxMainForm.ProcCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := Ask(SCloseProgMessage);
+  CanClose := Ask('Закрыть программу?' {SCloseProgMessage});
 end;
 
 function TsmxMainForm.GetInternalObject: TObject;
@@ -3560,9 +3564,11 @@ begin
   SetImageList(ImageList);
   //AddAlgorithms;
   if Assigned(AlgorithmList) and Assigned(MasterMenu) then
-    AlgorithmList.MasterMenu := MasterMenu;
+    //AlgorithmList.MasterMenu := MasterMenu;
+    AlgorithmList.AddAlgorithmsTo(MasterMenu);
   if Assigned(AlgorithmList) and Assigned(ControlBoard) then
-    AlgorithmList.ControlBoard := ControlBoard;
+    //AlgorithmList.ControlBoard := ControlBoard;
+    AlgorithmList.AddAlgorithmsTo(ControlBoard);
   PutState;
 end;
 
@@ -3647,8 +3653,8 @@ procedure TsmxMainForm.ShowForm;
 begin
   if not Assigned(Form) then
     Exit;
-  Form.OnClose := CloseProc;
-  Form.OnCloseQuery := CloseQueryProc;
+  Form.OnClose := ProcClose;
+  Form.OnCloseQuery := ProcCloseQuery;
   Form.Show;
   Prepare;
 end;
@@ -3659,9 +3665,11 @@ begin
     Exit;
   //DelAlgorithms;
   if Assigned(AlgorithmList) and Assigned(MasterMenu) then
-    AlgorithmList.MasterMenu := nil;
+    //AlgorithmList.MasterMenu := nil;
+    AlgorithmList.DelAlgorithmsTo(MasterMenu);
   if Assigned(AlgorithmList) and Assigned(ControlBoard) then
-    AlgorithmList.ControlBoard := nil;
+    //AlgorithmList.ControlBoard := nil;
+    AlgorithmList.DelAlgorithmsTo(ControlBoard);
   SetImageList(nil);
   UnInstallParent;
   FForm.Menu := nil;

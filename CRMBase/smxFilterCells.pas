@@ -84,7 +84,7 @@ type
   private
     FEdit: TEdit;
   protected
-    procedure KeyPressProc(Sender: TObject; var Key: Char);
+    procedure ProcKeyPress(Sender: TObject; var Key: Char);
     function GetCellEnable: Boolean; override;
     function GetFilterValue: Variant; override;
     function GetInternalObject: TObject; override;
@@ -370,7 +370,7 @@ begin
   FEdit.Anchors := [akLeft, akRight];
   FEdit.Left := 4;
   FEdit.Top := 20;
-  FEdit.OnKeyPress := KeyPressProc;
+  FEdit.OnKeyPress := ProcKeyPress;
   FEdit.Font.Color := Cfg.FilterFont.Color;
   FEdit.Font.Name := Cfg.FilterFont.Name;
   FEdit.Font.Size := Cfg.FilterFont.Size;
@@ -405,7 +405,7 @@ begin
   Result := FEdit;
 end;
 
-procedure TsmxNumEditFilter.KeyPressProc(Sender: TObject; var Key: Char);
+procedure TsmxNumEditFilter.ProcKeyPress(Sender: TObject; var Key: Char);
 
   function CountSep(s: String): Integer;
   var i: Integer;

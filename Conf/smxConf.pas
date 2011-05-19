@@ -26,9 +26,6 @@ type
     Label4: TLabel;
     ComboBox3: TComboBox;
     CheckBox1: TCheckBox;
-    Button2: TButton;
-    Button3: TButton;
-    Button8: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -38,10 +35,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure Button8Click(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
   private
     //FDatabaseIntf: IsmxDatabase;
     FCfg: TsmxBaseCfg;
@@ -73,7 +67,7 @@ implementation
 
 uses
   ImgList, smxCommonStorage, smxLibManager, smxDBManager, smxFuncs, smxTypes,
-  smxConsts, smxProcs, smxProject;
+  smxConsts, smxProcs, smxProjects;
 
 type
   { _TsmxBaseCfg }
@@ -100,8 +94,7 @@ begin
   FImageList := TImageList.Create(Self);
   LoadImage;
   FProjectManager := TsmxProjectManager.Create(Self);
-  FProjectManager.FileName := SFileProjectName;
-  FProjectManager.ReadProjects;
+  FProjectManager.FileName := 'proj.dat'; //SFileProjectName;
   FillProjectList;
   SaveProgVers;
 end;
@@ -178,6 +171,7 @@ procedure TfrmConf.FillProjectList;
 var i: Integer;
 begin
   ComboBox1.Clear;
+  FProjectManager.ReadProjects;
   for i := 0 to FProjectManager.ProjectList.Count - 1 do
     ComboBox1.Items.Add(FProjectManager.ProjectList[i].ProjectName);
 end;
@@ -255,76 +249,17 @@ begin
 end;
 
 procedure TfrmConf.Button1Click(Sender: TObject);
-var i: Integer; s: String; pr: TsmxProjectItem;
 begin
-  {if FDatabaseIntf.Connected then
-  begin
-    FDatabaseIntf.Connected := False;
-    StatusBar1.Panels[1].Text := 'Статус: disconnect';
-  end else
-  begin
-    s := ComboBox1.Items.Strings[ComboBox1.ItemIndex];
-    if s <> '' then
+  frmProjects := TfrmProjects.Create(Self);
+  try
+    if frmProjects.ShowModal = mrOk then
     begin
-      with FDatabaseIntf.Params do
-      begin
-        Clear;
-        Add('Provider=SQLOLEDB.1;');
-        Add('Integrated Security=SSPI;');
-        Add('Initial Catalog=crm;');
-        Add('Data Source=' + s + ';');
-      end;
-      try
-        FDatabaseIntf.Connected := True;
-        FTargetRequest.Database := FDatabaseIntf;
-        FillIntfList;
-        StatusBar1.Panels[0].Text := 'Сервер: ' + s;
-        StatusBar1.Panels[1].Text := 'Статус: connect';
-        //StatusBar1.Panels[2].Text := 'Пользователь: ';
-      except
-        raise EsmxDBInterfaceError.CreateRes(@SDBIntfConnectFailed);
-      end;
-    end;
-  end;}
-  i := frmConf.ComboBox1.ItemIndex;
-  if i >= 0 then
-  begin
-    s := frmConf.ComboBox1.Items[i];
-    pr := FProjectManager.ProjectList.FindByName(s);
-    if Assigned(pr) then
-    begin
-      frmProject := TfrmProject.Create(Self);
-      try
-        with frmProject, pr do
-        begin
-          Edit1.Text := ProjectName;
-          ComboBox1.ItemIndex := Integer(Generation);
-          Edit2.Text := LibraryName;
-          Edit3.Text := FunctionNameOrProgID;
-          CheckBox1.Checked := WindowsAuthorization;
-          Edit4.Text := DatabaseName;
-          Edit5.Text := DriverName;
-          CheckBox2.Checked := LoginPrompt;
-          Memo1.Lines.Text := Params;
-          if ShowModal = mrOk then
-          begin
-            ProjectName := Edit1.Text;
-            Generation := TsmxGenerationMode(ComboBox1.ItemIndex);
-            LibraryName := Edit2.Text;
-            FunctionNameOrProgID := Edit3.Text;
-            WindowsAuthorization := CheckBox1.Checked;
-            DatabaseName := Edit4.Text;
-            DriverName := Edit5.Text;
-            LoginPrompt := CheckBox2.Checked;
-            Params := Memo1.Lines.Text;
-            FillProjectList;
-            frmConf.ComboBox1.ItemIndex := i;
-          end;
-        end;
-      finally
-        FreeAndNil(frmProject);
-      end;
-    end;
+      FillProjectList;
+      ComboBox1.ItemIndex := -1;
+      ComboBox1.OnChange(nil);
+    end;  
+  finally
+    FreeAndNil(frmProjects);
   end;
 end;
 
@@ -423,32 +358,6 @@ begin
   Button4.OnClick(nil);
 end;
 
-procedure TfrmConf.Button3Click(Sender: TObject);
-var i: Integer; s: String; pr: TsmxProjectItem;
-begin
-  i := ComboBox1.ItemIndex;
-  if i >= 0 then
-  begin
-    s := ComboBox1.Items[i];
-    if Ask('Удалить проект - ' + s + '?') then
-    begin
-      pr := FProjectManager.ProjectList.FindByName(s);
-      if Assigned(pr) then
-      begin
-        FProjectManager.ProjectList.Remove(pr);
-        //FProjectManager.WriteProjects;
-        FillProjectList;
-        ComboBox1.OnChange(nil);
-      end;
-    end;
-  end;
-end;
-
-procedure TfrmConf.Button8Click(Sender: TObject);
-begin
-  FProjectManager.WriteProjects;
-end;
-
 procedure TfrmConf.ComboBox1Change(Sender: TObject);
 var i: Integer; s: String; pr: TsmxProjectItem;
 begin
@@ -487,35 +396,6 @@ begin
         StatusBar1.Panels[1].Text := 'Статус: connect';
       end;
     end;
-  end;
-end;
-
-procedure TfrmConf.Button2Click(Sender: TObject);
-begin
-  frmProject := TfrmProject.Create(Self);
-  try
-    with frmProject do
-    begin
-      if ShowModal = mrOk then
-      begin
-        with FProjectManager.ProjectList.Add do
-        begin
-          ProjectName := Edit1.Text;
-          Generation := TsmxGenerationMode(ComboBox1.ItemIndex);
-          LibraryName := Edit2.Text;
-          FunctionNameOrProgID := Edit3.Text;
-          WindowsAuthorization := CheckBox1.Checked;
-          DatabaseName := Edit4.Text;
-          DriverName := Edit5.Text;
-          LoginPrompt := CheckBox2.Checked;
-          Params := Memo1.Lines.Text;
-        end;
-        FillProjectList;
-        frmConf.ComboBox1.ItemIndex := frmConf.ComboBox1.Items.IndexOf(Edit1.Text);
-      end;
-    end;
-  finally
-    FreeAndNil(frmProject);
   end;
 end;
 

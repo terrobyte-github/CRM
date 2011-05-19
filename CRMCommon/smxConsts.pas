@@ -3,11 +3,12 @@ unit smxConsts;
 interface
 
 const
-  SFileConnectName = 'conn.ini';
-  SProcLibInfoName = 'LibInfo';
-  SFuncLoadResourceName = 'LoadResource';
-  SCloseProgMessage = 'Закрыть программу?';
-  SFileProjectName = 'proj.dat';
+  //SFileConnectName = 'conn.ini';
+  //SProcLibInfoName = 'LibInfo';
+  //SFuncNewResourceName = 'NewResource';
+  //SCloseProgMessage = 'Закрыть программу?';
+  //SFileProjectName = 'proj.dat';
+  SFileConfigurationName = 'conf.ini'; //'Cfg\cfg.ini';
 
 resourcestring
   { DBInterface }

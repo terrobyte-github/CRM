@@ -33,7 +33,7 @@ function VarStringToVar(V: Variant): Variant;
 function NewXML(AEncoding: String = 'UTF-8'): IXMLDocument;
 function FormatXMLText(AText: String): String;
 function UnFormatXMLText(AText: String): String;
-function LoadResource(AName: String): TResourceStream;
+function NewResource(AName: String): TResourceStream;
 
 implementation
 
@@ -306,6 +306,7 @@ end;
 function FormatXMLText(AText: String): String;
 begin
   Result := String(UTF8Decode(FormatXMLData(WideString(AText))));
+  //Result := Utf8ToAnsi(String(FormatXMLData(WideString(AText))));
 end;
 
 function UnFormatXMLText(AText: String): String;
@@ -318,12 +319,13 @@ begin
     for i := 0 to sl.Count - 1 do
       sl[i] := Trim(sl[i]);
     Result := String(UTF8Encode(WideString(AnsiReplaceStr(sl.Text, sLineBreak, ''))));
+    //Result := String(AnsiToUtf8(AnsiReplaceStr(sl.Text, sLineBreak, '')));
   finally
     sl.Free;
   end;
 end;
 
-function LoadResource(AName: String): TResourceStream;
+function NewResource(AName: String): TResourceStream;
 begin
   Result := TResourceStream.Create(HInstance, AName, RT_RCDATA);
   Result.Position := 0;

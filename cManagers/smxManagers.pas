@@ -1,14 +1,9 @@
-unit smxMain;
+unit smxManagers;
 
 interface
 
 procedure Initialize;
 function CreateMainForm: Boolean;
-//procedure SaveProgVers;
-//function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
-//procedure DisconnectDatabase;
-//procedure LoadCell;
-//procedure LoadImage;
 function LogIn: Boolean;
 
 implementation
@@ -78,10 +73,9 @@ end;
 procedure LoadCfg;
 var f: TIniFile; sl, sl2: TStringList; i, j: Integer;
 begin
-  ComStorage['CRMPath'] := ExtractFilePath(Application.ExeName);
   if FileExists(SFileConfigurationName) then
   begin
-    f := TIniFile.Create(ComStorage['CRMPath'] + SFileConfigurationName);
+    f := TIniFile.Create(ExtractFilePath(Application.ExeName) + SFileConfigurationName);
     try
       sl := TStringList.Create;
       try
@@ -106,31 +100,11 @@ begin
   end;
 end;
 
-procedure LoadVariables;
-var s: String;
-begin
-  s := ComStorage['CRMPath'];
-  SetEnvironmentVariable(PChar('CRM'), PChar(s));
-  s := ';' + s + ComStorage['LibPath'];
-  SetEnvironmentVariable(PChar('Path'), PChar(GetEnvironmentVariable('Path') + s));
-  {s := GetEnvironmentVariable('Path'); inf(s);
-  s2 := ExtractFileDir(Application.ExeName); inf(s2);
-  SetEnvironmentVariable(PChar('CRM'), PChar(s2)); inf('setvar');
-  if s <> '' then
-    s := s + ';' + s2 else
-    s := s2;
-  s2 := ComStorage['LibPath'];
-  if s2 <> '' then
-    s := s + '\' + s2;
-  SetEnvironmentVariable(PChar('Path'), PChar(s));}
-end;
-
 procedure Initialize;
 begin
   SaveProgVers;
   AssignCallBackParams;
   LoadCfg;
-  LoadVariables;
   LibManager.LibPath := ComStorage['LibPath'];
   LibManager.ProcLibInfoName := ComStorage['ProcLibInfo'];
   LoadCell;
@@ -160,7 +134,7 @@ begin
   end else
   begin
     f.Free;
-    //raise EsmxCellError.CreateRes(@SCellBuildError);
+    raise EsmxCellError.CreateRes(@SCellBuildError);
     Result := False;
   end;
 end;
