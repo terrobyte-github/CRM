@@ -9,23 +9,23 @@ uses
   smxDBIntf in '..\CRMComn\smxDBIntf.pas',
   smxTypes in '..\CRMComn\smxTypes.pas',
   smxFuncs in '..\CRMComn\smxFuncs.pas',
+  smxConsts in '..\CRMComn\smxConsts.pas',
   smxCells in '..\CRMBase\smxCells.pas',
   smxCfgs in '..\CRMBase\smxCfgs.pas',
-  smxConsts in '..\CRMComn\smxConsts.pas',
   smxWheelDBGrid in '..\CRMBase\smxWheelDBGrid.pas',
-  smxLibTypes in '..\CRMComn\smxLibTypes.pas',
-  smxLibFuncs in '..\CRMComn\smxLibFuncs.pas',
-  smxCallBack in '..\CRMBase\smxCallBack.pas',
-  smxGlobalStorage in '..\CRMBase\smxGlobalStorage.pas',
+  smxCommonStorage in '..\CRMBase\smxCommonStorage.pas',
   smxLibManager in '..\CRMBase\smxLibManager.pas',
+  smxLibTypes in '..\CRMComn\smxLibTypes.pas',
+  smxCallBack in '..\CRMBase\smxCallBack.pas',
   smxFormManager in '..\CRMBase\smxFormManager.pas',
-  smxGlobal in '..\CRMBase\smxGlobal.pas',
-  smxADODB in '..\CRMBase\smxADODB.pas',
-  smxField in '..\CRMBase\smxField.pas',
+  smxCellTypes in '..\CRMComn\smxCellTypes.pas',
+  smxGlobalVariables in '..\CRMBase\smxGlobalVariables.pas',
+  smxDBConnection in '..\CRMBase\smxDBConnection.pas',
+  smxDBManager in '..\CRMBase\smxDBManager.pas',
+  smxLibFuncs in '..\CRMComn\smxLibFuncs.pas',
   smxLibProcs in '..\CRMComn\smxLibProcs.pas',
   smxProcs in '..\CRMComn\smxProcs.pas',
-  smxDBManager in '..\CRMBase\smxDBManager.pas',
-  smxDBConnection in '..\CRMBase\smxDBConnection.pas';
+  smxCellFuncs in '..\CRMComn\smxCellFuncs.pas';
 
 {$R *.res}
 

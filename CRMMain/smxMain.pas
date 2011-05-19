@@ -9,9 +9,9 @@ function CreateMainForm: Boolean;
 implementation
 
 uses
-  Classes, Windows, Forms, SysUtils, smxClasses, smxCells, smxCallBack,
-  smxGlobal, smxGlobalStorage, smxLibManager, smxFormManager, smxDBManager,
-  smxProcs, smxFuncs, smxConsts;
+  Classes, Windows, Forms, SysUtils, smxCommonStorage, smxCallBack, smxLibManager,
+  smxDBManager, smxFormManager, smxGlobalVariables, smxClasses, smxCells,
+  smxFuncs, smxProcs, smxConsts;
 
 var
   MainForm: TForm = nil;
@@ -20,11 +20,11 @@ procedure SaveProgVers;
 var VersM, VersL: Cardinal;
 begin
   GetFileFullVersion(PChar(Application.ExeName), VersM, VersL);
-  GlobalStorage['ProgVersMajor'] := LongRec(VersM).Hi;
-  GlobalStorage['ProgVersMinor'] := LongRec(VersM).Lo;
-  GlobalStorage['ProgVersRelease'] := LongRec(VersL).Hi;
-  GlobalStorage['ProgVersBuild'] := LongRec(VersL).Lo;
-  GlobalStorage['ProgVers'] :=
+  CommonStorage['ProgVersMajor'] := LongRec(VersM).Hi;
+  CommonStorage['ProgVersMinor'] := LongRec(VersM).Lo;
+  CommonStorage['ProgVersRelease'] := LongRec(VersL).Hi;
+  CommonStorage['ProgVersBuild'] := LongRec(VersL).Lo;
+  CommonStorage['ProgVers'] :=
     IntToStr(LongRec(VersM).Hi) + '.' +
     IntToStr(LongRec(VersM).Lo) + '.' +
     IntToStr(LongRec(VersL).Hi) + '.' +
@@ -34,16 +34,19 @@ end;
 procedure AssignCallBackParams;
 begin
   CallBack[0] := Integer(Application.Handle);
-  CallBack[1] := Integer(Database);
-  CallBack[2] := Integer(GlobalStorage);
-  CallBack[3] := Integer(LibManager);
+  CallBack[1] := Integer(DBManager);
+  //CallBack[2] := Integer(CommonStorage);
+  //CallBack[3] := Integer(LibManager);
   CallBack[4] := Integer(FormManager);
-  CallBack[5] := Integer(ImageList);
-  CallBack[6] := Integer(TargetRequest);
-  CallBack[101] := Integer(@smxFuncs.NewCell);
-  CallBack[111] := Integer(@smxFuncs.IsCell);
-  //CallBack[121] := Integer(@smxGlblParams.FuncGlobalValue);
-  //CallBack[151] := Integer(@smxFuncs.Inf);
+  //CallBack[5] := Integer(ImageList);
+  //CallBack[6] := Integer(TargetRequest);
+  //CallBack[7] := Integer(@smxGlobal.DBListAdd);
+
+  CallBack[141] := Integer(@smxFormManager.FindFormByComboID);
+  CallBack[142] := Integer(@smxFormManager.FindFormByHandle);
+
+  CallBack[201] := Integer(@smxFuncs.NewCell);
+  CallBack[202] := Integer(@smxFuncs.IsCell);
 end;
 
 procedure Initialize;
@@ -56,7 +59,7 @@ end;
 function CreateMainForm: Boolean;
 var c: TsmxBaseCell;
 begin
-  c := NewCell(nil, Database, 1000218);
+  c := NewCell(nil, DBManager.DBConnections[0].Database, 1000218);
   if c is TsmxMainForm then
   begin
     Application.ShowMainForm := False;

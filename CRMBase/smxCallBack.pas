@@ -3,7 +3,7 @@ unit smxCallBack;
 interface
 
 uses
-  Classes, smxBaseClasses, smxClasses, smxTypes;
+  Classes, smxBaseClasses, smxClasses, smxTypes, smxLibTypes;
 
 type
   { TsmxCallBackParam }
@@ -102,12 +102,14 @@ end;
 
 constructor TsmxCallBack.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FParamList := TsmxCallBackParams.Create(TsmxCallBackParam);
 end;
 
 destructor TsmxCallBack.Destroy;
 begin
   FParamList.Free;
+  inherited Destroy;
 end;
 
 function TsmxCallBack.GetValue(Index: Integer): Variant;

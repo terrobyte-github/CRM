@@ -1,8 +1,8 @@
 object frmConf: TfrmConf
   Left = 279
   Top = 180
-  Width = 668
-  Height = 542
+  Width = 754
+  Height = 544
   Caption = #1050#1086#1085#1092#1080#1075#1091#1088#1072#1090#1086#1088
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,16 +18,16 @@ object frmConf: TfrmConf
   object Memo1: TMemo
     Left = 0
     Top = 0
-    Width = 660
-    Height = 389
+    Width = 746
+    Height = 391
     Align = alClient
     ScrollBars = ssBoth
     TabOrder = 0
   end
   object Panel1: TPanel
     Left = 0
-    Top = 389
-    Width = 660
+    Top = 391
+    Width = 746
     Height = 107
     Align = alBottom
     BevelOuter = bvNone
@@ -46,11 +46,11 @@ object frmConf: TfrmConf
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 388
+      Left = 390
       Top = 21
       Width = 48
       Height = 13
-      Caption = #1057#1077#1088#1074#1077#1088':'
+      Caption = #1055#1088#1086#1077#1082#1090':'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -93,7 +93,7 @@ object frmConf: TfrmConf
     end
     object Button6: TButton
       Left = 576
-      Top = 41
+      Top = 73
       Width = 75
       Height = 25
       Caption = 'HotKey/Str'
@@ -101,7 +101,7 @@ object frmConf: TfrmConf
       OnClick = Button6Click
     end
     object Button7: TButton
-      Left = 576
+      Left = 664
       Top = 73
       Width = 75
       Height = 25
@@ -111,7 +111,7 @@ object frmConf: TfrmConf
     end
     object Edit1: TEdit
       Left = 440
-      Top = 45
+      Top = 77
       Width = 121
       Height = 21
       TabOrder = 3
@@ -137,21 +137,22 @@ object frmConf: TfrmConf
     end
     object ComboBox1: TComboBox
       Left = 440
-      Top = 13
+      Top = 12
       Width = 121
       Height = 21
+      Style = csDropDownList
       ItemHeight = 13
       TabOrder = 6
+      OnChange = ComboBox1Change
       Items.Strings = (
-        'localhost'
-        'erop')
+        '')
     end
     object Button1: TButton
       Left = 576
-      Top = 9
+      Top = 41
       Width = 75
       Height = 25
-      Caption = 'Con/Discon'
+      Caption = #1048#1079#1084#1077#1085#1080#1090#1100
       TabOrder = 7
       OnClick = Button1Click
     end
@@ -159,9 +160,9 @@ object frmConf: TfrmConf
       Left = 80
       Top = 12
       Width = 121
-      Height = 22
-      Style = csOwnerDrawFixed
-      ItemHeight = 16
+      Height = 21
+      Style = csDropDownList
+      ItemHeight = 13
       ItemIndex = 0
       TabOrder = 8
       Text = 'cell'
@@ -174,9 +175,9 @@ object frmConf: TfrmConf
       Left = 80
       Top = 76
       Width = 297
-      Height = 22
-      Style = csOwnerDrawFixed
-      ItemHeight = 16
+      Height = 21
+      Style = csDropDownList
+      ItemHeight = 13
       TabOrder = 9
       Items.Strings = (
         'cell'
@@ -198,15 +199,42 @@ object frmConf: TfrmConf
       TabOrder = 10
       OnClick = CheckBox1Click
     end
+    object Button2: TButton
+      Left = 576
+      Top = 8
+      Width = 75
+      Height = 25
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100
+      TabOrder = 11
+      OnClick = Button2Click
+    end
+    object Button3: TButton
+      Left = 664
+      Top = 8
+      Width = 75
+      Height = 25
+      Caption = #1059#1076#1072#1083#1080#1090#1100
+      TabOrder = 12
+      OnClick = Button3Click
+    end
+    object Button8: TButton
+      Left = 664
+      Top = 41
+      Width = 75
+      Height = 25
+      Caption = #1047#1072#1087#1080#1089#1072#1090#1100
+      TabOrder = 13
+      OnClick = Button8Click
+    end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 496
-    Width = 660
+    Top = 498
+    Width = 746
     Height = 19
     Panels = <
       item
-        Text = #1057#1077#1088#1074#1077#1088':'
+        Text = #1055#1088#1086#1077#1082#1090':'
         Width = 150
       end
       item

@@ -879,6 +879,7 @@ end;
 
 //initialization
   //CoInitialize(nil);
+  //RegisterClasses([TsmxCoADODatabase]);
 
 //finalization
   //CoUninitialize;

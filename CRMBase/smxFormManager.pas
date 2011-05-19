@@ -3,7 +3,7 @@ unit smxFormManager;
 interface
 
 uses
-  Classes, Windows, smxBaseClasses, smxClasses;
+  Classes, Windows, smxBaseClasses, smxClasses, smxCellTypes;
 
 type
   { TsmxFormItem }
@@ -70,6 +70,12 @@ type
   end;
 
 function FormManager: TsmxFormManager;
+function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
+function FindFormByHandle(AHandle: HWND): TsmxBaseCell;
+
+{const
+  FuncFindFormByID: TsmxFuncFindFormByID = nil;
+  FuncFindFormByHandle: TsmxFuncFindFormByHandle = nil;}
 
 implementation
 
@@ -88,6 +94,16 @@ var
 function FormManager: TsmxFormManager;
 begin
   Result := _FormManager;
+end;
+
+function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
+begin
+  Result := _FormManager.FindByComboID(ACfgID, AID);
+end;
+
+function FindFormByHandle(AHandle: HWND): TsmxBaseCell;
+begin
+  Result := _FormManager.FindByHandle(AHandle);
 end;
 
 { TsmxFormItem }
@@ -171,15 +187,15 @@ end;}
 
 constructor TsmxFormManager.Create(AOwner: TComponent);
 begin
-  //FFormList := TList.Create;
+  inherited Create(AOwner);
   FFormList := TsmxFormItems.Create(TsmxFormItem);
 end;
 
 destructor TsmxFormManager.Destroy;
 begin
   FreeForms;
-  //FFormList.Free;
   FFormList.Free;
+  inherited Destroy;
 end;
 
 procedure TsmxFormManager.FreeForms;
@@ -309,8 +325,12 @@ end;
 
 initialization
   _FormManager := TsmxFormManager.Create(nil);
+  //FuncFindFormByID := _FormManager.FindByComboID;
+  //FuncFindFormByHandle := _FormManager.FindByHandle;
 
 finalization
+  //FuncFindFormByHandle := nil;
+  //FuncFindFormByID := nil;
   _FormManager.Free;
 
 end.

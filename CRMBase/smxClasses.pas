@@ -255,11 +255,11 @@ type
     function DoRequest(SQLText: String; RequestType: TsmxDataSetType = dstQuery;
       Res: String = ''; const DSFrom: IsmxDataSet = nil): Variant;
     function ForRequest(SQLText: String; RequestType: TsmxDataSetType = dstQuery;
-      Get: Boolean = False; Mode: TsmxReturnType = rtOpen; const DSFrom: IsmxDataSet = nil): IsmxDataSet;
+      Get: Boolean = False; Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): IsmxDataSet;
     function NewRequest(SQLText: String = ''; RequestType: TsmxDataSetType = dstQuery;
       const DSFrom: IsmxDataSet = nil): IsmxDataSet;
     function PrepRequest(const ARequest: IsmxDataSet; Get: Boolean = True;
-      Mode: TsmxReturnType = rtOpen; const DSFrom: IsmxDataSet = nil): Boolean;
+      Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
     //function StreamToStr(Stream: TStream): String;
     //function StrToStream(Str: String): TStream;
 
@@ -972,7 +972,7 @@ type
     destructor Destroy; override;
 
     property ID: Integer read FID write FID;
-    property XMLDoc: IXMLDocument read FXMLDocIntf; //write FXMLDocIntf;
+    property XMLDoc: IXMLDocument read FXMLDocIntf write FXMLDocIntf;
   end;
 
   { TsmxXMLDocItems }
@@ -1024,6 +1024,64 @@ type
 
     property CellStates: TsmxCellStates read GetCellStates;
     property IntfID: Integer read FIntfID default 0;
+  end;
+
+  TsmxStateCfgClass = class of TsmxStateCfg;
+
+  { TsmxProjectItem }
+
+  TsmxProjectItem = class(TsmxKitItem)
+  private
+    FProjectName: String;
+    FGeneration: TsmxGenerationMode;
+    FLibraryName: String;
+    FFunctionNameOrProgID: String;
+    FWindowsAuthorization: Boolean;
+    FDatabaseName: String;
+    FDriverName: String;
+    FLoginPrompt: Boolean;
+    FParams: String;
+  public
+    constructor Create(AKit: TsmxKit); override;
+
+    property ProjectName: String read FProjectName write FProjectName;
+    property Generation: TsmxGenerationMode read FGeneration write FGeneration;
+    property LibraryName: String read FLibraryName write FLibraryName;
+    property FunctionNameOrProgID: String read FFunctionNameOrProgID write FFunctionNameOrProgID;
+    property WindowsAuthorization: Boolean read FWindowsAuthorization write FWindowsAuthorization;
+    property DatabaseName: String read FDatabaseName write FDatabaseName;
+    property DriverName: String read FDriverName write FDriverName;
+    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
+    property Params: String read FParams write FParams;
+  end;
+
+  { TsmxProjectItems }
+
+  TsmxProjectItems = class(TsmxKit)
+  protected
+    function GetItem(Index: Integer): TsmxProjectItem;
+  public
+    function Add: TsmxProjectItem;
+    function FindByName(AProjectName: String): TsmxProjectItem;
+
+    property Items[Index: Integer]: TsmxProjectItem read GetItem; default;
+  end;
+
+  { TsmxProjectManager }
+
+  TsmxProjectManager = class(TsmxComponent)
+  private
+    FFileName: String;
+    FProjectList: TsmxProjectItems;
+    procedure SetFileName(Value: String);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure ReadProjects;
+    procedure WriteProjects;
+
+    property FileName: String read FFileName write SetFileName;
+    property ProjectList: TsmxProjectItems read FProjectList;
   end;
   
 implementation
@@ -1746,14 +1804,14 @@ begin
   begin
     if SQL.Text <> SQLText then
       SQL.Text := SQLText;
-    PrepRequest(FRequestIntf, True, rtExecute, DSFrom);
+    PrepRequest(FRequestIntf, True, pmExecute, DSFrom);
   end;
 end;
 
 function TsmxTargetRequest.DoRequest(SQLText: String; RequestType: TsmxDataSetType = dstQuery;
   Res: String = ''; const DSFrom: IsmxDataSet = nil): Variant;
 begin
-  with ForRequest(SQLText, RequestType, True, rtOpen, DSFrom) do
+  with ForRequest(SQLText, RequestType, True, pmOpen, DSFrom) do
   try
     if Res = '' then
       Res := Fields[0].FieldName;
@@ -1766,7 +1824,7 @@ begin
 end;
 
 function TsmxTargetRequest.ForRequest(SQLText: String; RequestType: TsmxDataSetType = dstQuery;
-  Get: Boolean = False; Mode: TsmxReturnType = rtOpen; const DSFrom: IsmxDataSet = nil): IsmxDataSet;
+  Get: Boolean = False; Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): IsmxDataSet;
 begin
   if Assigned(FRequestIntf) then
   begin
@@ -1779,7 +1837,7 @@ begin
   with FRequestIntf do
     if SQL.Text <> SQLText then
       SQL.Text := SQLText;
-  PrepRequest(FRequestIntf, Get, Mode, DSFrom);
+  PrepRequest(FRequestIntf, Get, Perform, DSFrom);
   Result := FRequestIntf;
 end;
 
@@ -1793,11 +1851,11 @@ begin
   Result := Database.NewDataSet(RequestType);
   Result.Database := Database;
   Result.SQL.Text := SQLText;
-  PrepRequest(Result, False, rtOpen, DSFrom);
+  PrepRequest(Result, False, pmOpen, DSFrom);
 end;
 
 function TsmxTargetRequest.PrepRequest(const ARequest: IsmxDataSet; Get: Boolean = True;
-  Mode: TsmxReturnType = rtOpen; const DSFrom: IsmxDataSet = nil): Boolean;
+  Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
 var i: Integer; f: IsmxField; v: Variant;
 begin
   Result := False;
@@ -1823,9 +1881,9 @@ begin
       end;
     if Get then
     begin
-      case Mode of
-        rtOpen: Open;
-        rtExecute: Execute;
+      case Perform of
+        pmOpen: Open;
+        pmExecute: Execute;
       end;
       for i := 0 to ParamCount - 1 do
         if Params[i].ParamType in [ptOutput, ptInputOutput] then
@@ -1840,9 +1898,9 @@ begin
           v := Params[i].Value;
         end;
 
-      case Mode of
-        rtOpen: Result := RecordCount > 0;
-        rtExecute: Result := v = 0;
+      case Perform of
+        pmOpen: Result := RecordCount > 0;
+        pmExecute: Result := v = 0;
       end;
     end;
   end;
@@ -3403,7 +3461,7 @@ constructor TsmxXMLDocItem.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FID := 0;
-  FXMLDocIntf := NewXMLDocument; //nil;
+  FXMLDocIntf := nil; //NewXMLDocument; 
 end;
 
 destructor TsmxXMLDocItem.Destroy;
@@ -3591,7 +3649,7 @@ begin
 end;}
 
 procedure TsmxStateCfg.LoadCfg;
-var IntfID: Integer; XMLText: String; //XMLDocIntf: IXMLDocument;
+var IntfID: Integer; XMLText: String; XMLDocIntf: IXMLDocument;
 begin
   {FTargetRequest['IntfID'] := 0;
   FTargetRequest['ConfID'] := IntToStr(FCfgID);
@@ -3619,17 +3677,19 @@ begin
       XMLText := VarToStr(FieldByName('IntfConfBlob').Value);
       //if XMLText <> '' then
       //begin
-        //XMLDocIntf := NewXMLDocument;
-        //if XMLText <> '' then
-          //XMLDocIntf.XML.Text := XMLText;
-        //XMLDocIntf.Active := True;
+        XMLDocIntf := NewXMLDocument;
+        if XMLText <> '' then
+        begin
+          XMLDocIntf.XML.Text := XMLText;
+          XMLDocIntf.Active := True;
+        end;
         with FXMLDocList.Add do
         begin
           ID := IntfID;
-          //XMLDoc := XMLDocIntf;
-          if XMLText <> '' then
-            XMLDoc.XML.Text := XMLText;
-          XMLDoc.Active := True;  
+          XMLDoc := XMLDocIntf;
+          //if XMLText <> '' then
+            //XMLDoc.XML.Text := XMLText;
+          //XMLDoc.Active := True;
         end;
       //end;
       Next;
@@ -3814,6 +3874,128 @@ begin
     n3 := n2.AddChild('cells');
     for j := 0 to CellStates[i].StateUnits.Root.Count - 1 do
       AddNodes(n3, CellStates[i].StateUnits.Root[j]);
+  end;
+end;
+
+{ TsmxProjectItem }
+
+constructor TsmxProjectItem.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  FProjectName := '';
+  FGeneration := gmFunction;
+  FLibraryName := '';
+  FFunctionNameOrProgID := '';
+  FWindowsAuthorization := False;
+  FDatabaseName := '';
+  FDriverName := '';
+  FLoginPrompt := False;
+  FParams := '';
+end;
+
+{ TsmxProjectItems }
+
+function TsmxProjectItems.Add: TsmxProjectItem;
+begin
+  Result := TsmxProjectItem(inherited Add);
+end;
+
+function TsmxProjectItems.FindByName(AProjectName: String): TsmxProjectItem;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if AnsiCompareText(Items[i].ProjectName, AProjectName) = 0 then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxProjectItems.GetItem(Index: Integer): TsmxProjectItem;
+begin
+  Result := TsmxProjectItem(inherited Items[Index]);
+end;
+
+{ TsmxProjectManager }
+
+constructor TsmxProjectManager.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FProjectList := TsmxProjectItems.Create(TsmxProjectItem);
+end;
+
+destructor TsmxProjectManager.Destroy;
+begin
+  FProjectList.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxProjectManager.SetFileName(Value: String);
+begin
+  if FFileName <> Value then
+  begin
+    FFileName := Value;
+    FProjectList.Clear;
+    ReadProjects;
+  end;
+end;
+
+procedure TsmxProjectManager.ReadProjects;
+var fs: TFileStream; pc: TsmxProjectConnection;
+begin
+  if FileExists(FFileName) then
+  begin
+    fs := TFileStream.Create(FFileName, fmOpenRead);
+    try
+      while fs.Position <> fs.Size do
+      begin
+        fs.ReadBuffer(pc, SizeOf(TsmxProjectConnection));
+        with FProjectList.Add do
+        begin
+          ProjectName := pc.ProjectName;
+          Generation := pc.Generation;
+          LibraryName := pc.LibraryName;
+          FunctionNameOrProgID := pc.FunctionNameOrProgID;
+          WindowsAuthorization := pc.WindowsAuthorization;
+          DatabaseName := pc.DatabaseName;
+          DriverName := pc.DriverName;
+          LoginPrompt := pc.LoginPrompt;
+          Params := pc.Params;
+        end;
+      end;
+    finally
+      fs.Free;
+    end;
+  end;
+end;
+
+procedure TsmxProjectManager.WriteProjects;
+var fs: TFileStream; pc: TsmxProjectConnection; i: Integer;
+begin
+  if FFileName <> '' then
+  begin
+    fs := TFileStream.Create(FFileName, fmCreate);
+    try
+      for i := 0 to FProjectList.Count - 1 do
+      begin
+        with pc do
+        begin
+          ProjectName := FProjectList[i].ProjectName;
+          Generation := FProjectList[i].Generation;
+          LibraryName := FProjectList[i].LibraryName;
+          FunctionNameOrProgID := FProjectList[i].FunctionNameOrProgID;
+          WindowsAuthorization := FProjectList[i].WindowsAuthorization;
+          DatabaseName := FProjectList[i].DatabaseName;
+          DriverName := FProjectList[i].DriverName;
+          LoginPrompt := FProjectList[i].LoginPrompt;
+          Params := FProjectList[i].Params;
+        end;
+        fs.WriteBuffer(pc, SizeOf(TsmxProjectConnection));
+      end;
+    finally
+      fs.Free;
+    end;
   end;
 end;
 

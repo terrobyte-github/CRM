@@ -16,6 +16,7 @@ type
     //FDataSetIntf: IsmxDataSet;
     //FPage: TsmxCustomPage;
     //FParamList: TStrings;
+    FDatabaseName: String;
     function GetCfg: TsmxRequestCfg;
     //function GetPage: TsmxCustomPage;
     //function GetParamList: TStrings;
@@ -28,6 +29,7 @@ type
     //function GetPrepared: Boolean; virtual;
     //function GetResultValue: Variant; virtual;
     //procedure SetPage(Value: TsmxCustomPage); virtual;
+    procedure SetDatabaseName(Value: String); virtual;
 
     property Cfg: TsmxRequestCfg read GetCfg;
     //property DataSet: IsmxDataSet read FDataSetIntf;
@@ -44,6 +46,7 @@ type
 
     //property DataSet: IsmxDataSet read FDataSetIntf;
     property CellDataSet: IsmxDataSet read GetCellDataSet;
+    property DatabaseName: String read FDatabaseName write SetDatabaseName;
     //property CellDataSetType: TsmxDataSetType read GetCellDataSetType;
     //property CellParams[Key: String]: String read GetCellParam;
     //property RequestParams[Key: String]: String read GetParam write SetParam;
@@ -59,13 +62,14 @@ type
     FDataSetIntf: IsmxDataSet;
     //FTargetRequest: TsmxTargetRequest;
   protected
-    //function GetInternalObject: TObject; override;
+    function GetInternalObject: TObject; override;
     function GetCellDataSet: IsmxDataSet; override;
     //function GetCellDataSetType: TsmxDataSetType; override;
     //function GetCellParam(Key: String): String; override;
     //function GetPrepared: Boolean; override;
     //function GetResultValue: Variant; override;
     //procedure SetParentCell(AParent: TsmxBaseCell); override;
+    procedure SetDatabaseName(Value: String); override;
 
     //property DataSet: IsmxDataSet read FDataSetIntf;
     //property TargetRequest: TsmxTargetRequest read FTargetRequest;
@@ -1303,8 +1307,9 @@ type
 implementation
 
 uses
-  SysUtils, Variants, Graphics, ImgList, ToolWin, smxGlobal, smxGlobalStorage,
-  smxLibManager, smxFormManager, smxFuncs, smxConsts;
+  SysUtils, Variants, Graphics, ImgList, ToolWin, smxCommonStorage, smxLibManager,
+  smxFormManager, smxGlobalVariables, smxDBManager, smxDBConnection, smxFuncs,
+  smxConsts;
 
 type
   { _TsmxBaseCell }
@@ -1618,6 +1623,11 @@ begin
   ParamList.Values[AnsiUpperCase(Key)] := Value;
 end;}
 
+procedure TsmxCustomRequest.SetDatabaseName(Value: String);
+begin
+  FDatabaseName := Value;
+end;
+
 { TsmxRequest }
 
 constructor TsmxRequest.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
@@ -1642,10 +1652,11 @@ begin
   inherited Destroy;
 end;
 
-{function TsmxRequest.GetInternalObject: TObject;
+function TsmxRequest.GetInternalObject: TObject;
 begin
-  Result := FTargetRequest;
-end;}
+  //Result := FTargetRequest;
+  Result := FDataSetIntf.GetDataSet;
+end;
 
 function TsmxRequest.GetCellDataSet: IsmxDataSet;
 begin
@@ -1881,9 +1892,9 @@ begin
     if not Same then
       RefreshParams;
     try
-      case Cfg.Mode of
-        rtOpen: Open;
-        rtExecute: Execute;
+      case Cfg.PerformanceMode of
+        pmOpen: Open;
+        pmExecute: Execute;
       end;
     except
       raise EsmxCellError.CreateRes(@SCellRequestPerformError);
@@ -1895,6 +1906,46 @@ begin
 end;
 
 procedure TsmxRequest.RefreshParams;
+
+  function FindFilterOnForm(AForm: TsmxCustomForm; AName: String): TsmxCustomFilter;
+  var i, j: Integer; p: TsmxCustomPage;
+  begin
+    Result := nil;
+    if Assigned(AForm) then
+      for i := 0 to AForm.PageManagerCount - 1 do
+      begin
+         p := AForm.PageManagers[i].ActivePage;
+         if Assigned(p) then
+           for j := 0 to p.SectionCount - 1 do
+           begin
+             if Assigned(p.Sections[j].FilterPanel) then
+               Result := p.Sections[j].FilterPanel.FindFilterByName(AName);
+             if Assigned(Result) then
+               Exit;
+           end;
+      end;
+  end;
+
+  function FindFieldOnForm(AForm: TsmxCustomForm; AName: String): IsmxField;
+  var i, j: Integer; p: TsmxCustomPage;
+  begin
+    Result := nil;
+    if Assigned(AForm) then
+      for i := 0 to AForm.PageManagerCount - 1 do
+      begin
+        p := AForm.PageManagers[i].ActivePage;
+        if Assigned(p) then
+          for j := 0 to p.SectionCount - 1 do
+          begin
+            if Assigned(p.Sections[j].Request) then
+              if Assigned(p.Sections[j].Request.CellDataSet) then
+                Result := p.Sections[j].Request.CellDataSet.FindField(AName);
+            if Assigned(Result) then
+              Exit;
+          end;
+      end;
+  end;
+
 var i, j, k: integer; v: Variant; c, a: TsmxBaseCell; f, fp: TsmxCustomForm;
   p: TsmxCustomPage; s: TsmxCustomSection; flt: TsmxCustomFilter;
   fld: IsmxField; prm: TsmxParam;
@@ -1960,7 +2011,7 @@ begin
         end;
         plGrid:
         begin
-          v := Null;
+          //v := Null;
           {fld := nil;
           p := nil;
           if Assigned(f) then
@@ -1973,6 +2024,33 @@ begin
                   fld := p.Grid.Request.CellDataSet.FindField(ParamName);
           if Assigned(fld) then
             v := fld.Value;}
+          fld := nil;
+          s := nil;
+          a := ParentCell;
+          if a is TsmxCustomSection then
+            s := TsmxCustomSection(a);
+          a := nil;
+          p := nil;
+          if Assigned(s) then
+            a := s.ParentCell;
+          if a is TsmxCustomPage then
+            p := TsmxCustomPage(a);
+          if Assigned(p) then
+          begin
+            for j := 0 to p.SectionCount - 1 do
+            begin
+              if p.Sections[j] <> s then
+              begin
+                if Assigned(p.Sections[j].Request) then
+                  if Assigned(p.Sections[j].Request.CellDataSet) then
+                    fld := p.Sections[j].Request.CellDataSet.FindField(ParamName);
+                if Assigned(fld) then
+                  Break;
+              end;
+            end;
+          end;
+          if Assigned(fld) then
+            v := fld.Value;
         end;
         plParentFormFilterPanel:
         begin
@@ -2067,9 +2145,9 @@ begin
               if AlgorithmParams[ParamName] <> '' then
                 v := AlgorithmParams[ParamName];}
         end;
-        plGlobalParams:
+        plCommonParams:
         begin
-          v := GlobalStorage.ParamValues[ParamName];
+          v := CommonStorage.ParamValues[ParamName];
         end;
         plFormID:
         begin
@@ -2103,6 +2181,20 @@ begin
         TCustomDBGrid(c).DataSource.DataSet := TDataSet(FDataSetIntf.GetDataSet);
   end;
 end;}
+
+procedure TsmxRequest.SetDatabaseName(Value: String);
+var dbc: TsmxDBConnection;
+begin
+  inherited SetDatabaseName(Value);
+  FDataSetIntf := nil;
+  dbc := DBManager.FindByName(Value);
+  if Assigned(dbc) then
+  begin
+    FDataSetIntf := dbc.Database.NewDataSet(Cfg.DataSetType);
+    FDataSetIntf.SQL.Text := Cfg.SQLText;
+    FDataSetIntf.Prepare;
+  end;
+end;
 
 { TsmxCustomColumn }
 
@@ -2644,10 +2736,14 @@ begin
     FDataSource.DataSet := nil;
   inherited SetRequest(Value);
   if Assigned(Value) then
-    if Assigned(Value.CellDataSet) then
+    //if Assigned(Value.CellDataSet) then
     begin
-      c := Value.CellDataSet.GetDataSet;
-      if c is TDataSet then
+      //c := Value.CellDataSet.GetDataSet;
+      c := Value.GetInternalObject;
+
+      //if c is TDataSet then
+        //FDataSource.DataSet := TDataSet(c);
+      if Assigned(c) then
         FDataSource.DataSet := TDataSet(c);
     end;
 end;
@@ -3204,7 +3300,7 @@ begin
   if Assigned(PrepareRequest) then
     if Assigned(PrepareRequest.CellDataSet) then
       if not PrepareRequest.CellDataSet.Active //not(PrepareRequest.CellDataSet.Prepared)
-          and (Cfg.PrepareRequest.Mode = omAutomatic) or Forcibly then
+          and (Cfg.PrepareRequest.Operation = omAutomatic) or Forcibly then
       begin
         PrepareRequest.Perform;
         for i := 0 to FilterCount - 1 do
@@ -3647,7 +3743,7 @@ begin
   if Assigned(Request) then
     if Assigned(Request.CellDataSet) then
       if not Request.CellDataSet.Active //not(Request.CellDataSet.Prepared)
-          and (Cfg.Request.Mode = omAutomatic) or Forcibly then
+          and (Cfg.Request.Operation = omAutomatic) or Forcibly then
         Request.Perform;
   if Assigned(Grid) then
     Grid.Prepare(Forcibly);
@@ -4682,6 +4778,8 @@ begin
     //raise EsmxCellError.CreateRes(@SCellBuildError);
 
   @FLibProc := LibManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
+  if not Assigned(FLibProc) then
+    raise EsmxCellError.CreateRes(@SCellBuildError);
 
   //@FLibInitProc := GetProcAddress(FLibHandle, PChar('InitDLL'));
   //if Assigned(FLibInitProc) then
@@ -4867,9 +4965,9 @@ begin
               if AlgorithmParams[ParamName] <> '' then
                 v := AlgorithmParams[ParamName];}
         end;
-        plGlobalParams:
+        plCommonParams:
         begin
-          v := GlobalStorage.ParamValues[ParamName];
+          v := CommonStorage.ParamValues[ParamName];
         end;
         plFormID:
         begin
@@ -6467,7 +6565,7 @@ constructor TsmxCustomForm.Create(AOwner: TComponent; const ADatabase: IsmxDatab
   ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner, ADatabase, ACfgID, AID);
-  FStateCfg := TsmxStateCfg.CreateByIntfID(Self, Database, CfgID, GlobalStorage['@IntfID']);
+  FStateCfg := TsmxStateCfg.CreateByIntfID(Self, Database, CfgID, CommonStorage['@IntfID']);
   FStateCfg.Initialize;
   //PutState;
 end;
@@ -7035,7 +7133,9 @@ begin
   FForm.Caption := Cfg.FormCaption;
   //if Assigned(FormManager) then
     //FormManager[FForm.Handle] := Self;
+    
     FormManager.InsertForm(Self);
+
   Initialize;
   InstallParent;
   AddAlgorithms;
@@ -7053,7 +7153,9 @@ begin
   UnInitialize;
   //if Assigned(FormManager) then
     //FormManager[FForm.Handle] := nil;
+
     FormManager.RemoveForm(Self);
+
   FForm.Free;
   inherited Destroy;
 end;
@@ -7062,6 +7164,8 @@ procedure TsmxStandardForm.CloseForm;
 begin
   //Form.OnClose := nil;
   //Form.Close;
+
+  //FormManager.RemoveForm(Self);
 
   Form.OnClose := nil;
   Free;
@@ -7329,6 +7433,8 @@ begin
   Form.Show;
   Prepare;
 
+  //FormManager.InsertForm(Self);
+
   {p := nil;
   if Assigned(PageManager) then
     p := PageManager.ActivePage;
@@ -7355,9 +7461,13 @@ begin
         r.Perform;
   end;}
 
+  //FormManager.InsertForm(Self);
+
   Prepare;
   //Form.OnClose := CloseProc;
   Result := Form.ShowModal;
+
+  //FormManager.RemoveForm(Self);
 end;
 
 {procedure TsmxStandardForm.UnInstallParent;

@@ -1,26 +1,32 @@
-unit smxGlobal;
+unit smxGlobalVariables;
 
 interface
 
 uses
-  Controls, smxBaseClasses, smxClasses, smxDBIntf, smxTypes;
+  Classes, Controls, smxClasses, smxDBConnection{, smxDBIntf};
 
 function ImageList: TImageList;
-function DataBase: IsmxDatabase;
+//function DataBase: IsmxDatabase;
+//function DBConnection: TsmxDBConnection;
 function TargetRequest: TsmxTargetRequest;
-function ConnectDatabase: Boolean;
-//function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
-//procedure DisconnectDatabase;
+//function ConnectDatabase: Boolean;
+function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
+procedure DisconnectDatabase;
 procedure LoadImage;
+
+//function CheckUser: Boolean;
+
+//var
+  //ProcDBListAdd: TsmxProcDBListAdd = nil;
 
 implementation
 
 {$R ..\Resource\pic.res}
 
 uses
-  Classes, Windows, Forms, ImgList, ActiveX, IniFiles, SysUtils, StrUtils,
-  smxCells, smxADODB, smxGlobalStorage, smxLibManager, smxDBManager,
-  smxDBConnection, smxFuncs, smxConsts;
+  Windows, {Forms,} ImgList, {ActiveX,} {IniFiles,} {SysUtils,} {StrUtils,} {ComObj,}
+  smxCommonStorage, {smxLibManager,} {smxDBConnection,} smxCells,
+  smxFuncs, smxTypes, smxConsts, smxDBIntf;
 
 type
   { TsmxDBConnection }
@@ -61,19 +67,23 @@ type
 
 var
   _ImageList: TImageList = nil;
-  _Database: IsmxDatabase = nil;
+  //_Database: IsmxDatabase = nil;
   _TargetRequest: TsmxTargetRequest = nil;
   _DBConnection: TsmxDBConnection = nil;
-
 
 function ImageList: TImageList;
 begin
   Result := _ImageList;
 end;
 
-function DataBase: IsmxDatabase;
+{function DataBase: IsmxDatabase;
 begin
   Result := _DataBase;
+end;}
+
+function DBConnection: TsmxDBConnection;
+begin
+  Result := _DBConnection;
 end;
 
 function TargetRequest: TsmxTargetRequest;
@@ -97,7 +107,7 @@ var c: TsmxBaseCell; f: IsmxField; IntfID: Integer; IntfName: String;
 begin
   Result := False;
   try
-    c := NewCell(nil, _Database, 1000277);
+    c := NewCell(nil, _DBConnection.Database, 1000277);
     try
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
@@ -107,14 +117,14 @@ begin
           if Assigned(f) then
             IntfID := f.Value else
             IntfID := 0;
-          GlobalStorage['IntfID'] := IntfID;
-          GlobalStorage['@IntfID'] := IntfID;
+          CommonStorage['IntfID'] := IntfID;
+          CommonStorage['@IntfID'] := IntfID;
           f := FindFieldSense(fsValue);
           if Assigned(f) then
             IntfName := f.Value else
             IntfName := '';
-          GlobalStorage['IntfName'] := IntfName;
-          GlobalStorage['@IntfName'] := IntfName;
+          CommonStorage['IntfName'] := IntfName;
+          CommonStorage['@IntfName'] := IntfName;
           if IntfID > 0 then
             Result := True;
         end;
@@ -131,7 +141,7 @@ var c: TsmxBaseCell; p: IsmxParam; UserID: Integer; UserName: String;
 begin
   Result := False;
   try
-    c := NewCell(nil, _Database, 1000236);
+    c := NewCell(nil, _DBConnection.Database, 1000236);
     try
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
@@ -141,14 +151,14 @@ begin
           if Assigned(p) then
             UserID := p.Value else
             UserID := 0;
-          GlobalStorage['UserID'] := UserID;
-          GlobalStorage['@UserID'] := UserID;
+          CommonStorage['UserID'] := UserID;
+          CommonStorage['@UserID'] := UserID;
           p := FindParamLocation(plValue);
           if Assigned(p) then
             UserName := p.Value else
             UserName := '';
-          GlobalStorage['UserName'] := UserName;
-          GlobalStorage['@UserName'] := UserName;
+          CommonStorage['UserName'] := UserName;
+          CommonStorage['@UserName'] := UserName;
           if UserID > 0 then
             Result := CheckIntfUser else
           if UserID = -1 then
@@ -174,7 +184,7 @@ begin
   end;
 end;}
 
-function ConnectDatabase: Boolean;
+{function ConnectDatabase: Boolean;
 var f: TIniFile;
 begin
   Result := False;
@@ -201,10 +211,50 @@ begin
       raise EsmxDBInterfaceError.CreateRes(@SDBIntfConnectFailed);
     end;
   end;
+end;}
+
+function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
+var pm: TsmxProjectManager; pr: TsmxProjectItem; //dbc: TsmxDBConnection;
+begin
+  Result := False;
+  pm := TsmxProjectManager.Create(nil);
+  pm.FileName := SFileProjectName;
+  try
+    pr := pm.ProjectList.FindByName(AProjectName);
+    if Assigned(pr) then
+    begin
+      //dbc := TsmxDBConnection.Create(nil, pi.Generation, pi.DatabaseName, pi.LibraryName, pi.FunctionNameOrProgID);
+      _DBConnection := TsmxDBConnection.Create(nil);
+      try
+        with _DBConnection do
+        begin
+          DatabaseName := pr.DatabaseName;
+          LibraryName := pr.LibraryName;
+          FunctionNameOrProgID := pr.FunctionNameOrProgID;
+          GenerationMode := pr.Generation;
+          DriverName := pr.DriverName;
+          LoginPrompt := pr.LoginPrompt;
+          Params := pr.Params;
+          User := AUserName;
+          Password := APassword;
+          Connect;
+          //_Database := Database;
+          Result := CheckUser;
+        end;
+      except
+        _DBConnection.Free;
+        raise;
+      end;
+    end;
+  finally
+    pm.Free;
+  end;
 end;
 
 {function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
-var fs: TFileStream;  pc: TsmxProjectConnection; FuncDatabase: TsmxFuncDatabaseCreate;
+var fs: TFileStream;  pc: TsmxProjectConnection; FuncCreateDatabase: TsmxFuncCreateDatabase;
+  c: TPersistentClass; h: THandle; //db: TsmxDatabase;
+  FuncDatabaseCLSID: TsmxFuncDatabaseCLSID; DatabaseCLSID: TGUID; i: IsmxDatabase;
   //DatabaseIntf: IsmxDatabase;
 begin
   Result := False;
@@ -224,9 +274,39 @@ begin
 
 
 
-        @FuncDatabase := LibManager.GetProcedure(pc.LibraryName, pc.ProcedureName);
-        if Assigned(FuncDatabase) then
-          _Database := FuncDatabase;
+        //@FuncDatabase := LibManager.GetProcedure(pc.LibraryName, pc.ProcedureName);
+        //if Assigned(FuncDatabase) then
+          //_Database := FuncDatabase;
+
+        //@FuncDatabaseCLSID := LibManager.GetProcedure(pc.LibraryName, 'CLSIDDatabase');
+        //_LibHandle := LoadLibrary(PChar(String(pc.LibraryName)));
+
+        //h := LoadLibrary(PChar(String(pc.LibraryName)));
+        h :=  LibManager.GetLibrary(pc.LibraryName);
+        if h > 0 then
+        begin
+          //@FuncDatabaseCLSID := GetProcAddress(h, PChar('CLSIDDatabase'));
+          @FuncCreateDatabase := GetProcAddress(h, PChar(String(pc.ProcedureNameOrProgID)));
+          //if Assigned(FuncDatabaseCLSID) then
+          if Assigned(FuncCreateDatabase) then
+          begin
+            //DatabaseCLSID := FuncDatabaseCLSID;
+            //RegisterComServer(pc.LibraryName);
+            //_Database := CreateComObject(DatabaseCLSID) as IsmxDatabase;
+
+            _Database := FuncCreateDatabase;
+            //_Database := NewADODatabase;
+          end;
+          //FreeLibrary(h);
+        end;
+
+
+          //c := FindClass('TsmxCoADODatabase');
+        //if Assigned(c) then
+        //begin
+          //_Database := TsmxCoDatabaseClass(c).CreateDatabase;
+        //end;
+
         if Assigned(_Database) then
           with _Database do
           begin
@@ -240,7 +320,8 @@ begin
             try
               Connected := True;
               //DBManager.InsertDatabase(DatabaseIntf);
-              Result := CheckUser;
+              //Result := CheckUser;
+              Result := True;
             except
               _Database := nil;
               raise EsmxDBInterfaceError.CreateRes(@SDBIntfConnectFailed);
@@ -289,16 +370,14 @@ begin
   end;
 end;}
 
-{procedure DisconnectDatabase;
+procedure DisconnectDatabase;
 begin
-  if Assigned(_Database) then
+  if Assigned(_DBConnection) then
   begin
-    if _Database.InTransaction then
-      _Database.RollbackTransaction;
-    _Database.Connected := False;
-    _Database := nil;
+    _DBConnection.Free;
+    _DBConnection := nil;
   end;
-end;}
+end;
 
 {procedure DisconnectDatabase;
 begin
@@ -474,14 +553,19 @@ end;}
 
 initialization
   _ImageList := TImageList.Create(nil);
-  CoInitialize(nil);
-  _Database := NewADODatabase;
+  //CoInitialize(nil);
+  //_Database := NewADODatabase;
+  //ConnectDatabase('CRM');
   _TargetRequest := TsmxTargetRequest.Create(nil);
+  //_DBList := TsmxDBList.Create(nil);
+  //ProcDBListAdd := _DBList.Add;
 
 finalization
+  //ProcDBListAdd := nil;
+  //_DBList.Free;
   _TargetRequest.Free;
-  _Database := nil;
-  CoUninitialize;
+  //_Database := nil;
+  //CoUninitialize;
   //DisconnectDatabase;
   _ImageList.Free;
 

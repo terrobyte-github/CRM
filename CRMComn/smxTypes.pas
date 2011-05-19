@@ -6,7 +6,7 @@ uses
   Classes, Controls, Graphics, smxDBIntf;
 
 type
-  TsmxFuncCallBack = function(Index: Integer): Variant of object;
+  //TsmxFuncCallBack = function(Index: Integer): Variant of object;
 
   //TsmxFuncGlobalValue = function(Name: String): Variant of object;
 
@@ -25,18 +25,19 @@ type
   end;
 
   TsmxParamLocation = (plInput, plConst, plOutput, plFilterPanel, plGrid,
-    plParentFormFilterPanel, plParentFormGrid, plAlgorithmParams, plGlobalParams,
+    plParentFormFilterPanel, plParentFormGrid, plAlgorithmParams, plCommonParams,
     plFormID, plKey, plValue, plResult, plMessage{, plID});
 
   TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage{, fsParam});
 
-  TsmxReturnType = (rtOpen, rtExecute);
+  TsmxPerformanceMode = (pmOpen, pmExecute);    
 
   TsmxOperationMode = (omManual, omAutomatic);
 
   TsmxRequestSetting = record
     CfgID: Integer;
-    Mode: TsmxOperationMode;
+    Operation: TsmxOperationMode;
+    DatabaseName: String;
   end;
 
   TsmxPositionSize = record
@@ -64,7 +65,7 @@ type
     Visible: Boolean;
   end;
 
-  TsmxVers = record
+  {TsmxVers = record
     Major, Minor, Release, Build: Word;
   end;
 
@@ -72,7 +73,7 @@ type
 
   TsmxLibTypes = set of TsmxLibType;
 
-  TsmxProcLibInit = procedure(ACall: TsmxFuncCallBack);
+  TsmxProcInitLib = procedure(ACall: TsmxFuncCallBack);
 
   TsmxLibInfo = record
     FullName: String;
@@ -80,17 +81,22 @@ type
     LibVers: TsmxVers;
     LibTypes: TsmxLibTypes;
     CompProgVers: TsmxVers;
-    ProcLibInit: TsmxProcLibInit;
+    ProcInitLib: TsmxProcInitLib;
   end;
 
-  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);
+  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);}
 
-  TsmxFuncDatabaseCreate = function: IsmxDatabase;
+  TsmxFuncCreateDatabase = function: IsmxDatabase;
+
+  TsmxFuncDatabaseCLSID = function: TGUID;
+
+  TsmxGenerationMode = (gmFunction, gmCOM);
 
   TsmxProjectConnection = record
     ProjectName: ShortString;
+    Generation: TsmxGenerationMode;
     LibraryName: ShortString;
-    ProcedureName: ShortString;
+    FunctionNameOrProgID: ShortString;
     WindowsAuthorization: Boolean;
     DatabaseName: ShortString;
     DriverName: ShortString;

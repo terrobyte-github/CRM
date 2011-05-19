@@ -3,11 +3,11 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, smxClasses, smxCells, smxDBIntf, smxTypes;
+  Classes, Windows, smxClasses, {smxCells,} smxDBIntf;
 
-function GetCurrentForm: TsmxCustomForm;
-function GetCurrentPage: TsmxCustomPage;
-function GetCurrentRequest: TsmxCustomRequest;
+//function GetCurrentForm: TsmxCustomForm;
+//function GetCurrentPage: TsmxCustomPage;
+//function GetCurrentRequest: TsmxCustomRequest;
 function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
 function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase;
@@ -27,7 +27,8 @@ function Ask(M: String): Boolean; overload;
 function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 function VarStringToVar(V: Variant): Variant;
 function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
-function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+//function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+//function PerformRequest(ARequest: TsmxBaseCell; Same: Boolean = False): Boolean;
 //function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 function FormatXMLText(AText: String): String;
 function UnFormatXMLText(AText: String): String;
@@ -35,9 +36,9 @@ function UnFormatXMLText(AText: String): String;
 implementation
 
 uses
-  Forms, Controls, Menus, SysUtils, StrUtils, Variants, XMLDoc, smxFormManager;
+  Forms, Controls, Menus, SysUtils, StrUtils, Variants, XMLDoc{, smxFormManager};
 
-function GetCurrentForm: TsmxCustomForm;
+{function GetCurrentForm: TsmxCustomForm;
 var h: HWND; f: TsmxBaseCell;
 begin
   Result := nil;
@@ -49,27 +50,27 @@ begin
       if f is TsmxCustomForm then
         Result := TsmxCustomForm(f);
   end;
-end;
+end;}
 
-function GetCurrentPage: TsmxCustomPage;
+{function GetCurrentPage: TsmxCustomPage;
 var f: TsmxCustomForm;
 begin
   Result := nil;
-  {f := GetCurrentForm;
+  f := GetCurrentForm;
   if Assigned(f) then
     if Assigned(f.PageManager) then
-      Result := f.PageManager.ActivePage;}
-end;
+      Result := f.PageManager.ActivePage;
+end;}
 
-function GetCurrentRequest: TsmxCustomRequest;
+{function GetCurrentRequest: TsmxCustomRequest;
 var p: TsmxCustomPage;
 begin
   Result := nil;
-  {p := GetCurrentPage;
+  p := GetCurrentPage;
   if Assigned(p) then
     if Assigned(p.Grid) then
-      Result := p.Grid.Request;}
-end;
+      Result := p.Grid.Request;
+end;}
 
 function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 var t: TsmxTypeCfg;
@@ -240,7 +241,8 @@ begin
   end;
 end;
 
-function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+//function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+{function PerformRequest(ARequest: TsmxBaseCell; Same: Boolean = False): Boolean;
 var fld: IsmxField; prm: IsmxParam; res: Integer; msg: String;
 begin
   Result := False;
@@ -281,7 +283,7 @@ begin
       Database.RollbackTransaction;
     end;
   end;
-end;
+end;}
 
 {function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 begin

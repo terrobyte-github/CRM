@@ -222,7 +222,7 @@ type
   TsmxRequestCfg = class(TsmxCellCfg)
   private
     FDataSetType: TsmxDataSetType;
-    FMode: TsmxReturnType;
+    FPerformanceMode: TsmxPerformanceMode;
     FRequestFields: TsmxRequestFields;
     FRequestParams: TsmxLocationParams;
     FSQLText: String;
@@ -239,7 +239,7 @@ type
     procedure Refresh; virtual;
 
     property DataSetType: TsmxDataSetType read FDataSetType write FDataSetType;
-    property Mode: TsmxReturnType read FMode write FMode;
+    property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write FPerformanceMode;
     property RequestFields: TsmxRequestFields read GetRequestFields;
     property RequestParams: TsmxLocationParams read GetRequestParams;
     property SQLText: String read FSQLText write FSQLText;
@@ -1312,7 +1312,7 @@ end;
 procedure TsmxRequestCfg.Clear;
 begin
   FDataSetType := dstUnknown;
-  FMode := rtOpen;
+  FPerformanceMode := pmOpen;
   FSQLText := '';
   RequestParams.Clear;
   RequestFields.Clear;
@@ -1353,7 +1353,7 @@ begin
   begin
     SQLText := n.Attributes['sqltext'];
     DataSetType := n.Attributes['type'];
-    Mode := n.Attributes['mode'];
+    PerformanceMode := n.Attributes['perform'];
   end;
 
   n := r.ChildNodes.FindNode('params');
@@ -1392,7 +1392,7 @@ begin
   ds := TargetRequest.ForRequest(SQLText, DataSetType);
   try
     try
-      TargetRequest.PrepRequest(ds, True, Mode);
+      TargetRequest.PrepRequest(ds, True, PerformanceMode);
     except
       raise EsmxCfgError.CreateRes(@SCellRequestPerformError);
     end;
@@ -1441,7 +1441,7 @@ begin
   n := r.AddChild('request');
   n.Attributes['sqltext'] := SQLText;
   n.Attributes['type'] := DataSetType;
-  n.Attributes['mode'] := Mode;
+  n.Attributes['perform'] := PerformanceMode;
 
   n := r.AddChild('params');
   for i := 0 to RequestParams.Count - 1 do
@@ -1469,7 +1469,8 @@ begin
   with Request do
   begin
     CfgID := 0;
-    Mode := omManual;
+    Operation := omManual;
+    DatabaseName := '';
   end;
   with Grid do
   begin
@@ -1514,7 +1515,8 @@ begin
     with Request do
     begin
       CfgID := n.Attributes['id'];
-      Mode := n.Attributes['mode'];
+      Operation := n.Attributes['operation'];
+      DatabaseName := n.Attributes['databasename'];
     end;
 
   n := r.ChildNodes.FindNode('grid');
@@ -1564,7 +1566,8 @@ begin
   with Request do
   begin
     n.Attributes['id'] := CfgID;
-    n.Attributes['mode'] := Mode;
+    n.Attributes['operation'] := Operation;
+    n.Attributes['databasename'] := DatabaseName;
   end;
 
   n := r.AddChild('grid');
@@ -2057,6 +2060,12 @@ begin
       Width := 0;
     end;
   end;
+  with StateRequest do
+  begin
+    CfgID := 0;
+    Operation := omManual;
+    DatabaseName := '';
+  end;
   {with PageManager do
   begin
     CfgID := 0;
@@ -2240,7 +2249,8 @@ begin
     with StateRequest do
     begin
       CfgID := n.Attributes['id'];
-      Mode := n.Attributes['mode'];
+      Operation := n.Attributes['operation'];
+      DatabaseName := n.Attributes['databasename'];
     end;
 
   {n := r.ChildNodes.FindNode('states');
@@ -2368,7 +2378,8 @@ begin
   with StateRequest do
   begin
     n.Attributes['id'] := CfgID;
-    n.Attributes['mode'] := Mode;
+    n.Attributes['operation'] := Operation;
+    n.Attributes['databasename'] := DatabaseName;
   end;
 
   {n := r.AddChild('states');
@@ -2629,12 +2640,14 @@ begin
   with ApplyRequest do
   begin
     CfgID := 0;
-    Mode := omManual;
+    Operation := omManual;
+    DatabaseName := '';
   end;
   with PrepareRequest do
   begin
     CfgID := 0;
-    Mode := omManual;
+    Operation := omManual;
+    DatabaseName := '';
   end;
   Filters.Clear;
 end;
@@ -2659,7 +2672,8 @@ begin
     with ApplyRequest do
     begin
       CfgID := n.Attributes['id'];
-      Mode := n.Attributes['mode'];
+      Operation := n.Attributes['operation'];
+      DatabaseName := n.Attributes['databasename'];
     end;
 
   n := r.ChildNodes.FindNode('preparerequest');
@@ -2667,7 +2681,8 @@ begin
     with PrepareRequest do
     begin
       CfgID := n.Attributes['id'];
-      Mode := n.Attributes['mode'];
+      Operation := n.Attributes['operation'];
+      DatabaseName := n.Attributes['databasename'];
     end;
 
   n := r.ChildNodes.FindNode('filters');
@@ -2709,14 +2724,16 @@ begin
   with ApplyRequest do
   begin
     n.Attributes['id'] := CfgID;
-    n.Attributes['mode'] := Mode;
+    n.Attributes['operation'] := Operation;
+    n.Attributes['databasename'] := DatabaseName;
   end;
 
   n := r.AddChild('preparerequest');
   with PrepareRequest do
   begin
     n.Attributes['id'] := CfgID;
-    n.Attributes['mode'] := Mode;
+    n.Attributes['operation'] := Operation;
+    n.Attributes['databasename'] := DatabaseName;
   end;
 
   n := r.AddChild('filters');

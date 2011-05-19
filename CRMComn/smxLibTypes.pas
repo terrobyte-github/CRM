@@ -2,22 +2,10 @@ unit smxLibTypes;
 
 interface
 
-uses
-  Classes, Windows, smxClasses, smxDBIntf;
-
 type
-  //TsmxFuncCallBack = function(Index: Integer): Variant of object;
+  TsmxFuncCallBack = function(Index: Integer): Variant of object;
 
-  TsmxFuncNewCell = function(AOwner: TComponent; const ADB: IsmxDatabase;
-    ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
-
-  TsmxFuncIsCell = function(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
-
-  //TsmxFuncInf = function(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
-
-  TsmxFuncFindForm = function(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell of object;
-
-  {TsmxVers = record
+  TsmxVers = record
     Major, Minor, Release, Build: Word;
   end;
 
@@ -25,7 +13,7 @@ type
 
   TsmxLibTypes = set of TsmxLibType;
 
-  TsmxProcLibInit = procedure(ACall: TsmxFuncCallBack);
+  TsmxProcInitLib = procedure(ACall: TsmxFuncCallBack);
 
   TsmxLibInfo = record
     FullName: String;
@@ -33,10 +21,10 @@ type
     LibVers: TsmxVers;
     LibTypes: TsmxLibTypes;
     CompProgVers: TsmxVers;
-    ProcLibInit: TsmxProcLibInit;
+    ProcInitLib: TsmxProcInitLib;
   end;
 
-  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);}
+  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);
 
 implementation
 

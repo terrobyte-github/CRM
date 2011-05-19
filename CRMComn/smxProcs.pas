@@ -2,6 +2,9 @@ unit smxProcs;
 
 interface
 
+uses
+  Classes;
+
 procedure GetFileFullVersion(AFileName: PChar; var AVersMost, AVersLeast: Cardinal);
 
 implementation

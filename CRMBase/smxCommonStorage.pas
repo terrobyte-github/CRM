@@ -1,4 +1,4 @@
-unit smxGlobalStorage;
+unit smxCommonStorage;
 
 interface
 
@@ -6,11 +6,11 @@ uses
   Classes, smxBaseClasses, smxClasses;
 
 type
-  { TsmxGlobalParam }
+  { TsmxCommonParam }
 
   //TsmxGlobalParamType = (gptSystem, gptUser);
 
-  TsmxGlobalParam = class(TsmxKitItem)
+  TsmxCommonParam = class(TsmxKitItem)
   private
     FParamName: String;
     FParamValue: Variant;
@@ -21,27 +21,27 @@ type
     property ParamValue: Variant read FParamValue write FParamValue;
   end;
 
-  { TsmxGlobalParams }
+  { TsmxCommonParams }
 
-  TsmxGlobalParams = class(TsmxKit)
+  TsmxCommonParams = class(TsmxKit)
   private
-    function GetItem(Index: Integer): TsmxGlobalParam;
+    function GetItem(Index: Integer): TsmxCommonParam;
   public
-    function Add: TsmxGlobalParam;
-    function FindByName(AParamName: String): TsmxGlobalParam;
+    function Add: TsmxCommonParam;
+    function FindByName(AParamName: String): TsmxCommonParam;
 
-    property Items[Index: Integer]: TsmxGlobalParam read GetItem; default;
+    property Items[Index: Integer]: TsmxCommonParam read GetItem; default;
   end;
 
-  { TsmxGlobalStorage }
+  { TsmxCommonStorage }
 
-  TsmxGlobalStorage = class(TsmxComponent)
+  TsmxCommonStorage = class(TsmxComponent)
   private
-    FParamList: TsmxGlobalParams;
+    FParamList: TsmxCommonParams;
     function GetValue(Name: String): Variant;
     procedure SetValue(Name: String; Value: Variant);
   protected
-    property ParamList: TsmxGlobalParams read FParamList;
+    property ParamList: TsmxCommonParams read FParamList;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -52,7 +52,7 @@ type
     property ParamValues[Name: String]: Variant read GetValue write SetValue; default;
   end;
 
-function GlobalStorage: TsmxGlobalStorage;
+function CommonStorage: TsmxCommonStorage;
 
 //const
   //FuncGlobalValue: TsmxFuncGlobalValue = nil;
@@ -63,30 +63,30 @@ uses
   Variants, SysUtils;
 
 var
-  _GlobalStorage: TsmxGlobalStorage = nil;
+  _CommonStorage: TsmxCommonStorage = nil;
 
-function GlobalStorage: TsmxGlobalStorage;
+function CommonStorage: TsmxCommonStorage;
 begin
-  Result := _GlobalStorage;
+  Result := _CommonStorage;
 end;
 
-{ TsmxGlobalParam }
+{ TsmxCommonParam }
 
-constructor TsmxGlobalParam.Create(AKit: TsmxKit);
+constructor TsmxCommonParam.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FParamName := '';
   FParamValue := Null;
 end;
 
-{ TsmxGlobalParams }
+{ TsmxCommonParams }
 
-function TsmxGlobalParams.Add: TsmxGlobalParam;
+function TsmxCommonParams.Add: TsmxCommonParam;
 begin
-  Result := TsmxGlobalParam(inherited Add);
+  Result := TsmxCommonParam(inherited Add);
 end;
 
-function TsmxGlobalParams.FindByName(AParamName: String): TsmxGlobalParam;
+function TsmxCommonParams.FindByName(AParamName: String): TsmxCommonParam;
 var i: Integer;
 begin
   Result := nil;
@@ -98,24 +98,26 @@ begin
     end;
 end;
 
-function TsmxGlobalParams.GetItem(Index: Integer): TsmxGlobalParam;
+function TsmxCommonParams.GetItem(Index: Integer): TsmxCommonParam;
 begin
-  Result := TsmxGlobalParam(inherited Items[Index]);
+  Result := TsmxCommonParam(inherited Items[Index]);
 end;
 
-{ TsmxGlobalStorage }
+{ TsmxCommonStorage }
 
-constructor TsmxGlobalStorage.Create(AOwner: TComponent);
+constructor TsmxCommonStorage.Create(AOwner: TComponent);
 begin
-  FParamList := TsmxGlobalParams.Create(TsmxGlobalParam);
+  inherited Create(AOwner);
+  FParamList := TsmxCommonParams.Create(TsmxCommonParam);
 end;
 
-destructor TsmxGlobalStorage.Destroy;
+destructor TsmxCommonStorage.Destroy;
 begin
   FParamList.Free;
+  inherited Destroy;
 end;
 
-{procedure TsmxGlobalStorage.InsertParam(AName: String; AValue: Variant);
+{procedure TsmxCommonStorage.InsertParam(AName: String; AValue: Variant);
 var p: TsmxParam;
 begin
   p := FParamList.FindByName(AName);
@@ -129,8 +131,8 @@ begin
     end;
 end;}
 
-function TsmxGlobalStorage.GetValue(Name: String): Variant;
-var p: TsmxGlobalParam;
+function TsmxCommonStorage.GetValue(Name: String): Variant;
+var p: TsmxCommonParam;
 begin
   p := FParamList.FindByName(Name);
   if Assigned(p) then
@@ -138,8 +140,8 @@ begin
     Result := Null;
 end;
 
-procedure TsmxGlobalStorage.SetValue(Name: String; Value: Variant);
-var p: TsmxGlobalParam;
+procedure TsmxCommonStorage.SetValue(Name: String; Value: Variant);
+var p: TsmxCommonParam;
 begin
   p := FParamList.FindByName(Name);
   if Assigned(p) then
@@ -153,11 +155,11 @@ begin
 end;
 
 initialization
-  _GlobalStorage := TsmxGlobalStorage.Create(nil);
+  _CommonStorage := TsmxCommonStorage.Create(nil);
   //FuncGlobalValue := _GlobalParams.GetValue;
 
 finalization
   //FuncGlobalValue := nil;
-  _GlobalStorage.Free;
+  _CommonStorage.Free;
 
 end.

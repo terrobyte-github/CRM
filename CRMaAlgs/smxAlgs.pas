@@ -27,8 +27,8 @@ procedure SelectOfFormPerformRequestFromForm(Algorithm: TsmxAlgorithm; Params: V
 implementation
 
 uses
-  Windows, Controls, Variants, smxLibProcs, smxCells, smxFormManager, smxFuncs,
-  smxLibFuncs, smxConsts, smxDBIntf, smxTypes;
+  Windows, Controls, Variants, smxCells, {smxFormManager, smxLibProcs,} smxLibFuncs,
+  smxFuncs, smxCellFuncs, smxConsts, smxDBIntf, smxTypes;
 
 procedure OpenForm(Algorithm: TsmxAlgorithm; Params: Variant);
 var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f: TsmxBaseCell;
@@ -55,18 +55,19 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      //f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      f := FormManagerLib.FindByComboID(FormCfgID, FormID);
       if Assigned(f) then
       begin
         TsmxCustomForm(f).ShowForm;
       end else
       begin
-        f := CreateCell(FormCfgID, FormID);
-        if ClassCell(f, 'TsmxCustomForm') then
+        f := NewCellLib(FormCfgID, FormID);
+        if IsCellLib(f, 'TsmxCustomForm') then
         begin
           with TsmxCustomForm(f) do
           begin
-            if ClassCell(c, 'TsmxCustomForm') then
+            if IsCellLib(c, 'TsmxCustomForm') then
               ParentForm := TsmxCustomForm(c);
             ShowForm;
           end;
@@ -105,18 +106,19 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      //f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      f := FormManagerLib.FindByComboID(FormCfgID, FormID);
       if Assigned(f) then
       begin
         TsmxCustomForm(f).ShowForm;
       end else
       begin
-        f := CreateCell(FormCfgID, FormID);
-        if ClassCell(f, 'TsmxCustomForm') then
+        f := NewCellLib(FormCfgID, FormID);
+        if IsCellLib(f, 'TsmxCustomForm') then
         begin
           with TsmxCustomForm(f) do
           begin
-            if ClassCell(c, 'TsmxCustomForm') then
+            if IsCellLib(c, 'TsmxCustomForm') then
               ParentForm := TsmxCustomForm(c);
             ShowForm;
           end;
@@ -155,18 +157,19 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      //f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      f := FormManagerLib.FindByComboID(FormCfgID, FormID);
       if Assigned(f) then
       begin
         TsmxCustomForm(f).ShowForm;
       end else
       begin
-        f := CreateCell(FormCfgID, FormID);
-        if ClassCell(f, 'TsmxCustomForm') then
+        f := NewCellLib(FormCfgID, FormID);
+        if IsCellLib(f, 'TsmxCustomForm') then
         begin
           with TsmxCustomForm(f) do
           begin
-            if ClassCell(c, 'TsmxCustomForm') then
+            if IsCellLib(c, 'TsmxCustomForm') then
               ParentForm := TsmxCustomForm(c);
             ShowForm;
           end;
@@ -187,8 +190,9 @@ var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
   c := Algorithm.RootCell;
   //Call := Algorithm.Call;
-  if ClassCell(c, 'TsmxCustomForm') then
-    c.Free;
+  if IsCellLib(c, 'TsmxCustomForm') then
+    //c.Free;
+    TsmxCustomForm(c).CloseForm;
 end;
 
 procedure RefreshForm(Algorithm: TsmxAlgorithm; Params: Variant);
@@ -196,7 +200,7 @@ var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
   c := Algorithm.RootCell;
   //Call := Algorithm.Call;
-  if ClassCell(c, 'TsmxCustomForm') then
+  if IsCellLib(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).Prepare(True);
 end;
 
@@ -205,7 +209,7 @@ var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
   c := Algorithm.RootCell;
   //Call := Algorithm.Call;
-  if ClassCell(c, 'TsmxCustomForm') then
+  if IsCellLib(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).Apply;
 end;
 
@@ -214,7 +218,7 @@ var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
   c := Algorithm.RootCell;
   //Call := Algorithm.Call;
-  if ClassCell(c, 'TsmxCustomForm') then
+  if IsCellLib(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).FormModalResult := mrOk;
 end;
 
@@ -223,7 +227,7 @@ var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
   c := Algorithm.RootCell;
   //Call := Algorithm.Call;
-  if ClassCell(c, 'TsmxCustomForm') then
+  if IsCellLib(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).FormModalResult := mrCancel;
 end;
 
@@ -251,15 +255,15 @@ begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
       flt := Algorithm.ParentCell;
-      if ClassCell(flt, 'TsmxCustomFilter') then
+      if IsCellLib(flt, 'TsmxCustomFilter') then
       begin
-        f := CreateCell(FormCfgID, FormID);
+        f := NewCellLib(FormCfgID, FormID);
         try
-          if not ClassCell(f, 'TsmxCustomForm') then
+          if not IsCellLib(f, 'TsmxCustomForm') then
             raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
           with TsmxCustomForm(f) do
           begin
-            if ClassCell(c, 'TsmxCustomForm') then
+            if IsCellLib(c, 'TsmxCustomForm') then
               ParentForm := TsmxCustomForm(c);
             if ShowModalForm = mrOk then
             begin
@@ -310,11 +314,11 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      if ClassCell(c, 'TsmxCustomForm') then
+      if IsCellLib(c, 'TsmxCustomForm') then
       begin
-        r := CreateCell(RequestCfgID);
+        r := NewCellLib(RequestCfgID);
         try
-          if not ClassCell(r, 'TsmxCustomRequest') then
+          if not IsCellLib(r, 'TsmxCustomRequest') then
             raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
           r.ParentCell := c;
           if PerformRequest(TsmxCustomRequest(r)) then
@@ -359,13 +363,13 @@ begin
       begin
         c := Algorithm.RootCell;
         //Call := Algorithm.Call;
-        f := CreateCell(FormCfgID, FormID);
+        f := NewCellLib(FormCfgID, FormID);
         try
-          if not ClassCell(f, 'TsmxCustomForm') then
+          if not IsCellLib(f, 'TsmxCustomForm') then
             raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
           with TsmxCustomForm(f) do
           begin
-            if ClassCell(c, 'TsmxCustomForm') then
+            if IsCellLib(c, 'TsmxCustomForm') then
               ParentForm := TsmxCustomForm(c);
             if ShowModalForm = mrOk then
             begin
@@ -374,9 +378,9 @@ begin
                 if Assigned(PageManager.ActivePage) then
                   if Assigned(PageManager.ActivePage.Grid) then
                     r2 := PageManager.ActivePage.Grid.Request;}
-              r := CreateCell(RequestCfgID);
+              r := NewCellLib(RequestCfgID);
               try
-                if not ClassCell(r, 'TsmxCustomRequest') then
+                if not IsCellLib(r, 'TsmxCustomRequest') then
                   raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
                 with TsmxCustomRequest(r) do
                 begin
@@ -393,7 +397,7 @@ begin
                 end;
                 //PerformRequest(TsmxCustomRequest(r), True);
                 if PerformRequest(TsmxCustomRequest(r), True) then
-                  if ClassCell(c, 'TsmxCustomForm') then
+                  if IsCellLib(c, 'TsmxCustomForm') then
                     TsmxCustomForm(c).Prepare(FormRefresh);
               finally
                 r.Free;
@@ -445,13 +449,13 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      f := CreateCell(FormCfgID, FormID);
+      f := NewCellLib(FormCfgID, FormID);
       try
-        if not ClassCell(f, 'TsmxCustomForm') then
+        if not IsCellLib(f, 'TsmxCustomForm') then
           raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
         with TsmxCustomForm(f) do
         begin
-          if ClassCell(c, 'TsmxCustomForm') then
+          if IsCellLib(c, 'TsmxCustomForm') then
             ParentForm := TsmxCustomForm(c);
           if ShowModalForm = mrOk then
           begin
@@ -486,13 +490,13 @@ begin
                 prm := Algorithm.FindParamLocation(plInput, prm.ItemIndex + 1);
               end;
             end;
-            r := CreateCell(RequestCfgID);
+            r := NewCellLib(RequestCfgID);
             try
-              if not ClassCell(r, 'TsmxCustomRequest') then
+              if not IsCellLib(r, 'TsmxCustomRequest') then
                 raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
               r.ParentCell := Algorithm;
               if PerformRequest(TsmxCustomRequest(r)) then
-                if ClassCell(c, 'TsmxCustomForm') then
+                if IsCellLib(c, 'TsmxCustomForm') then
                   TsmxCustomForm(c).Prepare(FormRefresh);
             finally
               r.Free;
@@ -541,11 +545,11 @@ begin
     begin
       c := Algorithm.RootCell;
       //Call := Algorithm.Call;
-      if ClassCell(c, 'TsmxCustomForm') then
+      if IsCellLib(c, 'TsmxCustomForm') then
       begin
-        f := CreateCell(FormCfgID, FormID);
+        f := NewCellLib(FormCfgID, FormID);
         try
-          if not ClassCell(f, 'TsmxCustomForm') then
+          if not IsCellLib(f, 'TsmxCustomForm') then
             raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
           with TsmxCustomForm(f) do
           begin
@@ -557,9 +561,9 @@ begin
                 if Assigned(PageManagers[0].ActivePage) then
                   if Assigned(PageManagers[0].ActivePage.Sections[0]) then
                     r2 := PageManagers[0].ActivePage.Sections[0].Request;
-              r := CreateCell(RequestCfgID);
+              r := NewCellLib(RequestCfgID);
               try
-                if not ClassCell(r, 'TsmxCustomRequest') then
+                if not IsCellLib(r, 'TsmxCustomRequest') then
                   raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
                 with TsmxCustomRequest(r) do
                 begin

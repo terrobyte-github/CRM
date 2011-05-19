@@ -3,7 +3,7 @@ unit smxLibManager;
 interface
 
 uses
-  Classes, SysUtils, smxBaseClasses, smxClasses, smxTypes;
+  Classes, SysUtils, smxBaseClasses, smxClasses, smxTypes, smxLibTypes;
 
 type
   { TsmxLibItem }
@@ -46,10 +46,11 @@ type
     function GetLibCount: Integer;
     procedure FreeLibs;
   protected
-    //function PrepareLibrary(ALibName: String): THandle;
-    function PrepareLibrary(ALibName: String; var ALibHandle: THandle): Boolean;
+    function PrepareLibrary(ALibName: String): THandle;
+    //function PrepareLibrary(ALibName: String; var ALibHandle: THandle): Boolean;
     //function PrepareLibrary(ALibHandle: THandle): Boolean;
     procedure ClearLibInfo(var ALibInfo: TsmxLibInfo);
+    function GetLibHandle(ALibName: String): THandle;
     
     //procedure UnPrepareLibraty(ALibItem: TsmxLibItem);
     //function GetLibInfo(ALibHandle: THandle; var ALibInfo: TsmxLibInfo): Boolean;
@@ -66,6 +67,8 @@ type
     //function FindLibInfoByName(ALibName: String): TsmxLibInfo;
     //function FindLibInfoByHandle(ALibHandle: THandle): TsmxLibInfo;
 
+    function CheckLibraryComp(ALibHandle: THandle): Boolean; overload;
+    function CheckLibraryComp(ALibName: String): Boolean; overload;
     function GetProcedure(ALibHandle: THandle; AProcName: String): Pointer; overload;
     function GetProcedure(ALibName, AProcName: String): Pointer; overload;
     function GetLibrary(ALibName: String): THandle;
@@ -82,7 +85,7 @@ function LibManager: TsmxLibManager;
 implementation
 
 uses
-  Windows, smxCallBack, smxGlobalStorage, smxConsts;
+  Windows, smxCommonStorage, smxCallBack, smxConsts;
 
 var
   _LibManager: TsmxLibManager = nil;
@@ -142,6 +145,7 @@ end;
 
 constructor TsmxLibManager.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FLibList := TsmxLibItems.Create(TsmxLibItem);
 end;
 
@@ -149,6 +153,7 @@ destructor TsmxLibManager.Destroy;
 begin
   FreeLibs;
   FLibList.Free;
+  inherited Destroy;
 end;
 
 procedure TsmxLibManager.FreeLibs;
@@ -183,7 +188,7 @@ begin
       Release := 0;
       Build := 0;
     end;
-    ProcLibInit := nil;
+    ProcInitLib := nil;
   end;
 end;
 
@@ -220,13 +225,17 @@ var l: TsmxLibItem; //pc: TsmxProjectConnection; fs: TFileStream;
 begin
   l := FLibList.FindByName(ALibName);
   if Assigned(l) then
-    Result := l.LibHandle else
-  if PrepareLibrary(ALibName, Result) then
-    with FLibList.Add do
-    begin
-      LibHandle := Result;
-      LibName := ALibName;
-    end;
+    Result := l.LibHandle
+  else
+  begin
+    Result := PrepareLibrary(ALibName);
+    if Result > 0 then
+      with FLibList.Add do
+      begin
+        LibHandle := Result;
+        LibName := ALibName;
+      end;
+  end;
 
   {with pc do
   begin
@@ -287,8 +296,8 @@ end;
 function TsmxLibManager.GetLibraryInfo(ALibHandle: THandle; var ALibInfo: TsmxLibInfo): Boolean;
 var ProcLibInfo: TsmxProcLibInfo;
 begin
-  ClearLibInfo(ALibInfo);
   Result := False;
+  ClearLibInfo(ALibInfo);
   if ALibHandle > 0 then
   begin
     @ProcLibInfo := GetProcAddress(ALibHandle, PChar(SProcLibInfoName));
@@ -303,21 +312,15 @@ end;
 function TsmxLibManager.GetLibraryInfo(ALibName: String; var ALibInfo: TsmxLibInfo): Boolean;
 var l: TsmxLibItem; h: THandle;
 begin
-  ClearLibInfo(ALibInfo);
-  Result := False;
   l := FLibList.FindByName(ALibName);
   if Assigned(l) then
+    Result := GetLibraryInfo(l.LibHandle, ALibInfo)
+  else
   begin
-    GetLibraryInfo(l.LibHandle, ALibInfo);
-    Result := True;
-  end else
-  begin
-    h := LoadLibrary(PChar(ALibName));
+    h := GetLibHandle(ALibName);
+    Result := GetLibraryInfo(h, ALibInfo);
     if h > 0 then
-    begin
-      Result := GetLibraryInfo(h, ALibInfo);
       FreeLibrary(h);
-    end;
   end;
 end;
 
@@ -329,7 +332,7 @@ begin
 end;
 
 function TsmxLibManager.GetProcedure(ALibName, AProcName: String): Pointer;
-var l: TsmxLibItem; 
+var l: TsmxLibItem;
 begin
   l := FLibList.FindByName(ALibName);
   if Assigned(l) then
@@ -400,39 +403,88 @@ begin
   end;
 end;}
 
-function TsmxLibManager.PrepareLibrary(ALibName: String; var ALibHandle: THandle): Boolean;
+{function TsmxLibManager.PrepareLibrary(ALibName: String; var ALibHandle: THandle): Boolean;
+var li: TsmxLibInfo; ProcInitLib: TsmxProcInitLib;
+begin
+  Result := False;
+  ALibHandle := GetLibHandle(ALibName);
+  if ALibHandle > 0 then
+    if CheckLibraryComp(ALibHandle) then
+    begin
+      if GetLibraryInfo(ALibHandle, li) then
+        ProcInitLib := li.ProcInitLib else
+        ProcInitLib := nil;
+      if Assigned(ProcInitLib) then
+        ProcInitLib(FuncCallBack);
+      Result := True;
+    end else
+    begin
+      FreeLibrary(ALibHandle);
+      ALibHandle := 0;
+    end;
+end;}
+
+function TsmxLibManager.PrepareLibrary(ALibName: String): THandle;
+var li: TsmxLibInfo; ProcInitLib: TsmxProcInitLib;
+begin
+  Result := GetLibHandle(ALibName);
+  if Result > 0 then
+    if CheckLibraryComp(Result) then
+    begin
+      if GetLibraryInfo(Result, li) then
+        ProcInitLib := li.ProcInitLib else
+        ProcInitLib := nil;
+      if Assigned(ProcInitLib) then
+        ProcInitLib(FuncCallBack);
+    end else
+    begin
+      FreeLibrary(Result);
+      Result := 0;
+    end;
+end;
+
+function TsmxLibManager.CheckLibraryComp(ALibHandle: THandle): Boolean;
 
   function CheckComp(ACompProgVers: TsmxVers): Boolean;
   var ProgVersMajor, ProgVersMinor: Word;
   begin
     Result := False;
-    ProgVersMajor := GlobalStorage['ProgVersMajor'];
-    ProgVersMinor := GlobalStorage['ProgVersMinor'];
+    ProgVersMajor := CommonStorage['ProgVersMajor'];
+    ProgVersMinor := CommonStorage['ProgVersMinor'];
     if (ACompProgVers.Major > ProgVersMajor)
         or ((ACompProgVers.Major = ProgVersMajor)
           and (ACompProgVers.Minor >= ProgVersMinor)) then
       Result := True;
   end;
 
-var li: TsmxLibInfo; ProcLibInit: TsmxProcLibInit;
+var li: TsmxLibInfo;
 begin
   Result := False;
-  ALibHandle := LoadLibrary(PChar(ALibName));
   if ALibHandle > 0 then
-  begin
     if GetLibraryInfo(ALibHandle, li) then
       Result := CheckComp(li.CompProgVers);
-    if Result then
-    begin
-      ProcLibInit := li.ProcLibInit;
-      if Assigned(ProcLibInit) then
-        ProcLibInit(FuncCallBack);
-    end else
-    begin
-      FreeLibrary(ALibHandle);
-      ALibHandle := 0;
-    end;
+end;
+
+function TsmxLibManager.CheckLibraryComp(ALibName: String): Boolean;
+var l: TsmxLibItem; h: THandle;
+begin
+  l := FLibList.FindByName(ALibName);
+  if Assigned(l) then
+    Result := CheckLibraryComp(l.LibHandle)
+  else
+  begin
+    h := GetLibHandle(ALibName);
+    Result := CheckLibraryComp(h);
+    if h > 0 then
+      FreeLibrary(h);
   end;
+end;
+
+function TsmxLibManager.GetLibHandle(ALibName: String): THandle;
+begin
+  Result := LoadLibrary(PChar(ALibName));
+  if Result <= HINSTANCE_ERROR then
+    Result := 0;
 end;
 
 {function TsmxLibManager.PrepareLibrary(ALibHandle: THandle): Boolean;

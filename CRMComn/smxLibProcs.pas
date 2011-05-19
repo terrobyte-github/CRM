@@ -3,11 +3,11 @@ unit smxLibProcs;
 interface
 
 uses
-  smxTypes;
+  smxLibTypes;
 
 procedure LibInfo(var ALibInfo: TsmxLibInfo);
 procedure LibInit(ACall: TsmxFuncCallBack);
-procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcLibInit = nil;
+procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
   ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
 
 const
@@ -32,7 +32,7 @@ begin
   Application.Handle := HWND(Integer(Call(0)));
 end;
 
-procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcLibInit = nil;
+procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
   ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
 var s: String; VersM, VersL: Cardinal;
 begin
@@ -57,7 +57,7 @@ begin
       Release := 0;
       Build := 0;
     end;
-    ProcLibInit := AProc;
+    ProcInitLib := AProc;
   end;
 end;
 

@@ -11,13 +11,13 @@ type
   TsmxDBItem = class(TsmxKitItem)
   private
     FDBConnection: TsmxDBConnection;
-    //FDatabaseName: String;
+    FDatabaseName: String;
     FDatabaseIntf: IsmxDatabase;
   public
     constructor Create(AKit: TsmxKit); override;
 
     property DBConnection: TsmxDBConnection read FDBConnection write FDBConnection;
-    //property DatabaseName: String read FDatabaseName write FDatabaseName;
+    property DatabaseName: String read FDatabaseName write FDatabaseName;
     property Database: IsmxDatabase read FDatabaseIntf write FDatabaseIntf;
   end;
 
@@ -77,7 +77,7 @@ constructor TsmxDBItem.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FDBConnection := nil;
-  //FDatabaseName := '';
+  FDatabaseName := '';
   FDatabaseIntf := nil;
 end;
 
@@ -93,8 +93,7 @@ var i: Integer;
 begin
   Result := nil;
   for i := 0 to Count - 1 do
-    //if AnsiCompareText(Items[i].DatabaseName, ADatabaseName) = 0 then
-    if AnsiCompareText(Items[i].Database.DatabaseName, ADatabaseName) = 0 then
+    if AnsiCompareText(Items[i].DatabaseName, ADatabaseName) = 0 then
     begin
       Result := Items[i];
       Break;
@@ -134,6 +133,7 @@ end;
 
 constructor TsmxDBManager.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FDBConnectionList := TsmxDBItems.Create(TsmxDBItem);
 end;
 
@@ -141,6 +141,7 @@ destructor TsmxDBManager.Destroy;
 begin
   FreeDBConnections;
   FDBConnectionList.Free;
+  inherited Destroy;
 end;
 
 procedure TsmxDBManager.FreeDBConnections;
@@ -165,7 +166,8 @@ var d: TsmxDBItem;
 begin
   d := DBConnectionList.FindByName(ADatabaseName);
   if Assigned(d) then
-    Result := d.DBConnection;
+    Result := d.DBConnection else
+    Result := nil;
 end;
 
 procedure TsmxDBManager.InsertDBConnection(ADBConnection: TsmxDBConnection);
@@ -177,7 +179,7 @@ begin
     begin
       DBConnection := ADBConnection;
       Database := ADBConnection.Database;
-      //DatabaseName := ADBConnection.Database.DatabaseName;
+      DatabaseName := ADBConnection.Database.DatabaseName;
     end;
 end;
 

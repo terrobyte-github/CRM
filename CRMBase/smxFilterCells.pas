@@ -131,7 +131,7 @@ type
 implementation
 
 uses
-  Variants, Forms, SysUtils, Graphics, smxGlobal, smxFuncs;
+  Variants, Forms, SysUtils, Graphics, smxGlobalVariables, smxFuncs;
 
 type
   { _TsmxBaseCell }
