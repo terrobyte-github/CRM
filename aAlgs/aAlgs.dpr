@@ -1,7 +1,7 @@
 library aAlgs;
 
 uses
-  ShareMem,
+  //ShareMem,
   Forms,
   smxAlgs in 'smxAlgs.pas',
   smxLibProcs in '..\CRMCommon\smxLibProcs.pas';

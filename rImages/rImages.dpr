@@ -1,7 +1,7 @@
 library rImages;
 
 uses
-  ShareMem,
+  //ShareMem,
   SysUtils,
   Classes,
   smxLibProcs in '..\CRMCommon\smxLibProcs.pas',

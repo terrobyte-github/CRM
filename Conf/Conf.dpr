@@ -1,7 +1,7 @@
 program Conf;
 
 uses
-  ShareMem,
+  //ShareMem,
   Forms,
   smxConf in 'smxConf.pas' {frmConf},
   smxProjects in 'smxProjects.pas' {frmProjects},

@@ -1,7 +1,7 @@
 library dCoADO;
 
 uses
-  ShareMem,
+  //ShareMem,
   ComServ,
   smxLibProcs in '..\CRMCommon\smxLibProcs.pas',
   smxLibTypes in '..\CRMCommon\smxLibTypes.pas',

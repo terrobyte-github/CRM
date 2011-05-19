@@ -1,7 +1,6 @@
 program CRM;
 
 uses
-  ShareMem,
   Forms,
   smxMain in 'smxMain.pas';
 

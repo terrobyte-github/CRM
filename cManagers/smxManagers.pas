@@ -12,7 +12,7 @@ uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, Graphics,
   IniFiles, smxClasses, smxFormManager, smxDBManager, smxLibManager, smxCallBack,
   smxCommonStorage, smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf,
-  smxConsts;
+  smxConsts, ActiveX;
 
 type
   { _TCustomImageList }
@@ -25,10 +25,13 @@ var
   _ImgList: TImageList = nil;
   _DBConnection: TsmxDBConnection = nil;
 
-procedure SaveProgVers;
-var VersM, VersL: Cardinal;
+procedure SaveProgInfo;
+var s: String; VersM, VersL: Cardinal;
 begin
-  GetFileFullVersion(Application.ExeName, VersM, VersL);
+  s := Application.ExeName;
+  ComStorage['CRMExe'] := s;
+  ComStorage['CRMPath'] := ExtractFilePath(s);
+  GetFileFullVersion(s, VersM, VersL);
   ComStorage['ProgVersMajor'] := LongRec(VersM).Hi;
   ComStorage['ProgVersMinor'] := LongRec(VersM).Lo;
   ComStorage['ProgVersRelease'] := LongRec(VersL).Hi;
@@ -73,9 +76,9 @@ end;
 procedure LoadCfg;
 var f: TIniFile; sl, sl2: TStringList; i, j: Integer;
 begin
-  if FileExists(SFileConfigurationName) then
+  if FileExists(ComStorage['CRMPath'] + SFileConfigurationName) then
   begin
-    f := TIniFile.Create(ExtractFilePath(Application.ExeName) + SFileConfigurationName);
+    f := TIniFile.Create(ComStorage['CRMPath'] + SFileConfigurationName);
     try
       sl := TStringList.Create;
       try
@@ -102,7 +105,7 @@ end;
 
 procedure Initialize;
 begin
-  SaveProgVers;
+  SaveProgInfo;
   AssignCallBackParams;
   LoadCfg;
   LibManager.LibPath := ComStorage['LibPath'];
@@ -134,7 +137,7 @@ begin
   end else
   begin
     f.Free;
-    raise EsmxCellError.CreateRes(@SCellBuildError);
+    //raise EsmxCellError.CreateRes(@SCellBuildError);
     Result := False;
   end;
 end;
@@ -414,8 +417,10 @@ end;
 
 initialization
   _ImgList := TImageList.Create(nil);
+  //CoInitialize(nil);
 
 finalization
+  //CoUninitialize;
   _ImgList.Free;
 
 end.

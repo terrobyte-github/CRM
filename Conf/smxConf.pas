@@ -97,6 +97,7 @@ begin
   FProjectManager.FileName := 'proj.dat'; //SFileProjectName;
   FillProjectList;
   SaveProgVers;
+  LibManager.ProcLibInfoName := 'LibInfo';
 end;
 
 procedure TfrmConf.FormDestroy(Sender: TObject);

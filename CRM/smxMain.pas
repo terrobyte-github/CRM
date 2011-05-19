@@ -30,10 +30,13 @@ var
   _ImgList: TImageList = nil;
   _DBConnection: TsmxDBConnection = nil;
 
-procedure SaveProgVers;
-var VersM, VersL: Cardinal;
+procedure SaveProgInfo;
+var s: String; VersM, VersL: Cardinal;
 begin
-  GetFileFullVersion(Application.ExeName, VersM, VersL);
+  s := Application.ExeName;
+  ComStorage['CRMExe'] := s;
+  ComStorage['CRMPath'] := ExtractFilePath(s);
+  GetFileFullVersion(s, VersM, VersL);
   ComStorage['ProgVersMajor'] := LongRec(VersM).Hi;
   ComStorage['ProgVersMinor'] := LongRec(VersM).Lo;
   ComStorage['ProgVersRelease'] := LongRec(VersL).Hi;
@@ -78,8 +81,7 @@ end;
 procedure LoadCfg;
 var f: TIniFile; sl, sl2: TStringList; i, j: Integer;
 begin
-  ComStorage['CRMPath'] := ExtractFilePath(Application.ExeName);
-  if FileExists(SFileConfigurationName) then
+  if FileExists(ComStorage['CRMPath'] + SFileConfigurationName) then
   begin
     f := TIniFile.Create(ComStorage['CRMPath'] + SFileConfigurationName);
     try
@@ -106,7 +108,7 @@ begin
   end;
 end;
 
-procedure LoadVariables;
+procedure SaveVariables;
 var s: String;
 begin
   s := ComStorage['CRMPath'];
@@ -127,10 +129,10 @@ end;
 
 procedure Initialize;
 begin
-  SaveProgVers;
+  SaveProgInfo;
   AssignCallBackParams;
   LoadCfg;
-  LoadVariables;
+  SaveVariables;
   LibManager.LibPath := ComStorage['LibPath'];
   LibManager.ProcLibInfoName := ComStorage['ProcLibInfo'];
   LoadCell;

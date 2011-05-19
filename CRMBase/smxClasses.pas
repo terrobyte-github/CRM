@@ -1163,6 +1163,7 @@ end;
 
 destructor TsmxBaseCell.Destroy;
 begin
+  SetParentCell(nil);
   FCellList.Free;
   FCfg.Free;
   FCfgDatabaseIntf := nil;
@@ -3034,10 +3035,23 @@ begin
 end;}
 
 procedure TsmxCustomFilterDesk.Apply;
+var i: Integer; p: IsmxParam;
 begin
-  //inherited Apply;
+  ////inherited Apply;
+  //if Assigned(ApplyRequest) then
+    //ApplyRequest.Perform;
   if Assigned(ApplyRequest) then
-    ApplyRequest.Perform;
+    if Assigned(ApplyRequest.CellDataSet) then
+    begin
+      ApplyRequest.RefreshParams;
+      for i := 0 to FilterCount - 1 do
+      begin
+        p := ApplyRequest.CellDataSet.FindParam(Filters[i].FilterName);
+        if Assigned(p) then
+          p.Value := Filters[i].FilterValue;
+      end;
+      ApplyRequest.Perform(True);
+    end;
 end;
 
 procedure TsmxCustomFilterDesk.Prepare(Forcibly: Boolean = False);
