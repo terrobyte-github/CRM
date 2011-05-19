@@ -54,6 +54,38 @@ begin
   end;
 end;
 
+function GetIntfUser: Boolean;
+var c: TsmxBaseCell; f: IsmxField; IntfID: Integer; IntfName: String;
+begin
+  Result := False;
+  try
+    c := NewCell(nil, _Database, 1000277);
+    try
+      if c is TsmxCustomRequest then
+        with TsmxCustomRequest(c) do
+        begin
+          Perform;
+          f := FindFieldSense(fsKey);
+          if Assigned(f) then
+            IntfID := f.Value else
+            IntfID := 0;
+          GlobalStorage['@IntfID'] := IntfID;
+          f := FindFieldSense(fsValue);
+          if Assigned(f) then
+            IntfName := f.Value else
+            IntfName := '';
+          GlobalStorage['@IntfName'] := IntfName;
+          if IntfID > 0 then
+            Result := True;
+        end;
+    finally
+      c.Free;
+    end;
+  except
+    raise EsmxCellError.CreateRes(@SCellBuildError);
+  end;
+end;
+
 function CheckUser: Boolean;
 var c: TsmxBaseCell; p: IsmxParam; UserID: Integer; UserName: String;
 begin
@@ -76,7 +108,7 @@ begin
             UserName := '';
           GlobalStorage['@UserName'] := UserName;
           if UserID > 0 then
-            Result := True else
+            Result := GetIntfUser else
           if UserID = -1 then
             Inf(UserName);
         end;

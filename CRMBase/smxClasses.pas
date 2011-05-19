@@ -21,32 +21,35 @@ type
     //FCfgName: String;
     FDatabaseIntf: IsmxDatabase;
     FCfgID: Integer;
+    FID: Integer;
     FTargetRequest: TsmxTargetRequest;
     FXMLDocIntf: IXMLDocument;
     //function GetCfgName: String;
     //function GetDatabase: IsmxDatabase;
-    function GetXMLText: String;
-    procedure SetXMLText(Value: String);
   protected
     procedure LoadCell; virtual;
     procedure ReadCell; virtual;
     procedure SaveCell; virtual;
     procedure WriteCell; virtual;
+    function GetXMLText: String; virtual;
+    procedure SetXMLText(Value: String); virtual;
 
     property TargetRequest: TsmxTargetRequest read FTargetRequest;
     property XMLDoc: IXMLDocument read FXMLDocIntf;
     property XMLText: String read GetXMLText write SetXMLText;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer); reintroduce; //virtual;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); reintroduce; //virtual;
     destructor Destroy; override;
     procedure Clear; virtual;
-    procedure Finalize; virtual;
-    procedure Initialize; virtual;
+    procedure Finalize; //virtual;
+    procedure Initialize; //virtual;
 
     //property Call: TsmxFuncCallBack read FCall;
     //property CfgName: String read GetCfgName;
     property Database: IsmxDatabase read FDatabaseIntf; //GetDatabase;
     property CfgID: Integer read FCfgID;
+    property ID: Integer read FID default 0;
   end;
 
   TsmxBaseCfgClass = class of TsmxBaseCfg;
@@ -99,7 +102,7 @@ type
     //property CfgClass: TsmxBaseCfgClass read GetCfgClass;
     property CellList: TList read FCellList;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); reintroduce; virtual;
     destructor Destroy; override;
     function FindCellByCfgID(ACfgID: Integer; AmongAll: Boolean = False): TsmxBaseCell;
@@ -109,7 +112,7 @@ type
     property Cells[Index: Integer]: TsmxBaseCell read GetCell;
     property Database: IsmxDatabase read FDatabaseIntf; //GetDatabase;
     property CfgID: Integer read FCfgID;
-    property ID: Integer read FID;
+    property ID: Integer read FID default 0;
     //property ImageList: TImageList read GetImageList;
     //property Item: TObject read GetInternalObject;
     //property OwnerCell: TsmxBaseCell read GetOwnerCell;
@@ -121,38 +124,38 @@ type
 
   { TsmxCellCfg }
 
-  TsmxCellCfg = class(TsmxComponent)
+  TsmxCellCfg = class(TsmxBaseCfg)
   private
     //FCall: TsmxFuncCallBack;
     //FCfgName: String;
-    FDatabaseIntf: IsmxDatabase;
-    FCfgID: Integer;
-    FTargetRequest: TsmxTargetRequest;
-    FXMLDocIntf: IXMLDocument;
+    //FDatabaseIntf: IsmxDatabase;
+    //FCfgID: Integer;
+    //FTargetRequest: TsmxTargetRequest;
+    //FXMLDocIntf: IXMLDocument;
     //function GetCfgName: String;
     //function GetDatabase: IsmxDatabase;
-    function GetXMLText: String;
-    procedure SetXMLText(Value: String);
+    //function GetXMLText: String;
+    //procedure SetXMLText(Value: String);
   protected
-    procedure LoadCell; virtual;
-    procedure ReadCell; virtual;
-    procedure SaveCell; virtual;
-    procedure WriteCell; virtual;
+    procedure LoadCell; override;
+    //procedure ReadCell; virtual;
+    procedure SaveCell; override;
+    //procedure WriteCell; virtual;
 
-    property TargetRequest: TsmxTargetRequest read FTargetRequest;
-    property XMLDoc: IXMLDocument read FXMLDocIntf;
-    property XMLText: String read GetXMLText write SetXMLText;
+    //property TargetRequest: TsmxTargetRequest read FTargetRequest;
+    //property XMLDoc: IXMLDocument read FXMLDocIntf;
+    //property XMLText: String read GetXMLText write SetXMLText;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer); reintroduce; //virtual;
-    destructor Destroy; override;
-    procedure Clear; virtual;
-    procedure Finalize; virtual;
-    procedure Initialize; virtual;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); reintroduce; //virtual;
+    //destructor Destroy; override;
+    //procedure Clear; virtual;
+    //procedure Finalize; virtual;
+    //procedure Initialize; virtual;
 
     //property Call: TsmxFuncCallBack read FCall;
     //property CfgName: String read GetCfgName;
-    property Database: IsmxDatabase read FDatabaseIntf; //GetDatabase;
-    property CfgID: Integer read FCfgID;
+    //property Database: IsmxDatabase read FDatabaseIntf; //GetDatabase;
+    //property CfgID: Integer read FCfgID;
   end;
 
   { TsmxTypeCfg }
@@ -171,6 +174,8 @@ type
     procedure SaveCell; override;
     procedure WriteCell; override;
   public
+    procedure Clear; override;
+
     property CfgClass: TsmxBaseCfgClass read FCfgClass;
     property CfgClassName: String read FCfgClassName write SetCfgClassName;
     property CellClass: TsmxBaseCellClass read FCellClass;
@@ -672,7 +677,7 @@ type
   //EsmxParamsError = class(Exception);
 
   TsmxParams = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxParam;
     //procedure SetItem(Index: Integer; Value: TsmxRequestParam);
     function GetValue(Name: String): Variant;
@@ -863,61 +868,170 @@ type
 
   { TsmxStateUnit }
 
+  TsmxStateUnits = class;
+
   TsmxStateUnit = class(TsmxHKitItem)
   private
     FCfgID: Integer;
+    FIntfID: Integer;
     FUnitEnable: Boolean;
     FUnitVisible: Boolean;
-  protected
+    function GetHKit: TsmxStateUnits;
     function GetItem(Index: Integer): TsmxStateUnit;
     function GetParent: TsmxStateUnit;
+    procedure SetUnitEnable(Value: Boolean);
+    procedure SetUnitVisible(Value: Boolean);
+    procedure ChangeIntfID;
   public
     constructor Create(AHKit: TsmxHKit); override;
     function Add: TsmxStateUnit;
     function FindByCfgID(ACfgID: Integer; AmongAll: Boolean = False): TsmxStateUnit;
 
     property CfgID: Integer read FCfgID write FCfgID;
+    property HKit: TsmxStateUnits read GetHKit;
+    property IntfID: Integer read FIntfID write FIntfID;
     property Items[Index: Integer]: TsmxStateUnit read GetItem; default;
     property Parent: TsmxStateUnit read GetParent;
-    property UnitEnable: Boolean read FUnitEnable write FUnitEnable;
-    property UnitVisible: Boolean read FUnitVisible write FUnitVisible;
+    property UnitEnable: Boolean read FUnitEnable write SetUnitEnable; //FUnitEnable;
+    property UnitVisible: Boolean read FUnitVisible write SetUnitVisible; //FUnitVisible;
   end;
 
   { TsmxStateUnits }
 
   TsmxStateUnits = class(TsmxHKit)
-  protected
+  private
+    FIntfID: Integer;
+    //FIsChangeIntfID: Boolean;
     function GetRoot: TsmxStateUnit;
   public
     property Root: TsmxStateUnit read GetRoot;
+    property IntfID: Integer read FIntfID write FIntfID default 0;
+    //property IsChangeIntfID: Boolean read FIsChangeIntfID write FIsChangeIntfID default False;
   end;
 
-  { TsmxIntfCfg }
+  { TsmxCellState }
 
-  TsmxIntfCfg = class(TsmxBaseCfg)
+  TsmxCellState = class(TsmxKitItem)
   private
+    FID: Integer;
+    FStateUnits: TsmxStateUnits;
+  public
+    constructor Create(AKit: TsmxKit); override;
+    destructor Destroy; override;
 
+    property ID: Integer read FID write FID;
+    property StateUnits: TsmxStateUnits read FStateUnits;
+  end;
+
+  { TsmxCellStates }
+
+  TsmxCellStates = class(TsmxKit)
+  private
+    function GetItem(Index: Integer): TsmxCellState;
+  public
+    function Add: TsmxCellState;
+    function FindByID(AID: Integer): TsmxCellState;
+
+    property Items[Index: Integer]: TsmxCellState read GetItem {write SetItem}; default;
+  end;
+
+  { TsmxIntfItem }
+
+  {TsmxIntfItem = class(TsmxKitItem)
+  private
+    FID: Integer;
+    FCellStates: TsmxCellStates;
+  public
+    constructor Create(AKit: TsmxKit); override;
+    destructor Destroy; override;
+
+    property ID: Integer read FID write FID;
+    property CellStates: TsmxCellStates read FCellStates;
+  end;}
+
+  { TsmxIntfItems }
+
+  {TsmxIntfItems = class(TsmxKit)
+  protected
+    function GetItem(Index: Integer): TsmxIntfItem;
+  public
+    function Add: TsmxIntfItem;
+    function FindByID(AID: Integer): TsmxIntfItem;
+
+    property Items[Index: Integer]: TsmxIntfItem read GetItem; default; //write SetItem
+  end;}
+  
+  { TsmxXMLDocItem }
+
+  TsmxXMLDocItem = class(TsmxKitItem)
+  private
+    FID: Integer;
+    FXMLDocIntf: IXMLDocument;
+  public
+    constructor Create(AKit: TsmxKit); override;
+    destructor Destroy; override;
+
+    property ID: Integer read FID write FID;
+    property XMLDoc: IXMLDocument read FXMLDocIntf; //write FXMLDocIntf;
+  end;
+
+  { TsmxXMLDocItems }
+
+  TsmxXMLDocItems = class(TsmxKit)
+  protected
+    function GetItem(Index: Integer): TsmxXMLDocItem;
+  public
+    function Add: TsmxXMLDocItem;
+    function FindByID(AID: Integer): TsmxXMLDocItem;
+
+    property Items[Index: Integer]: TsmxXMLDocItem read GetItem; default;
+  end;
+
+  { TsmxStateCfg }
+
+  TsmxStateCfg = class(TsmxBaseCfg)
+  private
+    FXMLDocList: TsmxXMLDocItems;
+    //FCellStatesList: TsmxIntfItems;
+    //FDataSetIntf: IsmxDataSet;
+    FCellStates: TsmxCellStates;
+    function GetXMLDocList: TsmxXMLDocItems;
+    //function GetXMLDocText(ID: Integer): String;
+    //procedure SetXMLDocText(ID: Integer; Value: String);
+    //function GetCellStatesList: TsmxIntfItems;
+    function GetCellStates: TsmxCellStates;
   protected
     procedure LoadCell; override;
     procedure ReadCell; override;
     procedure SaveCell; override;
     procedure WriteCell; override;
-  public
+    function GetXMLText: String; override;
+    procedure SetXMLText(Value: String); override;
 
+    property XMLDocList: TsmxXMLDocItems read GetXMLDocList;
+    //property XMLDocText[ID: Integer]: String read GetXMLDocText write SetXMLDocText;
+    //property CellStatesList: TsmxIntfItems read GetCellStatesList;
+  public
+    destructor Destroy; override;
+    procedure Clear; override;
+
+    property CellStates: TsmxCellStates read GetCellStates;
   end;
 
 implementation
 
 uses
-  DB, Variants, XMLDoc, StrUtils, smxGlobalStorage, smxFuncs, smxConsts;
+  DB, Variants, XMLDoc, smxFuncs, smxConsts;
 
 { TsmxBaseCfg }
 
-constructor TsmxBaseCfg.Create(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer);
+constructor TsmxBaseCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner);
-  FDatabaseIntf := ADB;
+  FDatabaseIntf := ADatabase;
   FCfgID := ACfgID;
+  FID := AID;
   //FCall := ACall;
   FTargetRequest := TsmxTargetRequest.Create(Self);
   FTargetRequest.Database := FDatabaseIntf; //Database;
@@ -956,7 +1070,7 @@ end;}
 
 function TsmxBaseCfg.GetXMLText: String;
 begin
-  Result := String(UTF8Decode(FormatXMLData(WideString(FXMLDocIntf.XML.Text))));
+  Result := FormatXMLText(FXMLDocIntf.XML.Text);
 end;
 
 procedure TsmxBaseCfg.Finalize;
@@ -1004,22 +1118,12 @@ begin
 end;
 
 procedure TsmxBaseCfg.SetXMLText(Value: String);
-var i: Integer; sl: TStrings;
 begin
   try
-    sl := TStringList.Create;
-    try
-      sl.Text := Value;
-      for i := 0 to sl.Count - 1 do
-        sl[i] := Trim(sl[i]);
-      FXMLDocIntf.XML.Text :=
-        String(UTF8Encode(WideString(AnsiReplaceStr(sl.Text, sLineBreak, ''))));
-      FXMLDocIntf.Active := True;
-      Clear;
-      ReadCell;
-    finally
-      sl.Free;
-    end;
+    FXMLDocIntf.XML.Text := UnFormatXMLText(Value);
+    FXMLDocIntf.Active := True;
+    Clear;
+    ReadCell;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
   end;
@@ -1031,11 +1135,11 @@ end;
 
 { TsmxBaseCell }
 
-constructor TsmxBaseCell.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxBaseCell.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner);
-  FDatabaseIntf := ADB;
+  FDatabaseIntf := ADatabase;
   FCfgID := ACfgID;
   FID := AID;
   //FCall := ACall;
@@ -1267,7 +1371,8 @@ end;
 
 { TsmxCellCfg }
 
-{constructor TsmxCellCfg.Create(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxCellCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner);
   FDatabaseIntf := ADB;
@@ -1279,17 +1384,17 @@ begin
   Initialize;
 end;}
 
-destructor TsmxCellCfg.Destroy;
+{destructor TsmxCellCfg.Destroy;
 begin
   FTargetRequest.Free;
   FDatabaseIntf := nil;
   FXMLDocIntf := nil;
   inherited Destroy;
-end;
+end;}
 
-procedure TsmxCellCfg.Clear;
+{procedure TsmxCellCfg.Clear;
 begin
-end;
+end;}
 
 {function TsmxCellCfg.GetCfgName: String;
 begin
@@ -1308,12 +1413,12 @@ begin
   Result := FDatabaseIntf;
 end;}
 
-function TsmxCellCfg.GetXMLText: String;
+{function TsmxCellCfg.GetXMLText: String;
 begin
-  Result := String(UTF8Decode(FormatXMLData(WideString(FXMLDocIntf.XML.Text))));
-end;
+  Result := FormatXMLText(FXMLDocIntf.XML.Text);
+end;}
 
-procedure TsmxCellCfg.Finalize;
+{procedure TsmxCellCfg.Finalize;
 begin
   try
     WriteCell;
@@ -1321,9 +1426,9 @@ begin
   except
     raise EsmxCfgError.CreateRes(@SCfgFinalizeError);
   end;
-end;
+end;}
 
-procedure TsmxCellCfg.Initialize;
+{procedure TsmxCellCfg.Initialize;
 begin
   try
     Clear;
@@ -1332,7 +1437,7 @@ begin
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
   end;
-end;
+end;}
 
 procedure TsmxCellCfg.LoadCell;
 begin
@@ -1346,9 +1451,9 @@ begin
   end;
 end;
 
-procedure TsmxCellCfg.ReadCell;
+{procedure TsmxCellCfg.ReadCell;
 begin
-end;
+end;}
 
 procedure TsmxCellCfg.SaveCell;
 begin
@@ -1357,33 +1462,29 @@ begin
   FTargetRequest.DoExecute('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
 end;
 
-procedure TsmxCellCfg.SetXMLText(Value: String);
-var i: Integer; sl: TStrings;
+{procedure TsmxCellCfg.SetXMLText(Value: String);
 begin
   try
-    sl := TStringList.Create;
-    try
-      sl.Text := Value;
-      for i := 0 to sl.Count - 1 do
-        sl[i] := Trim(sl[i]);
-      FXMLDocIntf.XML.Text :=
-        String(UTF8Encode(WideString(AnsiReplaceStr(sl.Text, sLineBreak, ''))));
-      FXMLDocIntf.Active := True;
-      Clear;
-      ReadCell;
-    finally
-      sl.Free;
-    end;
+    FXMLDocIntf.XML.Text := UnFormatXMLText(Value);
+    FXMLDocIntf.Active := True;
+    Clear;
+    ReadCell;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
   end;
-end;
+end;}
 
-procedure TsmxCellCfg.WriteCell;
+{procedure TsmxCellCfg.WriteCell;
 begin
-end;
+end;]
 
 { TsmxTypeCfg }
+
+procedure TsmxTypeCfg.Clear;
+begin
+  CellClassName := '';
+  CfgClassName := '';
+end;
 
 procedure TsmxTypeCfg.LoadCell;
 begin
@@ -1428,7 +1529,9 @@ begin
   if FCfgClassName <> Value then
   begin
     FCfgClassName := Value;
-    FCfgClass := TsmxBaseCfgClass(FindClass(FCfgClassName));
+    if FCfgClassName = '' then
+      FCfgClass := nil else
+      FCfgClass := TsmxBaseCfgClass(FindClass(FCfgClassName));
   end;
 end;
 
@@ -1437,7 +1540,9 @@ begin
   if FCellClassName <> Value then
   begin
     FCellClassName := Value;
-    FCellClass := TsmxBaseCellClass(FindClass(FCellClassName));
+    if FCellClassName = '' then
+      FCellClass := nil else
+      FCellClass := TsmxBaseCellClass(FindClass(FCellClassName));
   end;
 end;
 
@@ -3116,13 +3221,29 @@ constructor TsmxStateUnit.Create(AHKit: TsmxHKit);
 begin
   inherited Create(AHKit);
   FCfgID := 0;
-  FUnitEnable := True;
-  FUnitVisible := True;
+  FIntfID := 0;
+  FUnitEnable := False;
+  FUnitVisible := False;
 end;
 
 function TsmxStateUnit.Add: TsmxStateUnit;
 begin
   Result := TsmxStateUnit(inherited Add);
+end;
+
+procedure TsmxStateUnit.ChangeIntfID;
+var u: TsmxStateUnit; ID: Integer;
+begin
+  ID := HKit.IntfID;
+  if FIntfID <> ID then
+  begin
+    u := Self;
+    while u.HasParent do
+    begin
+      u.IntfID := ID;
+      u := u.Parent;
+    end;
+  end;
 end;
 
 function TsmxStateUnit.FindByCfgID(ACfgID: Integer; AmongAll: Boolean = False): TsmxStateUnit;
@@ -3153,6 +3274,11 @@ begin
   end;
 end;
 
+function TsmxStateUnit.GetHKit: TsmxStateUnits;
+begin
+  Result := TsmxStateUnits(inherited HKit);
+end;
+
 function TsmxStateUnit.GetItem(Index: Integer): TsmxStateUnit;
 begin
   Result := TsmxStateUnit(inherited Items[Index]);
@@ -3163,6 +3289,18 @@ begin
   Result := TsmxStateUnit(inherited Parent);
 end;
 
+procedure TsmxStateUnit.SetUnitEnable(Value: Boolean);
+begin
+  FUnitEnable := Value;
+  ChangeIntfID;
+end;
+
+procedure TsmxStateUnit.SetUnitVisible(Value: Boolean);
+begin
+  FUnitVisible := Value;
+  ChangeIntfID;
+end;
+
 { TsmxStateUnits }
 
 function TsmxStateUnits.GetRoot: TsmxStateUnit;
@@ -3170,57 +3308,453 @@ begin
   Result := TsmxStateUnit(inherited Root);
 end;
 
-{ TsmxIntfCfg }
+{ TsmxCellState }
 
-procedure TsmxIntfCfg.LoadCell;
+constructor TsmxCellState.Create(AKit: TsmxKit);
 begin
-  FTargetRequest['IntfID'] := VarToStr(GlobalStorage['@IntfID']);
+  inherited Create(AKit);
+  FID := 0;
+  FStateUnits := TsmxStateUnits.Create(TsmxStateUnit);
+end;
+
+destructor TsmxCellState.Destroy;
+begin
+  FStateUnits.Free;
+  inherited Destroy;
+end;
+
+{ TsmxCellStates }
+
+function TsmxCellStates.Add: TsmxCellState;
+begin
+  Result := TsmxCellState(inherited Add);
+end;
+
+function TsmxCellStates.FindByID(AID: Integer): TsmxCellState;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if Items[i].ID = AID then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxCellStates.GetItem(Index: Integer): TsmxCellState;
+begin
+  Result := TsmxCellState(inherited Items[Index]);
+end;
+
+{ TsmxIntfItem }
+
+{constructor TsmxIntfItem.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  FID := 0;
+  FCellStates := TsmxCellStates.Create(TsmxCellState);
+end;
+
+destructor TsmxIntfItem.Destroy;
+begin
+  FCellStates.Free;
+  inherited Destroy;
+end;}
+
+{ TsmxIntfItems }
+
+{function TsmxIntfItems.Add: TsmxIntfItem;
+begin
+  Result := TsmxIntfItem(inherited Add);
+end;
+
+function TsmxIntfItems.FindByID(AID: Integer): TsmxIntfItem;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if Items[i].ID = AID then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxIntfItems.GetItem(Index: Integer): TsmxIntfItem;
+begin
+  Result := TsmxIntfItem(inherited Items[Index]);
+end;}
+
+{ TsmxXMLDocItem }
+
+constructor TsmxXMLDocItem.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  FID := 0;
+  FXMLDocIntf := NewXMLDocument; //nil;
+end;
+
+destructor TsmxXMLDocItem.Destroy;
+begin
+  FXMLDocIntf := nil;
+  inherited Destroy;
+end;
+
+{ TsmxXMLDocItems }
+
+function TsmxXMLDocItems.Add: TsmxXMLDocItem;
+begin
+  Result := TsmxXMLDocItem(inherited Add);
+end;
+
+function TsmxXMLDocItems.FindByID(AID: Integer): TsmxXMLDocItem;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if Items[i].ID = AID then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxXMLDocItems.GetItem(Index: Integer): TsmxXMLDocItem;
+begin
+  Result := TsmxXMLDocItem(inherited Items[Index]);
+end;
+
+{ TsmxStateCfg }
+
+destructor TsmxStateCfg.Destroy;
+begin
+  if Assigned(FXMLDocList) then
+    FXMLDocList.Free;
+  if Assigned(FCellStates) then
+    FCellStates.Free;
+  //FDataSetIntf := nil;
+  inherited Destroy;
+end;
+
+procedure TsmxStateCfg.Clear;
+begin
+  CellStates.Clear;
+end;
+
+function TsmxStateCfg.GetXMLDocList: TsmxXMLDocItems;
+begin
+  if not Assigned(FXMLDocList) then
+    FXMLDocList := TsmxXMLDocItems.Create(TsmxXMLDocItem);
+  Result := FXMLDocList;
+end;
+
+{function TsmxStateCfg.GetCellStatesList: TsmxIntfItems;
+begin
+  if not Assigned(FCellStatesList) then
+    FCellStatesList := TsmxIntfItems.Create(TsmxIntfItem);
+  Result := FCellStatesList;
+end;}
+
+function TsmxStateCfg.GetCellStates: TsmxCellStates;
+begin
+  if not Assigned(FCellStates) then
+    FCellStates := TsmxCellStates.Create(TsmxCellState);
+  Result := FCellStates;
+end;
+
+function TsmxStateCfg.GetXMLText: String;
+var XMLDocItem: TsmxXMLDocItem;
+begin
+  XMLDocItem := XMLDocList.FindByID(ID);
+  if Assigned(XMLDocItem) then
+    Result := FormatXMLText(XMLDocItem.XMLDoc.XML.Text) else
+    Result := '';
+end;
+
+procedure TsmxStateCfg.SetXMLText(Value: String);
+var XMLDocItem: TsmxXMLDocItem;
+begin
+  XMLDocItem := XMLDocList.FindByID(ID);
+  if not Assigned(XMLDocItem) then
+  begin
+    XMLDocItem := XMLDocList.Add;
+    XMLDocItem.ID := ID;
+  end;
+  try
+    XMLDocItem.XMLDoc.XML.Text := UnFormatXMLText(Value);
+    XMLDocItem.XMLDoc.Active := True;
+    Clear;
+    ReadCell;
+  except
+    raise EsmxCfgError.CreateRes(@SCfgInitializeError);
+  end;
+end;
+
+{function TsmxStateCfg.GetXMLDocText(ID: Integer): String;
+var d: TsmxXMLDocItem;
+begin
+  d := XMLDocList.FindByID(ID);
+  if Assigned(d) then
+    Result := String(UTF8Decode(FormatXMLData(WideString(d.XMLDoc.XML.Text)))) else
+    raise EsmxCfgError.CreateRes(@SCfgInitializeError);
+end;}
+
+{procedure TsmxStateCfg.SetXMLDocText(ID: Integer; Value: String);
+var d: TsmxXMLDocItem; i: Integer; sl: TStrings;
+begin
+  d := XMLDocList.FindByID(ID);
+  if Assigned(d) then
+  begin
+    try
+      sl := TStringList.Create;
+      try
+        sl.Text := Value;
+        for i := 0 to sl.Count - 1 do
+          sl[i] := Trim(sl[i]);
+        d.XMLDoc.XML.Text :=
+          String(UTF8Encode(WideString(AnsiReplaceStr(sl.Text, sLineBreak, ''))));
+        d.XMLDoc.Active := True;
+        Clear;
+        ReadCell;
+      finally
+        sl.Free;
+      end;
+    except
+      raise EsmxCfgError.CreateRes(@SCfgInitializeError);
+    end;
+  end else
+  begin
+    raise EsmxCfgError.CreateRes(@SCfgInitializeError);
+  end;
+end;}
+
+procedure TsmxStateCfg.LoadCell;
+var IntfID: Integer; XMLText: String; //XMLDocIntf: IXMLDocument;
+begin
+  {FTargetRequest['IntfID'] := 0;
   FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['IntfConfBlob'] :=
-    FTargetRequest.DoRequest('select ic.IntfConfBlob from tIntfsConfs ic ' +
-      'where ic.IntfID = :IntfID and ic.ConfID = :ConfID');
+    FTargetRequest.DoRequest('select IntfConfBlob from tIntfsConfs ' +
+      'where IntfID = :IntfID and ConfID = :ConfID');
   if FTargetRequest['IntfConfBlob'] <> '' then
   begin
     FXMLDocIntf.XML.Text := FTargetRequest['IntfConfBlob'];
     FXMLDocIntf.Active := True;
-  end;
-end;
+  end;}
 
-procedure TsmxIntfCfg.ReadCell;
-var r, n: IXMLNode;
-begin
-  {r := FXMLDocIntf.ChildNodes.FindNode('root');
-  if not Assigned(r) then
-    Exit;
-
-  n := r.ChildNodes.FindNode('cell');
-  if Assigned(n) then
+  XMLDocList.Clear;
+  FTargetRequest['IntfID'] := IntToStr(FID);
+  FTargetRequest['ConfID'] := IntToStr(FCfgID);
+  with FTargetRequest.ForRequest('select ic.IntfID, ic.IntfConfBlob ' +
+    'from f_ParentInterfaces(:IntfID) pis ' +
+    'join tIntfsConfs ic on ic.IntfID = pis.ID and ic.ConfID = :ConfID ' +
+    'order by pis.HLevel desc', dstQuery, True) do
   begin
-    CfgClassName := n.Attributes['cfgclassname'];
-    CellClassName := n.Attributes['cellclassname'];
+    First;
+    while not Eof do
+    begin
+      IntfID := FieldByName('IntfID').Value;
+      XMLText := VarToStr(FieldByName('IntfConfBlob').Value);
+      //if XMLText <> '' then
+      //begin
+        //XMLDocIntf := NewXMLDocument;
+        //if XMLText <> '' then
+          //XMLDocIntf.XML.Text := XMLText;
+        //XMLDocIntf.Active := True;
+        with XMLDocList.Add do
+        begin
+          ID := IntfID;
+          //XMLDoc := XMLDocIntf;
+          if XMLText <> '' then
+            XMLDoc.XML.Text := XMLText;
+          XMLDoc.Active := True;  
+        end;
+      //end;
+      Next;
+    end;
+  end;
+
+  {XMLDocItem := XMLDocList.FindByID(0); //ID
+  if Assigned(XMLDocItem) then
+  begin
+    FXMLDocIntf.XML.Text := XMLDocItem.XMLDoc.XML.Text;
+    FXMLDocIntf.Active := True;
   end;}
 end;
 
-procedure TsmxIntfCfg.SaveCell;
-begin
-  FTargetRequest['IntfID'] := VarToStr(GlobalStorage['@IntfID']);
-  FTargetRequest['ConfID'] := IntToStr(FCfgID);
-  FTargetRequest['IntfConfBlob'] := FXMLDocIntf.XML.Text;
-  FTargetRequest.DoExecute('update tIntfsConfs ic set ic.IntfConfBlob = :IntfConfBlob ' +
-    'where ic.IntfID = :IntfID and ic.ConfID = :ConfID');
-end;
+procedure TsmxStateCfg.ReadCell;
 
-procedure TsmxIntfCfg.WriteCell;
-var r, n: IXMLNode;
+  procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxStateUnit; AIntfID: Integer);
+  var i: Integer; u: TsmxStateUnit;
+  begin
+    //u := AUnit.Add;
+    u := AUnit.FindByCfgID(ANode.Attributes['id']);
+    if not Assigned(u) then
+      u := AUnit.Add;
+    with u do
+    begin
+      FIntfID := AIntfID; //XMLDocList[k].ID; //HKit.IntfID;
+      FCfgID := ANode.Attributes['id'];
+      FUnitEnable := ANode.Attributes['enable'];
+      FUnitVisible := ANode.Attributes['visible'];
+    end;
+    for i := 0 to ANode.ChildNodes.Count - 1 do
+      if ANode.ChildNodes[i].NodeName = 'cell' then
+        AddUnits(ANode.ChildNodes[i], u, AIntfID);
+  end;
+
+var r, n, n2: IXMLNode; i, j, k: Integer; s: TsmxCellState;
 begin
+  for k := 0 to XMLDocList.Count - 1 do
+  begin
+    r := XMLDocList[k].XMLDoc.ChildNodes.FindNode('root');
+    if Assigned(r) then
+    begin
+      n := r.ChildNodes.FindNode('states');
+      if Assigned(n) and (n.ChildNodes.Count > 0) then
+      begin
+        for i := 0 to n.ChildNodes.Count - 1 do
+          if n.ChildNodes[i].NodeName = 'state' then
+          begin
+            s := CellStates.FindByID(n.ChildNodes[i].Attributes['id']);
+            if not Assigned(s) then
+            begin
+              s := CellStates.Add;
+              s.StateUnits.IntfID := FID;
+            end;
+            //with CellStates.Add do
+            with s do
+            begin
+              //StateUnits.IntfID := 0; //ID
+              //StateUnits.IsChangeIntfID := False;
+              ID := n.ChildNodes[i].Attributes['id'];
+              n2 := n.ChildNodes[i].ChildNodes.FindNode('cells');
+              if Assigned(n2) and (n2.ChildNodes.Count > 0) then
+                for j := 0 to n2.ChildNodes.Count - 1 do
+                  if n2.ChildNodes[j].NodeName = 'cell' then
+                    AddUnits(n2.ChildNodes[j], StateUnits.Root, XMLDocList[k].ID);
+              //StateUnits.IsChangeIntfID := True;
+            end;
+          end;
+      end;
+    end;
+  end;
+
   {r := FXMLDocIntf.ChildNodes.FindNode('root');
   if Assigned(r) then
-    r.ChildNodes.Clear else
-    r := FXMLDocIntf.AddChild('root');
+  begin
+    n := r.ChildNodes.FindNode('states');
+    if Assigned(n) and (n.ChildNodes.Count > 0) then
+    begin
+      for i := 0 to n.ChildNodes.Count - 1 do
+        if n.ChildNodes[i].NodeName = 'state' then
+          with CellStates.Add do
+          begin
+            StateUnits.IntfID := XMLDocList[k].ID;
+            StateUnits.IsChangeIntfID := False;
+            ID := n.ChildNodes[i].Attributes['id'];
+            n2 := n.ChildNodes[i].ChildNodes.FindNode('cells');
+            if Assigned(n2) and (n2.ChildNodes.Count > 0) then
+              for j := 0 to n2.ChildNodes.Count - 1 do
+                if n2.ChildNodes[j].NodeName = 'cell' then
+                  AddUnits(n2.ChildNodes[j], StateUnits.Root);
+            StateUnits.IsChangeIntfID := True;
+          end;
+    end;
+  end;}
+end;
 
-  n := r.AddChild('cell');
-  n.Attributes['cfgclassname'] := CfgClassName;
-  n.Attributes['cellclassname'] := CellClassName;}
+procedure TsmxStateCfg.SaveCell;
+var XMLDocItem: TsmxXMLDocItem; IntfConfID: Integer;
+begin
+  XMLDocItem := XMLDocList.FindByID(FID);
+  if Assigned(XMLDocItem) then
+  begin
+    FTargetRequest['IntfID'] := IntToStr(FID);
+    FTargetRequest['ConfID'] := IntToStr(FCfgID);
+    FTargetRequest['IntfConfBlob'] := XMLDocItem.XMLDoc.XML.Text; //FXMLDocIntf.XML.Text;
+    IntfConfID := StrToIntDef(FTargetRequest.DoRequest('select IntfConfID from tIntfsConfs ' +
+      'where IntfID = :IntfID and ConfID = :ConfID'), 0);
+    if IntfConfID = 0 then
+      FTargetRequest.DoExecute('insert into tIntfsConfs (IntfID, ConfID, IntfConfBlob) ' +
+        'values (:IntfID, :ConfID, :IntfConfBlob)') else
+      FTargetRequest.DoExecute('update tIntfsConfs ic set ic.IntfConfBlob = :IntfConfBlob ' +
+        'where ic.IntfID = :IntfID and ic.ConfID = :ConfID');
+  end;
+  //FTargetRequest.DoExecute('insert into tIntfsConfs (IntfID, ConfID, IntfConfBlob) ' +
+    //'values (:IntfID, :ConfID, :IntfConfBlob)') else
+  //FTargetRequest.DoExecute('update tIntfsConfs ic set ic.IntfConfBlob = :IntfConfBlob ' +
+    //'where ic.IntfConfID = :IntfConfID');
+end;
+
+procedure TsmxStateCfg.WriteCell;
+
+  procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxStateUnit);
+  var i: Integer; n: IXMLNode;
+  begin
+    if AUnit.IntfID = FID then
+    begin
+      n := ANode.AddChild('cell');
+      with n do
+      begin
+        Attributes['id'] := AUnit.CfgID;
+        Attributes['enable'] := AUnit.UnitEnable;
+        Attributes['visible'] := AUnit.UnitVisible;
+      end;
+    end;
+    for i := 0 to AUnit.Count - 1 do
+      AddNodes(n, AUnit[i]);
+  end;
+
+var r, n, n2, n3: IXMLNode; i, j: Integer; XMLDocItem: TsmxXMLDocItem;
+begin
+  {XMLDocList.Clear;
+  for k := 0 to CellStatesList.Count - 1 do
+  begin
+    XMLDocIntf := NewXMLDocument;
+    r := XMLDocIntf.AddChild('root');
+
+    n := r.AddChild('states');
+    for i := 0 to CellStatesList[k].CellStates.Count - 1 do
+    begin
+      n2 := n.AddChild('state');
+      n2.Attributes['id'] := CellStatesList[k].CellStates[i].ID;
+      n3 := n2.AddChild('cells');
+      for j := 0 to CellStatesList[k].CellStates[i].StateUnits.Root.Count - 1 do
+        AddNodes(n3, CellStatesList[k].CellStates[i].StateUnits.Root[j]);
+    end;
+
+    with XMLDocList.Add do
+    begin
+      ID := CellStatesList[k].ID;
+      XMLDoc := XMLDocIntf;
+    end;
+  end;}
+
+  XMLDocItem := XMLDocList.FindByID(FID);
+  if not Assigned(XMLDocItem) then
+  begin
+    XMLDocItem := XMLDocList.Add;
+    XMLDocItem.ID := FID;
+  end;
+
+  //r := FXMLDocIntf.ChildNodes.FindNode('root');
+  r := XMLDocItem.XMLDoc.ChildNodes.FindNode('root');
+  if Assigned(r) then
+    r.ChildNodes.Clear else
+    //r := FXMLDocIntf.AddChild('root');
+    r := XMLDocItem.XMLDoc.AddChild('root');
+
+  n := r.AddChild('states');
+  for i := 0 to CellStates.Count - 1 do
+  begin
+    n2 := n.AddChild('state');
+    n2.Attributes['id'] := CellStates[i].ID;
+    n3 := n2.AddChild('cells');
+    for j := 0 to CellStates[i].StateUnits.Root.Count - 1 do
+      AddNodes(n3, CellStates[i].StateUnits.Root[j]);
+  end;
 end;
 
 end.

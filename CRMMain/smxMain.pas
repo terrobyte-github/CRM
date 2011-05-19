@@ -4,7 +4,7 @@ interface
 
 procedure Initialize;
 function CreateMainForm: Boolean;
-procedure SaveProgVers;
+//procedure SaveProgVers;
 
 implementation
 
@@ -16,12 +16,23 @@ uses
 var
   MainForm: TForm = nil;
 
-procedure Initialize;
+procedure SaveProgVers;
+var VersM, VersL: Cardinal;
 begin
-  LoadImage;
+  GetFileFullVersion(PChar(Application.ExeName), VersM, VersL);
+  GlobalStorage['ProgVersMajor'] := LongRec(VersM).Hi;
+  GlobalStorage['ProgVersMinor'] := LongRec(VersM).Lo;
+  GlobalStorage['ProgVersRelease'] := LongRec(VersL).Hi;
+  GlobalStorage['ProgVersBuild'] := LongRec(VersL).Lo;
+  GlobalStorage['ProgVers'] :=
+    IntToStr(LongRec(VersM).Hi) + '.' +
+    IntToStr(LongRec(VersM).Lo) + '.' +
+    IntToStr(LongRec(VersL).Hi) + '.' +
+    IntToStr(LongRec(VersL).Lo);
+end;
 
-  SaveProgVers;
-
+procedure AssignCallBackParams;
+begin
   CallBack[0] := Integer(Application.Handle);
   CallBack[1] := Integer(Database);
   CallBack[2] := Integer(GlobalStorage);
@@ -33,6 +44,13 @@ begin
   CallBack[111] := Integer(@smxFuncs.IsCell);
   //CallBack[121] := Integer(@smxGlblParams.FuncGlobalValue);
   //CallBack[151] := Integer(@smxFuncs.Inf);
+end;
+
+procedure Initialize;
+begin
+  LoadImage;
+  SaveProgVers;
+  AssignCallBackParams;
 end;
 
 function CreateMainForm: Boolean;
@@ -55,21 +73,6 @@ begin
     raise EsmxCellError.CreateRes(@SCellBuildError);
     Result := False;
   end;
-end;
-
-procedure SaveProgVers;
-var VersM, VersL: Cardinal;
-begin
-  GetFileFullVersion(PChar(Application.ExeName), VersM, VersL);
-  GlobalStorage['ProgVersMajor'] := LongRec(VersM).Hi;
-  GlobalStorage['ProgVersMinor'] := LongRec(VersM).Lo;
-  GlobalStorage['ProgVersRelease'] := LongRec(VersL).Hi;
-  GlobalStorage['ProgVersBuild'] := LongRec(VersL).Lo;
-  GlobalStorage['ProgVers'] :=
-    IntToStr(LongRec(VersM).Hi) + '.' +
-    IntToStr(LongRec(VersM).Lo) + '.' +
-    IntToStr(LongRec(VersL).Hi) + '.' +
-    IntToStr(LongRec(VersL).Lo);
 end;
 
 end.

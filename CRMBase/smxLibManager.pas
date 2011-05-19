@@ -24,7 +24,7 @@ type
   { TsmxLibItems }
 
   TsmxLibItems = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxLibItem;
     //procedure SetItem(Index: Integer; Value: TsmxRequestParam);
   public

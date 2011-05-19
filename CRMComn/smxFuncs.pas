@@ -28,11 +28,13 @@ function VarStringToVar(V: Variant): Variant;
 function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
 function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
+function FormatXMLText(AText: String): String;
+function UnFormatXMLText(AText: String): String;
 
 implementation
 
 uses
-  Forms, Controls, Menus, SysUtils, Variants, smxFormManager;
+  Forms, Controls, Menus, SysUtils, StrUtils, Variants, XMLDoc, smxFormManager;
 
 function GetCurrentForm: TsmxCustomForm;
 var h: HWND; f: TsmxBaseCell;
@@ -285,6 +287,26 @@ begin
       if Assigned(AForm.PageManager.ActivePage) then
         if Assigned(AForm.PageManager.ActivePage.Grid) then
           Result := AForm.PageManager.ActivePage.Grid.Request;
+end;
+
+function FormatXMLText(AText: String): String;
+begin
+  Result := String(UTF8Decode(FormatXMLData(WideString(AText))));
+end;
+
+function UnFormatXMLText(AText: String): String;
+var i: Integer; sl: TStrings;
+begin
+  Result := '';
+  sl := TStringList.Create;
+  try
+    sl.Text := AText;
+    for i := 0 to sl.Count - 1 do
+      sl[i] := Trim(sl[i]);
+    Result := String(UTF8Encode(WideString(AnsiReplaceStr(sl.Text, sLineBreak, ''))));
+  finally
+    sl.Free;
+  end;
 end;
 
 end.

@@ -28,7 +28,7 @@ type
   { TsmxFormItems }
 
   TsmxFormItems = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxFormItem;
     //procedure SetItem(Index: Integer; Value: TsmxRequestParam);
   public
@@ -50,7 +50,7 @@ type
     function GetForm(Index: Integer): TsmxBaseCell;
     function GetFormCount: Integer;
     //function GetHandle(Handle: HWND): TsmxBaseCell;
-    procedure DestroyForms;
+    procedure FreeForms;
   protected
     property FormList: TsmxFormItems read FFormList;
   public
@@ -177,12 +177,12 @@ end;
 
 destructor TsmxFormManager.Destroy;
 begin
-  DestroyForms;
+  FreeForms;
   //FFormList.Free;
   FFormList.Free;
 end;
 
-procedure TsmxFormManager.DestroyForms;
+procedure TsmxFormManager.FreeForms;
 var i: Integer;
 begin
   {for i := FFormList.Count - 1 downto 0 do

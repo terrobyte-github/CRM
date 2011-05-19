@@ -114,7 +114,7 @@ type
   { TsmxVisibleUnits }
 
   TsmxVisibleUnits = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxVisibleUnit;
     //procedure SetItem(Index: Integer; Value: TsmxVisibleUnit);
   public
@@ -177,7 +177,7 @@ type
   { TsmxLocationParams }
 
   TsmxLocationParams = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxLocationParam;
     //procedure SetItem(Index: Integer; Value: TsmxLocationParam);
   public
@@ -207,7 +207,7 @@ type
   { TsmxRequestFields }
 
   TsmxRequestFields = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxRequestField;
     //procedure SetItem(Index: Integer; Value: TsmxRequestField);
   public
@@ -329,7 +329,7 @@ type
 
   { TsmxFormState }
 
-  TsmxFormState = class(TsmxKitItem)
+  {TsmxFormState = class(TsmxKitItem)
   private
     FID: Integer;
     FStateUnits: TsmxStateUnits;
@@ -339,19 +339,19 @@ type
 
     property ID: Integer read FID write FID;
     property StateUnits: TsmxStateUnits read FStateUnits;
-  end;
+  end;}
 
   { TsmxFormStates }
 
-  TsmxFormStates = class(TsmxKit)
+  {TsmxFormStates = class(TsmxKit)
   protected
     function GetItem(Index: Integer): TsmxFormState;
   public
     function Add: TsmxFormState;
     function FindByID(AID: Integer): TsmxFormState;
 
-    property Items[Index: Integer]: TsmxFormState read GetItem {write SetItem}; default;
-  end;
+    property Items[Index: Integer]: TsmxFormState read GetItem; default;
+  end;}
 
   { TsmxFormCfg }
 
@@ -367,16 +367,16 @@ type
     FFormCaption: String;
     FFormImageIndex: Integer;
     FFormPositionSize: TsmxPositionSize;
-    FFormStates: TsmxFormStates;
+    //FFormStates: TsmxFormStates;
     FMainMenu: TsmxControlCellSetting;
     FPageManager: TsmxControlCellSetting;
     FStateRequest: TsmxRequestSetting;
-    function GetFormStates: TsmxFormStates;
+    //function GetFormStates: TsmxFormStates;
   protected
     procedure ReadCell; override;
     procedure WriteCell; override;
   public
-    destructor Destroy; override;
+    //destructor Destroy; override;
     procedure Clear; override;
     //procedure Initialize; override;
 
@@ -385,7 +385,7 @@ type
     property FormCaption: String read FFormCaption write FFormCaption;
     property FormImageIndex: Integer read FFormImageIndex write FFormImageIndex;
     property FormPositionSize: TsmxPositionSize read FFormPositionSize write FFormPositionSize;
-    property FormStates: TsmxFormStates read GetFormStates;
+    //property FormStates: TsmxFormStates read GetFormStates;
     property MainMenu: TsmxControlCellSetting read FMainMenu write FMainMenu;
     property PageManager: TsmxControlCellSetting read FPageManager write FPageManager;
     property StateRequest: TsmxRequestSetting read FStateRequest write FStateRequest;
@@ -516,7 +516,6 @@ type
     FUnitTop: Integer;
     FUnitVisible: Boolean;
     FUnitWidth: Integer;
-  protected
     function GetItem(Index: Integer): TsmxHVisibleUnit;
     function GetParent: TsmxHVisibleUnit;
   public
@@ -539,7 +538,7 @@ type
   { TsmxHVisibleUnits }
 
   TsmxHVisibleUnits = class(TsmxHKit)
-  protected
+  private
     function GetRoot: TsmxHVisibleUnit;
   public
     property Root: TsmxHVisibleUnit read GetRoot;
@@ -651,7 +650,7 @@ type
   { TsmxAlgorithmItems }
 
   TsmxAlgorithmItems = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxAlgorithmItem;
   public
     function Add: TsmxAlgorithmItem;
@@ -1747,7 +1746,7 @@ end;}
 
 { TsmxFormState }
 
-constructor TsmxFormState.Create(AKit: TsmxKit);
+{constructor TsmxFormState.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FID := 0;
@@ -1758,11 +1757,11 @@ destructor TsmxFormState.Destroy;
 begin
   FStateUnits.Free;
   inherited Destroy;
-end;
+end;}
 
 { TsmxFormStates }
 
-function TsmxFormStates.Add: TsmxFormState;
+{function TsmxFormStates.Add: TsmxFormState;
 begin
   Result := TsmxFormState(inherited Add);
 end;
@@ -1782,16 +1781,16 @@ end;
 function TsmxFormStates.GetItem(Index: Integer): TsmxFormState;
 begin
   Result := TsmxFormState(inherited Items[Index]);
-end;
+end;}
 
 { TsmxFormCfg }
 
-destructor TsmxFormCfg.Destroy;
+{destructor TsmxFormCfg.Destroy;
 begin
   if Assigned(FFormStates) then
     FFormStates.Free;
   inherited Destroy;
-end;
+end;}
 
 procedure TsmxFormCfg.Clear;
 begin
@@ -1852,15 +1851,15 @@ begin
       Width := 0;
     end;
   end;
-  FormStates.Clear;
+  //FormStates.Clear;
 end;
 
-function TsmxFormCfg.GetFormStates: TsmxFormStates;
+{function TsmxFormCfg.GetFormStates: TsmxFormStates;
 begin
   if not Assigned(FFormStates) then
     FFormStates := TsmxFormStates.Create(TsmxFormState);
   Result := FFormStates;
-end;
+end;}
 
 {procedure TsmxFormCfg.Initialize;
 begin
@@ -1998,7 +1997,7 @@ begin
       Mode := n.Attributes['mode'];
     end;
 
-  n := r.ChildNodes.FindNode('states');
+  {n := r.ChildNodes.FindNode('states');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
     for i := 0 to n.ChildNodes.Count - 1 do
@@ -2012,7 +2011,7 @@ begin
               if n2.ChildNodes[j].NodeName = 'cell' then
                 AddUnits(n2.ChildNodes[j], StateUnits.Root);
         end;
-  end;
+  end;}
 end;
 
 procedure TsmxFormCfg.WriteCell;
@@ -2112,7 +2111,7 @@ begin
     n.Attributes['mode'] := Mode;
   end;
 
-  n := r.AddChild('states');
+  {n := r.AddChild('states');
   for i := 0 to FormStates.Count - 1 do
   begin
     n2 := n.AddChild('state');
@@ -2120,7 +2119,7 @@ begin
     n3 := n2.AddChild('cells');
     for j := 0 to FormStates[i].StateUnits.Root.Count - 1 do
       AddNodes(n3, FormStates[i].StateUnits.Root[j]);
-  end;
+  end;}
 end;
 
 { TsmxFilterCfg }

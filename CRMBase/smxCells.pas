@@ -33,7 +33,7 @@ type
     //property DataSet: IsmxDataSet read FDataSetIntf;
     //property ParamList: TStrings read GetParamList;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     function FindFieldSense(AFieldSense: TsmxFieldSense; StartPos: Integer = 0): IsmxField;
@@ -70,7 +70,7 @@ type
     //property DataSet: IsmxDataSet read FDataSetIntf;
     //property TargetRequest: TsmxTargetRequest read FTargetRequest;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     procedure Perform(Same: Boolean = False); override;
@@ -95,7 +95,7 @@ type
 
     property Cfg: TsmxColumnCfg read GetCfg;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
 
     //property FilterName: String read FFilterName;
@@ -132,7 +132,7 @@ type
 
     property Column: TColumn read FColumn;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -160,7 +160,7 @@ type
     property Cfg: TsmxGridCfg read GetCfg;
     property ColumnList: TList read FColumnList;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //procedure Apply; override;
     //procedure ApplyGrid; virtual;
@@ -216,7 +216,7 @@ type
     //property Grid: TDBGrid read FGrid;
     property Grid: TsmxWheelDBGrid read FGrid;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     //procedure ApplyGrid; override;
@@ -261,7 +261,7 @@ type
     property Cfg: TsmxFilterCfg read GetCfg;
     //property Request: TsmxCustomRequest read FRequest;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
 
@@ -307,7 +307,7 @@ type
     property Header: TLabel read FHeader;
     property Panel: TPanel read FPanel;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -342,7 +342,7 @@ type
     property FilterList: TList read FFilterList;
     property PrepareRequest: TsmxCustomRequest read FPrepareRequest;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     procedure Apply; override;
     //procedure ApplyFilterPanel; virtual;
@@ -388,7 +388,7 @@ type
 
     property Panel: TPanel read FPanel;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     //procedure ApplyFilterPanel; override;
@@ -419,7 +419,7 @@ type
 
     property Cfg: TsmxPageCfg read GetCfg;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     procedure Apply; override;
@@ -462,7 +462,7 @@ type
 
     property Page: TTabSheet read FPage;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -492,7 +492,7 @@ type
     property Cfg: TsmxPageManagerCfg read GetCfg;
     property PageList: TList read FPageList;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     procedure Apply; override;
@@ -535,7 +535,7 @@ type
 
     property PageControl: TPageControl read FPageControl;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -616,7 +616,7 @@ type
     property LibProc: TsmxProcAlgExecute read FLibProc; //TsmxProcLibAlgExecute read FLibProc;
     //property LibFunc: TsmxFuncAlgExecute read FLibFunc; //TsmxProcLibAlgExecute read FLibProc;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     procedure Execute(Same: Boolean = False); override;
@@ -652,7 +652,7 @@ type
 
     property Action: TAction read FAction;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -681,7 +681,7 @@ type
     property Cfg: TsmxAlgorithmListCfg read GetCfg;
     property AlgorithmList: TList read FAlgorithmList;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     //function AlgorithmButton(ACfgID: Integer): Boolean;
@@ -711,7 +711,7 @@ type
 
     property ActionList: TActionList read FActionList;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
@@ -737,7 +737,7 @@ type
     property Cfg: TsmxMenuItemCfg read GetCfg;
     property MenuItemList: TList read FMenuItemList;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
 
@@ -761,7 +761,7 @@ type
 
     property Cfg: TsmxMenuItemCfg read GetCfg;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     procedure AddAlgorithm(Algorithm: TsmxAlgorithm); virtual;
     procedure DelAlgorithm(Algorithm: TsmxAlgorithm); virtual;
@@ -788,7 +788,7 @@ type
 
     property MenuItem: TMenuItem read FMenuItem;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     procedure AddAlgorithm(Algorithm: TsmxAlgorithm); override;
@@ -846,7 +846,7 @@ type
     property MenuItemList: TList read FMenuItemList;
     //property MenuUnitMenuItems: TsmxMenuUnitMenuItems read FMenuUnitMenuItems;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //procedure AddLibAlg(Alg: TsmxCustomLibAlgorithm); virtual;
     //function FindMenuItem(const AMenuItemName: String): TsmxCustomMenuItem;
@@ -882,7 +882,7 @@ type
 
     property MainMenu: TMainMenu read FMainMenu;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     //procedure AddLibAlg(Alg: TsmxCustomLibAlgorithm); override;
@@ -928,7 +928,7 @@ type
 
     property ToolBar: TToolBar read FToolBar;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     procedure AddAlgorithm(Algorithm: TsmxAlgorithm); override;
@@ -990,7 +990,7 @@ type
     property ControlBar: TControlBar read FControlBar;
     //property ToolBarList: TList read FToolBarList write FToolBarList;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     //procedure AddAlgorithm(Algorithm: TsmxAlgorithm); override;
@@ -1014,7 +1014,9 @@ type
     FParentForm: TsmxCustomForm;
     FStateID: Integer;
     FStateRequest: TsmxCustomRequest;
+    FStateCfg: TsmxStateCfg;
     function GetCfg: TsmxFormCfg;
+    //function GetStateCfg: TsmxStateCfg;
     //function GetIsCreateMenuItem: Boolean;
     //function GetFormManager: TsmxFormManager;
     //function GetOwnerForm: TsmxCustomForm;
@@ -1047,11 +1049,12 @@ type
 
     property Cfg: TsmxFormCfg read GetCfg;
     //property ParamList: TStrings read GetParamList;
+    property StateCfg: TsmxStateCfg read FStateCfg; //GetStateCfg;
     property StateRequest: TsmxCustomRequest read FStateRequest;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
-      //ACfgID: Integer; AID: Integer = 0); override;
-    //destructor Destroy; override;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
+    destructor Destroy; override;
     procedure Apply; override;
     procedure CloseForm; virtual;
     procedure Prepare(Forcibly: Boolean = False); override;
@@ -1110,7 +1113,7 @@ type
 
     property Form: TForm read FForm;
   public
-    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     procedure CloseForm; override;
@@ -1157,7 +1160,7 @@ type
     procedure UnInitialize; override;
     //procedure UnInstallParent; override;
   public
-    //constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
     //destructor Destroy; override;
     procedure CloseForm; override;
@@ -1229,10 +1232,10 @@ type
 
 { TsmxCustomRequest }
 
-{constructor TsmxCustomRequest.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomRequest.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FDataSetIntf := Database.GetNewDataSet(Cfg.DataSetType);
   FDataSetIntf.SQL.Text := Cfg.SQLText;}
   {if AOwner is TsmxCustomPage then
@@ -1535,10 +1538,10 @@ end;}
 
 { TsmxRequest }
 
-constructor TsmxRequest.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxRequest.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   if Assigned(Database) then
     FDataSetIntf := Database.NewDataSet(Cfg.DataSetType) else
     raise EsmxCellError.CreateRes(@SCellBuildError);
@@ -1989,10 +1992,10 @@ end;}
 
 { TsmxDBColumn }
 
-constructor TsmxDBColumn.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxDBColumn.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FColumn := TColumn.Create(nil);
   FColumn.FieldName := Cfg.ColumnFieldName;
   FColumn.Alignment := Cfg.ColumnText.Align;
@@ -2136,10 +2139,10 @@ end;
 
 { TsmxCustomGrid }
 
-{constructor TsmxCustomGrid.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomGrid.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   if AOwner is TsmxCustomPage then
     FPage := TsmxCustomPage(AOwner);
 end;}
@@ -2280,10 +2283,10 @@ end;
 
 { TsmxDBGrid }
 
-constructor TsmxDBGrid.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxDBGrid.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FDataSource := TDataSource.Create(Self);
   FGrid := TsmxWheelDBGrid.Create(Self); //TDBGrid.Create(Self);
   FGrid.DataSource := FDataSource;
@@ -2546,10 +2549,10 @@ end;}
 
 { TsmxCustomFilter }
 
-{constructor TsmxCustomFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FFilterName := Cfg.FilterName;
 end;}
 
@@ -2714,10 +2717,10 @@ end;
 
 { TsmxPanelFilter }
 
-constructor TsmxPanelFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxPanelFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FPanel := TPanel.Create(Self);
   FPanel.Height := 49;
   FPanel.BevelOuter := bvNone;
@@ -2894,10 +2897,10 @@ end;}
 
 { TsmxCustomFilterPanel }
 
-{constructor TsmxCustomFilterPanel.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomFilterPanel.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   if AOwner is TsmxCustomPage then
     FPage := TsmxCustomPage(AOwner);
 end;}
@@ -3169,10 +3172,10 @@ end;
 
 { TsmxFilterPanel }
 
-constructor TsmxFilterPanel.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxFilterPanel.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FPanel := TPanel.Create(Self);
   FPanel.BevelOuter := bvNone;
   InstallParent;
@@ -3361,10 +3364,10 @@ end;}
 
 { TsmxCustomPage }
 
-{constructor TsmxCustomPage.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomPage.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   if AOwner is TsmxCustomPageManager then
     FPageManager := TsmxCustomPageManager(AOwner);
 end;}
@@ -3496,10 +3499,10 @@ end;
 
 { TsmxTabSheet }
 
-constructor TsmxTabSheet.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxTabSheet.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FPage := TTabSheet.Create(Self);
   FPage.Caption := Cfg.PageCaption;
   FPage.ImageIndex := TImageIndex(Cfg.PageImageIndex);
@@ -3652,10 +3655,10 @@ end;}
 
 { TsmxCustomPageManager }
 
-{constructor TsmxCustomPageManager.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomPageManager.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   if AOwner is TsmxCustomForm then
     FForm := TsmxCustomForm(AOwner);
 end;}
@@ -3774,10 +3777,10 @@ end;
 
 { TsmxPageControl }
 
-constructor TsmxPageControl.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxPageControl.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FPageControl := TPageControl.Create(Self);
   FPageControl.Images := ImageList;
   InstallParent;
@@ -4005,10 +4008,10 @@ end;}
 
 { TsmxCustomLibAlgorithm }
 
-{constructor TsmxCustomLibAlgorithm.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomLibAlgorithm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   LoadLib;
 end;}
 
@@ -4439,10 +4442,10 @@ end;
 
 { TsmxLibAlgorithm }
 
-constructor TsmxLibAlgorithm.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxLibAlgorithm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FAction := TAction.Create(Self);
   FAction.Caption := Cfg.AlgCaption;
   FAction.Hint := Cfg.AlgCaption;
@@ -4736,10 +4739,10 @@ end;
 
 { TsmxAlgorithmList }
 
-constructor TsmxActionList.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxActionList.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FActionList := TActionList.Create(Self);
   FActionList.Images := ImageList;
   InstallParent;
@@ -4849,10 +4852,10 @@ end;}
 
 { TsmxCustomMenuItem }
 
-{constructor TsmxCustomMenuItem.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FMenuItemList := TList.Create;
   FMenuItemName := Cfg.ItemName;
 end;
@@ -4920,10 +4923,10 @@ begin
     Value.FMenuItemList.Add(Self);
 end;}
 
-{constructor TsmxCustomMenuItem.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxCustomMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FMenuItemName := Cfg.ItemName;
 end;}
 
@@ -4963,10 +4966,10 @@ end;}
 
 { TsmxMenuItem }
 
-constructor TsmxMenuItem.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FMenuItem := TMenuItem.Create(Self);
   FMenuItem.Caption := Cfg.ItemCaption;
   FMenuItem.ImageIndex := TImageIndex(Cfg.ItemImageIndex);
@@ -5322,10 +5325,10 @@ end;
 
 { TsmxMainMenu }
 
-constructor TsmxMainMenu.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxMainMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FMainMenu := TMainMenu.Create(Self);
   FMainMenu.Images := ImageList;
   //AddItems;
@@ -5515,10 +5518,10 @@ end;
 
 { TsmxToolBar }
 
-constructor TsmxToolBar.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxToolBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FToolBar := TToolBar.Create(Self);
   FToolBar.AutoSize := True;
   FToolBar.EdgeBorders := FToolBar.EdgeBorders - [ebTop];
@@ -5776,10 +5779,10 @@ end;
 
 { TsmxControlBar }
 
-constructor TsmxControlBar.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxControlBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FControlBar := TControlBar.Create(Self);
   FControlBar.AutoSize := True;
   FControlBar.BevelInner := bvNone;
@@ -5994,23 +5997,20 @@ end;
 
 { TsmxCustomForm }
 
-{constructor TsmxCustomForm.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxCustomForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
-  FPageManager := TsmxCustomPageManager(IDToItemClass(Cfg.PageManager.ID).Create(Self, Cfg.PageManager.ID, Call));
-  SetSizePosChilds;
-end;}
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
+  FStateCfg := TsmxStateCfg.Create(Self, Database, CfgID, GlobalStorage['@IntfID']);
+  //PutState;
+end;
 
-{destructor TsmxCustomForm.Destroy;
+destructor TsmxCustomForm.Destroy;
 begin
-  //FPageList.Free;
-  //FForm.Free;
-  //FPageManager.Free;
-  if Assigned(FParamList) then
-    FParamList.Free;
+  //if Assigned(FStateCfg) then
+    FStateCfg.Free;
   inherited Destroy;
-end;}
+end;
 
 procedure TsmxCustomForm.AddAlgorithms;
 var i: Integer; mi: TsmxCustomMenuItem; tb: TsmxCustomToolBar;
@@ -6195,6 +6195,13 @@ function TsmxCustomForm.GetCfg: TsmxFormCfg;
 begin
   Result := TsmxFormCfg(inherited Cfg);
 end;
+
+{function TsmxCustomForm.GetStateCfg: TsmxStateCfg;
+begin
+  if not Assigned(FStateCfg) then
+    FStateCfg := TsmxStateCfg.Create(Self, Database, CfgID, GlobalStorage['@IntfID']);
+  Result := FStateCfg;
+end;}
 
 {function TsmxCustomForm.GetCompID: String;
 begin
@@ -6383,7 +6390,7 @@ begin
     ARequest.RequestParams[p.ParamName] := IntToStr(ID);
 end;}
 
-procedure TsmxCustomForm.PutState;
+{procedure TsmxCustomForm.PutState;
 
   procedure PutCell(AUnit: TsmxStateUnit; ACell: TsmxBaseCell);
   var i: Integer; c: TsmxBaseCell;
@@ -6415,6 +6422,40 @@ begin
   if Assigned(fs) then
     for i := 0 to fs.StateUnits.Root.Count - 1 do
       PutCell(fs.StateUnits.Root[i], Self);
+end;}
+
+procedure TsmxCustomForm.PutState;
+
+  procedure PutCell(AUnit: TsmxStateUnit; ACell: TsmxBaseCell);
+  var i: Integer; c: TsmxBaseCell;
+  begin
+    c := ACell.FindCellByCfgID(AUnit.CfgID);
+    if Assigned(c) then
+    begin
+      if c is TsmxAlgorithm then
+        with TsmxAlgorithm(c) do
+        begin
+          CellEnable := AUnit.UnitEnable;
+          CellVisible := AUnit.UnitVisible;
+        end
+      else
+      if c is TsmxControlCell then
+        with TsmxControlCell(c) do
+        begin
+          CellEnable := AUnit.UnitEnable;
+          CellVisible := AUnit.UnitVisible;
+        end;
+      for i := 0 to AUnit.Count - 1 do
+        PutCell(AUnit[i], c);
+    end;
+  end;
+
+var i: Integer; cs: TsmxCellState;
+begin
+  cs := StateCfg.CellStates.FindByID(FStateID);
+  if Assigned(cs) then
+    for i := 0 to cs.StateUnits.Root.Count - 1 do
+      PutCell(cs.StateUnits.Root[i], Self);
 end;
 
 procedure TsmxCustomForm.SetFormModalResult(Value: TModalResult);
@@ -6460,10 +6501,10 @@ end;
 
 { TsmxStandardForm }
 
-constructor TsmxStandardForm.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+constructor TsmxStandardForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   FForm := TForm.Create(Self);
   FForm.Left := Cfg.FormPositionSize.Left;
   FForm.Top := Cfg.FormPositionSize.Top;
@@ -6476,6 +6517,7 @@ begin
   Initialize;
   InstallParent;
   AddAlgorithms;
+  PutState;
   //AddAlgorithmsToMenu;
   //AddAlgorithmsToBar;
 end;
@@ -6831,10 +6873,10 @@ end;
 
 { TsmxMainForm }
 
-{constructor TsmxMainForm.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+{constructor TsmxMainForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ADB, ACfgID, AID);
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
   //FForm := TForm.Create(Self);
   //FForm.Left := Cfg.FormPositionSize.Left;
   //FForm.Top := Cfg.FormPositionSize.Top;
@@ -6968,6 +7010,7 @@ begin
   end;
   InstallParent;
   AddAlgorithms;
+  PutState;
   //AddAlgorithmsToMenu;
   //AddAlgorithmsToBar;
 end;

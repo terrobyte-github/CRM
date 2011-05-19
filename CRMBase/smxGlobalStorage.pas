@@ -24,7 +24,7 @@ type
   { TsmxGlobalParams }
 
   TsmxGlobalParams = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxGlobalParam;
   public
     function Add: TsmxGlobalParam;

@@ -22,7 +22,7 @@ type
   { TsmxCallBackParams }
 
   TsmxCallBackParams = class(TsmxKit)
-  protected
+  private
     function GetItem(Index: Integer): TsmxCallBackParam;
   public
     function Add: TsmxCallBackParam;
