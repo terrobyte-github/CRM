@@ -37,4 +37,5 @@ end;
 initialization
   TComObjectFactory.Create(ComServer, TsmxCoADODatabase, CLSID_ADODatabase,
     'ADODatabase', '', ciMultiInstance, tmApartment);
+
 end.

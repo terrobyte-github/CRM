@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{      Database connection classes     }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxDBConnection;
 
 interface
@@ -17,16 +27,12 @@ type
     FLoginPrompt: Boolean;
     FParams: String;
     FGenerationMode: TsmxGenerationMode;
-    //FProgID: String;
     FUser: String;
     FPassword: String;
     FDatabaseIntf: IsmxDatabase;
     function CreateDatabaseAsFunc: IsmxDatabase;
     function CreateDatabaseAsCOM: IsmxDatabase;
   public
-    //constructor Create(AOwner: TComponent; AGeneration: TsmxGenerationMode;
-      //ADBName, ALibName, AFuncNameOrProgID: String); reintroduce; virtual;
-    //constructor CreateAsCOM(AOwner: TComponent; ADBName, ALibName, AProgID: String); virtual;
     destructor Destroy; override;
     procedure Connect;
     procedure Disconnect;
@@ -50,35 +56,8 @@ uses
 
 { TsmxDBConnection }
 
-{constructor TsmxDBConnection.Create(AOwner: TComponent; AGeneration: TsmxGenerationMode;
-  ADBName, ALibName, AFuncNameOrProgID: String);
-begin
-  inherited Create(AOwner);
-  FDatabaseName := ADBName;
-  FLibraryName := ALibName;
-  FFunctionNameOrProgID := AFuncNameOrProgID;
-  case AGeneration of
-    gmFunction: FDatabaseIntf := CreateDatabaseAsFunc;
-    gmCOM: FDatabaseIntf := CreateDatabaseAsCOM;
-  end;
-  FDatabaseIntf.DatabaseName := FDatabaseName;
-  DBManager.InsertDBConnection(Self);
-end;}
-
-{constructor TsmxDBConnection.CreateAsCOM(AOwner: TComponent; ADBName, ALibName, AProgID: String);
-begin
-  inherited Create(AOwner);
-  FDatabaseName := ADBName;
-  FLibraryName := ALibName;
-  FProgID := AProgID;
-  FDatabaseIntf := CreateDatabaseCOM;
-  FDatabaseIntf.DatabaseName := FDatabaseName;
-  DBManager.InsertDBConnection(Self);
-end;}
-
 destructor TsmxDBConnection.Destroy;
 begin
-  //DBManager.RemoveDBConnection(Self);
   Disconnect;
   FDatabaseIntf := nil;
   inherited Destroy;

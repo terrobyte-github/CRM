@@ -17,6 +17,7 @@ resourcestring
   SDBIntfConnectFailed = 'Connection to a database is failed';
 
   { Cfg }
+  SCfgBuildError = 'Configuration build error';
   SCfgFinalizeError = 'Configuration finalize error';
   SCfgInitializeError = 'Configuration initialize error';
 

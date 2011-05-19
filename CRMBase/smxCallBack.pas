@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{          CallBack classes            }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxCallBack;
 
 interface

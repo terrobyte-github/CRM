@@ -1,28 +1,36 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{         Form Manager classes         }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxFormManager;
 
 interface
 
 uses
-  Classes, Windows, smxBaseClasses, smxClasses, smxCellTypes;
+  Classes, Windows, smxBaseClasses, smxClasses, smxClassTypes;
 
 type
   { TsmxFormItem }
 
   TsmxFormItem = class(TsmxKitItem)
   private
-    FForm: TsmxBaseCell;
+    FForm: TsmxCustomForm;
     FFormHandle: HWND;
     FFormCfgID: Integer;
     FFormID: Integer;
-    //FFormComboID: String;
   public
     constructor Create(AKit: TsmxKit); override;
 
-    property Form: TsmxBaseCell read FForm write FForm;
+    property Form: TsmxCustomForm read FForm write FForm;
     property FormHandle: HWND read FFormHandle write FFormHandle;
     property FormCfgID: Integer read FFormCfgID write FFormCfgID;
     property FormID: Integer read FFormID write FFormID;
-    //property FormComboID: String read FFormComboID write FFormComboID;
   end;
 
   { TsmxFormItems }
@@ -30,52 +38,40 @@ type
   TsmxFormItems = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxFormItem;
-    //procedure SetItem(Index: Integer; Value: TsmxRequestParam);
   public
     function Add: TsmxFormItem;
-    function FindByForm(AForm: TsmxBaseCell): TsmxFormItem;
+    function FindByForm(AForm: TsmxCustomForm): TsmxFormItem;
     function FindByHandle(AHandle: HWND): TsmxFormItem;
     function FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxFormItem;
-    //function FindByComboID(AComboID: String): TsmxFormItem;
 
-    property Items[Index: Integer]: TsmxFormItem read GetItem {write SetItem}; default;
+    property Items[Index: Integer]: TsmxFormItem read GetItem; default;
   end;
 
   { TsmxFormManager }
 
   TsmxFormManager = class(TsmxComponent)
   private
-    //FFormList: TList;
     FFormList: TsmxFormItems;
-    function GetForm(Index: Integer): TsmxBaseCell;
+    function GetForm(Index: Integer): TsmxCustomForm;
     function GetFormCount: Integer;
-    //function GetHandle(Handle: HWND): TsmxBaseCell;
-    procedure FreeForms;
+    procedure DestroyForms;
   protected
     property FormList: TsmxFormItems read FFormList;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
-    //function FindByComboID(AComboID: String): TsmxBaseCell;
-    function FindByHandle(AHandle: HWND): TsmxBaseCell;
-    //function HandleOfForm(AForm: TsmxBaseCell): HWND;
-    procedure InsertForm(AForm: TsmxBaseCell);
-    procedure RemoveForm(AForm: TsmxBaseCell);
+    function FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
+    function FindByHandle(AHandle: HWND): TsmxCustomForm;
+    procedure InsertForm(AForm: TsmxCustomForm);
+    procedure RemoveForm(AForm: TsmxCustomForm);
 
     property FormCount: Integer read GetFormCount;
-    property Forms[Index: Integer]: TsmxBaseCell read GetForm; default;
-    //property FormList: TsmxFormItems read FFormList;
-    //property Handles[Handle: HWND]: TsmxBaseCell read GetHandle;
+    property Forms[Index: Integer]: TsmxCustomForm read GetForm; default;
   end;
 
 function FormManager: TsmxFormManager;
-function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
-function FindFormByHandle(AHandle: HWND): TsmxBaseCell;
-
-{const
-  FuncFindFormByID: TsmxFuncFindFormByID = nil;
-  FuncFindFormByHandle: TsmxFuncFindFormByHandle = nil;}
+function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
+function FindFormByHandle(AHandle: HWND): TsmxCustomForm;
 
 implementation
 
@@ -96,12 +92,12 @@ begin
   Result := _FormManager;
 end;
 
-function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
+function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
 begin
   Result := _FormManager.FindByComboID(ACfgID, AID);
 end;
 
-function FindFormByHandle(AHandle: HWND): TsmxBaseCell;
+function FindFormByHandle(AHandle: HWND): TsmxCustomForm;
 begin
   Result := _FormManager.FindByHandle(AHandle);
 end;
@@ -115,7 +111,6 @@ begin
   FFormHandle := 0;
   FFormCfgID := 0;
   FFormID := 0;
-  //FFormComboID := '';
 end;
 
 { TsmxFormItems }
@@ -125,7 +120,7 @@ begin
   Result := TsmxFormItem(inherited Add);
 end;
 
-function TsmxFormItems.FindByForm(AForm: TsmxBaseCell): TsmxFormItem;
+function TsmxFormItems.FindByForm(AForm: TsmxCustomForm): TsmxFormItem;
 var i: Integer;
 begin
   Result := nil;
@@ -161,27 +156,10 @@ begin
     end;
 end;
 
-{function TsmxFormItems.FindByComboID(AComboID: String): TsmxFormItem;
-var i: Integer;
-begin
-  Result := nil;
-  for i := 0 to Count - 1 do
-    if AnsiCompareText(Items[i].FormComboID, AComboID) = 0 then
-    begin
-      Result := Items[i];
-      Break;
-    end;
-end;}
-
 function TsmxFormItems.GetItem(Index: Integer): TsmxFormItem;
 begin
   Result := TsmxFormItem(inherited Items[Index]);
 end;
-
-{procedure TsmxFormItems.SetItem(Index: Integer; Value: TsmxFormItem);
-begin
-  inherited Items[Index] := Value;
-end;}
 
 { TsmxFormManager }
 
@@ -193,48 +171,29 @@ end;
 
 destructor TsmxFormManager.Destroy;
 begin
-  FreeForms;
+  DestroyForms;
   FFormList.Free;
   inherited Destroy;
 end;
 
-procedure TsmxFormManager.FreeForms;
+procedure TsmxFormManager.DestroyForms;
 var i: Integer;
 begin
-  {for i := FFormList.Count - 1 downto 0 do
-  begin
-    TsmxBaseCell(FFormList[i]).Free;
-    //FFormList.Delete(i);
-  end;}
   for i := FFormList.Count - 1 downto 0 do
     FFormList[i].Form.Free;
 end;
 
-function TsmxFormManager.FindByHandle(AHandle: HWND): TsmxBaseCell;
-var f: TsmxFormItem; //i: Integer; c: TObject; h: HWND;
+function TsmxFormManager.FindByHandle(AHandle: HWND): TsmxCustomForm;
+var f: TsmxFormItem;
 begin
   Result := nil;
   f := FormList.FindByHandle(AHandle);
   if Assigned(f) then
     Result := f.Form;
-
-  {for i := 0 to FormCount - 1 do
-  begin
-    h := 0;
-    c := FormList[i].GetInternalObject;
-    if Assigned(c) then
-      if c is TWinControl then
-        h := TWinControl(c).Handle;
-    if AHandle = h then
-    begin
-      Result := FormList[i];
-      Break;
-    end;
-  end;}
 end;
 
-function TsmxFormManager.FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
-var f: TsmxFormItem; 
+function TsmxFormManager.FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
+var f: TsmxFormItem;
 begin
   Result := nil;
   f := FormList.FindByComboID(ACfgID, AID);
@@ -242,64 +201,19 @@ begin
     Result := f.Form;
 end;
 
-{function TsmxFormManager.FindByComboID(AComboID: String): TsmxBaseCell;
-var f: TsmxFormItem;
-begin
-  Result := nil;
-  f := FormList.FindByComboID(AComboID);
-  if Assigned(f) then
-    Result := f.Form;
-end;}
-
 function TsmxFormManager.GetFormCount: Integer;
 begin
   Result := FFormList.Count;
 end;
 
-function TsmxFormManager.GetForm(Index: Integer): TsmxBaseCell;
+function TsmxFormManager.GetForm(Index: Integer): TsmxCustomForm;
 begin
   Result := FFormList[Index].Form;
 end;
 
-{function TsmxFormManager.GetHandle(Handle: HWND): TsmxBaseCell;
-var i: Integer; c: TObject; h: HWND;
+procedure TsmxFormManager.InsertForm(AForm: TsmxCustomForm);
+var f: TsmxFormItem; c: TObject;
 begin
-  Result := nil;
-  for i := 0 to FormCount - 1 do
-  begin
-    h := 0;
-    c := FormList[i].GetInternalObject;
-    if Assigned(c) then
-      if c is TWinControl then
-        h := TWinControl(c).Handle;
-    if Handle = h then
-    begin
-      Result := FormList[i];
-      Break;
-    end;
-  end;
-end;}
-
-{function TsmxFormManager.HandleOfForm(AForm: TsmxBaseCell): HWND;
-var i: Integer; c: TObject;
-begin
-  Result := 0;
-  i := FFormList.IndexOf(AForm);
-  if i >= 0 then
-  begin
-    c := FormList[i].GetInternalObject;
-    if Assigned(c) then
-      if c is TWinControl then
-        Result := TWinControl(c).Handle;
-  end;
-end;}
-
-procedure TsmxFormManager.InsertForm(AForm: TsmxBaseCell);
-var f: TsmxFormItem; c: TObject; //i: Integer;
-begin
-  {i := FFormList.IndexOf(AForm);
-  if i = -1 then
-    FFormList.Add(AForm);}
   f := FormList.FindByForm(AForm);
   if not Assigned(f) then
     with FormList.Add do
@@ -310,14 +224,12 @@ begin
         FormHandle := TWinControl(c).Handle;
       FormCfgID := AForm.CfgID;
       FormID := AForm.ID;
-      //FormComboID := IntToStr(AForm.CfgID) + '.' + IntToStr(AForm.ID);
     end;
 end;
 
-procedure TsmxFormManager.RemoveForm(AForm: TsmxBaseCell);
+procedure TsmxFormManager.RemoveForm(AForm: TsmxCustomForm);
 var f: TsmxFormItem;
 begin
-  //FFormList.Remove(AForm);
   f := FormList.FindByForm(AForm);
   if Assigned(f) then
     FormList.Remove(f);
@@ -325,12 +237,8 @@ end;
 
 initialization
   _FormManager := TsmxFormManager.Create(nil);
-  //FuncFindFormByID := _FormManager.FindByComboID;
-  //FuncFindFormByHandle := _FormManager.FindByHandle;
 
 finalization
-  //FuncFindFormByHandle := nil;
-  //FuncFindFormByID := nil;
   _FormManager.Free;
 
 end.

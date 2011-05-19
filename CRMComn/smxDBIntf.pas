@@ -149,6 +149,7 @@ type
     function GetEof: Boolean;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
+    function GetIsDataSet: Boolean;
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
     function GetPrepare: Boolean;
@@ -183,6 +184,7 @@ type
     property Eof: Boolean read GetEof;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
+    property IsDataSet: Boolean read GetIsDataSet;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;

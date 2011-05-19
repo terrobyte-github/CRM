@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{       Database Manager classes       }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxDBManager;
 
 interface
@@ -42,7 +52,7 @@ type
     FDBConnectionList: TsmxDBItems;
     function GetDBConnection(Index: Integer): TsmxDBConnection;
     function GetDBConnectionCount: Integer;
-    procedure FreeDBConnections;
+    procedure DestroyDBConnections;
   protected
     property DBConnectionList: TsmxDBItems read FDBConnectionList;
   public
@@ -57,6 +67,7 @@ type
   end;
 
 function DBManager: TsmxDBManager;
+function FindDatabaseByName(ADatabaseName: String): IsmxDatabase;
 
 implementation
 
@@ -69,6 +80,15 @@ var
 function DBManager: TsmxDBManager;
 begin
   Result := _DBManager;
+end;
+
+function FindDatabaseByName(ADatabaseName: String): IsmxDatabase;
+var dbc: TsmxDBConnection;
+begin
+  dbc := _DBManager.FindByName(ADatabaseName);
+  if Assigned(dbc) then
+    Result := dbc.Database else
+    Result := nil;
 end;
 
 { TsmxDBItem }
@@ -139,12 +159,12 @@ end;
 
 destructor TsmxDBManager.Destroy;
 begin
-  FreeDBConnections;
+  DestroyDBConnections;
   FDBConnectionList.Free;
   inherited Destroy;
 end;
 
-procedure TsmxDBManager.FreeDBConnections;
+procedure TsmxDBManager.DestroyDBConnections;
 var i: Integer;
 begin
   for i := FDBConnectionList.Count - 1 downto 0 do

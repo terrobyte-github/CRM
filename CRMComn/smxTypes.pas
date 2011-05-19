@@ -6,10 +6,6 @@ uses
   Classes, Controls, Graphics, smxDBIntf;
 
 type
-  //TsmxFuncCallBack = function(Index: Integer): Variant of object;
-
-  //TsmxFuncGlobalValue = function(Name: String): Variant of object;
-
   TsmxCellFont = record
     Color: Integer;
     Name: String;
@@ -24,11 +20,11 @@ type
     Font: TsmxCellFont;
   end;
 
-  TsmxParamLocation = (plInput, plConst, plOutput, plFilterPanel, plGrid,
-    plParentFormFilterPanel, plParentFormGrid, plAlgorithmParams, plCommonParams,
-    plFormID, plKey, plValue, plResult, plMessage{, plID});
+  TsmxParamLocation = (plInput, plConst, plOutput, plFilterDesk, plGrid,
+    plParentFormFilterDesk, plParentFormGrid, plParentParams, plCommonParams,
+    plKey, plValue, plResult, plMessage, plParentCfgID, plFormIntfID, plFormID);
 
-  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage{, fsParam});
+  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage);
 
   TsmxPerformanceMode = (pmOpen, pmExecute);    
 
@@ -64,27 +60,6 @@ type
     HotKey: Integer;
     Visible: Boolean;
   end;
-
-  {TsmxVers = record
-    Major, Minor, Release, Build: Word;
-  end;
-
-  TsmxLibType = (ltAlgorithm, ltCellClass, ltDatabaseIntf);
-
-  TsmxLibTypes = set of TsmxLibType;
-
-  TsmxProcInitLib = procedure(ACall: TsmxFuncCallBack);
-
-  TsmxLibInfo = record
-    FullName: String;
-    Description: String;
-    LibVers: TsmxVers;
-    LibTypes: TsmxLibTypes;
-    CompProgVers: TsmxVers;
-    ProcInitLib: TsmxProcInitLib;
-  end;
-
-  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);}
 
   TsmxFuncCreateDatabase = function: IsmxDatabase;
 

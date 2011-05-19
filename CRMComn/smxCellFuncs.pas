@@ -16,6 +16,8 @@ function PerformRequest(Request: TsmxCustomRequest; Same: Boolean = False): Bool
 var fld: IsmxField; prm: IsmxParam; res: Integer; msg: String;
 begin
   Result := False;
+  if not Assigned(Request.Database) then
+    Exit;
   with Request do
   begin
     if not Database.InTransaction then

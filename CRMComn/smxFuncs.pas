@@ -3,35 +3,36 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, smxClasses, {smxCells,} smxDBIntf;
+  Classes, Windows{, smxClasses,} {smxCells,} {smxDBIntf};
 
 //function GetCurrentForm: TsmxCustomForm;
 //function GetCurrentPage: TsmxCustomPage;
 //function GetCurrentRequest: TsmxCustomRequest;
-function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
-function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
-function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase;
-  ACfgID: Integer): TsmxBaseCfg;
-function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
-  ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
+//function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
+//function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
+//function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase;
+  //ACfgID: Integer): TsmxBaseCfg;
+//function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
+  //ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
 function StreamToStr(Stream: TStream): String;
 function StrToStream(const Str: String): TStream;
 function HotKeyToStr(Key: Integer): String;
 function StrToHotKey(const Str: String): Integer;
 function StrToDateTimeEx(const Str: String): TDateTime;
-function VarToParams(V: Variant): TsmxParams;
-function ParamsToVar(Params: TsmxParams): Variant;
-function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
+//function VarToParams(V: Variant): TsmxParams;
+//function ParamsToVar(Params: TsmxParams): Variant;
+//function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
 function Ask(M: String; uType: Cardinal): Integer; overload;
 function Ask(M: String): Boolean; overload;
 function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 function VarStringToVar(V: Variant): Variant;
-function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
+//function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 //function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
 //function PerformRequest(ARequest: TsmxBaseCell; Same: Boolean = False): Boolean;
 //function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 function FormatXMLText(AText: String): String;
 function UnFormatXMLText(AText: String): String;
+
 
 implementation
 
@@ -72,7 +73,7 @@ begin
       Result := p.Grid.Request;
 end;}
 
-function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
+{function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 var t: TsmxTypeCfg;
 begin
   t := TsmxTypeCfg.Create(nil, ADB, ACfgID);
@@ -106,7 +107,7 @@ function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
 begin
   Result := CfgIDToCellClass(ADB, ACfgID).Create(AOwner, ADB, ACfgID, AID);
-end;
+end;}
 
 function StreamToStr(Stream: TStream): String;
 var Len: Integer;
@@ -154,7 +155,7 @@ begin
     Result := StrToDateDef(Str, StrToDate('30.12.1899'));
 end;
 
-function VarToParams(V: Variant): TsmxParams;
+{function VarToParams(V: Variant): TsmxParams;
 var i: Integer;
 begin
   Result := TsmxParams.Create(TsmxParam);
@@ -197,7 +198,7 @@ begin
   if ACell is CellClass then
     Result := True else
     Result := False;
-end;
+end;}
 
 function Ask(M: String; uType: Cardinal): Integer;
 var s: String;
@@ -228,7 +229,7 @@ begin
     Result := V;
 end;
 
-function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
+{function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 var p: TsmxParam;
 begin
   Result := ADefValue;
@@ -239,7 +240,7 @@ begin
       if not VarIsNull(p.ParamValue) then
         Result := p.ParamValue;
   end;
-end;
+end;}
 
 //function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
 {function PerformRequest(ARequest: TsmxBaseCell; Same: Boolean = False): Boolean;

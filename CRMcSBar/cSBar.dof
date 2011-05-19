@@ -90,10 +90,10 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=..\..\bin
+OutputDir=
 UnitOutputDir=..\..\tmp
-PackageDLLOutputDir=
-PackageDCPOutputDir=
+PackageDLLOutputDir=..\..\bin
+PackageDCPOutputDir=..\..\tmp
 SearchPath=
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP;dxNavBarD7;gridview_run;GridView_dsgn;gridother_run;JvCtrlsD7R;JvCustomD7R
 Conditionals=
@@ -132,7 +132,7 @@ LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
 ProductName=
-ProductVersion=1.0
+ProductVersion=1.0.0.0
 Comments=
 [HistoryLists\hlDebugSourcePath]
 Count=3

@@ -6,6 +6,7 @@ uses
   Classes;
 
 procedure GetFileFullVersion(AFileName: PChar; var AVersMost, AVersLeast: Cardinal);
+//procedure RegistrationClasses(AClasses: array of TPersistentClass);
 
 implementation
 
@@ -32,5 +33,10 @@ begin
     end;
   end;
 end;
+
+{procedure RegistrationClasses(AClasses: array of TPersistentClass);
+begin
+  RegisterClasses(AClasses);
+end;}
 
 end.

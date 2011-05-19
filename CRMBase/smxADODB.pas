@@ -99,6 +99,7 @@ type
     function GetEof: Boolean;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
+    function GetIsDataSet: Boolean;
     function GetParam(Index: Integer): IsmxParam;
     function GetParamCount: Integer;
     function GetPrepare: Boolean;
@@ -147,6 +148,7 @@ type
     property Eof: Boolean read GetEof;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
+    property IsDataSet: Boolean read GetIsDataSet;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;
@@ -613,6 +615,11 @@ end;
 function TsmxADODataSet.GetFieldCount: Integer;
 begin
   Result := FADODataSet.FieldCount;
+end;
+
+function TsmxADODataSet.GetIsDataSet: Boolean;
+begin
+  Result := FADODataSet is TDataSet;
 end;
 
 function TsmxADODataSet.GetParam(Index: Integer): IsmxParam;

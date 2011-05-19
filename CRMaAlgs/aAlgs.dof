@@ -166,3 +166,10 @@ Item2=..\Bin
 Item3=C:\Works\Bin
 Item4=C:\TW4
 Item5=C:\TW
+[HistoryLists\hlBPLOutput]
+Count=1
+Item0=..\..\bin
+[HistoryLists\hlDCPOutput]
+Count=2
+Item0=..\..\dcp
+Item1=..\..\bin

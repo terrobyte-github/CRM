@@ -7,12 +7,14 @@ uses
 
 function ImageList: TImageList;
 //function DataBase: IsmxDatabase;
-//function DBConnection: TsmxDBConnection;
+function DBConnection: TsmxDBConnection;
 function TargetRequest: TsmxTargetRequest;
 //function ConnectDatabase: Boolean;
-function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
+function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
 procedure DisconnectDatabase;
 procedure LoadImage;
+procedure LoadPackages;
+procedure UnLoadPackages;
 
 //function CheckUser: Boolean;
 
@@ -24,9 +26,9 @@ implementation
 {$R ..\Resource\pic.res}
 
 uses
-  Windows, {Forms,} ImgList, {ActiveX,} {IniFiles,} {SysUtils,} {StrUtils,} {ComObj,}
+  Windows, {Forms,} ImgList, {ActiveX,} {IniFiles,} SysUtils, {StrUtils,} {ComObj,}
   smxCommonStorage, {smxLibManager,} {smxDBConnection,} smxCells,
-  smxFuncs, smxTypes, smxConsts, smxDBIntf;
+  smxFuncs, smxClassFuncs, smxTypes, smxConsts, smxDBIntf;
 
 type
   { TsmxDBConnection }
@@ -70,6 +72,7 @@ var
   //_Database: IsmxDatabase = nil;
   _TargetRequest: TsmxTargetRequest = nil;
   _DBConnection: TsmxDBConnection = nil;
+  _PacketHandle: HMODULE = 0;
 
 function ImageList: TImageList;
 begin
@@ -102,6 +105,16 @@ begin
   end;
 end;
 
+procedure LoadPackages;
+begin
+  _PacketHandle := LoadPackage('cSBar.bpl');
+end;
+
+procedure UnLoadPackages;
+begin
+  UnloadPackage(_PacketHandle);
+end;
+
 function CheckIntfUser: Boolean;
 var c: TsmxBaseCell; f: IsmxField; IntfID: Integer; IntfName: String;
 begin
@@ -112,6 +125,7 @@ begin
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
         begin
+          Database := _DBConnection.Database;
           Perform;
           f := FindFieldSense(fsKey);
           if Assigned(f) then
@@ -146,6 +160,7 @@ begin
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
         begin
+          Database := _DBConnection.Database;
           Perform;
           p := FindParamLocation(plKey);
           if Assigned(p) then
@@ -213,12 +228,13 @@ begin
   end;
 end;}
 
-function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
+function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
 var pm: TsmxProjectManager; pr: TsmxProjectItem; //dbc: TsmxDBConnection;
 begin
   Result := False;
   pm := TsmxProjectManager.Create(nil);
   pm.FileName := SFileProjectName;
+  pm.ReadProjects;
   try
     pr := pm.ProjectList.FindByName(AProjectName);
     if Assigned(pr) then
@@ -235,11 +251,18 @@ begin
           DriverName := pr.DriverName;
           LoginPrompt := pr.LoginPrompt;
           Params := pr.Params;
-          User := AUserName;
+          User := ALogin;
           Password := APassword;
           Connect;
           //_Database := Database;
           Result := CheckUser;
+          if Result then
+          begin
+            CommonStorage['CfgDBName'] := pr.DatabaseName;
+            CommonStorage['@CfgDBName'] := pr.DatabaseName;
+            CommonStorage['RequestDBName'] := pr.DatabaseName;
+            CommonStorage['@RequestDBName'] := pr.DatabaseName;
+          end;
         end;
       except
         _DBConnection.Free;

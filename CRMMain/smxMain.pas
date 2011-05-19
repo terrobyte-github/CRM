@@ -9,9 +9,9 @@ function CreateMainForm: Boolean;
 implementation
 
 uses
-  Classes, Windows, Forms, SysUtils, smxCommonStorage, smxCallBack, smxLibManager,
-  smxDBManager, smxFormManager, smxGlobalVariables, smxClasses, smxCells,
-  smxFuncs, smxProcs, smxConsts;
+  Classes, Windows, Forms, SysUtils, smxClasses, smxCommonStorage, smxCallBack,
+  smxLibManager, smxDBManager, smxFormManager, smxGlobalVariables, smxCells,
+  smxFuncs, smxClassFuncs, smxProcs, smxConsts;
 
 var
   MainForm: TForm = nil;
@@ -34,19 +34,24 @@ end;
 procedure AssignCallBackParams;
 begin
   CallBack[0] := Integer(Application.Handle);
-  CallBack[1] := Integer(DBManager);
-  //CallBack[2] := Integer(CommonStorage);
-  //CallBack[3] := Integer(LibManager);
-  CallBack[4] := Integer(FormManager);
+  //CallBack[1] := Integer(CommonStorage);
+  //CallBack[2] := Integer(LibManager);
+  //CallBack[3] := Integer(DBManager);
+  //CallBack[4] := Integer(FormManager);
   //CallBack[5] := Integer(ImageList);
   //CallBack[6] := Integer(TargetRequest);
-  //CallBack[7] := Integer(@smxGlobal.DBListAdd);
+  //CallBack[10] := Integer(DBConnection.Database);
+
+  //CallBack[101] := Integer(DBConnection.Database);
+
+  CallBack[131] := Integer(@smxDBManager.FindDatabaseByName);
 
   CallBack[141] := Integer(@smxFormManager.FindFormByComboID);
   CallBack[142] := Integer(@smxFormManager.FindFormByHandle);
 
-  CallBack[201] := Integer(@smxFuncs.NewCell);
-  CallBack[202] := Integer(@smxFuncs.IsCell);
+  CallBack[201] := Integer(@smxClassFuncs.NewCell);
+  CallBack[202] := Integer(@smxClassFuncs.NewForm);
+  CallBack[203] := Integer(@smxClassFuncs.IsCell);
 end;
 
 procedure Initialize;
@@ -57,14 +62,15 @@ begin
 end;
 
 function CreateMainForm: Boolean;
-var c: TsmxBaseCell;
+var f: TsmxCustomForm; IntfID: Integer;
 begin
-  c := NewCell(nil, DBManager.DBConnections[0].Database, 1000218);
-  if c is TsmxMainForm then
+  IntfID := CommonStorage.ParamValues['IntfID'];
+  f := NewForm(nil, DBManager.DBConnections[0].Database, 1000218, IntfID);
+  if f is TsmxMainForm then
   begin
     Application.ShowMainForm := False;
     Application.CreateForm(TForm, MainForm);
-    with TsmxMainForm(c) do
+    with TsmxMainForm(f) do
     begin
       Form := MainForm;
       ShowForm;
@@ -72,7 +78,7 @@ begin
     Result := True;
   end else
   begin
-    c.Free;
+    f.Free;
     raise EsmxCellError.CreateRes(@SCellBuildError);
     Result := False;
   end;

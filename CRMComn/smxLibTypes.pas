@@ -2,6 +2,9 @@ unit smxLibTypes;
 
 interface
 
+uses
+  smxDBIntf;
+
 type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;
 
@@ -25,6 +28,10 @@ type
   end;
 
   TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);
+
+  TsmxFuncCommonParamValue = function(Name: String): Variant;
+
+  TsmxFuncFindDatabaseByName = function(ADatabaseName: String): IsmxDatabase;
 
 implementation
 

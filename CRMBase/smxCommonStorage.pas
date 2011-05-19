@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{        Common Storage classes        }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxCommonStorage;
 
 interface
@@ -7,8 +17,6 @@ uses
 
 type
   { TsmxCommonParam }
-
-  //TsmxGlobalParamType = (gptSystem, gptUser);
 
   TsmxCommonParam = class(TsmxKitItem)
   private
@@ -45,17 +53,12 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    //procedure InsertParam(AName: String; AValue: Variant);
-    //procedure RemoveParam(AName: String);
-    //function ExistsParam(AName: String): Boolean;
 
     property ParamValues[Name: String]: Variant read GetValue write SetValue; default;
   end;
 
 function CommonStorage: TsmxCommonStorage;
-
-//const
-  //FuncGlobalValue: TsmxFuncGlobalValue = nil;
+function CommonParamValue(Name: String): Variant;
 
 implementation
 
@@ -68,6 +71,11 @@ var
 function CommonStorage: TsmxCommonStorage;
 begin
   Result := _CommonStorage;
+end;
+
+function CommonParamValue(Name: String): Variant;
+begin
+  Result := _CommonStorage.ParamValues[Name];
 end;
 
 { TsmxCommonParam }
@@ -117,20 +125,6 @@ begin
   inherited Destroy;
 end;
 
-{procedure TsmxCommonStorage.InsertParam(AName: String; AValue: Variant);
-var p: TsmxParam;
-begin
-  p := FParamList.FindByName(AName);
-  if Assigned(p) then
-    raise EsmxCellError.CreateRes(@SCellParamNotFound)
-  else
-    with FParamList.Add do
-    begin
-      ParamName := AName;
-      ParamValue := AValue;
-    end;
-end;}
-
 function TsmxCommonStorage.GetValue(Name: String): Variant;
 var p: TsmxCommonParam;
 begin
@@ -156,10 +150,8 @@ end;
 
 initialization
   _CommonStorage := TsmxCommonStorage.Create(nil);
-  //FuncGlobalValue := _GlobalParams.GetValue;
 
 finalization
-  //FuncGlobalValue := nil;
   _CommonStorage.Free;
 
 end.

@@ -9,7 +9,7 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = CRM.exe Conf.exe aAlgs.dll dADO.dll dCoADO.dll
+PROJECTS = CRM.exe Conf.exe aAlgs.dll dADO.dll dCoADO.dll cSBar.bpl
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -27,6 +27,9 @@ dADO.dll: CRMdADO\dADO.dpr
   $(DCC)
 
 dCoADO.dll: CRMdCoADO\dCoADO.dpr
+  $(DCC)
+
+cSBar.bpl: CRMcSBar\cSBar.dpk
   $(DCC)
 
 

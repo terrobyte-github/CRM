@@ -10,6 +10,7 @@ uses
   smxDBIntf in '..\CRMComn\smxDBIntf.pas',
   smxTypes in '..\CRMComn\smxTypes.pas',
   smxFuncs in '..\CRMComn\smxFuncs.pas',
+  smxClassFuncs in '..\CRMComn\smxClassFuncs.pas',
   smxConsts in '..\CRMComn\smxConsts.pas',
   smxDBConnection in '..\CRMBase\smxDBConnection.pas',
   smxLibManager in '..\CRMBase\smxLibManager.pas',

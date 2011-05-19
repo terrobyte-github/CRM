@@ -100,6 +100,7 @@ begin
   LoadImage;
   FProjectManager := TsmxProjectManager.Create(Self);
   FProjectManager.FileName := SFileProjectName;
+  FProjectManager.ReadProjects;
   FillProjectList;
   SaveProgVers;
 end;
