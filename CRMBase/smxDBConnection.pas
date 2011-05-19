@@ -27,7 +27,7 @@ type
     FLoginPrompt: Boolean;
     FParams: String;
     FGenerationMode: TsmxGenerationMode;
-    FUser: String;
+    FUserName: String;
     FPassword: String;
     FDatabaseIntf: IsmxDatabase;
     function CreateDatabaseAsFunc: IsmxDatabase;
@@ -44,7 +44,7 @@ type
     property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
     property Params: String read FParams write FParams;
     property GenerationMode: TsmxGenerationMode read FGenerationMode write FGenerationMode;
-    property User: String read FUser write FUser;
+    property UserName: String read FUserName write FUserName;
     property Password: String read FPassword write FPassword;
     property Database: IsmxDatabase read FDatabaseIntf;
   end;
@@ -66,7 +66,7 @@ end;
 function TsmxDBConnection.CreateDatabaseAsFunc: IsmxDatabase;
 var FuncCreateDatabase: TsmxFuncCreateDatabase;
 begin
-  FuncCreateDatabase := LibManager.GetProcedure(FLibraryName, FFunctionNameOrProgID);
+  @FuncCreateDatabase := LibManager.GetProcedure(FLibraryName, FFunctionNameOrProgID);
   if Assigned(FuncCreateDatabase) then
     Result := FuncCreateDatabase else
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
@@ -94,7 +94,7 @@ begin
     DatabaseName := FDatabaseName;
     DriverName := FDriverName;
     LoginPrompt := FLoginPrompt;
-    Params.Text := AnsiReplaceText(AnsiReplaceText(FParams, '%User%', FUser), '%Password%', FPassword);
+    Params.Text := AnsiReplaceText(AnsiReplaceText(FParams, '%UserName%', FUserName), '%Password%', FPassword);
     try
       Connected := True;
     except

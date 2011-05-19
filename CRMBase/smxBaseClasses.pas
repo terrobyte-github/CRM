@@ -17,6 +17,8 @@ type
     property Version: String read GetVersion;
   end;
 
+  TsmxComponentClass = class of TsmxComponent;
+
   { TsmxInterfacedComponent }
 
   TsmxInterfacedComponent = class(TInterfacedObject)
@@ -28,9 +30,26 @@ type
     property Version: String read GetVersion;
   end;
 
+//procedure RegistrationClasses(AClasses: array of TsmxComponentClass);
+//procedure UnRegistrationClasses(AClasses: array of TsmxComponentClass);
+
 implementation
 
 {$I ..\Resource\smxVers.inc}
+
+{procedure RegistrationClasses(AClasses: array of TsmxComponentClass);
+var i: Integer;
+begin
+  for i := Low(AClasses) to High(AClasses) do
+    RegisterClass(AClasses[i]);
+end;
+
+procedure UnRegistrationClasses(AClasses: array of TsmxComponentClass);
+var i: Integer;
+begin
+  for i := Low(AClasses) to High(AClasses) do
+    UnRegisterClass(AClasses[i]);
+end;}
 
 { TsmxComponent }
 

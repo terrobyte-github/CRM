@@ -3,18 +3,19 @@ unit smxGlobalVariables;
 interface
 
 uses
-  Classes, Controls, smxClasses, smxDBConnection{, smxDBIntf};
+  Classes, Controls, smxClasses{, smxDBConnection}, smxDBIntf;
 
-function ImageList: TImageList;
+function ImgList: TImageList;
 //function DataBase: IsmxDatabase;
-function DBConnection: TsmxDBConnection;
+//function DBConnection: TsmxDBConnection;
 function TargetRequest: TsmxTargetRequest;
+function CheckUser(const ADatabase: IsmxDatabase): Boolean;
 //function ConnectDatabase: Boolean;
-function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
-procedure DisconnectDatabase;
+//function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
+//procedure DisconnectDatabase;
 procedure LoadImage;
-procedure LoadPackages;
-procedure UnLoadPackages;
+//procedure LoadPackages;
+//procedure UnLoadPackages;
 
 //function CheckUser: Boolean;
 
@@ -27,8 +28,8 @@ implementation
 
 uses
   Windows, {Forms,} ImgList, {ActiveX,} {IniFiles,} SysUtils, {StrUtils,} {ComObj,}
-  smxCommonStorage, {smxLibManager,} {smxDBConnection,} smxCells,
-  smxFuncs, smxClassFuncs, smxTypes, smxConsts, smxDBIntf;
+  smxCommonStorage, {smxLibManager,} {smxDBConnection,} {smxCells,}
+  smxFuncs, smxClassFuncs, smxTypes, smxConsts;
 
 type
   { TsmxDBConnection }
@@ -68,15 +69,15 @@ type
   end;
 
 var
-  _ImageList: TImageList = nil;
+  _ImgList: TImageList = nil;
   //_Database: IsmxDatabase = nil;
   _TargetRequest: TsmxTargetRequest = nil;
-  _DBConnection: TsmxDBConnection = nil;
-  _PacketHandle: HMODULE = 0;
+  //_DBConnection: TsmxDBConnection = nil;
+  //_PacketHandle: HMODULE = 0;
 
-function ImageList: TImageList;
+function ImgList: TImageList;
 begin
-  Result := _ImageList;
+  Result := _ImgList;
 end;
 
 {function DataBase: IsmxDatabase;
@@ -84,10 +85,10 @@ begin
   Result := _DataBase;
 end;}
 
-function DBConnection: TsmxDBConnection;
+{function DBConnection: TsmxDBConnection;
 begin
   Result := _DBConnection;
-end;
+end;}
 
 function TargetRequest: TsmxTargetRequest;
 begin
@@ -99,46 +100,46 @@ var rs: TResourceStream;
 begin
   rs := TResourceStream.Create(HInstance, 'pic', RT_RCDATA);
   try
-    _TCustomImageList(_ImageList).ReadData(rs);
+    _TCustomImageList(_ImgList).ReadData(rs);
   finally
     rs.Free;
   end;
 end;
 
-procedure LoadPackages;
+{procedure LoadPackages;
 begin
   _PacketHandle := LoadPackage('cSBar.bpl');
-end;
+end;}
 
-procedure UnLoadPackages;
+{procedure UnLoadPackages;
 begin
   UnloadPackage(_PacketHandle);
-end;
+end;}
 
-function CheckIntfUser: Boolean;
+{function CheckIntfUser(const ADatabase: IsmxDatabase): Boolean;
 var c: TsmxBaseCell; f: IsmxField; IntfID: Integer; IntfName: String;
 begin
   Result := False;
   try
-    c := NewCell(nil, _DBConnection.Database, 1000277);
+    c := NewCell(nil, ADatabase, 1000277);
     try
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
         begin
-          Database := _DBConnection.Database;
+          Database := ADatabase;
           Perform;
           f := FindFieldSense(fsKey);
           if Assigned(f) then
             IntfID := f.Value else
             IntfID := 0;
-          CommonStorage['IntfID'] := IntfID;
-          CommonStorage['@IntfID'] := IntfID;
+          ComStorage['IntfID'] := IntfID;
+          ComStorage['@IntfID'] := IntfID;
           f := FindFieldSense(fsValue);
           if Assigned(f) then
             IntfName := f.Value else
             IntfName := '';
-          CommonStorage['IntfName'] := IntfName;
-          CommonStorage['@IntfName'] := IntfName;
+          ComStorage['IntfName'] := IntfName;
+          ComStorage['@IntfName'] := IntfName;
           if IntfID > 0 then
             Result := True;
         end;
@@ -148,34 +149,34 @@ begin
   except
     raise EsmxCellError.CreateRes(@SCellBuildError);
   end;
-end;
+end;}
 
-function CheckUser: Boolean;
+{function CheckUser(const ADatabase: IsmxDatabase): Boolean;
 var c: TsmxBaseCell; p: IsmxParam; UserID: Integer; UserName: String;
 begin
   Result := False;
   try
-    c := NewCell(nil, _DBConnection.Database, 1000236);
+    c := NewCell(nil, ADatabase, 1000236);
     try
       if c is TsmxCustomRequest then
         with TsmxCustomRequest(c) do
         begin
-          Database := _DBConnection.Database;
+          Database := ADatabase;
           Perform;
           p := FindParamLocation(plKey);
           if Assigned(p) then
             UserID := p.Value else
             UserID := 0;
-          CommonStorage['UserID'] := UserID;
-          CommonStorage['@UserID'] := UserID;
+          ComStorage['UserID'] := UserID;
+          ComStorage['@UserID'] := UserID;
           p := FindParamLocation(plValue);
           if Assigned(p) then
             UserName := p.Value else
             UserName := '';
-          CommonStorage['UserName'] := UserName;
-          CommonStorage['@UserName'] := UserName;
+          ComStorage['UserName'] := UserName;
+          ComStorage['@UserName'] := UserName;
           if UserID > 0 then
-            Result := CheckIntfUser else
+            Result := CheckIntfUser(ADatabase) else
           if UserID = -1 then
             Inf(UserName);
         end;
@@ -184,6 +185,56 @@ begin
     end;
   except
     raise EsmxCellError.CreateRes(@SCellBuildError);
+  end;
+end;}
+
+function CheckUser(const ADatabase: IsmxDatabase): Boolean;
+var c, c2: TsmxBaseCell; ID, Name: Variant;
+begin
+  Result := False;
+  c := NewCell(nil, ADatabase, 1000236);
+  try
+    if c is TsmxCustomRequest then
+    begin
+      with TsmxCustomRequest(c) do
+      begin
+        Database := ADatabase;
+        CommonStorage := ComStorage;
+      end;
+      Result := RequestReturnKeyValue(TsmxCustomRequest(c), ID, Name);
+      if Result then
+      begin
+        ComStorage['UserID'] := ID;
+        ComStorage['@UserID'] := ID;
+        ComStorage['UserName'] := Name;
+        ComStorage['@UserName'] := Name;
+        if ID = -1 then
+          Inf(Name);
+        c2 := NewCell(nil, ADatabase, 1000277);
+        try
+          if c2 is TsmxCustomRequest then
+          begin
+            with TsmxCustomRequest(c) do
+            begin
+              Database := ADatabase;
+              CommonStorage := ComStorage;
+            end;
+            Result := RequestReturnKeyValue(TsmxCustomRequest(c), ID, Name);
+            if Result then
+            begin
+              ComStorage['IntfID'] := ID;
+              ComStorage['@IntfID'] := ID;
+              ComStorage['IntfName'] := Name;
+              ComStorage['@IntfName'] := Name;
+            end;
+          end;
+        finally
+          c2.Free;
+        end;
+      end;
+    end;
+  finally
+    c.Free;
   end;
 end;
 
@@ -228,7 +279,7 @@ begin
   end;
 end;}
 
-function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
+{function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
 var pm: TsmxProjectManager; pr: TsmxProjectItem; //dbc: TsmxDBConnection;
 begin
   Result := False;
@@ -272,7 +323,7 @@ begin
   finally
     pm.Free;
   end;
-end;
+end;}
 
 {function ConnectDatabase(AProjectName: String; AUserName: String = ''; APassword: String = ''): Boolean;
 var fs: TFileStream;  pc: TsmxProjectConnection; FuncCreateDatabase: TsmxFuncCreateDatabase;
@@ -393,14 +444,14 @@ begin
   end;
 end;}
 
-procedure DisconnectDatabase;
+{procedure DisconnectDatabase;
 begin
   if Assigned(_DBConnection) then
   begin
     _DBConnection.Free;
     _DBConnection := nil;
   end;
-end;
+end;}
 
 {procedure DisconnectDatabase;
 begin
@@ -575,7 +626,7 @@ begin
 end;}
 
 initialization
-  _ImageList := TImageList.Create(nil);
+  _ImgList := TImageList.Create(nil);
   //CoInitialize(nil);
   //_Database := NewADODatabase;
   //ConnectDatabase('CRM');
@@ -590,6 +641,6 @@ finalization
   //_Database := nil;
   //CoUninitialize;
   //DisconnectDatabase;
-  _ImageList.Free;
+  _ImgList.Free;
 
 end.

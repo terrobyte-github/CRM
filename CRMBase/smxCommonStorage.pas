@@ -13,7 +13,7 @@ unit smxCommonStorage;
 interface
 
 uses
-  Classes, smxBaseClasses, smxClasses;
+  Classes, smxClasses;
 
 type
   { TsmxCommonParam }
@@ -43,7 +43,7 @@ type
 
   { TsmxCommonStorage }
 
-  TsmxCommonStorage = class(TsmxComponent)
+  TsmxCommonStorage = class(TsmxCustomCommonStorage)
   private
     FParamList: TsmxCommonParams;
     function GetValue(Name: String): Variant;
@@ -53,12 +53,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function FindByName(AParamName: String): Variant; override; 
 
     property ParamValues[Name: String]: Variant read GetValue write SetValue; default;
   end;
 
-function CommonStorage: TsmxCommonStorage;
-function CommonParamValue(Name: String): Variant;
+function ComStorage: TsmxCommonStorage;
+//function FindCommonParamByName(AName: String): Variant;
 
 implementation
 
@@ -66,17 +67,17 @@ uses
   Variants, SysUtils;
 
 var
-  _CommonStorage: TsmxCommonStorage = nil;
+  _ComStorage: TsmxCommonStorage = nil;
 
-function CommonStorage: TsmxCommonStorage;
+function ComStorage: TsmxCommonStorage;
 begin
-  Result := _CommonStorage;
+  Result := _ComStorage;
 end;
 
-function CommonParamValue(Name: String): Variant;
+{function FindCommonParamByName(AName: String): Variant;
 begin
-  Result := _CommonStorage.ParamValues[Name];
-end;
+  Result := _CommonStorage.ParamValues[AName];
+end;}
 
 { TsmxCommonParam }
 
@@ -125,6 +126,15 @@ begin
   inherited Destroy;
 end;
 
+function TsmxCommonStorage.FindByName(AParamName: String): Variant;
+var p: TsmxCommonParam;
+begin
+  p := FParamList.FindByName(AParamName);
+  if Assigned(p) then
+    Result := p.ParamValue else
+    Result := Null;
+end;
+
 function TsmxCommonStorage.GetValue(Name: String): Variant;
 var p: TsmxCommonParam;
 begin
@@ -149,9 +159,9 @@ begin
 end;
 
 initialization
-  _CommonStorage := TsmxCommonStorage.Create(nil);
+  _ComStorage := TsmxCommonStorage.Create(nil);
 
 finalization
-  _CommonStorage.Free;
+  _ComStorage.Free;
 
 end.

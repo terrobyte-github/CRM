@@ -13,7 +13,7 @@ unit smxCallBack;
 interface
 
 uses
-  Classes, smxBaseClasses, smxClasses, smxTypes, smxLibTypes;
+  Classes, smxBaseClasses, smxClasses, smxLibTypes;
 
 type
   { TsmxCallBackParam }

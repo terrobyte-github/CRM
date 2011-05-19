@@ -2233,4 +2233,10 @@ initialization
     TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuPointCfg, TsmxMasterMenuCfg,
     TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
 
+finalization
+  UnRegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
+    TsmxAlgorithmListCfg,TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg,
+    TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuPointCfg, TsmxMasterMenuCfg,
+    TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
+
 end.

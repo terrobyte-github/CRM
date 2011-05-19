@@ -13,7 +13,7 @@ unit smxFilterCells;
 interface
 
 uses
-  Classes, Controls, StdCtrls, ComCtrls, Buttons, smxClasses, smxCells,
+  Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, smxClasses, smxCells,
   smxDBIntf, smxTypes;
 
 type
@@ -68,6 +68,7 @@ type
     procedure SetCellEnable(Value: Boolean); override;
     procedure SetFilterText(Value: String); override;
     procedure SetFilterValue(Value: Variant); override;
+    procedure SetImageList(Value: TCustomImageList); override;
     procedure Initialize; override;
     procedure UnInitialize; override;
 
@@ -118,7 +119,7 @@ type
 implementation
 
 uses
-  Variants, Forms, SysUtils, Graphics, smxGlobalVariables, smxFuncs;
+  Variants, Forms, SysUtils, Graphics, {smxGlobalVariables,} smxFuncs;
 
 type
   { _TsmxBaseCell }
@@ -318,6 +319,17 @@ begin
   FBitBtn.Enabled := Value;
 end;
 
+procedure TsmxBitBtnFilter.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    FBitBtn.Glyph := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    if Assigned(Algorithm) then
+      if Algorithm.CellImageIndex >= 0 then
+        ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
+end;
+
 procedure TsmxBitBtnFilter.SetFilterText(Value: String);
 begin
   FBitBtn.Caption := TCaption(Value);
@@ -333,8 +345,8 @@ var c: TObject;
 begin
   if Assigned(Algorithm) then
   begin
-    if Algorithm.CellImageIndex >= 0 then
-      ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
+    //if Algorithm.CellImageIndex >= 0 then
+      //ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
     c := _TsmxBaseCell(Algorithm).GetInternalObject;
     if c is TBasicAction then
       FBitBtn.Action := TBasicAction(c);
@@ -478,6 +490,10 @@ end;
 
 initialization
   RegisterClasses([TsmxEditFilter, TsmxDateTimeFilter, TsmxBitBtnFilter,
+    TsmxNumEditFilter, TsmxLabelFilter]);
+
+finalization
+  UnRegisterClasses([TsmxEditFilter, TsmxDateTimeFilter, TsmxBitBtnFilter,
     TsmxNumEditFilter, TsmxLabelFilter]);
 
 end.

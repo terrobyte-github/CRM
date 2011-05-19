@@ -13,7 +13,7 @@ unit smxFormManager;
 interface
 
 uses
-  Classes, Windows, smxBaseClasses, smxClasses, smxClassTypes;
+  Classes, Windows, smxClasses;
 
 type
   { TsmxFormItem }
@@ -49,7 +49,7 @@ type
 
   { TsmxFormManager }
 
-  TsmxFormManager = class(TsmxComponent)
+  TsmxFormManager = class(TsmxCustomFormManager)
   private
     FFormList: TsmxFormItems;
     function GetForm(Index: Integer): TsmxCustomForm;
@@ -60,18 +60,20 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
-    function FindByHandle(AHandle: HWND): TsmxCustomForm;
-    procedure InsertForm(AForm: TsmxCustomForm);
-    procedure RemoveForm(AForm: TsmxCustomForm);
+    function FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm; override;
+    function FindByHandle(AHandle: HWND): TsmxCustomForm; override;
+    procedure InsertForm(AForm: TsmxCustomForm); override;
+    procedure RemoveForm(AForm: TsmxCustomForm); override;
 
     property FormCount: Integer read GetFormCount;
     property Forms[Index: Integer]: TsmxCustomForm read GetForm; default;
   end;
 
-function FormManager: TsmxFormManager;
-function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
-function FindFormByHandle(AHandle: HWND): TsmxCustomForm;
+function FrmManager: TsmxFormManager;
+//function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
+//function FindFormByHandle(AHandle: HWND): TsmxCustomForm;
+//procedure AddFormIntoManager(AForm: TsmxCustomForm);
+//procedure DelFormFromManager(AForm: TsmxCustomForm);
 
 implementation
 
@@ -85,14 +87,14 @@ type
   end;
 
 var
-  _FormManager: TsmxFormManager = nil;
+  _FrmManager: TsmxFormManager = nil;
 
-function FormManager: TsmxFormManager;
+function FrmManager: TsmxFormManager;
 begin
-  Result := _FormManager;
+  Result := _FrmManager;
 end;
 
-function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
+{function FindFormByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
 begin
   Result := _FormManager.FindByComboID(ACfgID, AID);
 end;
@@ -101,6 +103,16 @@ function FindFormByHandle(AHandle: HWND): TsmxCustomForm;
 begin
   Result := _FormManager.FindByHandle(AHandle);
 end;
+
+procedure AddFormIntoManager(AForm: TsmxCustomForm);
+begin
+  _FormManager.InsertForm(AForm);
+end;
+
+procedure DelFormFromManager(AForm: TsmxCustomForm);
+begin
+  _FormManager.RemoveForm(AForm);
+end;}
 
 { TsmxFormItem }
 
@@ -236,9 +248,9 @@ begin
 end;
 
 initialization
-  _FormManager := TsmxFormManager.Create(nil);
+  _FrmManager := TsmxFormManager.Create(nil);
 
 finalization
-  _FormManager.Free;
+  _FrmManager.Free;
 
 end.
