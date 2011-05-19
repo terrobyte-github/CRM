@@ -1,10 +1,10 @@
-unit smxFltrCells;
+unit smxFilterCells;
 
 interface
 
 uses
   Classes, Controls, StdCtrls, ComCtrls, Buttons, smxClasses, smxCells,
-  smxTypes;
+  smxDBIntf, smxTypes;
 
 type
   { TsmxEditFilter }
@@ -23,7 +23,8 @@ type
 
     property Edit: TEdit read FEdit;
   public
-    constructor Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack); override;
+    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
 
@@ -44,7 +45,8 @@ type
 
     property DateTime: TDateTimePicker read FDateTime;
   public
-    constructor Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack); override;
+    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
 
@@ -58,18 +60,23 @@ type
   protected
     function GetCellEnable: Boolean; override;
     //function GetFilterCaption: String; override;
+    function GetFilterText: String; override;
     function GetFilterValue: Variant; override;
     function GetInternalObject: TObject; override;
     //procedure InstallParent; override;
     //procedure SetAlgorithm(Value: TsmxCustomAlgorithm); override;
     procedure SetCellEnable(Value: Boolean); override;
     //procedure SetFilterCaption(Value: String); override;
+    procedure SetFilterText(Value: String); override;
     procedure SetFilterValue(Value: Variant); override;
     //procedure UnInstallParent; override;
+    procedure Initialize; override;
+    procedure UnInitialize; override;
 
     property BitBtn: TBitBtn read FBitBtn;
   public
-    constructor Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack); override;
+    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
     //procedure PutParams(Params: Variant); override;
   end;
@@ -92,7 +99,8 @@ type
 
     property Edit: TEdit read FEdit;
   public
-    constructor Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack); override;
+    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
 
@@ -105,34 +113,38 @@ type
   protected
     //function GetCellEnable: Boolean; override;
     //function GetFilterCaption: String; override;
+    function GetFilterText: String; override;
     function GetFilterValue: Variant; override;
     function GetInternalObject: TObject; override;
     //procedure SetCellEnable(Value: Boolean); override;
     //procedure SetFilterCaption(Value: String); override;
+    procedure SetFilterText(Value: String); override;
     procedure SetFilterValue(Value: Variant); override;
 
     property SLabel: TLabel read FSLabel;
   public
-    constructor Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack); override;
+    constructor Create(AOwner: TComponent; const ADB: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  Variants, Forms, SysUtils, Graphics, smxDBIntf, smxFuncs;
+  Variants, Forms, SysUtils, Graphics, smxGlobal, smxFuncs;
 
-//type
+type
   { _TsmxBaseCell }
 
-  //_TsmxBaseCell = class(TsmxBaseCell)
-  //end;
+  _TsmxBaseCell = class(TsmxBaseCell)
+  end;
 
 { TsmxEditFilter }
 
-constructor TsmxEditFilter.Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack);
+constructor TsmxEditFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ACfgID, ACall);
+  inherited Create(AOwner, ADB, ACfgID, AID);
   FEdit := TEdit.Create(Self);
   FEdit.Parent := Panel;
   FEdit.AutoSize := False;
@@ -143,7 +155,12 @@ begin
   //FEdit.Hint := Cfg.FilterHeader.Text;
   //FEdit.ShowHint := True;
   //FEdit.Text := Cfg.FilterText;
-  SetFilterValue(Cfg.FilterDefValue);
+  FEdit.Font.Color := Cfg.FilterFont.Color;
+  FEdit.Font.Name := Cfg.FilterFont.Name;
+  FEdit.Font.Size := Cfg.FilterFont.Size;
+  FEdit.Font.Style := Cfg.FilterFont.Style;
+  //SetFilterValue(Cfg.FilterDefValue);
+  FEdit.Text := '';
 end;
 
 destructor TsmxEditFilter.Destroy;
@@ -195,9 +212,10 @@ end;
 
 { TsmxDateTimeFilter }
 
-constructor TsmxDateTimeFilter.Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack);
+constructor TsmxDateTimeFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ACfgID, ACall);
+  inherited Create(AOwner, ADB, ACfgID, AID);
   FDateTime := TDateTimePicker.Create(Self);
   SetFormat;
   FDateTime.Parent := Panel;
@@ -209,7 +227,13 @@ begin
   //FDateTime.ShowHint := True;
   FDateTime.ShowCheckbox := True;
   //FDateTime.DateTime := StrToDateTimeEx(Cfg.FilterText);
-  SetFilterValue(StrToDateTimeEx(Cfg.FilterDefValue));
+  FDateTime.Font.Color := Cfg.FilterFont.Color;
+  FDateTime.Font.Name := Cfg.FilterFont.Name;
+  FDateTime.Font.Size := Cfg.FilterFont.Size;
+  FDateTime.Font.Style := Cfg.FilterFont.Style;
+  //SetFilterValue(StrToDateTimeEx(Cfg.FilterDefValue));
+  FDateTime.DateTime := Date;
+  //FDateTime.Checked := False;
 end;
 
 destructor TsmxDateTimeFilter.Destroy;
@@ -285,9 +309,10 @@ end;
 
 { TsmxBitBtnFilter }
 
-constructor TsmxBitBtnFilter.Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack);
+constructor TsmxBitBtnFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ACfgID, ACall);
+  inherited Create(AOwner, ADB, ACfgID, AID);
   FBitBtn := TBitBtn.Create(Self);
   FBitBtn.Parent := Panel;
   FBitBtn.Width := Panel.Width - 8;
@@ -296,22 +321,27 @@ begin
   FBitBtn.Top := 20;
   //FBitBtn.Caption := Cfg.FilterText;
   //FBitBtn.Caption := Algorithm.ItemCaption;
-  if Assigned(Algorithm) then
-    if Algorithm.CellImageIndex >= 0 then
-      ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
   FBitBtn.Margin := 2;
   //FBitBtn.ShowHint := True;
   //SetAction;
-  InstallParent;
   //FBitBtn.Caption := '';
   //FBitBtn.Caption := TCaption(Cfg.FilterText);
   //FValue := Null;
-  SetFilterValue(Cfg.FilterDefValue);
+  FBitBtn.Font.Color := Cfg.FilterFont.Color;
+  FBitBtn.Font.Name := Cfg.FilterFont.Name;
+  FBitBtn.Font.Size := Cfg.FilterFont.Size;
+  FBitBtn.Font.Style := Cfg.FilterFont.Style;
+  //SetFilterValue(Cfg.FilterDefValue);
+  FValue := Null;
+  FBitBtn.Caption := '';
+  Initialize;
+  InstallParent;
 end;
 
 destructor TsmxBitBtnFilter.Destroy;
 begin
   UnInstallParent;
+  UnInitialize;
   FBitBtn.Parent := nil;
   FBitBtn.Free;
   inherited Destroy;
@@ -326,6 +356,11 @@ end;
 begin
   Result := String(FBitBtn.Caption);
 end;}
+
+function TsmxBitBtnFilter.GetFilterText: String;
+begin
+  Result := String(FBitBtn.Caption);
+end;
 
 function TsmxBitBtnFilter.GetFilterValue: Variant;
 begin
@@ -396,27 +431,15 @@ begin
   FBitBtn.Caption := TCaption(Value);
 end;}
 
-procedure TsmxBitBtnFilter.SetFilterValue(Value: Variant);
-var v: Variant; f: IsmxField; //ap: TsmxParams; p: TsmxParam;
+procedure TsmxBitBtnFilter.SetFilterText(Value: String);
 begin
-  //if not VarIsEmpty(Value) then
-    //FValue := Value;
-  {ap := VarToParams(Value);
-  try
-    p := ap.FindByName('Key');
-    if Assigned(p) then
-      FValue := p.ParamValue;
-    p := ap.FindByName('Value');
-    if Assigned(p) then
-      if VarIsEmpty(p.ParamValue) or VarIsNull(p.ParamValue) then
-        FBitBtn.Caption := '' else
-        FBitBtn.Caption := p.ParamValue;
-  finally
-    ap.Free;
-  end;}
+  FBitBtn.Caption := TCaption(Value);
+end;
 
-  //if (FValue <> Value) and not VarIsEmpty(Value) then
-  if VarIsEmpty(Value) or VarIsNull(Value) then
+procedure TsmxBitBtnFilter.SetFilterValue(Value: Variant);
+//var v: Variant; f: IsmxField;
+begin
+  {if VarIsEmpty(Value) or VarIsNull(Value) then
   begin
     FValue := Null;
     FBitBtn.Caption := '';
@@ -433,7 +456,27 @@ begin
         FBitBtn.Caption := TCaption(v) else
         FBitBtn.Caption := '';
     end;
+  end;}
+  FValue := Value;
+end;
+
+procedure TsmxBitBtnFilter.Initialize;
+var c: TObject;
+begin
+  if Assigned(Algorithm) then
+  begin
+    if Algorithm.CellImageIndex >= 0 then
+      //if Assigned(ImageList) then
+        ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
+    c := _TsmxBaseCell(Algorithm).GetInternalObject;
+    if c is TBasicAction then
+      FBitBtn.Action := TBasicAction(c);
   end;
+end;
+
+procedure TsmxBitBtnFilter.UnInitialize;
+begin
+  FBitBtn.Action := nil;
 end;
 
 {procedure TsmxBitBtnFilter.UnInstallParent;
@@ -446,9 +489,10 @@ end;}
 
 { TsmxNumEditFilter }
 
-constructor TsmxNumEditFilter.Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack);
+constructor TsmxNumEditFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ACfgID, ACall);
+  inherited Create(AOwner, ADB, ACfgID, AID);
   FEdit := TEdit.Create(Self);
   FEdit.Parent := Panel;
   FEdit.AutoSize := False;
@@ -461,7 +505,12 @@ begin
   //FEdit.Text := Cfg.FilterText;
   //FEdit.OnChange := ChangeProc;
   FEdit.OnKeyPress := KeyPressProc;
-  SetFilterValue(Cfg.FilterDefValue);
+  FEdit.Font.Color := Cfg.FilterFont.Color;
+  FEdit.Font.Name := Cfg.FilterFont.Name;
+  FEdit.Font.Size := Cfg.FilterFont.Size;
+  FEdit.Font.Style := Cfg.FilterFont.Style;
+  //SetFilterValue(Cfg.FilterDefValue);
+  FEdit.Text := '';
 end;
 
 destructor TsmxNumEditFilter.Destroy;
@@ -545,28 +594,32 @@ end;
 
 { TsmxLabelFilter }
 
-constructor TsmxLabelFilter.Create(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack);
+constructor TsmxLabelFilter.Create(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
 begin
-  inherited Create(AOwner, ACfgID, ACall);
+  inherited Create(AOwner, ADB, ACfgID, AID);
   FSLabel := TLabel.Create(Self);
   FSLabel.Parent := Panel;
   FSLabel.Width := Panel.Width - 8;
   FSLabel.Anchors := [akLeft, akRight];
   FSLabel.Left := 4;
   FSLabel.Top := 20;
-  FSLabel.Font.Color := clBlue;
-  FSLabel.Font.Size := 10;
-  FSLabel.Font.Style := [fsBold];
   //FEdit.Hint := Cfg.FilterHeader.Text;
   //FEdit.ShowHint := True;
   //FEdit.Text := Cfg.FilterText;
-  InstallParent;
-  SetFilterValue(Cfg.FilterDefValue);
+  //InstallParent;
+  FSLabel.Font.Color := Cfg.FilterFont.Color;
+  FSLabel.Font.Name := Cfg.FilterFont.Name;
+  FSLabel.Font.Size := Cfg.FilterFont.Size;
+  FSLabel.Font.Style := Cfg.FilterFont.Style;
+  //SetFilterValue(Cfg.FilterDefValue);
+  FValue := Null;
+  FSLabel.Caption := '';
 end;
 
 destructor TsmxLabelFilter.Destroy;
 begin
-  UnInstallParent;
+  //UnInstallParent;
   FSLabel.Parent := nil;
   FSLabel.Free;
   inherited Destroy;
@@ -581,6 +634,11 @@ end;}
 begin
   Result := FEdit.Text;
 end;}
+
+function TsmxLabelFilter.GetFilterText: String;
+begin
+  Result := String(FSLabel.Caption);
+end;
 
 function TsmxLabelFilter.GetFilterValue: Variant;
 begin
@@ -602,10 +660,15 @@ begin
   FEdit.Text := Value;
 end;}
 
-procedure TsmxLabelFilter.SetFilterValue(Value: Variant);
-var v: Variant; f: IsmxField;
+procedure TsmxLabelFilter.SetFilterText(Value: String);
 begin
-  if VarIsEmpty(Value) or VarIsNull(Value) then
+  FSLabel.Caption := TCaption(Value);
+end;
+
+procedure TsmxLabelFilter.SetFilterValue(Value: Variant);
+//var v: Variant; f: IsmxField;
+begin
+  {if VarIsEmpty(Value) or VarIsNull(Value) then
   begin
     FValue := Null;
     FSLabel.Caption := '';
@@ -622,7 +685,8 @@ begin
         FSLabel.Caption := TCaption(v) else
         FSLabel.Caption := '';
     end;
-  end;
+  end;}
+  FValue := Value;
 end;
 
 initialization

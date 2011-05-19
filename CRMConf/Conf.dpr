@@ -1,25 +1,24 @@
-program CRM;
+program Conf;
 
 uses
-  ShareMem,
   Forms,
-  smxBaseClasses in '..\CRMBase\smxBaseClasses.pas',
+  smxConf in 'smxConf.pas' {frmConf},
   smxDBIntf in '..\CRMComn\smxDBIntf.pas',
   smxADODB in '..\CRMBase\smxADODB.pas',
+  smxBaseClasses in '..\CRMBase\smxBaseClasses.pas',
   smxConsts in '..\CRMComn\smxConsts.pas',
   smxClasses in '..\CRMBase\smxClasses.pas',
-  smxField in '..\CRMBase\smxField.pas',
-  smxCfgs in '..\CRMBase\smxCfgs.pas',
-  smxCells in '..\CRMBase\smxCells.pas',
-  smxFilterCells in '..\CRMBase\smxFilterCells.pas',
-  smxFuncs in '..\CRMComn\smxFuncs.pas',
   smxTypes in '..\CRMComn\smxTypes.pas',
+  smxFuncs in '..\CRMComn\smxFuncs.pas',
+  smxCells in '..\CRMBase\smxCells.pas',
+  smxCfgs in '..\CRMBase\smxCfgs.pas',
   smxWheelDBGrid in '..\CRMBase\smxWheelDBGrid.pas',
-  smxMain in 'smxMain.pas',
+  smxField in '..\CRMBase\smxField.pas',
+  smxMain in '..\CRMMain\smxMain.pas',
   smxCallBack in '..\CRMBase\smxCallBack.pas',
   smxGlobalStorage in '..\CRMBase\smxGlobalStorage.pas',
-  smxFormManager in '..\CRMBase\smxFormManager.pas',
   smxLibManager in '..\CRMBase\smxLibManager.pas',
+  smxFormManager in '..\CRMBase\smxFormManager.pas',
   smxGlobal in '..\CRMBase\smxGlobal.pas',
   smxProcs in '..\CRMComn\smxProcs.pas';
 
@@ -27,7 +26,6 @@ uses
 
 begin
   Application.Initialize;
-  Initialize;
-  if ConnectDatabase and CreateMainForm then
-    Application.Run;
+  Application.CreateForm(TfrmConf, frmConf);
+  Application.Run;
 end.

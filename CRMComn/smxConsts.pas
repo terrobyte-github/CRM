@@ -3,8 +3,9 @@ unit smxConsts;
 interface
 
 const
-  FileConnectParams = 'conn.ini';
-  CloseProgMessage = 'Закрыть программу?';
+  SFileConnectName = 'conn.ini';
+  SFuncLibInfoName = 'LibInfo';
+  SCloseProgMessage = 'Закрыть программу?';
 
 resourcestring
   { DBInterface }
@@ -12,7 +13,7 @@ resourcestring
   SDBIntfDataSetInvalid = 'Class of dataset is invalid type';
   SDBIntfFieldInvalid = 'Class of field is invalid type';
   SDBIntfParamInvalid = 'Class of parameter is invalid type';
-  SDBIntfConnectFailed = 'Database connect failed';
+  SDBIntfConnectFailed = 'Connection to a database is failed';
 
   { Cfg }
   SCfgFinalizeError = 'Configuration finalize error';
@@ -20,17 +21,18 @@ resourcestring
 
   { Cell }
   SCellBuildError = 'Cell build error';
-  SCellRequestPerformError = 'Request perform error';
+  SCellRequestPerformError = 'Request perform Error';
 
   { LibManager }
-  SLibManagerFreeError = 'Library free error';
-  SLibManagerLoadError = 'Library load error';
+  //SLibManagerFreeError = 'Library free error';
+  //SLibManagerLoadError = 'Library load error';
 
   { Algorithm }
   SAlgExecuteError = 'Algorithm execute error';
 
-  { TargetRequest }
-  STargetRequestDatabaseError = 'Database is not assign';
+  { Kit }
+  SKitParamNotFound = 'The parameter is not found';
+  SKitParamExists = 'The parameter already exists';
 
 implementation
 

@@ -3,15 +3,16 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, smxClasses, smxCells, smxParams, smxTypes;
+  Classes, Windows, smxClasses, smxCells, smxDBIntf, smxTypes;
 
-function GetCurrentForm(ACall: TsmxFuncCallBack): TsmxCustomForm;
-function GetCurrentPage(ACall: TsmxFuncCallBack): TsmxCustomPage;
-function GetCurrentRequest(ACall: TsmxFuncCallBack): TsmxCustomRequest;
-function IDToCfgClass(ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCfgClass;
-function IDToCellClass(ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCellClass;
-function NewCfg(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCfg;
-function NewCell(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCell;
+function GetCurrentForm: TsmxCustomForm;
+function GetCurrentPage: TsmxCustomPage;
+function GetCurrentRequest: TsmxCustomRequest;
+function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
+function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
+function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
+function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
 function StreamToStr(Stream: TStream): String;
 function StrToStream(const Str: String): TStream;
 function HotKeyToStr(Key: Integer): String;
@@ -19,56 +20,58 @@ function StrToHotKey(const Str: String): Integer;
 function StrToDateTimeEx(const Str: String): TDateTime;
 function VarToParams(V: Variant): TsmxParams;
 function ParamsToVar(Params: TsmxParams): Variant;
-//function IsForm(ACell: TsmxBaseCell): Boolean;
-//function IsFilter(ACell: TsmxBaseCell): Boolean;
 function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
 function Ask(M: String; uType: Cardinal): Integer; overload;
 function Ask(M: String): Boolean; overload;
 function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
+function VarStringToVar(V: Variant): Variant;
+function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
+function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 
 implementation
 
 uses
-  Forms, Controls, Menus, SysUtils, Variants;
+  Forms, Controls, Menus, SysUtils, Variants, smxFormManager;
 
-function GetCurrentForm(ACall: TsmxFuncCallBack): TsmxCustomForm;
+function GetCurrentForm: TsmxCustomForm;
 var h: HWND; f: TsmxBaseCell;
 begin
   Result := nil;
   h := GetActiveWindow;
   if h > 0 then
   begin
-    f := TsmxFormManager(Integer(ACall(2))).FindByHandle(h);
+    f := FormManager.FindByHandle(h);
     if Assigned(f) then
       if f is TsmxCustomForm then
         Result := TsmxCustomForm(f);
   end;
 end;
 
-function GetCurrentPage(ACall: TsmxFuncCallBack): TsmxCustomPage;
+function GetCurrentPage: TsmxCustomPage;
 var f: TsmxCustomForm;
 begin
   Result := nil;
-  f := GetCurrentForm(ACall);
+  f := GetCurrentForm;
   if Assigned(f) then
     if Assigned(f.PageManager) then
       Result := f.PageManager.ActivePage;
 end;
 
-function GetCurrentRequest(ACall: TsmxFuncCallBack): TsmxCustomRequest;
+function GetCurrentRequest: TsmxCustomRequest;
 var p: TsmxCustomPage;
 begin
   Result := nil;
-  p := GetCurrentPage(ACall);
+  p := GetCurrentPage;
   if Assigned(p) then
     if Assigned(p.Grid) then
       Result := p.Grid.Request;
 end;
 
-function IDToCfgClass(ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCfgClass;
+function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 var t: TsmxTypeCfg;
 begin
-  t := TsmxTypeCfg.Create(nil, ACfgID, ACall);
+  t := TsmxTypeCfg.Create(nil, ADB, ACfgID);
   try
     Result := t.CfgClass;
   finally
@@ -76,10 +79,10 @@ begin
   end;
 end;
 
-function IDToCellClass(ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCellClass;
+function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
 var t: TsmxTypeCfg;
 begin
-  t := TsmxTypeCfg.Create(nil, ACfgID, ACall);
+  t := TsmxTypeCfg.Create(nil, ADB, ACfgID);
   try
     Result := t.CellClass;
   finally
@@ -87,14 +90,15 @@ begin
   end;
 end;
 
-function NewCfg(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCfg;
+function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
 begin
-  Result := IDToCfgClass(ACfgID, ACall).Create(AOwner, ACfgID, ACall);
+  Result := CfgIDToCfgClass(ADB, ACfgID).Create(AOwner, ADB, ACfgID);
 end;
 
-function NewCell(AOwner: TComponent; ACfgID: Integer; ACall: TsmxFuncCallBack): TsmxBaseCell;
+function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
 begin
-  Result := IDToCellClass(ACfgID, ACall).Create(AOwner, ACfgID, ACall);
+  Result := CfgIDToCellClass(ADB, ACfgID).Create(AOwner, ADB, ACfgID, AID);
 end;
 
 function StreamToStr(Stream: TStream): String;
@@ -134,7 +138,7 @@ end;
 
 function StrToDateTimeEx(const Str: String): TDateTime;
 begin
-  if AnsiCompareText(Str, 'today') = 0 then
+  if AnsiCompareText(Str, 'date') = 0 then
     Result := Date else
   if AnsiCompareText(Str, 'time') = 0 then
     Result := Time else
@@ -179,20 +183,6 @@ begin
   end;
 end;
 
-{function IsForm(ACell: TsmxBaseCell): Boolean;
-begin
-  if ACell is TsmxCustomForm then
-    Result := True else
-    Result := False;
-end;}
-
-{function IsFilter(ACell: TsmxBaseCell): Boolean;
-begin
-  if ACell is TsmxCustomFilter then
-    Result := True else
-    Result := False;
-end;}
-
 function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
 var CellClass: TsmxBaseCellClass;
 begin
@@ -222,6 +212,79 @@ end;
 function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 begin
   Result := Ask(M, uType);
+end;
+
+function VarStringToVar(V: Variant): Variant;
+begin
+  if VarToStr(V) = '' then
+    Result := Null else
+    Result := V;
+end;
+
+function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
+var p: TsmxParam;
+begin
+  Result := ADefValue;
+  if Assigned(AParams) then
+  begin
+    p := AParams.FindByName(AName);
+    if Assigned(p) then
+      if not VarIsNull(p.ParamValue) then
+        Result := p.ParamValue;
+  end;
+end;
+
+function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
+var fld: IsmxField; prm: IsmxParam; res: Integer; msg: String;
+begin
+  Result := False;
+  with ARequest do
+  begin
+    if not Database.InTransaction then
+      Database.StartTrans;
+    try
+      res := -1; msg := '';
+      Perform(Same);
+      case CellDataSet.DataSetType of
+        dstQuery:
+        begin
+          fld := FindFieldSense(fsResult);
+          if Assigned(fld) then
+            res := fld.Value;
+          fld := FindFieldSense(fsMessage);
+          if Assigned(fld) then
+            msg := fld.Value;
+        end;
+        dstStoredProc:
+        begin
+          prm := FindParamLocation(plResult);
+          if Assigned(prm) then
+            res := prm.Value;
+          prm := FindParamLocation(plMessage);
+          if Assigned(prm) then
+            msg := prm.Value;
+        end;
+      end;
+      if res = 0 then
+        Database.CommitTrans else
+        Database.RollbackTrans;
+      if msg <> '' then
+        Inf(msg);
+      Result := res = 0;
+    except
+      Database.RollbackTrans;
+    end;
+  end;
+end;
+
+function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
+begin
+  Result := nil;
+  if Assigned(AForm) then
+    if Assigned(AForm.PageManager) then
+      if Assigned(AForm.PageManager.ActivePage) then
+        if Assigned(AForm.PageManager.ActivePage.Grid) then
+          Result := AForm.PageManager.ActivePage.Grid.Request;
 end;
 
 end.

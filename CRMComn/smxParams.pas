@@ -3,39 +3,44 @@ unit smxParams;
 interface
 
 uses
-  Classes, smxClasses;
+  Classes, SysUtils, smxClasses;
 
 type
   { TsmxParam }
 
   TsmxParam = class(TsmxKitItem)
   private
-    FParamValue: Variant;
     FParamName: String;
+    FParamValue: Variant;
   public
     constructor Create(AKit: TsmxKit); override;
 
-    property ParamValue: Variant read FParamValue write FParamValue;
     property ParamName: String read FParamName write FParamName;
+    property ParamValue: Variant read FParamValue write FParamValue;
   end;
 
   { TsmxParams }
+
+  EsmxParamsError = class(Exception);
 
   TsmxParams = class(TsmxKit)
   protected
     function GetItem(Index: Integer): TsmxParam;
     //procedure SetItem(Index: Integer; Value: TsmxRequestParam);
+    function GetValue(Name: String): Variant;
+    procedure SetValue(Name: String; Value: Variant);
   public
     function Add: TsmxParam;
     function FindByName(AParamName: String): TsmxParam;
 
     property Items[Index: Integer]: TsmxParam read GetItem {write SetItem}; default;
+    property Values[Name: String]: Variant read GetValue write SetValue;
   end;
 
 implementation
 
 uses
-  Variants, SysUtils;
+  Variants, smxConsts;
 
 { TsmxParam }
 
@@ -75,5 +80,29 @@ begin
   inherited Items[Index] := Value;
 end;}
 
+function TsmxParams.GetValue(Name: String): Variant;
+var p: TsmxParam;
+begin
+  p := FindByName(Name);
+  if Assigned(p) then
+    Result := p.ParamValue else
+    raise EsmxParamsError.CreateRes(@SParamsParamNotFound);
+    //Result := Null; //Unassigned;
+end;
+
+procedure TsmxParams.SetValue(Name: String; Value: Variant);
+var p: TsmxParam;
+begin
+  p := FindByName(Name);
+  if Assigned(p) then
+    p.ParamValue := Value else
+    raise EsmxParamsError.CreateRes(@SParamsParamNotFound);
+  {else
+    with Add do
+    begin
+      ParamName := Name;
+      ParamValue := Value;
+    end;}
+end;
+
 end.
- 

@@ -28,7 +28,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure CommitTrans;
-    function GetNewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
     procedure RollbackTrans;
     procedure StartTrans;
 
@@ -50,6 +50,7 @@ type
     function GetNumericScale: Integer;
     function GetParam: TObject;
     function GetParamName: String;
+    function GetParamNo: Integer;
     function GetParamType: TsmxParamType;
     function GetPrecision: Integer;
     function GetSize: Integer;
@@ -73,6 +74,7 @@ type
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     //property Param: TObject read GetParam;
     property ParamName: String read GetParamName write SetParamName;
+    property ParamNo: Integer read GetParamNo;
     property ParamType: TsmxParamType read GetParamType write SetParamType;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
@@ -180,7 +182,7 @@ type
   end;
 
 function NewADODatabase: IsmxDatabase;
-function NewADODataSet: IsmxDataSet;
+//function NewADODataSet: IsmxDataSet;
 
 implementation
 
@@ -201,10 +203,10 @@ begin
   Result := TsmxADODatabase.Create;
 end;
 
-function NewADODataSet: IsmxDataSet;
+{function NewADODataSet: IsmxDataSet;
 begin
   Result := TsmxADODataSet.Create;
-end;
+end;}
 
 { TsmxADODatabase }
 
@@ -252,7 +254,18 @@ begin
   Result := FDatabase.LoginPrompt;
 end;
 
-function TsmxADODatabase.GetNewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
+function TsmxADODatabase.GetParams: TStrings;
+begin
+  Result := FParams;
+  //FDatabase.ConnectionString := WideString(FParams.Text);
+end;
+
+function TsmxADODatabase.GetVersion: String;
+begin
+  Result := Vers;
+end;
+
+function TsmxADODatabase.NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
 begin
   case DataSetType of
     dstQuery:
@@ -267,17 +280,6 @@ begin
     end;
     else Result := nil;
   end;
-end;
-
-function TsmxADODatabase.GetParams: TStrings;
-begin
-  Result := FParams;
-  //FDatabase.ConnectionString := WideString(FParams.Text);
-end;
-
-function TsmxADODatabase.GetVersion: String;
-begin
-  Result := Vers;
 end;
 
 procedure TsmxADODatabase.RollbackTrans;
@@ -320,7 +322,7 @@ end;
 constructor TsmxADOParam.Create(AParam: TParameter);
 begin
   inherited Create;
-  FParam := AParam;
+  FParam := AParam;  
 end;
 
 destructor TsmxADOParam.Destroy;
@@ -335,21 +337,25 @@ begin
 end;}
 
 procedure TsmxADOParam.AssignParam(const Source: IInterface);
-var p: TObject; i: IInterface;
+var p: TObject; ParamIntf: IsmxParam; FieldIntf: IsmxField;
 begin
-  if Source.QueryInterface(IsmxParam, i) = S_OK then
-    p := (Source as IsmxParam).GetParam else
-  if Source.QueryInterface(IsmxField, i) = S_OK then
-    p := (Source as IsmxField).GetField else
+  if Source.QueryInterface(IsmxParam, ParamIntf) = S_OK then
+    //p := (Source as IsmxParam).GetParam else
+    p := ParamIntf.GetParam else
+  if Source.QueryInterface(IsmxField, FieldIntf) = S_OK then
+    //p := (Source as IsmxField).GetField else
+    p := FieldIntf.GetField else
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfParamInvalid);
-  if p is TParameter then
+  {if p is TParameter then
     FParam.Assign(TParameter(p)) else
   if p is TField then
     FParam.Assign(TField(p)) else
   if p is TParam then
     FParam.Assign(TParam(p)) else
   if p is TStrings then
-    FParam.Assign(TStrings(p)) else
+    FParam.Assign(TStrings(p))}
+  if p is TPersistent then
+    FParam.Assign(TPersistent(p)) else
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfParamInvalid);
 end;
 
@@ -373,16 +379,25 @@ begin
   Result := FParam.Name;
 end;
 
-function TsmxADOParam.GetParamType: TsmxParamType;
+function TsmxADOParam.GetParamNo: Integer;
 begin
-  case FParam.Direction of
+  Result := FParam.Index;
+end;
+
+function TsmxADOParam.GetParamType: TsmxParamType;
+const
+  DirectionToType: array[TParameterDirection] of TsmxParamType =
+    (ptUnknown, ptInput, ptOutput, ptInputOutput, ptResult);
+begin
+  {case FParam.Direction of
     pdUnknown: Result := ptUnknown;
     pdInput: Result := ptInput;
     pdOutput: Result := ptOutput;
     pdInputOutput: Result := ptInputOutput;
     pdReturnValue: Result := ptResult;
     else Result := ptUnknown;
-  end;
+  end;}
+  Result := DirectionToType[FParam.Direction];
 end;
 
 function TsmxADOParam.GetPrecision: Integer;
@@ -426,15 +441,19 @@ begin
 end;
 
 procedure TsmxADOParam.SetParamType(Value: TsmxParamType);
+const
+  TypeToDirection: array[TsmxParamType] of TParameterDirection =
+    (pdUnknown, pdInput, pdOutput, pdInputOutput, pdReturnValue);
 begin
-  case Value of
+  {case Value of
     ptUnknown: FParam.Direction := pdUnknown;
     ptInput: FParam.Direction := pdInput;
     ptOutput: FParam.Direction := pdOutput;
     ptInputOutput: FParam.Direction := pdInputOutput;
     ptResult: FParam.Direction := pdReturnValue;
     else FParam.Direction := pdUnknown;
-  end;
+  end;}
+  FParam.Direction := TypeToDirection[Value];
 end;
 
 procedure TsmxADOParam.SetPrecision(Value: Integer);
@@ -689,9 +708,9 @@ begin
     d := Value.GetDatabase;
     if d is TADOConnection then
     begin
-      Close;
-      FDatabaseIntf := Value;
+      FADODataSet.Close;
       FADODataSet.Connection := TADOConnection(d);
+      FDatabaseIntf := Value;
     end else
       raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
   end;

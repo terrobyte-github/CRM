@@ -36,20 +36,20 @@ type
   TsmxCallBack = class(TsmxComponent)
   private
     FParamList: TsmxCallBackParams;
-    function GetParam(Index: Integer): Variant;
-    procedure SetParam(Index: Integer; Value: Variant);
+    function GetValue(Index: Integer): Variant;
+    procedure SetValue(Index: Integer; Value: Variant);
   protected
     property ParamList: TsmxCallBackParams read FParamList;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    property CallParams[Index: Integer]: Variant read GetParam write SetParam; default;
+    property ParamValues[Index: Integer]: Variant read GetValue write SetValue; default;
   end;
 
 function CallBack: TsmxCallBack;
 
-var
+const
   FuncCallBack: TsmxFuncCallBack = nil;
 
 implementation
@@ -70,7 +70,7 @@ end;
 constructor TsmxCallBackParam.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
-  FParamIndex := 0;
+  FParamIndex := -1;
   FParamValue := Unassigned;
 end;
 
@@ -110,7 +110,7 @@ begin
   FParamList.Free;
 end;
 
-function TsmxCallBack.GetParam(Index: Integer): Variant;
+function TsmxCallBack.GetValue(Index: Integer): Variant;
 var p: TsmxCallBackParam;
 begin
   p := FParamList.FindByIndex(Index);
@@ -119,7 +119,7 @@ begin
     Result := Unassigned;
 end;
 
-procedure TsmxCallBack.SetParam(Index: Integer; Value: Variant);
+procedure TsmxCallBack.SetValue(Index: Integer; Value: Variant);
 var p: TsmxCallBackParam;
 begin
   p := FParamList.FindByIndex(Index);
@@ -135,7 +135,7 @@ end;
 
 initialization
   _CallBack := TsmxCallBack.Create(nil);
-  FuncCallBack := _CallBack.GetParam;
+  FuncCallBack := _CallBack.GetValue;
 
 finalization
   FuncCallBack := nil;

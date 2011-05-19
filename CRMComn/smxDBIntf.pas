@@ -28,8 +28,8 @@ type
     function GetDatabaseName: String;
     function GetInTransaction: Boolean;
     function GetLoginPrompt: Boolean;
-    function GetNewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
     function GetParams: TStrings;
+    function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
     procedure RollbackTrans;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
@@ -97,6 +97,7 @@ type
     function GetNumericScale: Integer;
     function GetParam: TObject;
     function GetParamName: String;
+    function GetParamNo: Integer;
     function GetParamType: TsmxParamType;
     function GetPrecision: Integer;
     function GetSize: Integer;
@@ -114,6 +115,7 @@ type
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     //property Param: TObject read GetParam;
     property ParamName: String read GetParamName write SetParamName;
+    property ParamNo: Integer read GetParamNo;
     property ParamType: TsmxParamType read GetParamType write SetParamType;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;

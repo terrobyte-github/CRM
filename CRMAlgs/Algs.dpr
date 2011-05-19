@@ -11,29 +11,38 @@ uses
   smxFuncs in '..\CRMComn\smxFuncs.pas',
   smxCells in '..\CRMBase\smxCells.pas',
   smxCfgs in '..\CRMBase\smxCfgs.pas',
-  smxParams in '..\CRMComn\smxParams.pas',
   smxConsts in '..\CRMComn\smxConsts.pas',
   smxWheelDBGrid in '..\CRMBase\smxWheelDBGrid.pas',
-  smxDLLTypes in '..\CRMComn\smxDLLTypes.pas',
-  smxDLLFuncs in '..\CRMComn\smxDLLFuncs.pas';
+  smxLibTypes in '..\CRMComn\smxLibTypes.pas',
+  smxLibFuncs in '..\CRMComn\smxLibFuncs.pas',
+  smxCallBack in '..\CRMBase\smxCallBack.pas',
+  smxGlobalStorage in '..\CRMBase\smxGlobalStorage.pas',
+  smxLibManager in '..\CRMBase\smxLibManager.pas',
+  smxFormManager in '..\CRMBase\smxFormManager.pas',
+  smxGlobal in '..\CRMBase\smxGlobal.pas',
+  smxADODB in '..\CRMBase\smxADODB.pas',
+  smxField in '..\CRMBase\smxField.pas',
+  smxLibProcs in '..\CRMComn\smxLibProcs.pas',
+  smxProcs in '..\CRMComn\smxProcs.pas';
 
 {$R *.res}
 
 exports
-  //InitDLL,
-  //ManagerActions,
-  //Inf,
-  RefreshRequest,
+  LibInfo,
   OpenForm,
+  OpenFormByEventID,
+  OpenFormByProblemID,
   CloseForm,
   RefreshForm,
-  OpenModalForm,
+  ApplyForm,
   SelectRecord,
   UnSelectRecord,
-  ExecuteAlgorithm,
   SelectOfFormSetFilterValue,
   PerformRequestFromForm,
-  SelectOfFormPerformRequest;
+  SelectOfFormPerformRequest,
+  SelectOfFormPerformRequestFromAlgorithm,
+  SelectOfFormPerformRequestFromForm;
 
-begin  
+begin
+  FillInfo(1, 0, LibInit);
 end.

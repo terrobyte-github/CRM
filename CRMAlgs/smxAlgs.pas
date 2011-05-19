@@ -10,465 +10,490 @@ type
 
   EsmxAlgorithmError = class(Exception);
 
-procedure RefreshRequest(Action: TsmxAlgorithm; Params: Variant);
-procedure OpenForm(Action: TsmxAlgorithm; Params: Variant);
-procedure CloseForm(Action: TsmxAlgorithm; Params: Variant);
-procedure RefreshForm(Action: TsmxAlgorithm; Params: Variant);
-procedure OpenModalForm(Action: TsmxAlgorithm; Params: Variant);
-procedure SelectRecord(Action: TsmxAlgorithm; Params: Variant);
-procedure UnSelectRecord(Action: TsmxAlgorithm; Params: Variant);
-//function OpenCard(Action: TsmxAlgorithm; Params: Variant): Variant;
-procedure ExecuteAlgorithm(Action: TsmxAlgorithm; Params: Variant);
-procedure SelectOfFormSetFilterValue(Action: TsmxAlgorithm; Params: Variant);
-procedure PerformRequestFromForm(Action: TsmxAlgorithm; Params: Variant);
-procedure SelectOfFormPerformRequest(Action: TsmxAlgorithm; Params: Variant);
+procedure OpenForm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure OpenFormByEventID(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure OpenFormByProblemID(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure CloseForm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure RefreshForm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure ApplyForm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure SelectRecord(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure UnSelectRecord(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure SelectOfFormSetFilterValue(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure PerformRequestFromForm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure SelectOfFormPerformRequest(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure SelectOfFormPerformRequestFromAlgorithm(Algorithm: TsmxAlgorithm; Params: Variant);
+procedure SelectOfFormPerformRequestFromForm(Algorithm: TsmxAlgorithm; Params: Variant);
 
 implementation
 
 uses
-  Windows, Controls, Variants, smxCells, smxParams, smxFuncs,
-  smxDLLFuncs, smxConsts, smxDBIntf, smxTypes, smxDLLTypes;
+  Windows, Controls, Variants, smxLibProcs, smxCells, smxFormManager, smxFuncs,
+  smxLibFuncs, smxConsts, smxDBIntf, smxTypes, smxLibTypes;
 
-procedure RefreshRequest(Action: TsmxAlgorithm; Params: Variant);
-var c: TsmxBaseCell; r: TsmxCustomRequest;
+procedure OpenForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f: TsmxBaseCell;
+  //Call: TsmxFuncCallBack;
 begin
-  r := nil;
-  c := Action.RootCell;
-  if TsmxFuncIsCell(Integer(Action.Call(111)))(c, 'TsmxCustomForm') then
-  begin
-    with TsmxCustomForm(c) do
-      if Assigned(PageManager) then
-        if Assigned(PageManager.ActivePage) then
-          if Assigned(PageManager.ActivePage.Grid) then
-            r := PageManager.ActivePage.Grid.Request;
-    if Assigned(r) then
-      r.Perform;
-  end;
-end;
-
-procedure OpenForm(Action: TsmxAlgorithm; Params: Variant);
-var FormID: Integer; ap: TsmxParams; c, f: TsmxBaseCell;
-  Call: TsmxFuncCallBack; i: Integer;
-begin
-  FormID := 0;
-  ap := VarToParams(Params);
   try
-    if ap.Count > 0 then
-      FormID := ap[0].ParamValue;
-    if FormID > 0 then
+    //FormCfgID := 0; FormID := 0;
+    ap := VarToParams(Params);
+    try
+      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
+      FormID := ParamValueDef(ap, 'FormID', 0);
+      {p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('FormID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;}
+    finally
+      ap.Free;
+    end;
+    if FormCfgID > 0 then
     begin
-      c := Action.RootCell;
-      Call := Action.Call;
-      f := TsmxFormManager(Integer(Call(2))).FindByCfgID(FormID);
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
       if Assigned(f) then
       begin
         TsmxCustomForm(f).ShowForm;
       end else
       begin
-        f := CreateCell(FormID, Call);
-        if not ClassCell(f, 'TsmxCustomForm', Call) then
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-        with TsmxCustomForm(f) do
+        f := CreateCell(FormCfgID, FormID);
+        if ClassCell(f, 'TsmxCustomForm') then
         begin
-          if ClassCell(c, 'TsmxCustomForm', Call) then
-            ParentForm := TsmxCustomForm(c);
-          for i := 1 to ap.Count - 1 do
-            FormParams[ap[i].ParamName] := ap[i].ParamValue;
-          ShowForm;
+          with TsmxCustomForm(f) do
+          begin
+            if ClassCell(c, 'TsmxCustomForm') then
+              ParentForm := TsmxCustomForm(c);
+            ShowForm;
+          end;
+        end else
+        begin
+          f.Free;
+          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
         end;
       end;
     end;
-  finally
-    ap.Free;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
   end;
 end;
 
-procedure CloseForm(Action: TsmxAlgorithm; Params: Variant);
-var c: TsmxBaseCell; Call: TsmxFuncCallBack;
+procedure OpenFormByEventID(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f: TsmxBaseCell;
+  //Call: TsmxFuncCallBack;
 begin
-  c := Action.RootCell;
-  Call := Action.Call;
-  if ClassCell(c, 'TsmxCustomForm', Call) then
+  try
+    FormCfgID := 0; FormID := 0;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('@EventID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+    finally
+      ap.Free;
+    end;
+    if (FormCfgID > 0) and (FormID > 0) then
+    begin
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      if Assigned(f) then
+      begin
+        TsmxCustomForm(f).ShowForm;
+      end else
+      begin
+        f := CreateCell(FormCfgID, FormID);
+        if ClassCell(f, 'TsmxCustomForm') then
+        begin
+          with TsmxCustomForm(f) do
+          begin
+            if ClassCell(c, 'TsmxCustomForm') then
+              ParentForm := TsmxCustomForm(c);
+            ShowForm;
+          end;
+        end else
+        begin
+          f.Free;
+          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+        end;
+      end;
+    end;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+  end;
+end;
+
+procedure OpenFormByProblemID(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f: TsmxBaseCell;
+  //Call: TsmxFuncCallBack;
+begin
+  try
+    FormCfgID := 0; FormID := 0;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('@ProblemID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+    finally
+      ap.Free;
+    end;
+    if (FormCfgID > 0) and (FormID > 0) then
+    begin
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      f := TsmxFormManager(Integer(Call(4))).FindByComboID(FormCfgID, FormID);
+      if Assigned(f) then
+      begin
+        TsmxCustomForm(f).ShowForm;
+      end else
+      begin
+        f := CreateCell(FormCfgID, FormID);
+        if ClassCell(f, 'TsmxCustomForm') then
+        begin
+          with TsmxCustomForm(f) do
+          begin
+            if ClassCell(c, 'TsmxCustomForm') then
+              ParentForm := TsmxCustomForm(c);
+            ShowForm;
+          end;
+        end else
+        begin
+          f.Free;
+          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+        end;
+      end;
+    end;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+  end;
+end;
+
+procedure CloseForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
+begin
+  c := Algorithm.RootCell;
+  //Call := Algorithm.Call;
+  if ClassCell(c, 'TsmxCustomForm') then
     c.Free;
 end;
 
-procedure RefreshForm(Action: TsmxAlgorithm; Params: Variant);
-var c: TsmxBaseCell; Call: TsmxFuncCallBack;
+procedure RefreshForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
-  c := Action.RootCell;
-  Call := Action.Call;
-  if ClassCell(c, 'TsmxCustomForm', Call) then
+  c := Algorithm.RootCell;
+  //Call := Algorithm.Call;
+  if ClassCell(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).Prepare(True);
 end;
 
-procedure OpenModalForm(Action: TsmxAlgorithm; Params: Variant);
-var ID: Integer; f: TsmxCustomForm; r: TsmxCustomRequest; c: TsmxBaseCell;
-  apIn: TsmxParams; i: Integer; fld: IsmxField; flt: TsmxBaseCell;
+procedure ApplyForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
-  //MessageBox(0, 'OpenForm', nil, 0);
-
-  //f := TsmxStandardForm(NewCell(nil, 7, Action.Call));
-  //f := TsmxStandardForm(tmp(Integer(Action.Call(101)))(nil, 7, Action.Call));
-  //Result := Unassigned;
-  ID := 0;
-  apIn := VarToParams(Params);
-  try
-    if apIn.Count > 0 then
-      ID := apIn[0].ParamValue;
-    if ID > 0 then
-    begin
-      //f := TsmxCustomForm(NewCell(nil, ID, Action.Call));
-      f := TsmxCustomForm(TsmxFuncNewCell(Integer(Action.Call(101)))(nil, ID, Action.Call));
-      c := Action.RootCell;
-      if TsmxFuncIsCell(Integer(Action.Call(111)))(c, 'TsmxCustomForm') then
-        f.ParentForm := TsmxCustomForm(c);
-      try
-        for i := 1 to apIn.Count - 1 do
-          f.FormParams[apIn[i].ParamName] := apIn[i].ParamValue;
-        //f.ItemLeft := 300;
-        //f.ItemTop := 300;
-        //f.ItemWidth := 300;
-        //f.ItemHeight := 400;
-        if f.ShowModalForm = mrOk then
-        begin
-          r := nil;
-          if Assigned(f.PageManager) then
-            if Assigned(f.PageManager.ActivePage) then
-              if Assigned(f.PageManager.ActivePage.Grid) then
-                r := f.PageManager.ActivePage.Grid.Request;
-          if Assigned(r) then
-          begin
-            {apOut := TsmxParams.Create(TsmxParam);
-            try
-              with apOut.Add do
-              begin
-                ParamName := 'Key';
-                ParamValue := r.FindResultValue(fsKey);
-              end;
-              with apOut.Add do
-              begin
-                ParamName := 'Value';
-                ParamValue := r.FindResultValue(fsValue);
-              end;
-              Result := ParamsToVar(apOut);
-            finally
-              apOut.Free;
-            end;}
-            fld := r.FindFieldSense(fsKey);
-            if Assigned(fld) then
-            begin
-              //Result := fld.Value;
-              flt := Action.ParentCell;
-              if TsmxFuncIsCell(Integer(Action.Call(111)))(flt, 'TsmxCustomFilter') then
-                TsmxCustomFilter(flt).FilterValue := fld.Value;
-            end;
-          end;
-        end;
-      finally
-        f.Free;
-      end;
-    end;
-  finally
-    apIn.Free;
-  end;
-
-  {Result := Unassigned;
-  ID := 0; t := 0;
-  if VarIsArray(Params) then
-    if VarArrayHighBound(Params, 1) = 1 then
-    begin
-      ID := Params[0];
-      t := Params[1];
-    end;
-  if ID > 0 then
-  begin                   //Application.Handle := Action.Call(0);
-    //f := TsmxStandardForm.Create(nil, 7, Action.Call);
-    //f := TsmxStandardForm(NewCell(nil, 7, Action.Call));
-    //f := TsmxStandardForm.Create(nil, 7, Action.Call);
-    //f := TsmxStandardForm(NewCell(nil, ID, Action.Call));
-    
-    f := TsmxCustomForm(NewCell(nil, ID, Action.Call));
-    try
-      f.FormParams['@DirType'] := IntToStr(t);
-      f.ItemLeft := 300;
-      f.ItemTop := 300;
-      f.ItemWidth := 300;
-      f.ItemHeight := 400;
-      if f.ShowModalForm = mrOk then
-      begin
-        r := nil;
-        if Assigned(f.PageManager) then
-          if Assigned(f.PageManager.ActivePage) then
-            r := f.PageManager.ActivePage.Request;
-        if Assigned(r) then
-        begin
-          v := VarArrayCreate([0, 1], varVariant);
-          v[0] := r.FindResultValue(fsKey);
-          v[1] := r.FindResultValue(fsValue);
-          Result := v;
-          //Result := r.FindResultValue(fsKey);
-        end;
-      end;
-    finally
-      f.Free;
-    end;
-  end;}
+  c := Algorithm.RootCell;
+  //Call := Algorithm.Call;
+  if ClassCell(c, 'TsmxCustomForm') then
+    TsmxCustomForm(c).Apply;
 end;
 
-procedure SelectRecord(Action: TsmxAlgorithm; Params: Variant);
-var c: TsmxBaseCell; Call: TsmxFuncCallBack;
+procedure SelectRecord(Algorithm: TsmxAlgorithm; Params: Variant);
+var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
-  c := Action.RootCell;
-  Call := Action.Call;
-  if ClassCell(c, 'TsmxCustomForm', Call) then
+  c := Algorithm.RootCell;
+  //Call := Algorithm.Call;
+  if ClassCell(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).FormModalResult := mrOk;
 end;
 
-procedure UnSelectRecord(Action: TsmxAlgorithm; Params: Variant);
-var c: TsmxBaseCell; Call: TsmxFuncCallBack;
+procedure UnSelectRecord(Algorithm: TsmxAlgorithm; Params: Variant);
+var c: TsmxBaseCell; //Call: TsmxFuncCallBack;
 begin
-  c := Action.RootCell;
-  Call := Action.Call;
-  if ClassCell(c, 'TsmxCustomForm', Call) then
+  c := Algorithm.RootCell;
+  //Call := Algorithm.Call;
+  if ClassCell(c, 'TsmxCustomForm') then
     TsmxCustomForm(c).FormModalResult := mrCancel;
 end;
 
-{procedure OpenCard(Action: TsmxAlgorithm; Params: Variant);
-var ID: Integer; f: TsmxCustomForm; ap: TsmxParams; h: HWND;
-  fp: TsmxCustomFilterPanel; r: TsmxCustomRequest; i: Integer;
+procedure SelectOfFormSetFilterValue(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f, flt: TsmxBaseCell;
+  r: TsmxCustomRequest; fld: IsmxField; //Call: TsmxFuncCallBack;
 begin
-  Result := Unassigned;
-  ID := 0;
-  ap := VarToParams(Params);
   try
-    if ap.Count > 0 then
-      ID := ap[0].ParamValue;
-  finally
-    ap.Free;
-  end;
-  if ID > 0 then
-  begin
-    f := TsmxCustomForm(TsmxCustomForm(Action.RootCell).FormManager.FindByID(ID));
-    if Assigned(f) then
+    FormCfgID := 0; FormID := 0;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('FormID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+    finally
+      ap.Free;
+    end;
+    if FormCfgID > 0 then
     begin
-      h := TsmxCustomForm(Action.RootCell).FormManager.HandleOfForm(f);
-      BringWindowToTop(h);
-      SetActiveWindow(h);
-    end else
-    begin
-      f := TsmxCustomForm(TsmxFuncNewCell(Integer(Action.Call(101)))(nil, ID, Action.Call));
-      //f.ItemLeft := 250;
-      //f.ItemTop := 250;
-      //f.ItemWidth := 400;
-      //f.ItemHeight := 250;
-      f.ParentForm := TsmxCustomForm(Action.RootCell);
-      f.ShowForm;
-      fp := nil; r := nil;
-      if Assigned(f.PageManager) then
-        if Assigned(f.PageManager.ActivePage) then
-          if Assigned(f.PageManager.ActivePage.Grid) then
-          begin
-            r := f.PageManager.ActivePage.Grid.Request;
-            fp := f.PageManager.ActivePage.FilterPanel;
-          end;
-      if Assigned(r) and Assigned(fp) then
-        for i := 0 to fp.FilterCount - 1 do
-        begin
-          //
-        end;
-    end
-  end;
-end;}
-
-procedure ExecuteAlgorithm(Action: TsmxAlgorithm; Params: Variant);
-var ID: Integer; ap: TsmxParams; c: TsmxBaseCell; r: TsmxCustomRequest;
-  res, msg: Variant; f: IsmxField;
-begin
-  //Result := Unassigned;
-  ID := 0;
-  ap := VarToParams(Params);
-  try
-    if ap.Count > 0 then
-      ID := ap[0].ParamValue;
-    if ID > 0 then
-    begin
-      r := TsmxCustomRequest(TsmxFuncNewCell(Integer(Action.Call(101)))(nil, ID, Action.Call));
-      c := Action.RootCell;
-      if TsmxFuncIsCell(Integer(Action.Call(111)))(c, 'TsmxCustomForm') then
-        if Assigned(TsmxCustomForm(c).PageManager) then
-          r.ParentCell := TsmxCustomForm(c).PageManager.ActivePage;
-      try
-        if not(r.Database.InTransaction) then
-          r.Database.StartTrans;
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      flt := Algorithm.ParentCell;
+      if ClassCell(flt, 'TsmxCustomFilter') then
+      begin
+        f := CreateCell(FormCfgID, FormID);
         try
-          r.Perform;
-          case r.CellDataSet.DataSetType of
-            dstQuery:
-            begin
-              f := r.FindFieldSense(fsResult);
-              if Assigned(f) then
-                res := f.Value;
-              f := r.FindFieldSense(fsMsg);
-              if Assigned(f) then
-                msg := f.Value;
-              //res := r.FindResultValue(fsResult);
-              //msg := r.FindResultValue(fsMsg);
-            end;
-            dstStoredProc:
-            begin
-              res := r.RequestParams['@Return_value'];
-              msg := r.RequestParams['@Msg'];
-            end;
-          end;
-          if StrToIntDef(res, 1) = 0 then
-            r.Database.CommitTrans else
-            r.Database.RollbackTrans;
-          if StrToIntDef(res, 1) = 0 then
-            if TsmxFuncIsCell(Integer(Action.Call(111)))(c, 'TsmxCustomForm') then
-              TsmxCustomForm(c).Prepare(True);
-          if msg <> '' then
+          if not ClassCell(f, 'TsmxCustomForm') then
+            raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+          with TsmxCustomForm(f) do
           begin
-            //MessageBox(0, PChar(String(msg)), nil, 0);
-            //Application.Handle := HWND(Integer(Action.Call(0)));
-            //Inf(msg);
-            TsmxFuncInf(Integer(Action.Call(151)))(msg);
+            if ClassCell(c, 'TsmxCustomForm') then
+              ParentForm := TsmxCustomForm(c);
+            if ShowModalForm = mrOk then
+            begin
+              {r := nil;
+              with TsmxCustomForm(f) do
+                if Assigned(PageManager) then
+                  if Assigned(PageManager.ActivePage) then
+                    if Assigned(PageManager.ActivePage.Grid) then
+                      r := PageManager.ActivePage.Grid.Request;}
+              r := ActiveRequest(TsmxCustomForm(f));
+              if Assigned(r) then
+              begin
+                fld := r.FindFieldSense(fsKey);
+                if Assigned(fld) then
+                  TsmxCustomFilter(flt).FilterValue := fld.Value;
+                fld := r.FindFieldSense(fsValue);
+                if Assigned(fld) then
+                  TsmxCustomFilter(flt).FilterText := fld.Value;
+              end;
+            end;
           end;
-        except
-          r.Database.RollbackTrans;
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+        finally
+          f.Free;
         end;
-      finally
-        r.ParentCell := nil;
-        r.Free;
       end;
     end;
-  finally
-    ap.Free;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
   end;
 end;
 
-procedure SelectOfFormSetFilterValue(Action: TsmxAlgorithm; Params: Variant);
-var FormID: Integer; ap: TsmxParams; c, f, p: TsmxBaseCell; r: TsmxCustomRequest;
-  Call: TsmxFuncCallBack; i: Integer; fld: IsmxField;
+procedure PerformRequestFromForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var RequestCfgID: Integer; ap: TsmxParams; p: TsmxParam; c, r: TsmxBaseCell;
+  //Call: TsmxFuncCallBack;
 begin
-  FormID := 0;
-  ap := VarToParams(Params);
   try
-    if ap.Count > 0 then
-      FormID := ap[0].ParamValue;
-    if FormID > 0 then
+    RequestCfgID := 0;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('RequestCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          RequestCfgID := p.ParamValue;
+    finally
+      ap.Free;
+    end;
+    if RequestCfgID > 0 then
     begin
-      c := Action.RootCell;
-      Call := Action.Call;
-      p := Action.ParentCell;
-      if not ClassCell(p, 'TsmxCustomFilter', Call) then
-        raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-      f := CreateCell(FormID, Call);
-      try
-        if not ClassCell(f, 'TsmxCustomForm', Call) then
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-        with TsmxCustomForm(f) do
-        begin
-          if ClassCell(c, 'TsmxCustomForm', Call) then
-            ParentForm := TsmxCustomForm(c);
-          for i := 1 to ap.Count - 1 do
-            FormParams[ap[i].ParamName] := ap[i].ParamValue;
-          if ShowModalForm = mrOk then
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      if ClassCell(c, 'TsmxCustomForm') then
+      begin
+        r := CreateCell(RequestCfgID);
+        try
+          if not ClassCell(r, 'TsmxCustomRequest') then
+            raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+          r.ParentCell := c;
+          if PerformRequest(TsmxCustomRequest(r)) then
+            TsmxCustomForm(c).Prepare(True);
+        finally
+          r.Free;
+        end;
+      end;
+    end;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+  end;
+end;
+
+procedure SelectOfFormPerformRequest(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID, RequestCfgID: Integer; FormRefresh: Boolean;
+  ap: TsmxParams; p: TsmxParam; c, f, r: TsmxBaseCell; //r2: TsmxCustomRequest;
+  //i: Integer; //Call: TsmxFuncCallBack;
+begin
+  try
+    FormCfgID := 0; FormID := 0;
+    RequestCfgID := 0; FormRefresh := False;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('FormID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+      p := ap.FindByName('RequestCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          RequestCfgID := p.ParamValue;
+      p := ap.FindByName('FormRefresh');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormRefresh := p.ParamValue;
+      if (FormCfgID > 0) and (RequestCfgID > 0) then
+      begin
+        c := Algorithm.RootCell;
+        //Call := Algorithm.Call;
+        f := CreateCell(FormCfgID, FormID);
+        try
+          if not ClassCell(f, 'TsmxCustomForm') then
+            raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+          with TsmxCustomForm(f) do
           begin
-            r := nil;
-            with TsmxCustomForm(f) do
+            if ClassCell(c, 'TsmxCustomForm') then
+              ParentForm := TsmxCustomForm(c);
+            if ShowModalForm = mrOk then
+            begin
+              {r2 := nil;
               if Assigned(PageManager) then
                 if Assigned(PageManager.ActivePage) then
                   if Assigned(PageManager.ActivePage.Grid) then
-                    r := PageManager.ActivePage.Grid.Request;
-            if Assigned(r) then
-            begin
-              fld := r.FindFieldSense(fsKey);
-              if Assigned(fld) then
-                TsmxCustomFilter(p).FilterValue := fld.Value;
+                    r2 := PageManager.ActivePage.Grid.Request;}
+              r := CreateCell(RequestCfgID);
+              try
+                if not ClassCell(r, 'TsmxCustomRequest') then
+                  raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+                with TsmxCustomRequest(r) do
+                begin
+                  {for i := 0 to ap.Count - 1 do
+                    if VarIsNull(ap[i].ParamValue) then
+                      RequestParams[ap[i].ParamName] := '' else
+                      RequestParams[ap[i].ParamName] := ap[i].ParamValue;
+                  if Assigned(r2) then
+                    for i := 0 to r2.CellDataSet.FieldCount - 1 do
+                      if VarIsNull(r2.CellDataSet.Fields[i].Value) then
+                        RequestParams[r2.CellDataSet.Fields[i].FieldName] := '' else
+                        RequestParams[r2.CellDataSet.Fields[i].FieldName] :=
+                          r2.CellDataSet.Fields[i].Value;}
+                end;
+                //PerformRequest(TsmxCustomRequest(r), True);
+                if PerformRequest(TsmxCustomRequest(r), True) then
+                  if ClassCell(c, 'TsmxCustomForm') then
+                    TsmxCustomForm(c).Prepare(FormRefresh);
+              finally
+                r.Free;
+              end;
             end;
           end;
+        finally
+          f.Free;
         end;
-      finally
-        f.Free;
       end;
+    finally
+      ap.Free;
     end;
-  finally
-    ap.Free;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
   end;
 end;
 
-procedure PerformRequestFromForm(Action: TsmxAlgorithm; Params: Variant);
-var RequestID: Integer; ap: TsmxParams; c, r: TsmxBaseCell;
-  Call: TsmxFuncCallBack; res: Boolean;
+procedure SelectOfFormPerformRequestFromAlgorithm(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID, RequestCfgID: Integer; FormRefresh: Boolean;
+  ap: TsmxParams; p: TsmxParam; c, f, r: TsmxBaseCell; r2: TsmxCustomRequest;
+  fld: IsmxField; prm: TsmxParam; //Call: TsmxFuncCallBack;
 begin
-  RequestID := 0;
-  ap := VarToParams(Params);
   try
-    if ap.Count > 0 then
-      RequestID := ap[0].ParamValue;
-    if RequestID > 0 then
-    begin
-      c := Action.RootCell;
-      Call := Action.Call;
-      r := CreateCell(RequestID, Call);
-      try
-        if not ClassCell(r, 'TsmxCustomRequest', Call) then
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-        if not ClassCell(c, 'TsmxCustomForm', Call) then
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-        r.ParentCell := c;
-        res := PerformRequest(TsmxCustomRequest(r));
-        if not res then
-          raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-        TsmxCustomForm(c).Prepare(True);
-      finally
-        r.Free;
-      end;
+    FormCfgID := 0; FormID := 0;
+    RequestCfgID := 0; FormRefresh := False;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('FormID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+      p := ap.FindByName('RequestCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          RequestCfgID := p.ParamValue;
+      p := ap.FindByName('FormRefresh');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormRefresh := p.ParamValue;
+    finally
+      ap.Free;
     end;
-  finally
-    ap.Free;
-  end;
-end;
-
-procedure SelectOfFormPerformRequest(Action: TsmxAlgorithm; Params: Variant);
-var FormID, RequestID: Integer; ap: TsmxParams; c, f, r: TsmxBaseCell;
-  Call: TsmxFuncCallBack; i: Integer; res: Boolean;
-begin
-  FormID := 0; RequestID := 0;
-  ap := VarToParams(Params);
-  try
-    if ap.Count > 1 then
+    if (FormCfgID > 0) and (RequestCfgID > 0) then
     begin
-      FormID := ap[0].ParamValue;
-      RequestID := ap[1].ParamValue;
-    end;
-    if (FormID > 0) and (RequestID > 0) then
-    begin
-      c := Action.RootCell;
-      Call := Action.Call;
-      f := CreateCell(FormID, Call);
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      f := CreateCell(FormCfgID, FormID);
       try
-        if not ClassCell(f, 'TsmxCustomForm', Call) then
+        if not ClassCell(f, 'TsmxCustomForm') then
           raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
         with TsmxCustomForm(f) do
         begin
-          if ClassCell(c, 'TsmxCustomForm', Call) then
+          if ClassCell(c, 'TsmxCustomForm') then
             ParentForm := TsmxCustomForm(c);
-          for i := 2 to ap.Count - 1 do
-            FormParams[ap[i].ParamName] := ap[i].ParamValue;
           if ShowModalForm = mrOk then
           begin
-            r := CreateCell(RequestID, Call);
+            r2 := nil;
+            if Assigned(PageManager) then
+              if Assigned(PageManager.ActivePage) then
+                if Assigned(PageManager.ActivePage.Grid) then
+                  r2 := PageManager.ActivePage.Grid.Request;
+            if Assigned(r2) then
+            begin
+              {fld := r2.FindFieldSense(fsParam);
+              while Assigned(fld) do
+              begin
+                //if VarIsNull(fld.Value) then
+                  //Algorithm.AlgorithmParams[fld.FieldName] := '' else
+                  //Algorithm.AlgorithmParams[fld.FieldName] := fld.Value;
+                //Algorithm.AlgorithmParams.Values[fld.FieldName] := fld.Value;
+                with Algorithm.AlgorithmParams.Add do
+                begin
+                  ParamName := fld.FieldName;
+                  ParamValue := fld.Value;
+                end;
+                fld := r2.FindFieldSense(fsParam, fld.FieldNo + 1);
+              end;}
+
+              prm := Algorithm.FindParamLocation(plInput);
+              while Assigned(prm) do
+              begin
+                fld := r2.CellDataSet.FindField(prm.ParamName);
+                  if Assigned(fld) then
+                    prm.ParamValue := fld.Value;
+                prm := Algorithm.FindParamLocation(plInput, prm.ItemIndex + 1);
+              end;
+            end;
+            r := CreateCell(RequestCfgID);
             try
-              if not ClassCell(r, 'TsmxCustomRequest', Call) then
+              if not ClassCell(r, 'TsmxCustomRequest') then
                 raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-              r.ParentCell := f;
-              res := PerformRequest(TsmxCustomRequest(r));
-              if not res then
-                raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-              if ClassCell(c, 'TsmxCustomForm', Call) then
-                TsmxCustomForm(c).Prepare(True);
+              r.ParentCell := Algorithm;
+              if PerformRequest(TsmxCustomRequest(r)) then
+                if ClassCell(c, 'TsmxCustomForm') then
+                  TsmxCustomForm(c).Prepare(FormRefresh);
             finally
               r.Free;
             end;
@@ -478,8 +503,106 @@ begin
         f.Free;
       end;
     end;
-  finally
-    ap.Free;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+  end;
+end;
+
+procedure SelectOfFormPerformRequestFromForm(Algorithm: TsmxAlgorithm; Params: Variant);
+var FormCfgID, FormID, RequestCfgID: Integer; FormRefresh: Boolean;
+  ap: TsmxParams; p: TsmxParam; c, f, r: TsmxBaseCell; r2: TsmxCustomRequest;
+  fld: IsmxField; prm: IsmxParam; //Call: TsmxFuncCallBack;
+begin
+  try
+    FormCfgID := 0; FormID := 0;
+    RequestCfgID := 0; FormRefresh := False;
+    ap := VarToParams(Params);
+    try
+      p := ap.FindByName('FormCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormCfgID := p.ParamValue;
+      p := ap.FindByName('FormID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormID := p.ParamValue;
+      p := ap.FindByName('RequestCfgID');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          RequestCfgID := p.ParamValue;
+      p := ap.FindByName('FormRefresh');
+      if Assigned(p) then
+        if not VarIsNull(p.ParamValue) then
+          FormRefresh := p.ParamValue;
+    finally
+      ap.Free;
+    end;
+    if (FormCfgID > 0) and (RequestCfgID > 0) then
+    begin
+      c := Algorithm.RootCell;
+      //Call := Algorithm.Call;
+      if ClassCell(c, 'TsmxCustomForm') then
+      begin
+        f := CreateCell(FormCfgID, FormID);
+        try
+          if not ClassCell(f, 'TsmxCustomForm') then
+            raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+          with TsmxCustomForm(f) do
+          begin
+            ParentForm := TsmxCustomForm(c);
+            if ShowModalForm = mrOk then
+            begin
+              r2 := nil;
+              if Assigned(PageManager) then
+                if Assigned(PageManager.ActivePage) then
+                  if Assigned(PageManager.ActivePage.Grid) then
+                    r2 := PageManager.ActivePage.Grid.Request;
+              r := CreateCell(RequestCfgID);
+              try
+                if not ClassCell(r, 'TsmxCustomRequest') then
+                  raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+                with TsmxCustomRequest(r) do
+                begin
+                  ParentCell := c;
+                  RefreshParams;
+                  if Assigned(r2) then
+                  begin
+                    prm := FindParamLocation(plInput);
+                    while Assigned(prm) do
+                    begin
+                      fld := r2.CellDataSet.FindField(prm.ParamName);
+                      if Assigned(fld) then
+                        prm.Value := fld.Value;
+                      prm := FindParamLocation(plInput, prm.ParamNo + 1);
+                    end;
+
+                    {fld := r2.FindFieldSense(fsParam);
+                    while Assigned(fld) do
+                    begin
+                      prm := CellDataSet.FindParam(fld.FieldName);
+                      if Assigned(prm) then
+                        prm.Value := fld.Value;
+                      //if VarIsNull(fld.Value) then
+                        //RequestParams[fld.FieldName] := '' else
+                        //RequestParams[fld.FieldName] := fld.Value;
+                      fld := r2.FindFieldSense(fsParam, fld.FieldNo + 1);
+                    end;}
+                  end;
+                end;
+                if PerformRequest(TsmxCustomRequest(r), True) then
+                  TsmxCustomForm(c).Prepare(FormRefresh);
+              finally
+                r.Free;
+              end;
+            end;
+          end;
+        finally
+          f.Free;
+        end;
+      end;
+    end;
+  except
+    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
   end;
 end;
 
