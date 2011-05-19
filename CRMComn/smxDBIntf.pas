@@ -22,24 +22,27 @@ type
 
   IsmxDatabase = interface(IInterface)
     ['{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}']
-    procedure CommitTrans;
+    procedure CommitTransaction;
     function GetConnected: Boolean;
     function GetDatabase: TObject;
     function GetDatabaseName: String;
+    function GetDriverName: String;
     function GetInTransaction: Boolean;
     function GetLoginPrompt: Boolean;
     function GetParams: TStrings;
     function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
-    procedure RollbackTrans;
+    procedure RollbackTransaction;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
+    procedure SetDriverName(const Value: String);
     procedure SetLoginPrompt(Value: Boolean);
     procedure SetParams(Value: TStrings);
-    procedure StartTrans;
+    procedure StartTransaction;
 
     property Connected: Boolean read GetConnected write SetConnected;
     //property Database: TObject read GetDatabase;
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
+    property DriverName: String read GetDriverName write SetDriverName;
     property InTransaction: Boolean read GetInTransaction;
     property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     property Params: TStrings read GetParams write SetParams;
@@ -126,6 +129,7 @@ type
 
   IsmxDataSet = interface(IInterface)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
+    procedure Add;
     function AddField(const FieldName: String): IsmxField;
     function AddParam: IsmxParam;
     procedure ClearFields;
@@ -148,7 +152,7 @@ type
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
     function GetPrepare: Boolean;
-    function GetRecNo: Integer;
+    function GetRecordNo: Integer;
     function GetRecordCount: Integer;
     function GetSQL: TStrings;
     procedure Last;
@@ -157,8 +161,10 @@ type
     procedure Next;
     procedure Open;
     function ParamByName(const Value: String): IsmxParam;
+    procedure Post;
     procedure Prepare;
     procedure Prior;
+    procedure Remove;
     procedure RemoveParam(const Value: IsmxParam);
     procedure RemoveField(const Value: IsmxField);
     procedure SetActive(Value: Boolean);
@@ -166,7 +172,7 @@ type
     procedure SetField(Index: Integer; const Value: IsmxField);
     procedure SetParam(Index: Integer; const Value: IsmxParam);
     procedure SetPrepare(Value: Boolean);
-    procedure SetRecNo(Value: Integer);
+    procedure SetRecordNo(Value: Integer);
     procedure SetSQL(Value: TStrings);
 
     property Active: Boolean read GetActive write SetActive;
@@ -180,7 +186,7 @@ type
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;
-    property RecNo: Integer read GetRecNo write SetRecNo;
+    property RecordNo: Integer read GetRecordNo write SetRecordNo;
     property RecordCount: Integer read GetRecordCount;
     property SQL: TStrings read GetSQL write SetSQL;
   end;

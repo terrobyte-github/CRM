@@ -20,7 +20,9 @@ uses
   smxLibManager in '..\CRMBase\smxLibManager.pas',
   smxFormManager in '..\CRMBase\smxFormManager.pas',
   smxGlobal in '..\CRMBase\smxGlobal.pas',
-  smxProcs in '..\CRMComn\smxProcs.pas';
+  smxProcs in '..\CRMComn\smxProcs.pas',
+  smxDBManager in '..\CRMBase\smxDBManager.pas',
+  smxDBConnection in '..\CRMBase\smxDBConnection.pas';
 
 {$R *.res}
 

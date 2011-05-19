@@ -4,8 +4,9 @@ interface
 
 const
   SFileConnectName = 'conn.ini';
-  SFuncLibInfoName = 'LibInfo';
+  SProcLibInfoName = 'LibInfo';
   SCloseProgMessage = 'Закрыть программу?';
+  SFileProjectName = 'proj.dat';
 
 resourcestring
   { DBInterface }

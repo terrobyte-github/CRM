@@ -156,6 +156,7 @@ type
     procedure InstallParent; override;
     //procedure SetPage(Value: TsmxCustomPage); virtual;
     procedure UnInstallParent; override;
+    procedure SetRequest(Value: TsmxCustomRequest); virtual;
 
     property Cfg: TsmxGridCfg read GetCfg;
     property ColumnList: TList read FColumnList;
@@ -164,14 +165,14 @@ type
       //ACfgID: Integer; AID: Integer = 0); override;
     //procedure Apply; override;
     //procedure ApplyGrid; virtual;
-    procedure Prepare(Forcibly: Boolean = False); override;
+    //procedure Prepare(Forcibly: Boolean = False); override;
     //procedure PrepareGrid; virtual;
     //procedure RefreshGrid; virtual;
 
     property ColumnCount: Integer read GetColumnCount;
     property Columns[Index: Integer]: TsmxCustomColumn read GetColumn; default;
     //property Page: TsmxCustomPage read GetPage; //FPage write SetPage;
-    property Request: TsmxCustomRequest read FRequest; //write SetRequest;
+    property Request: TsmxCustomRequest read FRequest write SetRequest;
     //property RequestMode: TsmxOperationMode read GetRequestMode;
   end;
 
@@ -205,13 +206,14 @@ type
     procedure SetCellWidth(Value: Integer); override;
     //procedure SetPage(Value: TsmxCustomPage); override;
     procedure SetParentCell(AParent: TsmxBaseCell); override;
-    procedure Initialize; override;
-    procedure UnInitialize; override;
+    //procedure Initialize; override;
+    //procedure UnInitialize; override;
     //procedure UnInstallParent; override;
     //procedure WheelDownProc(Sender: TObject; Shift: TShiftState; MousePos: TPoint;
     //  var Handled: Boolean); virtual;
     //procedure WheelUpProc(Sender: TObject; Shift: TShiftState; MousePos: TPoint;
     //  var Handled: Boolean); virtual;
+    procedure SetRequest(Value: TsmxCustomRequest); override;
 
     //property Grid: TDBGrid read FGrid;
     property Grid: TsmxWheelDBGrid read FGrid;
@@ -396,28 +398,24 @@ type
     //procedure RefreshFilterPanel; override;
   end;
 
-  { TsmxCustomPage }
+  { TsmxCustomSection }
 
-  //TsmxCustomPageManager = class;
-
-  TsmxCustomPage = class(TsmxControlCell)
+  TsmxCustomSection = class(TsmxControlCell)
   private
     FFilterPanel: TsmxCustomFilterPanel;
     FGrid: TsmxCustomGrid;
-    //FPageManager: TsmxCustomPageManager;
-    //FRequest: TsmxCustomRequest;
-    function GetCfg: TsmxPageCfg;
-    //function GetPageManager: TsmxCustomPageManager;
-    //function GetRequestMode: TsmxOperationMode;
+    FRequest: TsmxCustomRequest;
+    function GetCfg: TsmxSectionCfg;
   protected
     procedure CreateChilds; override;
     procedure DestroyChilds; override;
     procedure InitChilds; override;
     procedure InstallParent; override;
-    //procedure SetManagerPages(Value: TsmxCustomPageManager); virtual;
     procedure UnInstallParent; override;
+    procedure Initialize; override;
+    procedure UnInitialize; override;
 
-    property Cfg: TsmxPageCfg read GetCfg;
+    property Cfg: TsmxSectionCfg read GetCfg;
   public
     //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       //ACfgID: Integer; AID: Integer = 0); override;
@@ -427,9 +425,87 @@ type
 
     property Grid: TsmxCustomGrid read FGrid;
     property FilterPanel: TsmxCustomFilterPanel read FFilterPanel;
+    property Request: TsmxCustomRequest read FRequest;
+  end;
+
+  { TsmxSectionPanel }
+
+  TsmxSectionPanel = class(TsmxCustomSection)
+  private
+    FPanel: TPanel;
+  protected
+    function GetInternalObject: TObject; override;
+    function GetCellAlign: TAlign; override;
+    function GetCellEnable: Boolean; override;
+    function GetCellHeight: Integer; override;
+    function GetCellLeft: Integer; override;
+    //function GetItemParent: TObject; override;
+    function GetCellTop: Integer; override;
+    function GetCellVisible: Boolean; override;
+    function GetCellWidth: Integer; override;
+    //procedure InstallParent; override;
+    procedure SetCellAlign(Value: TAlign); override;
+    procedure SetCellEnable(Value: Boolean); override;
+    procedure SetCellHeight(Value: Integer); override;
+    procedure SetCellLeft(Value: Integer); override;
+    //procedure SetItemParent(Value: TObject); override;
+    procedure SetCellTop(Value: Integer); override;
+    procedure SetCellVisible(Value: Boolean); override;
+    procedure SetCellWidth(Value: Integer); override;
+    //procedure SetPage(Value: TsmxCustomPage); override;
+    procedure SetParentCell(AParent: TsmxBaseCell); override;
+    //procedure UnInstallParent; override;
+
+    property Panel: TPanel read FPanel;
+  public
+    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+      ACfgID: Integer; AID: Integer = 0); override;
+    destructor Destroy; override;
+    //procedure ApplyFilterPanel; override;
+    //procedure PrepareFilterPanel; override;
+    //procedure RefreshFilterPanel; override;
+  end;
+
+  { TsmxCustomPage }
+
+  //TsmxCustomPageManager = class;
+
+  TsmxCustomPage = class(TsmxControlCell)
+  private
+    FSectionList: TList;
+    //FFilterPanel: TsmxCustomFilterPanel;
+    //FGrid: TsmxCustomGrid;
+    //FPageManager: TsmxCustomPageManager;
+    //FRequest: TsmxCustomRequest;
+    function GetCfg: TsmxPageCfg;
+    //function GetPageManager: TsmxCustomPageManager;
+    //function GetRequestMode: TsmxOperationMode;
+    function GetSection(Index: Integer): TsmxCustomSection;
+    function GetSectionCount: Integer;
+  protected
+    procedure CreateChilds; override;
+    procedure DestroyChilds; override;
+    procedure InitChilds; override;
+    procedure InstallParent; override;
+    //procedure SetManagerPages(Value: TsmxCustomPageManager); virtual;
+    procedure UnInstallParent; override;
+
+    property Cfg: TsmxPageCfg read GetCfg;
+    property SectionList: TList read FSectionList;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+      //ACfgID: Integer; AID: Integer = 0); override;
+    //destructor Destroy; override;
+    procedure Apply; override;
+    procedure Prepare(Forcibly: Boolean = False); override;
+
+    //property Grid: TsmxCustomGrid read FGrid;
+    //property FilterPanel: TsmxCustomFilterPanel read FFilterPanel;
     //property PageManager: TsmxCustomPageManager read GetPageManager; //FPageManager write SetManagerPages;
     //property Request: TsmxCustomRequest read FRequest;
     //property RequestMode: TsmxOperationMode read GetRequestMode;
+    property SectionCount: Integer read GetSectionCount;
+    property Sections[Index: Integer]: TsmxCustomSection read GetSection; default;
   end;
 
   { TsmxTabSheet }
@@ -588,7 +664,7 @@ type
   TsmxCustomLibAlgorithm = class(TsmxAlgorithm)
   private
     //FAlgorithmList: TsmxCustomAlgorithmList;
-    FLibHandle: THandle;
+    //FLibHandle: THandle;
     //FLibInitProc: TsmxProcInitDLL;
     //FLibManager: TsmxLibManager;
     //FLibManagerActions: TsmxManagerActions;
@@ -610,7 +686,7 @@ type
     procedure UnLoadLib; virtual;
 
     property Cfg: TsmxLibAlgorithmCfg read GetCfg;
-    property LibHandle: THandle read FLibHandle;
+    //property LibHandle: THandle read FLibHandle;
     //property LibInitProc: TsmxProcInitDLL read FLibInitProc;
     //property LibManagerActions: TsmxManagerActions read FLibManagerActions;
     property LibProc: TsmxProcAlgExecute read FLibProc; //TsmxProcLibAlgExecute read FLibProc;
@@ -1010,12 +1086,15 @@ type
     //FFormModalResult: TModalResult;
     //FParamList: TStrings;
     FMainMenu: TsmxCustomMainMenu;
-    FPageManager: TsmxCustomPageManager;
+    //FPageManager: TsmxCustomPageManager;
+    FPageManagerList: TList;
     FParentForm: TsmxCustomForm;
     FStateID: Integer;
     FStateRequest: TsmxCustomRequest;
     FStateCfg: TsmxStateCfg;
     function GetCfg: TsmxFormCfg;
+    function GetPageManager(Index: Integer): TsmxCustomPageManager;
+    function GetPageManagerCount: Integer;
     //function GetStateCfg: TsmxStateCfg;
     //function GetIsCreateMenuItem: Boolean;
     //function GetFormManager: TsmxFormManager;
@@ -1051,6 +1130,7 @@ type
     //property ParamList: TStrings read GetParamList;
     property StateCfg: TsmxStateCfg read FStateCfg; //GetStateCfg;
     property StateRequest: TsmxCustomRequest read FStateRequest;
+    property PageManagerList: TList read FPageManagerList;
   public
     constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer; AID: Integer = 0); override;
@@ -1072,7 +1152,9 @@ type
     //property IsCreateMenuItem: Boolean read GetIsCreateMenuItem;
     property MainMenu: TsmxCustomMainMenu read FMainMenu;
     property ParentForm: TsmxCustomForm read FParentForm write SetParentForm;
-    property PageManager: TsmxCustomPageManager read FPageManager;
+    //property PageManager: TsmxCustomPageManager read FPageManager;
+    property PageManagerCount: Integer read GetPageManagerCount;
+    property PageManagers[Index: Integer]: TsmxCustomPageManager read GetPageManager; default;
     property StateID: Integer read FStateID default 0;
   end;
 
@@ -1813,8 +1895,9 @@ begin
 end;
 
 procedure TsmxRequest.RefreshParams;
-var i: integer; v: Variant; c, a: TsmxBaseCell; f, fp: TsmxCustomForm;
-  p: TsmxCustomPage; flt: TsmxCustomFilter; fld: IsmxField; prm: TsmxParam;
+var i, j, k: integer; v: Variant; c, a: TsmxBaseCell; f, fp: TsmxCustomForm;
+  p: TsmxCustomPage; s: TsmxCustomSection; flt: TsmxCustomFilter;
+  fld: IsmxField; prm: TsmxParam;
 begin
   c := RootCell;
   f := nil;
@@ -1847,15 +1930,31 @@ begin
             v := flt.FilterValue;}
 
           flt := nil;
-          p := nil;
+          //p := nil;
+          s := nil;
           a := ParentCell;
-          while Assigned(a) and not (a is TsmxCustomPage) do
-            a := a.ParentCell;
-          if a is TsmxCustomPage then
-            p := TsmxCustomPage(a);
-          if Assigned(p) then
-            if Assigned(p.FilterPanel) then
-              flt := p.FilterPanel.FindFilterByName(ParamName);
+          if a is TsmxCustomSection then
+            s := TsmxCustomSection(a);
+          if Assigned(s) then
+            if Assigned(s.FilterPanel) then
+              flt := s.FilterPanel.FindFilterByName(ParamName);
+          //a := ParentCell;
+          //while Assigned(a) and not (a is TsmxCustomPage) do
+            //a := a.ParentCell;
+          //if a is TsmxCustomPage then
+            //p := TsmxCustomPage(a);
+          //if Assigned(p) then
+          //begin
+            //for j := 0 to p.SectionCount - 1 do
+            //begin
+              //if Assigned(p.Sections[j].FilterPanel) then
+                //flt := p.Sections[j].FilterPanel.FindFilterByName(ParamName);
+              //if Assigned(flt) then
+                //Break;
+            //end;
+            //if Assigned(p.FilterPanel) then
+              //flt := p.FilterPanel.FindFilterByName(ParamName);
+          //end;
           if Assigned(flt) then
             v := flt.FilterValue;
         end;
@@ -1881,18 +1980,35 @@ begin
           fp := nil;
           if Assigned(f) then
             fp := f.ParentForm;
-          while Assigned(fp) and not Assigned(flt) do
+          while Assigned(fp) do
           begin
-            p := nil;
-            if Assigned(fp.PageManager) then
-              p := fp.PageManager.ActivePage;
-            if Assigned(p) then
-              if Assigned(p.FilterPanel) then
-                flt := p.FilterPanel.FindFilterByName(ParamName);
+            for k := 0 to fp.PageManagerCount - 1 do
+            begin
+              //p := nil;
+              //if Assigned(fp.PageManager) then
+                //p := fp.PageManager.ActivePage;
+              p := fp.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].FilterPanel) then
+                    flt := p.Sections[j].FilterPanel.FindFilterByName(ParamName);
+                  if Assigned(flt) then
+                    Break;
+                end;
+              //if Assigned(p.FilterPanel) then
+                //flt := p.FilterPanel.FindFilterByName(ParamName);
+              end;
+              if Assigned(flt) then
+                Break;
+            end;
             if Assigned(flt) then
-              v := flt.FilterValue;
+              Break;
             fp := fp.ParentForm;
           end;
+          if Assigned(flt) then
+            v := flt.FilterValue;
         end;
         plParentFormGrid:
         begin
@@ -1900,20 +2016,38 @@ begin
           fp := nil;
           if Assigned(f) then
             fp := f.ParentForm;
-          while Assigned(fp) and not Assigned(fld) do
+          while Assigned(fp) do
           begin
-            p := nil;
-            if Assigned(fp.PageManager) then
-              p := fp.PageManager.ActivePage;
-            if Assigned(p) then
-              if Assigned(p.Grid) then
-                if Assigned(p.Grid.Request) then
-                  if Assigned(p.Grid.Request.CellDataSet) then
-                    fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+            for k := 0 to fp.PageManagerCount - 1 do
+            begin
+              //p := nil;
+              //if Assigned(fp.PageManager) then
+                //p := fp.PageManager.ActivePage;
+              p := fp.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].Request) then
+                    if Assigned(p.Sections[j].Request.CellDataSet) then
+                      fld := p.Sections[j].Request.CellDataSet.FindField(ParamName);
+                  if Assigned(fld) then
+                    Break;
+                end;
+              //if Assigned(p.Grid) then
+                //if Assigned(p.Grid.Request) then
+                  //if Assigned(p.Grid.Request.CellDataSet) then
+                    //fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+              end;
+              if Assigned(fld) then
+                Break;
+            end;
             if Assigned(fld) then
-              v := fld.Value;
+              Break;
             fp := fp.ParentForm;
           end;
+          if Assigned(fld) then
+            v := fld.Value;
         end;
         plAlgorithmParams:
         begin
@@ -2158,14 +2292,14 @@ end;}
 procedure TsmxCustomGrid.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
-  with Cfg.Request do
+  {with Cfg.Request do
     if CfgID > 0 then
     begin
       c := NewCell(Self, Database, CfgID);
       if c is TsmxCustomRequest then
         FRequest := TsmxCustomRequest(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
+    end;}
   FColumnList := TList.Create;
   FColumnList.Count := Cfg.GridColumns.Count;
   for i := 0 to Cfg.GridColumns.Count - 1 do
@@ -2183,8 +2317,8 @@ end;
 procedure TsmxCustomGrid.DestroyChilds;
 var i: Integer;
 begin
-  if Assigned(FRequest) then
-    FRequest.Free;
+  //if Assigned(FRequest) then
+    //FRequest.Free;
   for i := FColumnList.Count - 1 downto 0 do
   begin
     TsmxCustomColumn(FColumnList[i]).Free;
@@ -2240,19 +2374,19 @@ end;
 procedure TsmxCustomGrid.InstallParent;
 var i: Integer;
 begin
-  FRequest.ParentCell := Self;
+  //FRequest.ParentCell := Self;
   for i := 0 to ColumnCount - 1 do
     Columns[i].ParentCell := Self;
 end;
 
-procedure TsmxCustomGrid.Prepare(Forcibly: Boolean = False);
+{procedure TsmxCustomGrid.Prepare(Forcibly: Boolean = False);
 begin
   if Assigned(Request) then
     if Assigned(Request.CellDataSet) then
       if not Request.CellDataSet.Active //not(Request.CellDataSet.Prepared)
           and (Cfg.Request.Mode = omAutomatic) or Forcibly then
         Request.Perform;
-end;
+end;}
 
 {procedure TsmxCustomGrid.PrepareGrid;
 begin
@@ -2273,10 +2407,15 @@ begin
   FPage := Value;
 end;}
 
+procedure TsmxCustomGrid.SetRequest(Value: TsmxCustomRequest);
+begin
+  FRequest := Value;  
+end;
+
 procedure TsmxCustomGrid.UnInstallParent;
 var i: Integer;
 begin
-  FRequest.ParentCell := nil;
+  //FRequest.ParentCell := nil;
   for i := 0 to ColumnCount - 1 do
     Columns[i].ParentCell := nil;
 end;
@@ -2302,7 +2441,7 @@ begin
     FGrid.Options := FGrid.Options - [dgRowSelect];
   //FGrid.OnMouseWheelDown := WheelDownProc;
   //FGrid.OnMouseWheelUp := WheelUpProc;
-  Initialize;
+  //Initialize;
   InstallParent;    
   //AddColumns;
 end;
@@ -2312,7 +2451,7 @@ begin
   //FGrid.OnMouseWheelDown := nil;
   //FGrid.OnMouseWheelUp := nil;
   UnInstallParent;
-  UnInitialize;
+  //UnInitialize;
   FGrid.Free;
   FDataSource.Free;
   inherited Destroy;
@@ -2498,7 +2637,22 @@ begin
   end;
 end;
 
-procedure TsmxDBGrid.Initialize;
+procedure TsmxDBGrid.SetRequest(Value: TsmxCustomRequest);
+var c: TObject;
+begin
+  if Assigned(FDataSource.DataSet) then
+    FDataSource.DataSet := nil;
+  inherited SetRequest(Value);
+  if Assigned(Value) then
+    if Assigned(Value.CellDataSet) then
+    begin
+      c := Value.CellDataSet.GetDataSet;
+      if c is TDataSet then
+        FDataSource.DataSet := TDataSet(c);
+    end;
+end;
+
+{procedure TsmxDBGrid.Initialize;
 var c: TObject;
 begin
   if Assigned(FRequest) then
@@ -2508,12 +2662,12 @@ begin
       if c is TDataSet then
         FDataSource.DataSet := TDataSet(c);
     end;
-end;
+end;}
 
-procedure TsmxDBGrid.UnInitialize;
+{procedure TsmxDBGrid.UnInitialize;
 begin
   FDataSource.DataSet := nil;
-end;
+end;}
 
 {procedure TsmxDBGrid.UnInstallParent;
 var i: Integer;
@@ -3362,9 +3516,9 @@ begin
     FRequest.ParentCell := nil;
 end;}
 
-{ TsmxCustomPage }
+{ TsmxCustomSection }
 
-{constructor TsmxCustomPage.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+{constructor TsmxCustomSection.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner, ADatabase, ACfgID, AID);
@@ -3372,24 +3526,32 @@ begin
     FPageManager := TsmxCustomPageManager(AOwner);
 end;}
 
-{destructor TsmxCustomPage.Destroy;
+{destructor TsmxCustomSection.Destroy;
 begin
   FGrid.Free;
   FRequest.Free;
   inherited Destroy;
 end;}
 
-procedure TsmxCustomPage.Apply;
+procedure TsmxCustomSection.Apply;
 begin
-  if Assigned(FilterPanel) then
-    FilterPanel.Apply;
   if Assigned(Grid) then
     Grid.Apply;
+  if Assigned(FilterPanel) then
+    FilterPanel.Apply;
 end;
 
-procedure TsmxCustomPage.CreateChilds;
+procedure TsmxCustomSection.CreateChilds;
 var c: TsmxBaseCell;
 begin
+  with Cfg.Request do
+    if CfgID > 0 then
+    begin
+      c := NewCell(Self, Database, CfgID);
+      if c is TsmxCustomRequest then
+        FRequest := TsmxCustomRequest(c) else
+        raise EsmxCellError.CreateRes(@SCellBuildError);
+    end;
   with Cfg.Grid do
     if CfgID > 0 then
     begin
@@ -3408,33 +3570,22 @@ begin
     end;
 end;
 
-procedure TsmxCustomPage.DestroyChilds;
+procedure TsmxCustomSection.DestroyChilds;
 begin
+  if Assigned(FRequest) then
+    FRequest.Free;
   if Assigned(FGrid) then
     FGrid.Free;
   if Assigned(FFilterPanel) then
     FFilterPanel.Free;
 end;
 
-function TsmxCustomPage.GetCfg: TsmxPageCfg;
+function TsmxCustomSection.GetCfg: TsmxSectionCfg;
 begin
-  Result := TsmxPageCfg(inherited Cfg);
+  Result := TsmxSectionCfg(inherited Cfg);
 end;
 
-{function TsmxCustomPage.GetPageManager: TsmxCustomPageManager;
-begin
-  Result := nil;
-  if Assigned(ParentCell) then
-    if ParentCell is TsmxCustomPageManager then
-      Result := TsmxCustomPageManager(ParentCell);
-end;}
-
-{function TsmxCustomPage.GetRequestMode: TsmxOperationMode;
-begin
-  Result := Cfg.PageRequest.Mode;
-end;}
-
-procedure TsmxCustomPage.InitChilds;
+procedure TsmxCustomSection.InitChilds;
 begin
   if Assigned(FGrid) then
   begin
@@ -3468,33 +3619,277 @@ begin
     end;
 end;
 
-procedure TsmxCustomPage.InstallParent;
+procedure TsmxCustomSection.InstallParent;
 begin
+  if Assigned(FRequest) then
+    FRequest.ParentCell := Self;
   if Assigned(FGrid) then
     FGrid.ParentCell := Self;
   if Assigned(FFilterPanel) then
     FFilterPanel.ParentCell := Self;
 end;
 
-procedure TsmxCustomPage.Prepare(Forcibly: Boolean = False);
+procedure TsmxCustomSection.Initialize;
 begin
-  if Assigned(FilterPanel) then
-    FilterPanel.Prepare(Forcibly);
-  if Assigned(Grid) then
-    Grid.Prepare(Forcibly);
+  if Assigned(FGrid) then
+    if Assigned(FRequest) then
+      FGrid.Request := FRequest;
 end;
 
-{procedure TsmxCustomPage.SetManagerPages(Value: TsmxCustomPageManager);
+procedure TsmxCustomSection.UnInitialize;
 begin
-  FPageManager := Value;
-end;}
+  if Assigned(FGrid) then
+    FGrid.Request := nil;
+end;
 
-procedure TsmxCustomPage.UnInstallParent;
+procedure TsmxCustomSection.Prepare(Forcibly: Boolean = False);
 begin
+  if Assigned(Request) then
+    if Assigned(Request.CellDataSet) then
+      if not Request.CellDataSet.Active //not(Request.CellDataSet.Prepared)
+          and (Cfg.Request.Mode = omAutomatic) or Forcibly then
+        Request.Perform;
+  if Assigned(Grid) then
+    Grid.Prepare(Forcibly);
+  if Assigned(FilterPanel) then
+    FilterPanel.Prepare(Forcibly);
+end;
+
+procedure TsmxCustomSection.UnInstallParent;
+begin
+  if Assigned(FRequest) then
+    FRequest.ParentCell := nil;
   if Assigned(FGrid) then
     FGrid.ParentCell := nil;
   if Assigned(FFilterPanel) then
     FFilterPanel.ParentCell := nil;
+end;
+
+{ TsmxSectionPanel }
+
+constructor TsmxSectionPanel.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
+begin
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
+  FPanel := TPanel.Create(Self);
+  FPanel.BevelOuter := bvNone;
+  InstallParent;
+  Initialize;
+end;
+
+destructor TsmxSectionPanel.Destroy;
+begin
+  UnInitialize;
+  UnInstallParent;
+  FPanel.Free;
+  inherited Destroy;
+end;
+
+function TsmxSectionPanel.GetInternalObject: TObject;
+begin
+  Result := FPanel;
+end;
+
+function TsmxSectionPanel.GetCellAlign: TAlign;
+begin
+  Result := FPanel.Align;
+end;
+
+function TsmxSectionPanel.GetCellEnable: Boolean;
+begin
+  Result := FPanel.Enabled;
+end;
+
+function TsmxSectionPanel.GetCellHeight: Integer;
+begin
+  Result := FPanel.Height;
+end;
+
+function TsmxSectionPanel.GetCellLeft: Integer;
+begin
+  Result := FPanel.Left;
+end;
+
+function TsmxSectionPanel.GetCellTop: Integer;
+begin
+  Result := FPanel.Top;
+end;
+
+function TsmxSectionPanel.GetCellVisible: Boolean;
+begin
+  Result := FPanel.Visible;
+end;
+
+function TsmxSectionPanel.GetCellWidth: Integer;
+begin
+  Result := FPanel.Width;
+end;
+
+procedure TsmxSectionPanel.SetCellAlign(Value: TAlign);
+begin
+  FPanel.Align := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellEnable(Value: Boolean);
+begin
+  FPanel.Enabled := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellHeight(Value: Integer);
+begin
+  FPanel.Height := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellLeft(Value: Integer);
+begin
+  FPanel.Left := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellTop(Value: Integer);
+begin
+  FPanel.Top := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellVisible(Value: Boolean);
+begin
+  FPanel.Visible := Value;
+end;
+
+procedure TsmxSectionPanel.SetCellWidth(Value: Integer);
+begin
+  FPanel.Width := Value;
+end;
+
+procedure TsmxSectionPanel.SetParentCell(AParent: TsmxBaseCell);
+var c: TObject;
+begin
+  if Assigned(ParentCell) then
+    FPanel.Parent := nil;
+  inherited SetParentCell(AParent);
+  if Assigned(AParent) then
+  begin
+    c := _TsmxBaseCell(AParent).GetInternalObject;
+    //if Assigned(c) then
+      if c is TWinControl then
+        FPanel.Parent := TWinControl(c);
+  end;
+end;
+
+{ TsmxCustomPage }
+
+{constructor TsmxCustomPage.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+  ACfgID: Integer; AID: Integer = 0);
+begin
+  inherited Create(AOwner, ADatabase, ACfgID, AID);
+  if AOwner is TsmxCustomPageManager then
+    FPageManager := TsmxCustomPageManager(AOwner);
+end;}
+
+{destructor TsmxCustomPage.Destroy;
+begin
+  FGrid.Free;
+  FRequest.Free;
+  inherited Destroy;
+end;}
+
+procedure TsmxCustomPage.Apply;
+var i: Integer;
+begin
+  for i := 0 to SectionCount - 1 do
+    Sections[i].Apply;
+end;
+
+procedure TsmxCustomPage.CreateChilds;
+var i: Integer; c: TsmxBaseCell;
+begin
+  FSectionList := TList.Create;
+  FSectionList.Count := Cfg.Sections.Count;
+  for i := 0 to Cfg.Sections.Count - 1 do
+    with Cfg.Sections[i] do
+      if CfgID > 0 then
+      begin
+        c := NewCell(Self, Database, CfgID);
+        if c is TsmxCustomSection then
+          FSectionList[i] := c else
+          raise EsmxCellError.CreateRes(@SCellBuildError);
+      end else
+        raise EsmxCellError.CreateRes(@SCellBuildError);
+end;
+
+procedure TsmxCustomPage.DestroyChilds;
+var i: Integer;
+begin
+  for i := FSectionList.Count - 1 downto 0 do
+  begin
+    TsmxCustomSection(FSectionList[i]).Free;
+    FSectionList.Delete(i);
+  end;
+  FSectionList.Free;
+end;
+
+function TsmxCustomPage.GetCfg: TsmxPageCfg;
+begin
+  Result := TsmxPageCfg(inherited Cfg);
+end;
+
+function TsmxCustomPage.GetSection(Index: Integer): TsmxCustomSection;
+begin
+  Result := TsmxCustomSection(FSectionList[Index]);
+end;
+
+function TsmxCustomPage.GetSectionCount: Integer;
+begin
+  Result := FSectionList.Count;
+end;
+
+{function TsmxCustomPage.GetPageManager: TsmxCustomPageManager;
+begin
+  Result := nil;
+  if Assigned(ParentCell) then
+    if ParentCell is TsmxCustomPageManager then
+      Result := TsmxCustomPageManager(ParentCell);
+end;}
+
+{function TsmxCustomPage.GetRequestMode: TsmxOperationMode;
+begin
+  Result := Cfg.PageRequest.Mode;
+end;}
+
+procedure TsmxCustomPage.InitChilds;
+var i: Integer;
+begin
+  for i := 0 to Cfg.Sections.Count - 1 do
+    with Cfg.Sections[i] do
+    begin
+      Sections[i].CellAlign := UnitAlign;
+      Sections[i].CellEnable := UnitEnable;
+      Sections[i].CellHeight := UnitHeight;
+      Sections[i].CellLeft := UnitLeft;
+      Sections[i].CellTop := UnitTop;
+      Sections[i].CellVisible := UnitVisible;
+      Sections[i].CellWidth := UnitWidth;
+    end;
+end;
+
+procedure TsmxCustomPage.InstallParent;
+var i: Integer;
+begin
+  for i := 0 to SectionCount - 1 do
+    Sections[i].ParentCell := Self;
+end;
+
+procedure TsmxCustomPage.Prepare(Forcibly: Boolean = False);
+var i: Integer;
+begin
+  for i := 0 to SectionCount - 1 do
+    Sections[i].Prepare(Forcibly);
+end;
+
+procedure TsmxCustomPage.UnInstallParent;
+var i: Integer;
+begin
+  for i := 0 to SectionCount - 1 do
+    Sections[i].ParentCell := nil;
 end;
 
 { TsmxTabSheet }
@@ -4275,14 +4670,19 @@ begin
   //if not Assigned(lm) then
     //raise EsmxCellError.CreateRes(@SCellBuildError);
   //FLibHandle := lm[Cfg.AlgLibrary];
-  FLibHandle := LibManager[Cfg.AlgLibrary];
-  if FLibHandle = 0 then
-    raise EsmxCellError.CreateRes(@SCellBuildError);
-  @FLibProc := GetProcAddress(FLibHandle, PChar(Cfg.AlgProcedure));
-  //@FLibFunc := GetProcAddress(FLibHandle, PChar(Cfg.AlgProcedure));
-  if not Assigned(FLibProc) then
-  //if not(Assigned(FLibFunc)) then
-    raise EsmxCellError.CreateRes(@SCellBuildError);
+
+
+  //FLibHandle := LibManager[Cfg.AlgLibrary];
+  //if FLibHandle = 0 then
+    //raise EsmxCellError.CreateRes(@SCellBuildError);
+  //@FLibProc := GetProcAddress(FLibHandle, PChar(Cfg.AlgProcedure));
+  ////@FLibFunc := GetProcAddress(FLibHandle, PChar(Cfg.AlgProcedure));
+  //if not Assigned(FLibProc) then
+  ////if not(Assigned(FLibFunc)) then
+    //raise EsmxCellError.CreateRes(@SCellBuildError);
+
+  @FLibProc := LibManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
+
   //@FLibInitProc := GetProcAddress(FLibHandle, PChar('InitDLL'));
   //if Assigned(FLibInitProc) then
     //FLibInitProc(Call);
@@ -4305,7 +4705,7 @@ begin
 end;}
 
 procedure TsmxCustomLibAlgorithm.RefreshParams;
-var i: integer; v: Variant; c, a: TsmxBaseCell; f, fp: TsmxCustomForm;
+var i, j, k: integer; v: Variant; c, a: TsmxBaseCell; f, fp: TsmxCustomForm;
   p: TsmxCustomPage; flt: TsmxCustomFilter; fld: IsmxField;
 begin
   c := RootCell;
@@ -4327,28 +4727,59 @@ begin
         plFilterPanel:
         begin
           flt := nil;
-          p := nil;
+          //p := nil;
           if Assigned(f) then
-            if Assigned(f.PageManager) then
-              p := f.PageManager.ActivePage;
-          if Assigned(p) then
-            if Assigned(p.FilterPanel) then
-              flt := p.FilterPanel.FindFilterByName(ParamName);
+            for k := 0 to f.PageManagerCount - 1 do
+            begin
+              //if Assigned(f.PageManager) then
+                //p := f.PageManager.ActivePage;
+              p := f.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].FilterPanel) then
+                    flt := p.Sections[j].FilterPanel.FindFilterByName(ParamName);
+                  if Assigned(flt) then
+                    Break;
+                end;
+                //if Assigned(p.FilterPanel) then
+                  //flt := p.FilterPanel.FindFilterByName(ParamName);
+              end;
+              if Assigned(flt) then
+                Break;
+            end;
           if Assigned(flt) then
             v := flt.FilterValue;
         end;
         plGrid:
         begin
           fld := nil;
-          p := nil;
+          //p := nil;
           if Assigned(f) then
-            if Assigned(f.PageManager) then
-              p := f.PageManager.ActivePage;
-          if Assigned(p) then
-            if Assigned(p.Grid) then
-              if Assigned(p.Grid.Request) then
-                if Assigned(p.Grid.Request.CellDataSet) then
-                  fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+            for k := 0 to f.PageManagerCount - 1 do
+            begin
+              //if Assigned(f.PageManager) then
+                //p := f.PageManager.ActivePage;
+              p := f.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].Request) then
+                    if Assigned(p.Sections[j].Request.CellDataSet) then
+                      fld := p.Sections[j].Request.CellDataSet.FindField(ParamName);
+                  if Assigned(fld) then
+                    Break;
+                end;
+                //if Assigned(p.Grid) then
+                  //if Assigned(p.Grid.Request) then
+                    //if Assigned(p.Grid.Request.CellDataSet) then
+                      //fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+              end;
+              if Assigned(fld) then
+                Break;
+            end;
           if Assigned(fld) then
             v := fld.Value;
         end;
@@ -4358,18 +4789,35 @@ begin
           fp := nil;
           if Assigned(f) then
             fp := f.ParentForm;
-          while Assigned(fp) and not Assigned(flt) do
+          while Assigned(fp) do
           begin
-            p := nil;
-            if Assigned(fp.PageManager) then
-              p := fp.PageManager.ActivePage;
-            if Assigned(p) then
-              if Assigned(p.FilterPanel) then
-                flt := p.FilterPanel.FindFilterByName(ParamName);
+            for k := 0 to fp.PageManagerCount - 1 do
+            begin
+              //p := nil;
+              //if Assigned(fp.PageManager) then
+                //p := fp.PageManager.ActivePage;
+              p := fp.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].FilterPanel) then
+                    flt := p.Sections[j].FilterPanel.FindFilterByName(ParamName);
+                  if Assigned(flt) then
+                    Break;
+                end;
+                //if Assigned(p.FilterPanel) then
+                  //flt := p.FilterPanel.FindFilterByName(ParamName);
+              end;
+              if Assigned(flt) then
+                Break;
+            end;
             if Assigned(flt) then
-              v := flt.FilterValue;
+              Break;
             fp := fp.ParentForm;
           end;
+          if Assigned(flt) then
+            v := flt.FilterValue;
         end;
         plParentFormGrid:
         begin
@@ -4377,20 +4825,38 @@ begin
           fp := nil;
           if Assigned(f) then
             fp := f.ParentForm;
-          while Assigned(fp) and not Assigned(fld) do
+          while Assigned(fp) do
           begin
-            p := nil;
-            if Assigned(fp.PageManager) then
-              p := fp.PageManager.ActivePage;
-            if Assigned(p) then
-              if Assigned(p.Grid) then
-                if Assigned(p.Grid.Request) then
-                  if Assigned(p.Grid.Request.CellDataSet) then
-                    fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+            for k := 0 to fp.PageManagerCount - 1 do
+            begin
+              //p := nil;
+              //if Assigned(fp.PageManager) then
+                //p := fp.PageManager.ActivePage;
+              p := fp.PageManagers[k].ActivePage;
+              if Assigned(p) then
+              begin
+                for j := 0 to p.SectionCount - 1 do
+                begin
+                  if Assigned(p.Sections[j].Request) then
+                    if Assigned(p.Sections[j].Request.CellDataSet) then
+                      fld := p.Sections[j].Request.CellDataSet.FindField(ParamName);
+                  if Assigned(fld) then
+                    Break;
+                end;
+                //if Assigned(p.Grid) then
+                  //if Assigned(p.Grid.Request) then
+                    //if Assigned(p.Grid.Request.CellDataSet) then
+                      //fld := p.Grid.Request.CellDataSet.FindField(ParamName);
+              end;
+              if Assigned(fld) then
+                Break;
+            end;
             if Assigned(fld) then
-              v := fld.Value;
+              Break;
             fp := fp.ParentForm;
           end;
+          if Assigned(fld) then
+            v := fld.Value;
         end;
         plAlgorithmParams:
         begin
@@ -4437,7 +4903,7 @@ begin
   //FLibFunc := nil;
   {if FLibHandle <> 0 then
     FreeLibrary(FLibHandle);}
-  FLibHandle := 0;
+  //FLibHandle := 0;
 end;
 
 { TsmxLibAlgorithm }
@@ -6001,7 +6467,8 @@ constructor TsmxCustomForm.Create(AOwner: TComponent; const ADatabase: IsmxDatab
   ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner, ADatabase, ACfgID, AID);
-  FStateCfg := TsmxStateCfg.Create(Self, Database, CfgID, GlobalStorage['@IntfID']);
+  FStateCfg := TsmxStateCfg.CreateByIntfID(Self, Database, CfgID, GlobalStorage['@IntfID']);
+  FStateCfg.Initialize;
   //PutState;
 end;
 
@@ -6053,9 +6520,12 @@ begin
 end;}
 
 procedure TsmxCustomForm.Apply;
+var i: Integer;
 begin
-  if Assigned(PageManager) then
-    PageManager.Apply;
+  //if Assigned(PageManager) then
+    //PageManager.Apply;
+  for i := 0 to PageManagerCount - 1 do
+    PageManagers[i].Apply;
 end;
 
 procedure TsmxCustomForm.ChangeState;
@@ -6084,16 +6554,28 @@ begin
 end;
 
 procedure TsmxCustomForm.CreateChilds;
-var c: TsmxBaseCell;
+var c: TsmxBaseCell; i: Integer;
 begin
-  with Cfg.PageManager do
+  {with Cfg.PageManager do
     if CfgID > 0 then
     begin
       c := NewCell(Self, Database, CfgID);
       if c is TsmxCustomPageManager then
         FPageManager := TsmxCustomPageManager(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
+    end;}
+  FPageManagerList := TList.Create;
+  FPageManagerList.Count := Cfg.PageManagers.Count;
+  for i := 0 to Cfg.PageManagers.Count - 1 do
+    with Cfg.PageManagers[i] do
+      if CfgID > 0 then
+      begin
+        c := NewCell(Self, Database, CfgID);
+        if c is TsmxCustomPageManager then
+          FPageManagerList[i] := c else
+          raise EsmxCellError.CreateRes(@SCellBuildError);
+      end else
+        raise EsmxCellError.CreateRes(@SCellBuildError);
   with Cfg.MainMenu do
     if CfgID > 0 then
     begin
@@ -6169,9 +6651,16 @@ begin
 end;}
 
 procedure TsmxCustomForm.DestroyChilds;
+var i: Integer;
 begin
-  if Assigned(FPageManager) then
-    FPageManager.Free;
+  //if Assigned(FPageManager) then
+    //FPageManager.Free;
+  for i := FPageManagerList.Count - 1 downto 0 do
+  begin
+    TsmxCustomPageManager(FPageManagerList[i]).Free;
+    FPageManagerList.Delete(i);
+  end;
+  FPageManagerList.Free;
   if Assigned(FMainMenu) then
     FMainMenu.Free;
   if Assigned(FAlgorithmList) then
@@ -6194,6 +6683,16 @@ end;}
 function TsmxCustomForm.GetCfg: TsmxFormCfg;
 begin
   Result := TsmxFormCfg(inherited Cfg);
+end;
+
+function TsmxCustomForm.GetPageManager(Index: Integer): TsmxCustomPageManager;
+begin
+  Result := TsmxCustomPageManager(FPageManagerList[Index]);
+end;
+
+function TsmxCustomForm.GetPageManagerCount: Integer;
+begin
+  Result := FPageManagerList.Count;
 end;
 
 {function TsmxCustomForm.GetStateCfg: TsmxStateCfg;
@@ -6282,8 +6781,9 @@ begin
 end;}
 
 procedure TsmxCustomForm.InitChilds;
+var i: Integer;
 begin
-  if Assigned(FPageManager) then
+  {if Assigned(FPageManager) then
     with Cfg.PageManager do
     begin
       FPageManager.CellAlign := Align;
@@ -6296,6 +6796,17 @@ begin
         FPageManager.CellTop := Top;
         FPageManager.CellWidth := Width;
       end;
+    end;}
+  for i := 0 to Cfg.PageManagers.Count - 1 do
+    with Cfg.PageManagers[i] do
+    begin
+      PageManagers[i].CellAlign := UnitAlign;
+      PageManagers[i].CellEnable := UnitEnable;
+      PageManagers[i].CellHeight := UnitHeight;
+      PageManagers[i].CellLeft := UnitLeft;
+      PageManagers[i].CellTop := UnitTop;
+      PageManagers[i].CellVisible := UnitVisible;
+      PageManagers[i].CellWidth := UnitWidth;
     end;
   if Assigned(FMainMenu) then
     with Cfg.MainMenu do
@@ -6328,9 +6839,12 @@ begin
 end;
 
 procedure TsmxCustomForm.InstallParent;
+var i: Integer;
 begin
-  if Assigned(FPageManager) then
-    FPageManager.ParentCell := Self;
+  //if Assigned(FPageManager) then
+    //FPageManager.ParentCell := Self;
+  for i := 0 to PageManagerCount - 1 do
+    PageManagers[i].ParentCell := Self;
   if Assigned(FMainMenu) then
     FMainMenu.ParentCell := Self;
   if Assigned(FAlgorithmList) then
@@ -6342,10 +6856,13 @@ begin
 end;
 
 procedure TsmxCustomForm.Prepare(Forcibly: Boolean = False);
+var i: Integer;
 begin
   ChangeState;
-  if Assigned(PageManager) then
-    PageManager.Prepare(Forcibly);
+  //if Assigned(PageManager) then
+    //PageManager.Prepare(Forcibly);
+  for i := 0 to PageManagerCount - 1 do
+    PageManagers[i].Prepare(Forcibly);
   if Assigned(ControlBar) then
     ControlBar.Prepare(True);
 end;
@@ -6452,7 +6969,9 @@ procedure TsmxCustomForm.PutState;
 
 var i: Integer; cs: TsmxCellState;
 begin
-  cs := StateCfg.CellStates.FindByID(FStateID);
+  cs := nil;
+  if Assigned(FStateCfg) then
+    cs := FStateCfg.CellStates.FindByID(FStateID);
   if Assigned(cs) then
     for i := 0 to cs.StateUnits.Root.Count - 1 do
       PutCell(cs.StateUnits.Root[i], Self);
@@ -6486,9 +7005,12 @@ begin
 end;
 
 procedure TsmxCustomForm.UnInstallParent;
+var i: Integer;
 begin
-  if Assigned(FPageManager) then
-    FPageManager.ParentCell := nil;
+  //if Assigned(FPageManager) then
+    //FPageManager.ParentCell := nil;
+  for i := 0 to PageManagerCount - 1 do
+    PageManagers[i].ParentCell := nil;
   if Assigned(FMainMenu) then
     FMainMenu.ParentCell := nil;
   if Assigned(FAlgorithmList) then
@@ -6538,19 +7060,20 @@ end;
 
 procedure TsmxStandardForm.CloseForm;
 begin
-  Form.OnClose := nil;
-  Form.Close;
-
   //Form.OnClose := nil;
-  //Free;
+  //Form.Close;
+
+  Form.OnClose := nil;
+  Free;
 end;
 
 procedure TsmxStandardForm.CloseProc(Sender: TObject; var Action: TCloseAction);
 begin
-  Action := caNone;
-  Free;
+  //Action := caNone;
+  //Free;
 
-  //CloseForm;
+  Action := caNone;
+  CloseForm;
 end;
 
 function TsmxStandardForm.GetFormModalResult:  TModalResult;
@@ -7358,7 +7881,8 @@ end;}
 
 initialization
   RegisterClasses([TsmxRequest, TsmxDBColumn, TsmxDBGrid, TsmxFilterPanel,
-    TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxLibAlgorithm,
-    TsmxActionList, TsmxToolBar, TsmxControlBar, TsmxStandardForm, TsmxMainForm]);
+    TsmxSectionPanel, TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu,
+    TsmxLibAlgorithm, TsmxActionList, TsmxToolBar, TsmxControlBar,
+    TsmxStandardForm, TsmxMainForm]);
 
 end.

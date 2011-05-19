@@ -22,15 +22,15 @@ type
     Font: TsmxCellFont;
   end;}
 
-  TsmxColumnCfg = class(TsmxBaseCfg)
+  TsmxColumnCfg = class(TsmxCellCfg)
   private
     FColumnFieldName: String;
     FColumnText: TsmxCellText;
     FColumnTitle: TsmxCellText;
     //FColumnWidth: Integer;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //constructor Create(AOwner: TComponent; AID: Integer; ACall: TsmxCallBack); override;
     procedure Clear; override;
@@ -132,17 +132,17 @@ type
     Mode: TsmxOperationMode;
   end;}
 
-  TsmxGridCfg = class(TsmxBaseCfg)
+  TsmxGridCfg = class(TsmxCellCfg)
   private
     FGridColLines: Boolean;
     FGridColumns: TsmxVisibleUnits;
     FGridRowLines: Boolean;
     FGridRowSelect: Boolean;
-    FRequest: TsmxRequestSetting;  
+    //FRequest: TsmxRequestSetting;  
     function GetGridColumns: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //constructor Create(AOwner: TComponent; AID: Integer; ACall: TsmxCallBack); override;
     destructor Destroy; override;
@@ -153,7 +153,7 @@ type
     property GridColumns: TsmxVisibleUnits read GetGridColumns;
     property GridRowLines: Boolean read FGridRowLines write FGridRowLines;
     property GridRowSelect: Boolean read FGridRowSelect write FGridRowSelect;
-    property Request: TsmxRequestSetting read FRequest write FRequest;
+    //property Request: TsmxRequestSetting read FRequest write FRequest;
   end;
 
   { TsmxLocationParam }
@@ -219,7 +219,7 @@ type
 
   { TsmxRequestCfg }
 
-  TsmxRequestCfg = class(TsmxBaseCfg)
+  TsmxRequestCfg = class(TsmxCellCfg)
   private
     FDataSetType: TsmxDataSetType;
     FMode: TsmxReturnType;
@@ -229,8 +229,8 @@ type
     function GetRequestFields: TsmxRequestFields;
     function GetRequestParams: TsmxLocationParams;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //constructor Create(AOwner: TComponent; AID: Integer; ACall: TsmxCallBack); override;
     destructor Destroy; override;
@@ -243,6 +243,25 @@ type
     property RequestFields: TsmxRequestFields read GetRequestFields;
     property RequestParams: TsmxLocationParams read GetRequestParams;
     property SQLText: String read FSQLText write FSQLText;
+  end;
+
+  { TsmxSectionCfg }
+
+  TsmxSectionCfg = class(TsmxCellCfg)
+  private
+    FFilterPanel: TsmxControlCellSetting;
+    FGrid: TsmxControlCellSetting;
+    FRequest: TsmxRequestSetting;
+  protected
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
+  public
+    procedure Clear; override;
+    //procedure Initialize; override;
+
+    property FilterPanel: TsmxControlCellSetting read FFilterPanel write FFilterPanel;
+    property Grid: TsmxControlCellSetting read FGrid write FGrid;
+    property Request: TsmxRequestSetting read FRequest write FRequest;
   end;
 
   { TsmxPageCfg }
@@ -258,36 +277,39 @@ type
     Height, Left, Top, Width: Integer;
   end;}
 
-  TsmxPageCfg = class(TsmxBaseCfg)
+  TsmxPageCfg = class(TsmxCellCfg)
   private
-    FFilterPanel: TsmxControlCellSetting;
-    FGrid: TsmxControlCellSetting;
+    //FFilterPanel: TsmxControlCellSetting;
+    //FGrid: TsmxControlCellSetting;
     FPageCaption: String;
     FPageImageIndex: Integer;
     //FRequest: TsmxRequestSetting;
+    FSections: TsmxVisibleUnits;
+    function GetSections: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     procedure Clear; override;
     //procedure Initialize; override;
 
-    property FilterPanel: TsmxControlCellSetting read FFilterPanel write FFilterPanel;
-    property Grid: TsmxControlCellSetting read FGrid write FGrid;
+    //property FilterPanel: TsmxControlCellSetting read FFilterPanel write FFilterPanel;
+    //property Grid: TsmxControlCellSetting read FGrid write FGrid;
     property PageCaption: String read FPageCaption write FPageCaption;
     property PageImageIndex: Integer read FPageImageIndex write FPageImageIndex;
+    property Sections: TsmxVisibleUnits read GetSections;
     //property Request: TsmxRequestSetting read FRequest write FRequest;
   end;
 
   { TsmxPageManagerCfg }
 
-  TsmxPageManagerCfg = class(TsmxBaseCfg)
+  TsmxPageManagerCfg = class(TsmxCellCfg)
   private
     FSheets: TsmxVisibleUnits;
     function GetSheets: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
@@ -360,7 +382,7 @@ type
     IsCreateMenuItem: Boolean;
   end;}
 
-  TsmxFormCfg = class(TsmxBaseCfg)
+  TsmxFormCfg = class(TsmxCellCfg)
   private
     FAlgorithmList: TsmxAlgorithmListSetting;
     FControlBar: TsmxControlCellSetting;
@@ -369,12 +391,14 @@ type
     FFormPositionSize: TsmxPositionSize;
     //FFormStates: TsmxFormStates;
     FMainMenu: TsmxControlCellSetting;
-    FPageManager: TsmxControlCellSetting;
+    //FPageManager: TsmxControlCellSetting;
     FStateRequest: TsmxRequestSetting;
+    FPageManagers: TsmxVisibleUnits;
     //function GetFormStates: TsmxFormStates;
+    function GetPageManagers: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //destructor Destroy; override;
     procedure Clear; override;
@@ -387,7 +411,8 @@ type
     property FormPositionSize: TsmxPositionSize read FFormPositionSize write FFormPositionSize;
     //property FormStates: TsmxFormStates read GetFormStates;
     property MainMenu: TsmxControlCellSetting read FMainMenu write FMainMenu;
-    property PageManager: TsmxControlCellSetting read FPageManager write FPageManager;
+    //property PageManager: TsmxControlCellSetting read FPageManager write FPageManager;
+    property PageManagers: TsmxVisibleUnits read GetPageManagers;
     property StateRequest: TsmxRequestSetting read FStateRequest write FStateRequest;
   end;
 
@@ -402,7 +427,7 @@ type
     Visible: Boolean;
   end;}
 
-  TsmxFilterCfg = class(TsmxBaseCfg)
+  TsmxFilterCfg = class(TsmxCellCfg)
   private
     FAlgorithm: TsmxAlgorithmSetting;
     //FAlgorithmID: Integer;
@@ -416,8 +441,8 @@ type
     //FRequest: TsmxRequestSetting;
     FValueFormat: String;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //constructor Create(AOwner: TComponent; AID: Integer; ACall: TsmxCallBack); override;
     procedure Clear; override;
@@ -439,7 +464,7 @@ type
 
   { TsmxFilterPanelCfg }
 
-  TsmxFilterPanelCfg = class(TsmxBaseCfg)
+  TsmxFilterPanelCfg = class(TsmxCellCfg)
   private
     //FAlgorithmList: TsmxAlgorithmListSetting;
     FApplyRequest: TsmxRequestSetting;
@@ -447,8 +472,8 @@ type
     FPrepareRequest: TsmxRequestSetting;
     function GetFilters: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
@@ -461,13 +486,13 @@ type
 
   { TsmxMenuItemCfg }
 
-  TsmxMenuItemCfg = class(TsmxBaseCfg)
+  TsmxMenuItemCfg = class(TsmxCellCfg)
   private
     FItemCaption: String;
     FItemImageIndex: Integer;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     procedure Clear; override;
     //procedure Initialize; override;
@@ -578,13 +603,13 @@ type
 
   { TsmxMainMenuCfg }
 
-  TsmxMainMenuCfg = class(TsmxBaseCfg)
+  TsmxMainMenuCfg = class(TsmxCellCfg)
   private
     FMenuUnits: TsmxHVisibleUnits; //TsmxMenuUnits;
     function GetMenuUnits: TsmxHVisibleUnits; //TsmxMenuUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
@@ -594,7 +619,7 @@ type
   
   { TsmxLibAlgorithmCfg }
 
-  TsmxLibAlgorithmCfg = class(TsmxBaseCfg)
+  TsmxLibAlgorithmCfg = class(TsmxCellCfg)
   private
     FAlgCaption: String;
     FAlgHotKey: Integer;
@@ -604,8 +629,8 @@ type
     FAlgProcedure: String;
     function GetAlgParams: TsmxLocationParams;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     //constructor Create(AOwner: TComponent; AID: Integer; ACall: TsmxCallBack); override;
     //destructor Destroy; override;
@@ -661,13 +686,13 @@ type
 
   { TsmxAlgorithmListCfg }
 
-  TsmxAlgorithmListCfg = class(TsmxBaseCfg)
+  TsmxAlgorithmListCfg = class(TsmxCellCfg)
   private
     FAlgorithmItems: TsmxAlgorithmItems;
     function GetAlgorithmItems: TsmxAlgorithmItems;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
@@ -677,14 +702,14 @@ type
 
   { TsmxToolBarCfg }
 
-  TsmxToolBarCfg = class(TsmxBaseCfg)
+  TsmxToolBarCfg = class(TsmxCellCfg)
   private
     FBarFlat: Boolean;
     FBarShowCaptions: Boolean;
     FBarShowHint: Boolean;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     procedure Clear; override;
 
@@ -695,19 +720,35 @@ type
 
   { TsmxControlBarCfg }
 
-  TsmxControlBarCfg = class(TsmxBaseCfg)
+  TsmxControlBarCfg = class(TsmxCellCfg)
   private
     FBarUnits: TsmxVisibleUnits;
     function GetBarUnits: TsmxVisibleUnits;
   protected
-    procedure ReadCell; override;
-    procedure WriteCell; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
   public
     procedure Clear; override;
 
     property BarUnits: TsmxVisibleUnits read GetBarUnits;
   end;
-  
+
+  { TsmxDBDriverCfg }
+
+  {TsmxDBDriverCfg = class(TsmxCellCfg)
+  private
+    FDrvLibrary: String;
+    FDrvProcedure: String;
+  protected
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
+  public
+    procedure Clear; override;
+
+    property DrvLibrary: String read FDrvLibrary write FDrvLibrary;
+    property DrvProcedure: String read FDrvProcedure write FDrvProcedure;
+  end;}
+
 implementation
 
 uses
@@ -779,7 +820,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxColumnCfg.ReadCell;
+procedure TsmxColumnCfg.ReadCfg;
 var r, n, n2, n3: IXMLNode;
 begin
   //Clear;
@@ -832,7 +873,7 @@ begin
   end;
 end;
 
-procedure TsmxColumnCfg.WriteCell;
+procedure TsmxColumnCfg.WriteCfg;
 var r, n, n2, n3: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -989,11 +1030,11 @@ begin
   GridColLines := True;
   GridRowLines := True;
   GridRowSelect := False;
-  with Request do
+  {with Request do
   begin
     CfgID := 0;
     Mode := omManual;
-  end;
+  end;}
   GridColumns.Clear;
 end;
 
@@ -1010,7 +1051,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxGridCfg.ReadCell;
+procedure TsmxGridCfg.ReadCfg;
 var r, n{, n2, n3}: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -1026,13 +1067,13 @@ begin
     GridRowSelect := n.Attributes['rowselect'];
   end;
 
-  n := r.ChildNodes.FindNode('request');
+  {n := r.ChildNodes.FindNode('request');
   if Assigned(n) then
     with Request do
     begin
       CfgID := n.Attributes['id'];
       Mode := n.Attributes['mode'];
-    end;
+    end;}
 
   n := r.ChildNodes.FindNode('columns');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
@@ -1099,7 +1140,7 @@ begin
   end;
 end;
 
-procedure TsmxGridCfg.WriteCell;
+procedure TsmxGridCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -1112,12 +1153,12 @@ begin
   n.Attributes['rowlines'] := GridRowLines;
   n.Attributes['rowselect'] := GridRowSelect;
 
-  n := r.AddChild('request');
+  {n := r.AddChild('request');
   with Request do
   begin
     n.Attributes['id'] := CfgID;
     n.Attributes['mode'] := Mode;
-  end;
+  end;}
 
   n := r.AddChild('columns');
   for i := 0 to GridColumns.Count - 1 do
@@ -1299,7 +1340,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxRequestCfg.ReadCell;
+procedure TsmxRequestCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer; //v: Variant;
 begin
   //Clear;
@@ -1389,7 +1430,7 @@ begin
   end;
 end;
 
-procedure TsmxRequestCfg.WriteCell;
+procedure TsmxRequestCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -1421,12 +1462,15 @@ begin
     end;
 end;
 
-{ TsmxPageCfg }
+{ TsmxSectionCfg }
 
-procedure TsmxPageCfg.Clear;
+procedure TsmxSectionCfg.Clear;
 begin
-  PageCaption := ''; //CfgName;
-  PageImageIndex := -1;
+  with Request do
+  begin
+    CfgID := 0;
+    Mode := omManual;
+  end;
   with Grid do
   begin
     CfgID := 0;
@@ -1455,48 +1499,9 @@ begin
       Width := 0;
     end;
   end;
-  {with PageRequest do
-  begin
-    ID := 0;
-    Mode := omManual;
-  end;}
 end;
 
-{procedure TsmxPageCfg.Initialize;
-begin
-  PageCaption := CfgName;
-  PageImageIndex := -1;
-  with PageGrid do
-  begin
-    ID := 0;
-    Align := alClient;
-    Enable := True;
-    Height := 0;
-    Left := 0;
-    Top := 0;
-    Visible := True;
-    Width := 0;
-  end;
-  with PageFilterPanel do
-  begin
-    ID := 0;
-    Align := alTop;
-    Enable := True;
-    Height := 49;
-    Left := 0;
-    Top := 0;
-    Visible := True;
-    Width := 0;
-  end;
-  with Request do
-  begin
-    ID := 0;
-    Mode := omManual;
-  end;
-  inherited Initialize;
-end;}
-
-procedure TsmxPageCfg.ReadCell;
+procedure TsmxSectionCfg.ReadCfg;
 var r, n: IXMLNode;
 begin
   //Clear;
@@ -1504,20 +1509,13 @@ begin
   if not Assigned(r) then
     Exit;
 
-  n := r.ChildNodes.FindNode('page');
-  if Assigned(n) then
-  begin
-    PageCaption := n.Attributes['caption'];
-    PageImageIndex := n.Attributes['imageindex'];
-  end;
-
-  {n := r.ChildNodes.FindNode('request');
+  n := r.ChildNodes.FindNode('request');
   if Assigned(n) then
     with Request do
     begin
-      ID := n.Attributes['id'];
+      CfgID := n.Attributes['id'];
       Mode := n.Attributes['mode'];
-    end;}
+    end;
 
   n := r.ChildNodes.FindNode('grid');
   if Assigned(n) then
@@ -1554,7 +1552,7 @@ begin
     end;  
 end;
 
-procedure TsmxPageCfg.WriteCell;
+procedure TsmxSectionCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -1562,18 +1560,12 @@ begin
     r.ChildNodes.Clear else
     r := XMLDoc.AddChild('root');
 
-  n := r.AddChild('page');
-  n.Attributes['caption'] := PageCaption;
-  n.Attributes['imageindex'] := PageImageIndex;
-
-  {n := r.ChildNodes.FindNode('request');
-  if not(Assigned(n)) then
-    n := r.AddChild('request');
+  n := r.AddChild('request');
   with Request do
   begin
-    n.Attributes['id'] := ID;
+    n.Attributes['id'] := CfgID;
     n.Attributes['mode'] := Mode;
-  end;}
+  end;
 
   n := r.AddChild('grid');
   with Grid do
@@ -1608,6 +1600,234 @@ begin
   end;
 end;
 
+{ TsmxPageCfg }
+
+procedure TsmxPageCfg.Clear;
+begin
+  PageCaption := ''; //CfgName;
+  PageImageIndex := -1;
+  Sections.Clear;
+  
+  {with Grid do
+  begin
+    CfgID := 0;
+    Align := alClient;
+    Enable := True;
+    Visible := True;
+    with PositionSize do
+    begin
+      Height := 0;
+      Left := 0;
+      Top := 0;
+      Width := 0;
+    end;
+  end;
+  with FilterPanel do
+  begin
+    CfgID := 0;
+    Align := alTop;
+    Enable := True;
+    Visible := True;
+    with PositionSize do
+    begin
+      Height := 49;
+      Left := 0;
+      Top := 0;
+      Width := 0;
+    end;
+  end;}
+  {with PageRequest do
+  begin
+    ID := 0;
+    Mode := omManual;
+  end;}
+end;
+
+function TsmxPageCfg.GetSections: TsmxVisibleUnits;
+begin
+  if not Assigned(FSections) then
+    FSections := TsmxVisibleUnits.Create(TsmxVisibleUnit);
+  Result := FSections;
+end;
+
+{procedure TsmxPageCfg.Initialize;
+begin
+  PageCaption := CfgName;
+  PageImageIndex := -1;
+  with PageGrid do
+  begin
+    ID := 0;
+    Align := alClient;
+    Enable := True;
+    Height := 0;
+    Left := 0;
+    Top := 0;
+    Visible := True;
+    Width := 0;
+  end;
+  with PageFilterPanel do
+  begin
+    ID := 0;
+    Align := alTop;
+    Enable := True;
+    Height := 49;
+    Left := 0;
+    Top := 0;
+    Visible := True;
+    Width := 0;
+  end;
+  with Request do
+  begin
+    ID := 0;
+    Mode := omManual;
+  end;
+  inherited Initialize;
+end;}
+
+procedure TsmxPageCfg.ReadCfg;
+var r, n: IXMLNode; i: Integer;
+begin
+  //Clear;
+  r := XMLDoc.ChildNodes.FindNode('root');
+  if not Assigned(r) then
+    Exit;
+
+  n := r.ChildNodes.FindNode('page');
+  if Assigned(n) then
+  begin
+    PageCaption := n.Attributes['caption'];
+    PageImageIndex := n.Attributes['imageindex'];
+  end;
+
+  n := r.ChildNodes.FindNode('sections');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'section' then
+        with Sections.Add do
+        begin
+          CfgID := n.ChildNodes[i].Attributes['id'];
+          UnitAlign := n.ChildNodes[i].Attributes['align'];
+          UnitEnable := n.ChildNodes[i].Attributes['enable'];
+          UnitHeight := n.ChildNodes[i].Attributes['height'];
+          UnitLeft := n.ChildNodes[i].Attributes['left'];
+          UnitTop := n.ChildNodes[i].Attributes['top'];
+          UnitVisible := n.ChildNodes[i].Attributes['visible'];
+          UnitWidth := n.ChildNodes[i].Attributes['width'];
+        end;
+  end;
+
+  {n := r.ChildNodes.FindNode('request');
+  if Assigned(n) then
+    with Request do
+    begin
+      ID := n.Attributes['id'];
+      Mode := n.Attributes['mode'];
+    end;}
+
+  {n := r.ChildNodes.FindNode('grid');
+  if Assigned(n) then
+    with Grid do
+    begin
+      CfgID := n.Attributes['id'];
+      Align := n.Attributes['align'];
+      Enable := n.Attributes['enable'];
+      Visible := n.Attributes['visible'];
+      with PositionSize do
+      begin
+        Height := n.Attributes['height'];
+        Left := n.Attributes['left'];
+        Top := n.Attributes['top'];
+        Width := n.Attributes['width'];
+      end;
+    end;
+
+  n := r.ChildNodes.FindNode('filterpanel');
+  if Assigned(n) then
+    with FilterPanel do
+    begin
+      CfgID := n.Attributes['id'];
+      Align := n.Attributes['align'];
+      Enable := n.Attributes['enable'];
+      Visible := n.Attributes['visible'];
+      with PositionSize do
+      begin
+        Height := n.Attributes['height'];
+        Left := n.Attributes['left'];
+        Top := n.Attributes['top'];
+        Width := n.Attributes['width'];
+      end;
+    end;}
+end;
+
+procedure TsmxPageCfg.WriteCfg;
+var r, n: IXMLNode; i: Integer;
+begin
+  r := XMLDoc.ChildNodes.FindNode('root');
+  if Assigned(r) then
+    r.ChildNodes.Clear else
+    r := XMLDoc.AddChild('root');
+
+  n := r.AddChild('page');
+  n.Attributes['caption'] := PageCaption;
+  n.Attributes['imageindex'] := PageImageIndex;
+
+  n := r.AddChild('sections');
+  for i := 0 to Sections.Count - 1 do
+    with n.AddChild('section') do
+    begin
+      Attributes['id'] := Sections[i].CfgID;
+      Attributes['align'] := Sections[i].UnitAlign;
+      Attributes['enable'] := Sections[i].UnitEnable;
+      Attributes['height'] := Sections[i].UnitHeight;
+      Attributes['left'] := Sections[i].UnitLeft;
+      Attributes['top'] := Sections[i].UnitTop;
+      Attributes['visible'] := Sections[i].UnitVisible;
+      Attributes['width'] := Sections[i].UnitWidth;
+    end;
+
+  {n := r.ChildNodes.FindNode('request');
+  if not(Assigned(n)) then
+    n := r.AddChild('request');
+  with Request do
+  begin
+    n.Attributes['id'] := ID;
+    n.Attributes['mode'] := Mode;
+  end;}
+
+  {n := r.AddChild('grid');
+  with Grid do
+  begin
+    n.Attributes['id'] := CfgID;
+    n.Attributes['align'] := Align;
+    n.Attributes['enable'] := Enable;
+    n.Attributes['visible'] := Visible;
+    with PositionSize do
+    begin
+      n.Attributes['height'] := Height;
+      n.Attributes['left'] := Left;
+      n.Attributes['top'] := Top;
+      n.Attributes['width'] := Width;
+    end;
+  end;
+
+  n := r.AddChild('filterpanel');
+  with FilterPanel do
+  begin
+    n.Attributes['id'] := CfgID;
+    n.Attributes['align'] := Align;
+    n.Attributes['enable'] := Enable;
+    n.Attributes['visible'] := Visible;
+    with PositionSize do
+    begin
+      n.Attributes['height'] := Height;
+      n.Attributes['left'] := Left;
+      n.Attributes['top'] := Top;
+      n.Attributes['width'] := Width;
+    end;
+  end;}
+end;
+
 { TsmxPageManagerCfg }
 
 destructor TsmxPageManagerCfg.Destroy;
@@ -1634,7 +1854,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxPageManagerCfg.ReadCell;
+procedure TsmxPageManagerCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -1661,7 +1881,7 @@ begin
   end;
 end;
 
-procedure TsmxPageManagerCfg.WriteCell;
+procedure TsmxPageManagerCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -1837,7 +2057,7 @@ begin
       Width := 0;
     end;
   end;
-  with PageManager do
+  {with PageManager do
   begin
     CfgID := 0;
     Align := alClient;
@@ -1850,8 +2070,16 @@ begin
       Top := 0;
       Width := 0;
     end;
-  end;
+  end;}
+  PageManagers.Clear;
   //FormStates.Clear;
+end;
+
+function TsmxFormCfg.GetPageManagers: TsmxVisibleUnits;
+begin
+  if not Assigned(FPageManagers) then
+    FPageManagers := TsmxVisibleUnits.Create(TsmxVisibleUnit);
+  Result := FPageManagers;
 end;
 
 {function TsmxFormCfg.GetFormStates: TsmxFormStates;
@@ -1891,7 +2119,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxFormCfg.ReadCell;
+procedure TsmxFormCfg.ReadCfg;
 
   procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxStateUnit);
   var i: Integer; u: TsmxStateUnit;
@@ -1908,7 +2136,7 @@ procedure TsmxFormCfg.ReadCell;
         AddUnits(ANode.ChildNodes[i], u);
   end;
 
-var r, n, n2: IXMLNode; i, j: Integer;  
+var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -1929,7 +2157,7 @@ begin
     end;
   end;
 
-  n := r.ChildNodes.FindNode('pagemanager');
+  {n := r.ChildNodes.FindNode('pagemanager');
   if Assigned(n) then
     with PageManager do
     begin
@@ -1944,7 +2172,25 @@ begin
         Top := n.Attributes['top'];
         Width := n.Attributes['width'];
       end;
-    end;
+    end;}
+
+  n := r.ChildNodes.FindNode('pagemanagers');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'pagemanager' then
+        with PageManagers.Add do
+        begin
+          CfgID := n.ChildNodes[i].Attributes['id'];
+          UnitAlign := n.ChildNodes[i].Attributes['align'];
+          UnitEnable := n.ChildNodes[i].Attributes['enable'];
+          UnitHeight := n.ChildNodes[i].Attributes['height'];
+          UnitLeft := n.ChildNodes[i].Attributes['left'];
+          UnitTop := n.ChildNodes[i].Attributes['top'];
+          UnitVisible := n.ChildNodes[i].Attributes['visible'];
+          UnitWidth := n.ChildNodes[i].Attributes['width'];
+        end;
+  end;
 
   n := r.ChildNodes.FindNode('mainmenu');
   if Assigned(n) then
@@ -2014,7 +2260,7 @@ begin
   end;}
 end;
 
-procedure TsmxFormCfg.WriteCell;
+procedure TsmxFormCfg.WriteCfg;
 
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxStateUnit);
   var i: Integer; n: IXMLNode;
@@ -2030,7 +2276,7 @@ procedure TsmxFormCfg.WriteCell;
       AddNodes(n, AUnit[i]);
   end;
 
-var r, n, n2, n3: IXMLNode; i, j: Integer;  
+var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
   if Assigned(r) then
@@ -2048,7 +2294,7 @@ begin
     n.Attributes['width'] := Width;
   end;
 
-  n := r.AddChild('pagemanager');
+  {n := r.AddChild('pagemanager');
   with PageManager do
   begin
     n.Attributes['id'] := CfgID;
@@ -2062,7 +2308,21 @@ begin
       n.Attributes['top'] := Top;
       n.Attributes['width'] := Width;
     end;
-  end;
+  end;}
+
+  n := r.AddChild('pagemanagers');
+  for i := 0 to PageManagers.Count - 1 do
+    with n.AddChild('pagemanager') do
+    begin
+      Attributes['id'] := PageManagers[i].CfgID;
+      Attributes['align'] := PageManagers[i].UnitAlign;
+      Attributes['enable'] := PageManagers[i].UnitEnable;
+      Attributes['height'] := PageManagers[i].UnitHeight;
+      Attributes['left'] := PageManagers[i].UnitLeft;
+      Attributes['top'] := PageManagers[i].UnitTop;
+      Attributes['visible'] := PageManagers[i].UnitVisible;
+      Attributes['width'] := PageManagers[i].UnitWidth;
+    end;
 
   n := r.AddChild('mainmenu');
   with MainMenu do
@@ -2188,7 +2448,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxFilterCfg.ReadCell;
+procedure TsmxFilterCfg.ReadCfg;
 var r, n, n2: IXMLNode;
 begin
   //Clear;
@@ -2276,7 +2536,7 @@ begin
     end;}
 end;
 
-procedure TsmxFilterCfg.WriteCell;
+procedure TsmxFilterCfg.WriteCfg;
 var r, n, n2: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -2386,7 +2646,7 @@ begin
   Result := FFilters;
 end;
 
-procedure TsmxFilterPanelCfg.ReadCell;
+procedure TsmxFilterPanelCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -2437,7 +2697,7 @@ begin
     end;}
 end;
 
-procedure TsmxFilterPanelCfg.WriteCell;
+procedure TsmxFilterPanelCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -2498,7 +2758,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxMenuItemCfg.ReadCell;
+procedure TsmxMenuItemCfg.ReadCfg;
 var r, n: IXMLNode;
 begin
   //Clear;
@@ -2514,7 +2774,7 @@ begin
   end;
 end;
 
-procedure TsmxMenuItemCfg.WriteCell;
+procedure TsmxMenuItemCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -2726,7 +2986,7 @@ begin
   Result := FMenuUnits;
 end;}
 
-procedure TsmxMainMenuCfg.ReadCell;
+procedure TsmxMainMenuCfg.ReadCfg;
 
   procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxHVisibleUnit);
   var i: Integer; u: TsmxHVisibleUnit;
@@ -2764,7 +3024,7 @@ begin
   end;
 end;
 
-{procedure TsmxMainMenuCfg.ReadCell;
+{procedure TsmxMainMenuCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 
   procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxMenuUnit);
@@ -2800,7 +3060,7 @@ begin
   end;
 end;}
 
-procedure TsmxMainMenuCfg.WriteCell;
+procedure TsmxMainMenuCfg.WriteCfg;
 
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxHVisibleUnit);
   var i: Integer; n: IXMLNode;
@@ -2833,7 +3093,7 @@ begin
     AddNodes(n, MenuUnits.Root[i]);
 end;
 
-{procedure TsmxMainMenuCfg.WriteCell;
+{procedure TsmxMainMenuCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxMenuUnit);
@@ -2896,7 +3156,7 @@ begin
   inherited Initialize;
 end;}
 
-procedure TsmxLibAlgorithmCfg.ReadCell;
+procedure TsmxLibAlgorithmCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -2928,7 +3188,7 @@ begin
   end;
 end;
 
-procedure TsmxLibAlgorithmCfg.WriteCell;
+procedure TsmxLibAlgorithmCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -3014,7 +3274,7 @@ begin
   Result := FAlgorithmItems;
 end;
 
-procedure TsmxAlgorithmListCfg.ReadCell;
+procedure TsmxAlgorithmListCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -3052,7 +3312,7 @@ begin
   end;
 end;
 
-procedure TsmxAlgorithmListCfg.WriteCell;
+procedure TsmxAlgorithmListCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -3092,7 +3352,7 @@ begin
   FBarShowHint := False;
 end;
 
-procedure TsmxToolBarCfg.ReadCell;
+procedure TsmxToolBarCfg.ReadCfg;
 var r, n: IXMLNode;
 begin
   //Clear;
@@ -3109,7 +3369,7 @@ begin
   end;
 end;
 
-procedure TsmxToolBarCfg.WriteCell;
+procedure TsmxToolBarCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -3137,7 +3397,7 @@ begin
   Result := FBarUnits;
 end;
 
-procedure TsmxControlBarCfg.ReadCell;
+procedure TsmxControlBarCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   //Clear;
@@ -3164,7 +3424,7 @@ begin
   end;
 end;
 
-procedure TsmxControlBarCfg.WriteCell;
+procedure TsmxControlBarCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('root');
@@ -3187,10 +3447,46 @@ begin
     end;
 end;
 
+{ TsmxDBDriverCfg }
+
+{procedure TsmxDBDriverCfg.Clear;
+begin
+  FDrvLibrary := '';
+  FDrvProcedure := '';
+end;
+
+procedure TsmxDBDriverCfg.ReadCfg;
+var r, n: IXMLNode;
+begin
+  r := FXMLDocIntf.ChildNodes.FindNode('root');
+  if not Assigned(r) then
+    Exit;
+
+  n := r.ChildNodes.FindNode('driver');
+  if Assigned(n) then
+  begin
+    DrvLibrary := n.Attributes['library'];
+    DrvProcedure := n.Attributes['procedure'];
+  end;
+end;
+
+procedure TsmxDBDriverCfg.WriteCfg;
+var r, n: IXMLNode;
+begin
+  r := FXMLDocIntf.ChildNodes.FindNode('root');
+  if Assigned(r) then
+    r.ChildNodes.Clear else
+    r := FXMLDocIntf.AddChild('root');
+
+  n := r.AddChild('driver');
+  n.Attributes['library'] := DrvLibrary;
+  n.Attributes['procedure'] := DrvProcedure;
+end;}
+
 initialization
   RegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg, TsmxFilterCfg,
-    TsmxFilterPanelCfg, TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuItemCfg,
-    TsmxMainMenuCfg, TsmxLibAlgorithmCfg, TsmxAlgorithmListCfg, TsmxToolBarCfg,
-    TsmxControlBarCfg, TsmxFormCfg]);
+    TsmxFilterPanelCfg, TsmxSectionCfg, TsmxPageCfg, TsmxPageManagerCfg,
+    TsmxMenuItemCfg, TsmxMainMenuCfg, TsmxLibAlgorithmCfg, TsmxAlgorithmListCfg,
+    TsmxToolBarCfg, TsmxControlBarCfg, TsmxFormCfg]);
 
 end.

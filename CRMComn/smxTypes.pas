@@ -3,7 +3,7 @@ unit smxTypes;
 interface
 
 uses
-  Classes, Controls, Graphics;
+  Classes, Controls, Graphics, smxDBIntf;
 
 type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;
@@ -26,7 +26,7 @@ type
 
   TsmxParamLocation = (plInput, plConst, plOutput, plFilterPanel, plGrid,
     plParentFormFilterPanel, plParentFormGrid, plAlgorithmParams, plGlobalParams,
-    plFormID, plKey, plValue, plResult, plMessage);
+    plFormID, plKey, plValue, plResult, plMessage{, plID});
 
   TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage{, fsParam});
 
@@ -72,7 +72,7 @@ type
 
   TsmxLibTypes = set of TsmxLibType;
 
-  TsmxFuncLibInit = procedure(ACall: TsmxFuncCallBack);
+  TsmxProcLibInit = procedure(ACall: TsmxFuncCallBack);
 
   TsmxLibInfo = record
     FullName: String;
@@ -80,10 +80,23 @@ type
     LibVers: TsmxVers;
     LibTypes: TsmxLibTypes;
     CompProgVers: TsmxVers;
-    FuncLibInit: TsmxFuncLibInit;
+    ProcLibInit: TsmxProcLibInit;
   end;
 
-  TsmxFuncLibInfo = procedure(var ALibInfo: TsmxLibInfo);
+  TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);
+
+  TsmxFuncDatabaseCreate = function: IsmxDatabase;
+
+  TsmxProjectConnection = record
+    ProjectName: ShortString;
+    LibraryName: ShortString;
+    ProcedureName: ShortString;
+    WindowsAuthorization: Boolean;
+    DatabaseName: ShortString;
+    DriverName: ShortString;
+    LoginPrompt: Boolean;
+    Params: ShortString;
+  end;
 
 implementation
 

@@ -21,13 +21,25 @@ uses
   smxFormManager in '..\CRMBase\smxFormManager.pas',
   smxLibManager in '..\CRMBase\smxLibManager.pas',
   smxGlobal in '..\CRMBase\smxGlobal.pas',
-  smxProcs in '..\CRMComn\smxProcs.pas';
+  smxProcs in '..\CRMComn\smxProcs.pas',
+  smxDBManager in '..\CRMBase\smxDBManager.pas',
+  smxDBConnection in '..\CRMBase\smxDBConnection.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
+
   Initialize;
   if ConnectDatabase and CreateMainForm then
     Application.Run;
+
+  {Initialize;
+  if ConnectDatabase('CRM') then
+  begin
+    CallBack[1] := Integer(Database);
+    if CreateMainForm then
+      Application.Run;
+    //DisconnectDatabase;
+  end;}
 end.

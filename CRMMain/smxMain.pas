@@ -10,8 +10,8 @@ implementation
 
 uses
   Classes, Windows, Forms, SysUtils, smxClasses, smxCells, smxCallBack,
-  smxGlobal, smxGlobalStorage, smxLibManager, smxFormManager, smxProcs,
-  smxFuncs, smxConsts;
+  smxGlobal, smxGlobalStorage, smxLibManager, smxFormManager, smxDBManager,
+  smxProcs, smxFuncs, smxConsts;
 
 var
   MainForm: TForm = nil;

@@ -1,4 +1,4 @@
-library Algs;
+library aAlgs;
 
 uses
   ShareMem,
@@ -23,7 +23,9 @@ uses
   smxADODB in '..\CRMBase\smxADODB.pas',
   smxField in '..\CRMBase\smxField.pas',
   smxLibProcs in '..\CRMComn\smxLibProcs.pas',
-  smxProcs in '..\CRMComn\smxProcs.pas';
+  smxProcs in '..\CRMComn\smxProcs.pas',
+  smxDBManager in '..\CRMBase\smxDBManager.pas',
+  smxDBConnection in '..\CRMBase\smxDBConnection.pas';
 
 {$R *.res}
 

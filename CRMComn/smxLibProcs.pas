@@ -7,8 +7,8 @@ uses
 
 procedure LibInfo(var ALibInfo: TsmxLibInfo);
 procedure LibInit(ACall: TsmxFuncCallBack);
-procedure FillInfo(ACompProgVersMajor, ACompProgVersMinor: Word; AFuncLibInit: TsmxFuncLibInit = nil;
-  ALibTypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
+procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcLibInit = nil;
+  ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
 
 const
   Call: TsmxFuncCallBack = nil;
@@ -32,8 +32,8 @@ begin
   Application.Handle := HWND(Integer(Call(0)));
 end;
 
-procedure FillInfo(ACompProgVersMajor, ACompProgVersMinor: Word; AFuncLibInit: TsmxFuncLibInit = nil;
-  ALibTypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
+procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcLibInit = nil;
+  ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
 var s: String; VersM, VersL: Cardinal;
 begin
   s := GetModuleName(HInstance);
@@ -49,15 +49,15 @@ begin
       Release := LongRec(VersL).Hi;
       Build := LongRec(VersL).Lo;
     end;
-    LibTypes := ALibTypes;
+    LibTypes := ATypes;
     with CompProgVers do
     begin
-      Major := ACompProgVersMajor;
-      Minor := ACompProgVersMinor;
+      Major := ACompMajor;
+      Minor := ACompMinor;
       Release := 0;
       Build := 0;
     end;
-    FuncLibInit := AFuncLibInit;
+    ProcLibInit := AProc;
   end;
 end;
 

@@ -10,7 +10,8 @@ function GetCurrentPage: TsmxCustomPage;
 function GetCurrentRequest: TsmxCustomRequest;
 function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
-function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
+function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
 function StreamToStr(Stream: TStream): String;
@@ -27,7 +28,7 @@ function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 function VarStringToVar(V: Variant): Variant;
 function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
-function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
+//function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 function FormatXMLText(AText: String): String;
 function UnFormatXMLText(AText: String): String;
 
@@ -54,26 +55,27 @@ function GetCurrentPage: TsmxCustomPage;
 var f: TsmxCustomForm;
 begin
   Result := nil;
-  f := GetCurrentForm;
+  {f := GetCurrentForm;
   if Assigned(f) then
     if Assigned(f.PageManager) then
-      Result := f.PageManager.ActivePage;
+      Result := f.PageManager.ActivePage;}
 end;
 
 function GetCurrentRequest: TsmxCustomRequest;
 var p: TsmxCustomPage;
 begin
   Result := nil;
-  p := GetCurrentPage;
+  {p := GetCurrentPage;
   if Assigned(p) then
     if Assigned(p.Grid) then
-      Result := p.Grid.Request;
+      Result := p.Grid.Request;}
 end;
 
 function CfgIDToCfgClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
 var t: TsmxTypeCfg;
 begin
   t := TsmxTypeCfg.Create(nil, ADB, ACfgID);
+  t.Initialize;
   try
     Result := t.CfgClass;
   finally
@@ -85,6 +87,7 @@ function CfgIDToCellClass(const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCel
 var t: TsmxTypeCfg;
 begin
   t := TsmxTypeCfg.Create(nil, ADB, ACfgID);
+  t.Initialize;
   try
     Result := t.CellClass;
   finally
@@ -92,7 +95,8 @@ begin
   end;
 end;
 
-function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
+function NewCfg(AOwner: TComponent; const ADB: IsmxDatabase;
+  ACfgID: Integer): TsmxBaseCfg;
 begin
   Result := CfgIDToCfgClass(ADB, ACfgID).Create(AOwner, ADB, ACfgID);
 end;
@@ -243,7 +247,7 @@ begin
   with ARequest do
   begin
     if not Database.InTransaction then
-      Database.StartTrans;
+      Database.StartTransaction;
     try
       res := -1; msg := '';
       Perform(Same);
@@ -268,18 +272,18 @@ begin
         end;
       end;
       if res = 0 then
-        Database.CommitTrans else
-        Database.RollbackTrans;
+        Database.CommitTransaction else
+        Database.RollbackTransaction;
       if msg <> '' then
         Inf(msg);
       Result := res = 0;
     except
-      Database.RollbackTrans;
+      Database.RollbackTransaction;
     end;
   end;
 end;
 
-function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
+{function ActiveRequest(AForm: TsmxCustomForm): TsmxCustomRequest;
 begin
   Result := nil;
   if Assigned(AForm) then
@@ -287,7 +291,7 @@ begin
       if Assigned(AForm.PageManager.ActivePage) then
         if Assigned(AForm.PageManager.ActivePage.Grid) then
           Result := AForm.PageManager.ActivePage.Grid.Request;
-end;
+end;}
 
 function FormatXMLText(AText: String): String;
 begin

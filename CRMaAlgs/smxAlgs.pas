@@ -28,7 +28,7 @@ implementation
 
 uses
   Windows, Controls, Variants, smxLibProcs, smxCells, smxFormManager, smxFuncs,
-  smxLibFuncs, smxConsts, smxDBIntf, smxTypes, smxLibTypes;
+  smxLibFuncs, smxConsts, smxDBIntf, smxTypes;
 
 procedure OpenForm(Algorithm: TsmxAlgorithm; Params: Variant);
 var FormCfgID, FormID: Integer; ap: TsmxParams; p: TsmxParam; c, f: TsmxBaseCell;
@@ -263,13 +263,13 @@ begin
               ParentForm := TsmxCustomForm(c);
             if ShowModalForm = mrOk then
             begin
-              {r := nil;
+              r := nil;
               with TsmxCustomForm(f) do
-                if Assigned(PageManager) then
-                  if Assigned(PageManager.ActivePage) then
-                    if Assigned(PageManager.ActivePage.Grid) then
-                      r := PageManager.ActivePage.Grid.Request;}
-              r := ActiveRequest(TsmxCustomForm(f));
+                if Assigned(PageManagers[0]) then
+                  if Assigned(PageManagers[0].ActivePage) then
+                    if Assigned(PageManagers[0].ActivePage.Sections[0]) then
+                      r := PageManagers[0].ActivePage.Sections[0].Request;
+              //r := ActiveRequest(TsmxCustomForm(f));
               if Assigned(r) then
               begin
                 fld := r.FindFieldSense(fsKey);
@@ -456,10 +456,10 @@ begin
           if ShowModalForm = mrOk then
           begin
             r2 := nil;
-            if Assigned(PageManager) then
-              if Assigned(PageManager.ActivePage) then
-                if Assigned(PageManager.ActivePage.Grid) then
-                  r2 := PageManager.ActivePage.Grid.Request;
+            if Assigned(PageManagers[0]) then
+              if Assigned(PageManagers[0].ActivePage) then
+                if Assigned(PageManagers[0].ActivePage.Sections[0]) then
+                  r2 := PageManagers[0].ActivePage.Sections[0].Request;
             if Assigned(r2) then
             begin
               {fld := r2.FindFieldSense(fsParam);
@@ -553,10 +553,10 @@ begin
             if ShowModalForm = mrOk then
             begin
               r2 := nil;
-              if Assigned(PageManager) then
-                if Assigned(PageManager.ActivePage) then
-                  if Assigned(PageManager.ActivePage.Grid) then
-                    r2 := PageManager.ActivePage.Grid.Request;
+              if Assigned(PageManagers[0]) then
+                if Assigned(PageManagers[0].ActivePage) then
+                  if Assigned(PageManagers[0].ActivePage.Sections[0]) then
+                    r2 := PageManagers[0].ActivePage.Sections[0].Request;
               r := CreateCell(RequestCfgID);
               try
                 if not ClassCell(r, 'TsmxCustomRequest') then

@@ -16,25 +16,28 @@ type
     function GetConnected: Boolean;
     function GetDatabase: TObject;
     function GetDatabaseName: String;
+    function GetDriverName: String;
     function GetInTransaction: Boolean;
     function GetLoginPrompt: Boolean;
     function GetParams: TStrings;
     function GetVersion: String; override;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
+    procedure SetDriverName(const Value: String);
     procedure SetLoginPrompt(Value: Boolean);
     procedure SetParams(Value: TStrings);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure CommitTrans;
+    procedure CommitTransaction;
     function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
-    procedure RollbackTrans;
-    procedure StartTrans;
+    procedure RollbackTransaction;
+    procedure StartTransaction;
 
     property Connected: Boolean read GetConnected write SetConnected;
     //property Database: TObject read GetDatabase;
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
+    property DriverName: String read GetDriverName write SetDriverName;
     property InTransaction: Boolean read GetInTransaction;
     property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     property Params: TStrings read GetParams write SetParams;
@@ -99,7 +102,7 @@ type
     function GetParam(Index: Integer): IsmxParam;
     function GetParamCount: Integer;
     function GetPrepare: Boolean;
-    function GetRecNo: Integer;
+    function GetRecordNo: Integer;
     function GetRecordCount: Integer;
     function GetSQL: TStrings; virtual;
     function GetVersion: String; override;
@@ -108,9 +111,10 @@ type
     procedure SetField(Index: Integer; const Value: IsmxField);
     procedure SetParam(Index: Integer; const Value: IsmxParam);
     procedure SetPrepare(Value: Boolean);
-    procedure SetRecNo(Value: Integer);
+    procedure SetRecordNo(Value: Integer);
     procedure SetSQL(Value: TStrings); virtual;
   public
+    procedure Add; 
     function AddField(const FieldName: String): IsmxField;
     function AddParam: IsmxParam;
     procedure ClearFields;
@@ -128,8 +132,10 @@ type
     procedure Next;
     procedure Open;
     function ParamByName(const Value: String): IsmxParam;
+    procedure Post;
     procedure Prepare; virtual;
     procedure Prior;
+    procedure Remove;
     procedure RemoveField(const Value: IsmxField);
     procedure RemoveParam(const Value: IsmxParam);
 
@@ -144,7 +150,7 @@ type
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;
-    property RecNo: Integer read GetRecNo write SetRecNo;
+    property RecordNo: Integer read GetRecordNo write SetRecordNo;
     property RecordCount: Integer read GetRecordCount;
     property SQL: TStrings read GetSQL write SetSQL;
   end;
@@ -187,7 +193,7 @@ function NewADODatabase: IsmxDatabase;
 implementation
 
 uses
-  StrUtils, smxConsts, smxField;
+  StrUtils, {ActiveX,} smxConsts, smxField;
 
 const
   Vers = '1.0';
@@ -224,7 +230,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TsmxADODatabase.CommitTrans;
+procedure TsmxADODatabase.CommitTransaction;
 begin
   FDatabase.CommitTrans;
 end;
@@ -242,6 +248,11 @@ end;
 function TsmxADODatabase.GetDatabaseName: String;
 begin
   Result := String(FDatabase.Name);
+end;
+
+function TsmxADODatabase.GetDriverName: String;
+begin
+  Result := String(FDatabase.Provider);
 end;
 
 function TsmxADODatabase.GetInTransaction: Boolean;
@@ -282,7 +293,7 @@ begin
   end;
 end;
 
-procedure TsmxADODatabase.RollbackTrans;
+procedure TsmxADODatabase.RollbackTransaction;
 begin
   FDatabase.RollbackTrans;
 end;
@@ -299,6 +310,11 @@ begin
   FDatabase.Name := Value;
 end;
 
+procedure TsmxADODatabase.SetDriverName(const Value: String);
+begin
+  FDatabase.Provider := WideString(Value);
+end;
+
 procedure TsmxADODatabase.SetLoginPrompt(Value: Boolean);
 begin
   FDatabase.LoginPrompt := Value;
@@ -312,7 +328,7 @@ begin
   //FDatabase.ConnectionString := WideString(FParams.Text);
 end;
 
-procedure TsmxADODatabase.StartTrans;
+procedure TsmxADODatabase.StartTransaction;
 begin
   FDatabase.BeginTrans;
 end;
@@ -345,7 +361,8 @@ begin
   if Source.QueryInterface(IsmxField, FieldIntf) = S_OK then
     //p := (Source as IsmxField).GetField else
     p := FieldIntf.GetField else
-    raise EsmxDBInterfaceError.CreateRes(@SDBIntfParamInvalid);
+    //raise EsmxDBInterfaceError.CreateRes(@SDBIntfParamInvalid);
+    p := nil;
   {if p is TParameter then
     FParam.Assign(TParameter(p)) else
   if p is TField then
@@ -472,6 +489,11 @@ begin
 end;
 
 { TsmxADODataSet }
+
+procedure TsmxADODataSet.Add;
+begin
+  FADODataSet.Append;
+end;
 
 function TsmxADODataSet.AddField(const FieldName: String): IsmxField;
 var f: TField;
@@ -612,7 +634,7 @@ begin
   Result := _TCustomADODataSet(FADODataSet).Prepared;
 end;
 
-function TsmxADODataSet.GetRecNo: Integer;
+function TsmxADODataSet.GetRecordNo: Integer;
 begin
   Result := FADODataSet.RecNo;
 end;
@@ -668,6 +690,11 @@ begin
     Result := TsmxADOParam.Create(p);
 end;
 
+procedure TsmxADODataSet.Post;
+begin
+  FADODataSet.Post;
+end;
+
 procedure TsmxADODataSet.Prepare;
 begin
 end;
@@ -675,6 +702,11 @@ end;
 procedure TsmxADODataSet.Prior;
 begin
   FADODataSet.Prior;
+end;
+
+procedure TsmxADODataSet.Remove;
+begin
+  FADODataSet.Delete;
 end;
 
 procedure TsmxADODataSet.RemoveField(const Value: IsmxField);
@@ -739,7 +771,7 @@ begin
   _TCustomADODataSet(FADODataSet).Prepared := Value;
 end;
 
-procedure TsmxADODataSet.SetRecNo(Value: Integer);
+procedure TsmxADODataSet.SetRecordNo(Value: Integer);
 begin
   FADODataSet.RecNo := Value;
 end;
@@ -845,6 +877,11 @@ begin
   //TADOStoredProc(FADODataSet).ProcedureName := FSQL.Text;
 end;
 
+//initialization
+  //CoInitialize(nil);
+
+//finalization
+  //CoUninitialize;
+
 end.
 
- 
