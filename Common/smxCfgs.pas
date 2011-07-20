@@ -1653,29 +1653,29 @@ end;
 procedure TsmxMenuPointCfg.ReadCfg;
 var r, n: IXMLNode;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
 
-  n := r.ChildNodes.FindNode('menuitem');
+  n := r.ChildNodes.FindNode('MenuItem');
   if Assigned(n) then
   begin
-    ItemCaption := n.Attributes['caption'];
-    ItemImageIndex := n.Attributes['imageindex'];
+    ItemCaption := n.Attributes['Caption'];
+    ItemImageIndex := n.Attributes['ImageIndex'];
   end; 
 end;
 
 procedure TsmxMenuPointCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := XMLDoc.AddChild('root');
+    r := XMLDoc.AddChild('Root');
 
-  n := r.AddChild('menuitem');
-  n.Attributes['caption'] := ItemCaption;
-  n.Attributes['imageindex'] := ItemImageIndex;
+  n := r.AddChild('MenuItem');
+  n.Attributes['Caption'] := ItemCaption;
+  n.Attributes['ImageIndex'] := ItemImageIndex;
 end;
 
 { TsmxHVisibleUnit }
@@ -1772,31 +1772,31 @@ procedure TsmxMasterMenuCfg.ReadCfg;
     u := AUnit.Add;
     with u do
     begin
-      CfgID := ANode.Attributes['id'];
-      UnitAlign := ANode.Attributes['align'];
-      UnitEnable := ANode.Attributes['enable'];
-      UnitHeight := ANode.Attributes['height'];
-      UnitLeft := ANode.Attributes['left'];
-      UnitTop := ANode.Attributes['top'];
-      UnitVisible := ANode.Attributes['visible'];
-      UnitWidth := ANode.Attributes['width'];
+      CfgID := ANode.Attributes['CfgID'];
+      UnitAlign := ANode.Attributes['Align'];
+      UnitEnable := ANode.Attributes['Enable'];
+      UnitHeight := ANode.Attributes['Height'];
+      UnitLeft := ANode.Attributes['Left'];
+      UnitTop := ANode.Attributes['Top'];
+      UnitVisible := ANode.Attributes['Visible'];
+      UnitWidth := ANode.Attributes['Width'];
     end;
     for i := 0 to ANode.ChildNodes.Count - 1 do
-      if ANode.ChildNodes[i].NodeName = 'menuitem' then
+      if ANode.ChildNodes[i].NodeName = 'MenuItem' then
         AddUnits(ANode.ChildNodes[i], u);
   end;
 
 var r, n: IXMLNode; i: Integer;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
 
-  n := r.ChildNodes.FindNode('menuitems');
+  n := r.ChildNodes.FindNode('MenuItems');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
     for i := 0 to n.ChildNodes.Count - 1 do
-      if n.ChildNodes[i].NodeName = 'menuitem' then
+      if n.ChildNodes[i].NodeName = 'MenuItem' then
         AddUnits(n.ChildNodes[i], MenuUnits.Root);
   end; 
 end;
@@ -1806,17 +1806,17 @@ procedure TsmxMasterMenuCfg.WriteCfg;
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxHVisibleUnit);
   var i: Integer; n: IXMLNode;
   begin
-    n := ANode.AddChild('menuitem');
+    n := ANode.AddChild('MenuItem');
     with n do
     begin
-      Attributes['id'] := AUnit.CfgID;
-      Attributes['align'] := AUnit.UnitAlign;
-      Attributes['enable'] := AUnit.UnitEnable;
-      Attributes['height'] := AUnit.UnitHeight;
-      Attributes['left'] := AUnit.UnitLeft;
-      Attributes['top'] := AUnit.UnitTop;
-      Attributes['visible'] := AUnit.UnitVisible;
-      Attributes['width'] := AUnit.UnitWidth;
+      Attributes['CfgID'] := AUnit.CfgID;
+      Attributes['Align'] := AUnit.UnitAlign;
+      Attributes['Enable'] := AUnit.UnitEnable;
+      Attributes['Height'] := AUnit.UnitHeight;
+      Attributes['Left'] := AUnit.UnitLeft;
+      Attributes['Top'] := AUnit.UnitTop;
+      Attributes['Visible'] := AUnit.UnitVisible;
+      Attributes['Width'] := AUnit.UnitWidth;
     end;
     for i := 0 to AUnit.Count - 1 do
       AddNodes(n, AUnit[i]);
@@ -1824,12 +1824,12 @@ procedure TsmxMasterMenuCfg.WriteCfg;
 
 var r, n: IXMLNode; i: Integer;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := XMLDoc.AddChild('root');
+    r := XMLDoc.AddChild('Root');
 
-  n := r.AddChild('menuitems');
+  n := r.AddChild('MenuItems');
   for i := 0 to MenuUnits.Root.Count - 1 do
     AddNodes(n, MenuUnits.Root[i]);
 end;
@@ -2023,108 +2023,108 @@ end;
 procedure TsmxFormCfg.ReadCfg;
 var r, n: IXMLNode; i: Integer;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
 
-  n := r.ChildNodes.FindNode('form');
+  n := r.ChildNodes.FindNode('Form');
   if Assigned(n) then
   begin
-    FormCaption := n.Attributes['caption'];
-    FormImageIndex := n.Attributes['imageindex'];
+    FormCaption := n.Attributes['Caption'];
+    FormImageIndex := n.Attributes['ImageIndex'];
     with FormPositionSize do
     begin
-      Height := n.Attributes['height'];
-      Left := n.Attributes['left'];
-      Top := n.Attributes['top'];
-      Width := n.Attributes['width'];
+      Height := n.Attributes['Height'];
+      Left := n.Attributes['Left'];
+      Top := n.Attributes['Top'];
+      Width := n.Attributes['Width'];
     end;
   end;
 
-  n := r.ChildNodes.FindNode('pagemanagers');
+  n := r.ChildNodes.FindNode('PageManagers');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
     for i := 0 to n.ChildNodes.Count - 1 do
-      if n.ChildNodes[i].NodeName = 'pagemanager' then
+      if n.ChildNodes[i].NodeName = 'PageManager' then
         with PageManagers.Add do
         begin
-          CfgID := n.ChildNodes[i].Attributes['id'];
-          UnitAlign := n.ChildNodes[i].Attributes['align'];
-          UnitEnable := n.ChildNodes[i].Attributes['enable'];
-          UnitHeight := n.ChildNodes[i].Attributes['height'];
-          UnitLeft := n.ChildNodes[i].Attributes['left'];
-          UnitTop := n.ChildNodes[i].Attributes['top'];
-          UnitVisible := n.ChildNodes[i].Attributes['visible'];
-          UnitWidth := n.ChildNodes[i].Attributes['width'];
+          CfgID := n.ChildNodes[i].Attributes['CfgID'];
+          UnitAlign := n.ChildNodes[i].Attributes['Align'];
+          UnitEnable := n.ChildNodes[i].Attributes['Enable'];
+          UnitHeight := n.ChildNodes[i].Attributes['Height'];
+          UnitLeft := n.ChildNodes[i].Attributes['Left'];
+          UnitTop := n.ChildNodes[i].Attributes['Top'];
+          UnitVisible := n.ChildNodes[i].Attributes['Visible'];
+          UnitWidth := n.ChildNodes[i].Attributes['Width'];
         end;
   end;
 
-  n := r.ChildNodes.FindNode('mainmenu');
+  n := r.ChildNodes.FindNode('MainMenu');
   if Assigned(n) then
     with MainMenu do
     begin
-      CfgID := n.Attributes['id'];
-      Align := n.Attributes['align'];
-      Enable := n.Attributes['enable'];
-      Visible := n.Attributes['visible'];
+      CfgID := n.Attributes['CfgID'];
+      Align := n.Attributes['Align'];
+      Enable := n.Attributes['Enable'];
+      Visible := n.Attributes['Visible'];
       with PositionSize do
       begin
-        Height := n.Attributes['height'];
-        Left := n.Attributes['left'];
-        Top := n.Attributes['top'];
-        Width := n.Attributes['width'];
+        Height := n.Attributes['Height'];
+        Left := n.Attributes['Left'];
+        Top := n.Attributes['Top'];
+        Width := n.Attributes['Width'];
       end;
     end;
 
-  n := r.ChildNodes.FindNode('algorithmlist');
+  n := r.ChildNodes.FindNode('AlgorithmList');
   if Assigned(n) then
     with AlgorithmList do
     begin
-      CfgID := n.Attributes['id'];
-      IsCreateMenuItem := n.Attributes['iscreatemenuitem'];
-      IsCreateToolButton := n.Attributes['iscreatetoolbutton'];
+      CfgID := n.Attributes['CfgID'];
+      IsCreateMenuItem := n.Attributes['IsCreateMenuItem'];
+      IsCreateToolButton := n.Attributes['IsCreateToolButton'];
     end;
 
-  n := r.ChildNodes.FindNode('controlbar');
+  n := r.ChildNodes.FindNode('ControlBar');
   if Assigned(n) then
     with ControlBar do
     begin
-      CfgID := n.Attributes['id'];
-      Align := n.Attributes['align'];
-      Enable := n.Attributes['enable'];
-      Visible := n.Attributes['visible'];
+      CfgID := n.Attributes['CfgID'];
+      Align := n.Attributes['Align'];
+      Enable := n.Attributes['Enable'];
+      Visible := n.Attributes['Visible'];
       with PositionSize do
       begin
-        Height := n.Attributes['height'];
-        Left := n.Attributes['left'];
-        Top := n.Attributes['top'];
-        Width := n.Attributes['width'];
+        Height := n.Attributes['Height'];
+        Left := n.Attributes['Left'];
+        Top := n.Attributes['Top'];
+        Width := n.Attributes['Width'];
       end;
     end;
 
-  n := r.ChildNodes.FindNode('staterequest');
+  n := r.ChildNodes.FindNode('StateRequest');
   if Assigned(n) then
     with StateRequest do
     begin
-      CfgID := n.Attributes['id'];
-      Operation := n.Attributes['operation'];
-      DatabaseName := n.Attributes['databasename'];
+      CfgID := n.Attributes['CfgID'];
+      Operation := n.Attributes['Operation'];
+      DatabaseName := n.Attributes['DatabaseName'];
     end;
 
-  n := r.ChildNodes.FindNode('statusbar');
+  n := r.ChildNodes.FindNode('StatusBar');
   if Assigned(n) then
     with StatusBar do
     begin
-      CfgID := n.Attributes['id'];
-      Align := n.Attributes['align'];
-      Enable := n.Attributes['enable'];
-      Visible := n.Attributes['visible'];
+      CfgID := n.Attributes['CfgID'];
+      Align := n.Attributes['Align'];
+      Enable := n.Attributes['Enable'];
+      Visible := n.Attributes['Visible'];
       with PositionSize do
       begin
-        Height := n.Attributes['height'];
-        Left := n.Attributes['left'];
-        Top := n.Attributes['top'];
-        Width := n.Attributes['width'];
+        Height := n.Attributes['Height'];
+        Left := n.Attributes['Left'];
+        Top := n.Attributes['Top'];
+        Width := n.Attributes['Width'];
       end;
     end;
 end;
@@ -2132,97 +2132,97 @@ end;
 procedure TsmxFormCfg.WriteCfg;
 var r, n: IXMLNode; i: Integer;
 begin
-  r := XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDoc.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := XMLDoc.AddChild('root');
+    r := XMLDoc.AddChild('Root');
 
-  n := r.AddChild('form');
-  n.Attributes['caption'] := FormCaption;
-  n.Attributes['imageindex'] := FormImageIndex;
+  n := r.AddChild('Form');
+  n.Attributes['Caption'] := FormCaption;
+  n.Attributes['ImageIndex'] := FormImageIndex;
   with FormPositionSize do
   begin
-    n.Attributes['height'] := Height;
-    n.Attributes['left'] := Left;
-    n.Attributes['top'] := Top;
-    n.Attributes['width'] := Width;
+    n.Attributes['Height'] := Height;
+    n.Attributes['Left'] := Left;
+    n.Attributes['Top'] := Top;
+    n.Attributes['Width'] := Width;
   end;
 
-  n := r.AddChild('pagemanagers');
+  n := r.AddChild('PageManagers');
   for i := 0 to PageManagers.Count - 1 do
-    with n.AddChild('pagemanager') do
+    with n.AddChild('PageManager') do
     begin
-      Attributes['id'] := PageManagers[i].CfgID;
-      Attributes['align'] := PageManagers[i].UnitAlign;
-      Attributes['enable'] := PageManagers[i].UnitEnable;
-      Attributes['height'] := PageManagers[i].UnitHeight;
-      Attributes['left'] := PageManagers[i].UnitLeft;
-      Attributes['top'] := PageManagers[i].UnitTop;
-      Attributes['visible'] := PageManagers[i].UnitVisible;
-      Attributes['width'] := PageManagers[i].UnitWidth;
+      Attributes['CfgID'] := PageManagers[i].CfgID;
+      Attributes['Align'] := PageManagers[i].UnitAlign;
+      Attributes['Enable'] := PageManagers[i].UnitEnable;
+      Attributes['Height'] := PageManagers[i].UnitHeight;
+      Attributes['Left'] := PageManagers[i].UnitLeft;
+      Attributes['Top'] := PageManagers[i].UnitTop;
+      Attributes['Visible'] := PageManagers[i].UnitVisible;
+      Attributes['Width'] := PageManagers[i].UnitWidth;
     end;
 
-  n := r.AddChild('mainmenu');
+  n := r.AddChild('MainMenu');
   with MainMenu do
   begin
-    n.Attributes['id'] := CfgID;
-    n.Attributes['align'] := Align;
-    n.Attributes['enable'] := Enable;
-    n.Attributes['visible'] := Visible;
+    n.Attributes['CfgID'] := CfgID;
+    n.Attributes['Align'] := Align;
+    n.Attributes['Enable'] := Enable;
+    n.Attributes['Visible'] := Visible;
     with PositionSize do
     begin
-      n.Attributes['height'] := Height;
-      n.Attributes['left'] := Left;
-      n.Attributes['top'] := Top;
-      n.Attributes['width'] := Width;
+      n.Attributes['Height'] := Height;
+      n.Attributes['Left'] := Left;
+      n.Attributes['Top'] := Top;
+      n.Attributes['Width'] := Width;
     end;
   end;
 
-  n := r.AddChild('algorithmlist');
+  n := r.AddChild('AlgorithmList');
   with AlgorithmList do
   begin
-    n.Attributes['id'] := CfgID;
-    n.Attributes['iscreatemenuitem'] := IsCreateMenuItem;
-    n.Attributes['iscreatetoolbutton'] := IsCreateToolButton;
+    n.Attributes['CfgID'] := CfgID;
+    n.Attributes['IsCreateMenuItem'] := IsCreateMenuItem;
+    n.Attributes['IsCreateToolButton'] := IsCreateToolButton;
   end;
 
-  n := r.AddChild('controlbar');
+  n := r.AddChild('ControlBar');
   with ControlBar do
   begin
-    n.Attributes['id'] := CfgID;
-    n.Attributes['align'] := Align;
-    n.Attributes['enable'] := Enable;
-    n.Attributes['visible'] := Visible;
+    n.Attributes['CfgID'] := CfgID;
+    n.Attributes['Align'] := Align;
+    n.Attributes['Enable'] := Enable;
+    n.Attributes['Visible'] := Visible;
     with PositionSize do
     begin
-      n.Attributes['height'] := Height;
-      n.Attributes['left'] := Left;
-      n.Attributes['top'] := Top;
-      n.Attributes['width'] := Width;
-    end;  
+      n.Attributes['Height'] := Height;
+      n.Attributes['Left'] := Left;
+      n.Attributes['Top'] := Top;
+      n.Attributes['Width'] := Width;
+    end;
   end;
 
-  n := r.AddChild('staterequest');
+  n := r.AddChild('StateRequest');
   with StateRequest do
   begin
-    n.Attributes['id'] := CfgID;
-    n.Attributes['operation'] := Operation;
-    n.Attributes['databasename'] := DatabaseName;
+    n.Attributes['CfgID'] := CfgID;
+    n.Attributes['Operation'] := Operation;
+    n.Attributes['DatabaseName'] := DatabaseName;
   end;
 
-  n := r.AddChild('statusbar');
+  n := r.AddChild('StatusBar');
   with StatusBar do
   begin
-    n.Attributes['id'] := CfgID;
-    n.Attributes['align'] := Align;
-    n.Attributes['enable'] := Enable;
-    n.Attributes['visible'] := Visible;
+    n.Attributes['CfgID'] := CfgID;
+    n.Attributes['Align'] := Align;
+    n.Attributes['Enable'] := Enable;
+    n.Attributes['Visible'] := Visible;
     with PositionSize do
     begin
-      n.Attributes['height'] := Height;
-      n.Attributes['left'] := Left;
-      n.Attributes['top'] := Top;
-      n.Attributes['width'] := Width;
+      n.Attributes['Height'] := Height;
+      n.Attributes['Left'] := Left;
+      n.Attributes['Top'] := Top;
+      n.Attributes['Width'] := Width;
     end;  
   end;
 end;

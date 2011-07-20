@@ -9,8 +9,8 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = smxBaseClassesRTL.bpl dFuADO.dll dCoADO.dll rImages.dll \
-  smxClassesRTL.bpl CRM.exe aAlgs.dll smxCellsRTL.bpl cCells.dll Conf.exe
+PROJECTS = smxBaseClassesRTL.bpl smxClassesRTL.bpl smxCellsRTL.bpl dADO.dll \
+  dBDE.dll rImages.dll aAlgs.dll CRM.exe Conf.exe cCells.dll
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -22,31 +22,31 @@ default: $(PROJECTS)
 smxBaseClassesRTL.bpl: BaseClassesRTL\smxBaseClassesRTL.dpk
   $(DCC)
 
-dFuADO.dll: dFuADO\dFuADO.dpr
-  $(DCC)
-
-dCoADO.dll: dCoADO\dCoADO.dpr
-  $(DCC)
-
-rImages.dll: rImages\rImages.dpr
-  $(DCC)
-
 smxClassesRTL.bpl: ClassesRTL\smxClassesRTL.dpk
-  $(DCC)
-
-CRM.exe: CRM\CRM.dpr
-  $(DCC)
-
-aAlgs.dll: aAlgs\aAlgs.dpr
   $(DCC)
 
 smxCellsRTL.bpl: CellsRTL\smxCellsRTL.dpk
   $(DCC)
 
-cCells.dll: cCells\cCells.dpr
+dADO.dll: dADO\dADO.dpr
+  $(DCC)
+
+dBDE.dll: dBDE\dBDE.dpr
+  $(DCC)
+
+rImages.dll: rImages\rImages.dpr
+  $(DCC)
+
+aAlgs.dll: aAlgs\aAlgs.dpr
+  $(DCC)
+
+CRM.exe: CRM\CRM.dpr
   $(DCC)
 
 Conf.exe: Conf\Conf.dpr
+  $(DCC)
+
+cCells.dll: cCells\cCells.dpr
   $(DCC)
 
 

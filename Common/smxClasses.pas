@@ -499,6 +499,8 @@ type
     FDriverName: String;
     FLoginPrompt: Boolean;
     FParams: String;
+    FUserName: String;
+    FPassword: String;
   public
     constructor Create(AKit: TsmxKit); override;
 
@@ -511,6 +513,8 @@ type
     property DriverName: String read FDriverName write FDriverName;
     property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
     property Params: String read FParams write FParams;
+    property UserName: String read FUserName write FUserName;
+    property Password: String read FPassword write FPassword;
   end;
 
   { TsmxProjectItems }
@@ -1323,10 +1327,19 @@ begin
 end;
 
 procedure TsmxCellCfg.SaveCfg;
+var
+  Request: IsmxDataSet;
 begin
   FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['ConfBlob'] := FXMLDocIntf.XML.Text;
-  FTargetRequest.DoExecute('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
+  //FTargetRequest.DoExecute('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
+  Request := FTargetRequest.NewRequest('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
+  try
+    Request.ParamByName('ConfBlob').DataType := ftBlob;
+    FTargetRequest.PrepRequest(Request, True, pmExecute);
+  finally
+    Request := nil;
+  end;
 end;
 
 { TsmxTypeCfg }
@@ -1557,12 +1570,9 @@ begin
   end else
     FRequestIntf := NewRequest('', RequestType);
 
-  with FRequestIntf do
-  begin
-    if SQL.Text <> SQLText then
-      SQL.Text := SQLText;
-    PrepRequest(FRequestIntf, True, pmExecute, DSFrom);
-  end;
+  if FRequestIntf.SQL.Text <> SQLText then
+    FRequestIntf.SQL.Text := SQLText;
+  PrepRequest(FRequestIntf, True, pmExecute, DSFrom);
 end;
 
 function TsmxTargetRequest.DoRequest(SQLText: String; RequestType: TsmxDataSetType = dstQuery;
@@ -1589,9 +1599,8 @@ begin
   end else
     FRequestIntf := NewRequest('', RequestType);
 
-  with FRequestIntf do
-    if SQL.Text <> SQLText then
-      SQL.Text := SQLText;
+  if FRequestIntf.SQL.Text <> SQLText then
+    FRequestIntf.SQL.Text := SQLText;
   PrepRequest(FRequestIntf, Get, Perform, DSFrom);
   Result := FRequestIntf;
 end;
@@ -1600,17 +1609,20 @@ function TsmxTargetRequest.NewRequest(SQLText: String = '';
   RequestType: TsmxDataSetType = dstQuery; const DSFrom: IsmxDataSet = nil): IsmxDataSet;
 begin
   Result := nil;
-  if not Assigned(Database) then
+  if Assigned(Database) then
+    Result := Database.NewDataSet(RequestType) else
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
-  Result := Database.NewDataSet(RequestType);
   Result.Database := Database;
-  Result.SQL.Text := SQLText;
-  PrepRequest(Result, False, pmOpen, DSFrom);
+  if SQLText <> '' then
+  begin
+    Result.SQL.Text := SQLText;
+    PrepRequest(Result, False, pmOpen, DSFrom);
+  end;  
 end;
 
 function TsmxTargetRequest.PrepRequest(const ARequest: IsmxDataSet; Get: Boolean = True;
   Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
-var i: Integer; f: IsmxField; v: Variant;
+var i: Integer; f: IsmxField; v: Variant; s: TStream;
 begin
   Result := False;
   with ARequest do
@@ -1619,7 +1631,7 @@ begin
     if not Prepared then
       Prepare;
     for i := 0 to ParamCount - 1 do
-      if Params[i].ParamType in [ptInput, ptInputOutput] then
+      if Params[i].ParamType in [ptUnknown, ptInput, ptInputOutput] then
       begin
         f := nil;
         if Assigned(DSFrom) then
@@ -1629,8 +1641,20 @@ begin
         else
         begin
           if ParamValues[Params[i].ParamName] = '' then
-            Params[i].Value := Null else
-            Params[i].Value := ParamValues[Params[i].ParamName];
+            Params[i].Value := Null
+          else
+          begin
+            if Params[i].DataType = ftBlob then
+            begin
+              s := StrToStream(ParamValues[Params[i].ParamName]);
+              try
+                Params[i].LoadStream(s);
+              finally
+                s.Free;
+              end;
+            end else
+              Params[i].Value := ParamValues[Params[i].ParamName];
+          end;
         end;
       end;
     if Get then
@@ -1640,13 +1664,13 @@ begin
         pmExecute: Execute;
       end;
       for i := 0 to ParamCount - 1 do
-        if Params[i].ParamType in [ptOutput, ptInputOutput] then
+        if Params[i].ParamType in [ptUnknown, ptOutput, ptInputOutput] then
         begin
           if VarIsNull(Params[i].Value) then
             ParamValues[Params[i].ParamName] := '' else
             ParamValues[Params[i].ParamName] := Params[i].Value;
         end else
-        if Params[i].ParamType in [ptResult] then
+        if Params[i].ParamType = ptResult then
         begin
           ParamValues[Params[i].ParamName] := Params[i].Value;
           v := Params[i].Value;
@@ -2347,6 +2371,8 @@ begin
   FDriverName := '';
   FLoginPrompt := False;
   FParams := '';
+  FUserName := '';
+  FPassword := '';
 end;
 
 { TsmxProjectItems }
@@ -2409,6 +2435,8 @@ begin
           DriverName := pc.DriverName;
           LoginPrompt := pc.LoginPrompt;
           Params := pc.Params;
+          UserName := pc.UserName;
+          Password := pc.Password;
         end;
       end;
     finally
@@ -2437,6 +2465,8 @@ begin
           DriverName := FProjectList[i].DriverName;
           LoginPrompt := FProjectList[i].LoginPrompt;
           Params := FProjectList[i].Params;
+          UserName := FProjectList[i].UserName;
+          Password := FProjectList[i].Password;
         end;
         fs.WriteBuffer(pc, SizeOf(TsmxProjectConnection));
       end;

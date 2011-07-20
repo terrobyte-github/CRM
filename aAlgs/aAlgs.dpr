@@ -1,10 +1,12 @@
 library aAlgs;
 
 uses
-  //ShareMem,
   Forms,
   smxAlgs in 'smxAlgs.pas',
-  smxLibProcs in '..\CRMCommon\smxLibProcs.pas';
+  smxLibProcs in '..\Common\smxLibProcs.pas',
+  smxLibFuncs in '..\Common\smxLibFuncs.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxProcs in '..\Common\smxProcs.pas';
 
 {$R *.res}
 

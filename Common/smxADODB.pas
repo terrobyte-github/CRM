@@ -280,19 +280,14 @@ end;
 
 function TsmxADODatabase.NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
 begin
+  Result := nil;
   case DataSetType of
-    dstQuery:
-    begin
-      Result := TsmxADOQuery.Create;
-      Result.Database := Self;
-    end;
-    dstStoredProc:
-    begin
-      Result := TsmxADOStoredProc.Create;
-      Result.Database := Self;
-    end;
-    else Result := nil;
+    dstQuery: Result := TsmxADOQuery.Create;
+    dstStoredProc: Result := TsmxADOStoredProc.Create;
   end;
+  {if Assigned(Result) then
+    Result.Database := Self else
+    raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetInvalid);}
 end;
 
 procedure TsmxADODatabase.RollbackTransaction;

@@ -73,6 +73,8 @@ type
     DriverName: ShortString;
     LoginPrompt: Boolean;
     Params: ShortString;
+    UserName: ShortString;
+    Password: ShortString;
   end;
 
   TsmxFuncDatabaseCLSID = function: TGUID;

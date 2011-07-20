@@ -1,8 +1,8 @@
 object frmConf: TfrmConf
-  Left = 279
-  Top = 180
-  Width = 754
-  Height = 544
+  Left = 288
+  Top = 189
+  Width = 759
+  Height = 526
   Caption = #1050#1086#1085#1092#1080#1075#1091#1088#1072#1090#1086#1088
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,16 +18,16 @@ object frmConf: TfrmConf
   object Memo1: TMemo
     Left = 0
     Top = 0
-    Width = 746
-    Height = 391
+    Width = 751
+    Height = 366
     Align = alClient
     ScrollBars = ssBoth
     TabOrder = 0
   end
   object Panel1: TPanel
     Left = 0
-    Top = 391
-    Width = 746
+    Top = 366
+    Width = 751
     Height = 107
     Align = alBottom
     BevelOuter = bvNone
@@ -202,8 +202,8 @@ object frmConf: TfrmConf
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 498
-    Width = 746
+    Top = 473
+    Width = 751
     Height = 19
     Panels = <
       item
@@ -218,5 +218,6 @@ object frmConf: TfrmConf
         Text = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1100':'
         Width = 200
       end>
+    SimplePanel = False
   end
 end

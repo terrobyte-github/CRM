@@ -8,7 +8,7 @@ const
   //SFuncNewResourceName = 'NewResource';
   //SCloseProgMessage = 'Закрыть программу?';
   //SFileProjectName = 'proj.dat';
-  SFileConfigurationName = 'conf.ini'; //'Cfg\cfg.ini';
+  SFileConfigurationName = '..\Cfg\conf.ini'; //'conf.ini'; //'Cfg\cfg.ini';
 
 resourcestring
   { DBInterface }

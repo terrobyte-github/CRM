@@ -30,6 +30,11 @@ type
     Label8: TLabel;
     Button3: TButton;
     Button4: TButton;
+    Edit6: TEdit;
+    Label9: TLabel;
+    Label10: TLabel;
+    Edit7: TEdit;
+    Label11: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -59,7 +64,7 @@ uses
 procedure TfrmProjects.FormCreate(Sender: TObject);
 begin
   FProjectManager := TsmxProjectManager.Create(Self);
-  FProjectManager.FileName := 'proj.dat'; //SFileProjectName;
+  FProjectManager.FileName := '..\Cfg\proj.dat'; //'proj.dat'; //SFileProjectName;
   FProjectManager.ReadProjects;
   FillProjectList;
   if ListBox1.Items.Count > 0 then
@@ -99,6 +104,8 @@ begin
       Edit5.Text := DriverName;
       CheckBox2.Checked := LoginPrompt;
       Memo1.Lines.Text := Params;
+      Edit6.Text := UserName;
+      Edit7.Text := Password;
     end
   else
     ClearProjectParams;
@@ -115,6 +122,8 @@ begin
   Edit5.Text := '';
   CheckBox2.Checked := False;
   Memo1.Lines.Clear;
+  Edit6.Text := '';
+  Edit7.Text := '';
 end;
 
 procedure TfrmProjects.Button1Click(Sender: TObject);
@@ -186,6 +195,8 @@ begin
           7: pr.WindowsAuthorization := CheckBox1.Checked;
           8: pr.LoginPrompt := CheckBox2.Checked;
           9: pr.Params := Memo1.Lines.Text;
+          10: pr.UserName := Edit6.Text;
+          11: pr.Password := Edit7.Text;
         end;
     end;
   end;

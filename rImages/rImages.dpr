@@ -1,12 +1,12 @@
 library rImages;
 
 uses
-  //ShareMem,
   SysUtils,
   Classes,
-  smxLibProcs in '..\CRMCommon\smxLibProcs.pas',
-  smxLibTypes in '..\CRMCommon\smxLibTypes.pas',
-  smxFuncs in '..\CRMCommon\smxFuncs.pas';
+  smxLibProcs in '..\Common\smxLibProcs.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxFuncs in '..\Common\smxFuncs.pas',
+  smxProcs in '..\Common\smxProcs.pas';
 
 {$R *.res}
 {$R ..\Resource\pic.res}

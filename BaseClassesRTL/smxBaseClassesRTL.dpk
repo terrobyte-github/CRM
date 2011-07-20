@@ -31,6 +31,6 @@ requires
   dbrtl;
 
 contains
-  smxBaseClasses in '..\CRMBase\smxBaseClasses.pas';
+  smxBaseClasses in '..\Common\smxBaseClasses.pas';
 
 end.

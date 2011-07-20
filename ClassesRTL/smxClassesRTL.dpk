@@ -34,12 +34,12 @@ requires
   inet;
 
 contains
-  smxClasses in '..\CRMBase\smxClasses.pas',
-  smxTypes in '..\CRMCommon\smxTypes.pas',
-  smxClassFuncs in '..\CRMCommon\smxClassFuncs.pas',
-  smxConsts in '..\CRMCommon\smxConsts.pas',
-  smxDBIntf in '..\CRMCommon\smxDBIntf.pas',
-  smxFuncs in '..\CRMCommon\smxFuncs.pas',
-  smxDBTypes in '..\CRMCommon\smxDBTypes.pas';
+  smxClasses in '..\Common\smxClasses.pas',
+  smxTypes in '..\Common\smxTypes.pas',
+  smxClassFuncs in '..\Common\smxClassFuncs.pas',
+  smxConsts in '..\Common\smxConsts.pas',
+  smxDBIntf in '..\Common\smxDBIntf.pas',
+  smxFuncs in '..\Common\smxFuncs.pas',
+  smxDBTypes in '..\Common\smxDBTypes.pas';
 
 end.

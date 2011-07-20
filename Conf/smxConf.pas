@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, StdCtrls, ExtCtrls, smxClasses, smxDBIntf;
+  Dialogs, ComCtrls, StdCtrls, ExtCtrls, ImgList, smxClasses, smxDBIntf,
+  DB, DBTables;
 
 type
   TfrmConf = class(TForm)
@@ -51,6 +52,9 @@ type
     procedure FillProjectList;
     function GetCellCfg(CfgID: Integer): String;
     function GetStateCfg(CfgID, IntfID: Integer): String;
+    //procedure ReadData(ImageList: TCustomImageList; Stream: TStream);
+    //procedure ReadD2Stream(ImageList: TCustomImageList; Stream: TStream);
+    //procedure ReadD3Stream(ImageList: TCustomImageList; Stream: TStream);
   public
     //property Database: IsmxDatabase read FDatabaseIntf;
     //property TargetRequest: TsmxTargetRequest read FTargetRequest;
@@ -66,8 +70,8 @@ implementation
 {$R ..\Resource\pic.res}
 
 uses
-  ImgList, smxCommonStorage, smxLibManager, smxDBManager, smxFuncs, smxTypes,
-  smxConsts, smxProcs, smxProjects;
+  smxCommonStorage, smxLibManager, smxDBManager, smxFuncs,
+  smxTypes, smxConsts, smxProcs, smxProjects;
 
 type
   { _TsmxBaseCfg }
@@ -94,9 +98,10 @@ begin
   FImageList := TImageList.Create(Self);
   LoadImage;
   FProjectManager := TsmxProjectManager.Create(Self);
-  FProjectManager.FileName := 'proj.dat'; //SFileProjectName;
+  FProjectManager.FileName := '..\Cfg\proj.dat'; //'proj.dat'; //SFileProjectName;
   FillProjectList;
   SaveProgVers;
+  LibManager.LibPath := '..\Lib\';
   LibManager.ProcLibInfoName := 'LibInfo';
 end;
 
@@ -162,7 +167,8 @@ var rs: TResourceStream;
 begin
   rs := TResourceStream.Create(HInstance, 'pic', RT_RCDATA);
   try
-    _TCustomImageList(FImageList).ReadData(rs);
+    //_TCustomImageList(FImageList).ReadData(rs);
+    LoadImagesFromStream(FImageList, rs);
   finally
     rs.Free;
   end;
@@ -176,6 +182,145 @@ begin
   for i := 0 to FProjectManager.ProjectList.Count - 1 do
     ComboBox1.Items.Add(FProjectManager.ProjectList[i].ProjectName);
 end;
+
+{procedure TfrmConf.ReadData(ImageList: TCustomImageList; Stream: TStream);
+var
+  CheckInt1, CheckInt2: Integer;
+  CheckByte1, CheckByte2: Byte;
+  StreamPos: Integer;
+begin
+  ImageList.Handle := 0;
+  StreamPos := Stream.Position;              // check stream signature to
+  Stream.Read(CheckInt1, SizeOf(CheckInt1)); // determine a Delphi 2 or Delphi
+  Stream.Read(CheckInt2, SizeOf(CheckInt2)); // 3 imagelist stream.  Delphi 2
+  CheckByte1 := Lo(LoWord(CheckInt1));       // streams can be read, but only
+  CheckByte2 := Hi(LoWord(CheckInt1));       // Delphi 3 streams will be written
+  Stream.Position := StreamPos;
+  if (CheckInt1 <> CheckInt2) and (CheckByte1 = $49) and (CheckByte2 = $4C) then
+    ReadD3Stream(ImageList, Stream) else
+    ReadD2Stream(ImageList, Stream);
+end;}
+
+{procedure TfrmConf.ReadD2Stream(ImageList: TCustomImageList; Stream: TStream);
+var
+  FullImage, Image, FullMask, Mask: TBitmap;
+  I, J, Size, Pos, Count: Integer;
+  SrcRect: TRect;
+begin
+  ImageList.Clear;
+  Stream.ReadBuffer(Size, SizeOf(Size));
+  Stream.ReadBuffer(Count, SizeOf(Count));
+  FullImage := TBitmap.Create;
+  try
+    Pos := Stream.Position;
+    FullImage.LoadFromStream(Stream);
+    Stream.Position := Pos + Size;
+    FullMask := TBitmap.Create;
+    try
+      FullMask.LoadFromStream(Stream);
+      Image := TBitmap.Create;
+      Image.Width := Width;
+      Image.Height := Height;
+      Mask := TBitmap.Create;
+      Mask.Monochrome := True;
+      Mask.Width := Width;
+      Mask.Height := Height;
+      SrcRect := Rect(0, 0, Width, Height);
+      //BeginUpdate;
+      try
+        for J := 0 to (FullImage.Height div Height) - 1 do
+        begin
+          if Count = 0 then Break;
+          for I := 0 to (FullImage.Width div Width) - 1 do
+          begin
+            if Count = 0 then Break;
+            Image.Canvas.CopyRect(SrcRect, FullImage.Canvas,
+              Bounds(I * Width, J * Height, Width, Height));
+            Mask.Canvas.CopyRect(SrcRect, FullMask.Canvas,
+              Bounds(I * Width, J * Height, Width, Height));
+            ImageList.Add(Image, Mask);
+            Dec(Count);
+          end;
+        end;
+      finally
+        Image.Free;
+        Mask.Free;
+        //EndUpdate;
+      end;
+    finally
+      FullMask.Free;
+    end;
+  finally
+    FullImage.Free;
+  end;
+end;}
+
+{procedure TfrmConf.ReadD3Stream(ImageList: TCustomImageList; Stream: TStream);
+var
+  LAdapter: TStreamAdapter;
+  LTemp: TMemoryStream;
+  LRetry: Boolean;
+  LValue, LBitCount: Byte;
+begin
+  // attempt a simple read
+  LAdapter := TStreamAdapter.Create(Stream);
+  try
+    ImageList.Handle := ImageList_Read(LAdapter);
+  finally
+    LAdapter.Free;
+  end;
+
+  // if we were not successful then attempt to fix up the really old ComCtl stream
+  if not ImageList.HandleAllocated then
+  begin
+
+    // make a temp copy of the stream
+    LRetry := False;
+    LTemp := TMemoryStream.Create;
+    try
+      Stream.Position := 0;
+      LTemp.LoadFromStream(Stream);
+
+      // find the bad value imagelist header info
+      LTemp.Position := 18;
+      if (LTemp.Read(LValue, 1) = 1) and (LValue = 1) then
+      begin
+
+        // find the bitcount data farther on into the BitmapInfoHeader
+        LTemp.Position := 56;
+        if LTemp.Read(LBitCount, 1) = 1 then
+        begin
+
+          // correct the original value
+          LValue := LValue or LBitCount;
+
+          // back to the imagelist header info and patch it
+          LTemp.Position := 18;
+          LRetry := LTemp.Write(LValue, 1) = 1;
+        end;
+      end;
+
+      // reattempt the load
+      if LRetry then
+      begin
+        LTemp.Position := 0;
+        LAdapter := TStreamAdapter.Create(LTemp);
+        try
+          ImageList.Handle := ImageList_Read(LAdapter);
+        finally
+          LAdapter.Free;
+        end;
+      end;
+
+    finally
+      LTemp.Free;
+    end;
+
+    // if we still didn't succeed then fail
+    if not ImageList.HandleAllocated then
+      raise EReadError.CreateRes(@SImageReadFail);
+  end;
+end;}
 
 {function TfrmConf.GetFullStateCfg;
 
@@ -386,13 +531,13 @@ begin
         DriverName := pr.DriverName;
         LoginPrompt := pr.LoginPrompt;
         Params := pr.Params;
-        UserName := '';
-        Password := '';
+        UserName := pr.UserName;
+        Password := pr.Password;
         LibraryManager := LibManager;
         DatabaseManager := DBManager;
         ConnectToDatabase;
         //FTargetRequest.Database := Database;
-        FillIntfList;
+        //FillIntfList;
         StatusBar1.Panels[0].Text := 'Проект: ' + s;
         StatusBar1.Panels[1].Text := 'Статус: connect';
       end;

@@ -16,7 +16,7 @@ implementation
 uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, Graphics,
   IniFiles, smxClasses, smxFormManager, smxDBManager, smxLibManager, smxCallBack,
-  smxCommonStorage, smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf,
+  smxCommonStorage, smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf,  
   smxConsts;
 
 type
@@ -71,7 +71,8 @@ begin
   begin
     rs := FuncNewResource('pic');
     try
-      _TCustomImageList(_ImgList).ReadData(rs);
+      //_TCustomImageList(_ImgList).ReadData(rs);
+      LoadImagesFromStream(_ImgList, rs);
     finally
       rs.Free;
     end;
@@ -94,7 +95,7 @@ begin
           begin
             f.ReadSectionValues(sl[i], sl2);
             for j := 0 to sl2.Count - 1 do
-              ComStorage[sl2.Names[j]] := sl2.ValueFromIndex[j];
+              ComStorage[sl2.Names[j]] := sl2.Values[sl2.Names[j]]; //sl2.ValueFromIndex[j];
           end;
         finally
           sl2.Free;
@@ -140,11 +141,13 @@ begin
 end;
 
 function CreateMainForm: Boolean;
-var f: TsmxCustomForm; IntfID: Integer;
+var f: TsmxCustomForm; IntfID: Integer; c: TsmxBaseCell;
 begin
-  IntfID := ComStorage['IntfID'];
-  f := NewForm(nil, _DBConnection.Database, 1000218, IntfID); 
-  if f is TsmxCustomMasterForm then
+  //IntfID := ComStorage['IntfID'];
+  //f := NewForm(nil, _DBConnection.Database, 1000002, IntfID);
+  c := NewCell(nil, _DBConnection.Database, 1000002);
+  //if f is TsmxCustomMasterForm then
+  if c is TsmxCustomMasterForm then
   begin
     Application.ShowMainForm := False;
     Application.CreateForm(TForm, _MainForm);
@@ -251,8 +254,12 @@ begin
           DriverName := pr.DriverName;
           LoginPrompt := pr.LoginPrompt;
           Params := pr.Params;
-          UserName := ALogin;
-          Password := APassword;
+          if ALogin = '' then
+            UserName := pr.UserName else
+            UserName := ALogin;
+          if APassword := '' then
+            Password := pr.Password else
+            Password := APassword;
           LibraryManager := LibManager;
           DatabaseManager := DBManager;
           ConnectToDatabase;
@@ -437,7 +444,7 @@ begin
   finally
     f.Free;
   end;}
-  Result := ConnectDatabase('CRM');
+  Result := ConnectDatabase('CRM2');
 end;
 
 initialization

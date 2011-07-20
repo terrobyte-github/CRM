@@ -2,12 +2,16 @@ unit smxProcs;
 
 interface
 
+uses
+  Classes, ImgList;
+
 procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
+procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
 
 implementation
 
 uses
-  Windows, SysUtils;
+  Windows, SysUtils, CommCtrl;
 
 procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var s, h, w: DWORD; buf: PChar; pfi: PVSFixedFileInfo;
@@ -27,6 +31,19 @@ begin
     finally
       FreeMem(buf, s);
     end;
+  end;
+end;
+
+procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
+var
+  LAdapter: TStreamAdapter;
+begin
+  AImageList.Handle := 0;
+  LAdapter := TStreamAdapter.Create(AStream);
+  try
+    AImageList.Handle := ImageList_Read(LAdapter);
+  finally
+    LAdapter.Free;
   end;
 end;
 

@@ -4,11 +4,11 @@ uses
   //ShareMem,
   SysUtils,
   Classes,
-  smxLibProcs in '..\CRMCommon\smxLibProcs.pas',
-  smxLibTypes in '..\CRMCommon\smxLibTypes.pas',
-  smxCfgs in '..\CRMBase\smxCfgs.pas',
-  smxCells in '..\CRMBase\smxCells.pas',
-  smxFilterCells in '..\CRMBase\smxFilterCells.pas';
+  smxLibProcs in '..\Common\smxLibProcs.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxCfgs in '..\Common\smxCfgs.pas',
+  smxCells in '..\Common\smxCells.pas',
+  smxFilterCells in '..\Common\smxFilterCells.pas';
 
 {$R *.res}
 

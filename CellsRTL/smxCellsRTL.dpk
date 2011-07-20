@@ -35,14 +35,14 @@ requires
   inet;
 
 contains
-  smxCells in '..\CRMBase\smxCells.pas',
-  smxCfgs in '..\CRMBase\smxCfgs.pas',
-  smxFilterCells in '..\CRMBase\smxFilterCells.pas',
-  smxClassTypes in '..\CRMCommon\smxClassTypes.pas',
-  smxLibFuncs in '..\CRMCommon\smxLibFuncs.pas',
-  smxLibProcs in '..\CRMCommon\smxLibProcs.pas',
-  smxLibTypes in '..\CRMCommon\smxLibTypes.pas',
-  smxProcs in '..\CRMCommon\smxProcs.pas',
-  smxWheelDBGrid in '..\CRMBase\smxWheelDBGrid.pas';
+  smxCells in '..\Common\smxCells.pas',
+  smxCfgs in '..\Common\smxCfgs.pas',
+  smxFilterCells in '..\Common\smxFilterCells.pas',
+  smxClassTypes in '..\Common\smxClassTypes.pas',
+  smxLibFuncs in '..\Common\smxLibFuncs.pas',
+  smxLibProcs in '..\Common\smxLibProcs.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxProcs in '..\Common\smxProcs.pas',
+  smxWheelDBGrid in '..\Common\smxWheelDBGrid.pas';
 
 end.
