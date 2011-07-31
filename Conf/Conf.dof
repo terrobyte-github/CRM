@@ -86,7 +86,7 @@ ProductName=
 ProductVersion=1.0.0.0
 Comments=
 [Excluded Packages]
-c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland SOAP Components
+c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland Soap Components
 [HistoryLists\hlDebugSourcePath]
 Count=3
 Item0=$(DELPHI)\Source\RXLib\Src
@@ -114,8 +114,8 @@ Item4=C:\Works\temp
 Item5=..\dcu
 [HistoryLists\hlOutputDirectorry]
 Count=8
-Item0=$(CRM)\lib
-Item1=$(CRM)\bin
+Item0=$(CRM)\bin
+Item1=$(CRM)\lib
 Item2=..\..\bin
 Item3=..\..\..\bin
 Item4=..\Bin

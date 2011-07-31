@@ -27,6 +27,8 @@ type
     Label4: TLabel;
     ComboBox3: TComboBox;
     CheckBox1: TCheckBox;
+    Button2: TButton;
+    Button3: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -37,6 +39,9 @@ type
     procedure ComboBox2Change(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Edit2KeyPress(Sender: TObject; var Key: Char);
   private
     //FDatabaseIntf: IsmxDatabase;
     FCfg: TsmxBaseCfg;
@@ -71,7 +76,7 @@ implementation
 
 uses
   smxCommonStorage, smxLibManager, smxDBManager, smxFuncs,
-  smxTypes, smxConsts, smxProcs, smxProjects;
+  smxTypes, smxConsts, smxProcs, smxProjects, smxAddCell, smxClassFuncs;
 
 type
   { _TsmxBaseCfg }
@@ -103,6 +108,7 @@ begin
   SaveProgVers;
   LibManager.LibPath := '..\Lib\';
   LibManager.ProcLibInfoName := 'LibInfo';
+  LibManager.CallLibrary('cCells.dll');
 end;
 
 procedure TfrmConf.FormDestroy(Sender: TObject);
@@ -373,7 +379,7 @@ begin
   CheckDatabase;
   if CfgID > 0 then
   begin
-    FCfg := TsmxCellCfg.Create(nil, FDBConnection.Database, CfgID);
+    FCfg := smxClassFuncs.NewCfg(nil, FDBConnection.Database, CfgID);
     FCfg.Initialize;
     Result := _TsmxBaseCfg(FCfg).XMLText;
   end else
@@ -543,6 +549,46 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TfrmConf.Button2Click(Sender: TObject);
+begin
+  if Assigned(FCfg) then
+  begin
+    Memo1.Clear;
+    FCfg.Clear;
+    _TsmxBaseCfg(FCfg).WriteCfg;
+    case ComboBox2.ItemIndex of
+      0: Memo1.Lines.Text := _TsmxBaseCfg(FCfg).XMLText;
+      1: if CheckBox1.Checked then
+           Memo1.Lines.Text := _TsmxStateCfg(FCfg).FullXMLText else
+           Memo1.Lines.Text := _TsmxStateCfg(FCfg).XMLText;
+    end;
+  end;
+end;
+
+procedure TfrmConf.Button3Click(Sender: TObject);
+begin
+  CheckDatabase;
+  frmAddCell := TfrmAddCell.Create(nil);
+  try
+    frmAddCell.Database := FDBConnection.Database;
+    if frmAddCell.ShowModal = mrOk then
+    begin
+      ComboBox2.ItemIndex := 0;
+      Edit2.Text := frmAddCell.Edit1.Text;
+      Button4.Click;
+      Button2.Click;
+    end;
+  finally
+    frmAddCell.Free;
+  end;
+end;
+
+procedure TfrmConf.Edit2KeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    Button4.Click;
 end;
 
 end.

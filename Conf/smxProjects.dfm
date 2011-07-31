@@ -1,8 +1,8 @@
 object frmProjects: TfrmProjects
-  Left = 508
-  Top = 288
-  Width = 600
-  Height = 417
+  Left = 283
+  Top = 85
+  Width = 606
+  Height = 422
   Caption = #1055#1088#1086#1077#1082#1090#1099
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,7 +11,7 @@ object frmProjects: TfrmProjects
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
-  Position = poOwnerFormCenter
+  Position = poDesktopCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96

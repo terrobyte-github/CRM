@@ -14,7 +14,8 @@ uses
   smxCommonStorage in '..\Common\smxCommonStorage.pas',
   smxLibManager in '..\Common\smxLibManager.pas',
   smxCallBack in '..\Common\smxCallBack.pas',
-  smxDBManager in '..\Common\smxDBManager.pas';
+  smxDBManager in '..\Common\smxDBManager.pas',
+  smxAddCell in 'smxAddCell.pas' {frmAddCell};
 
 {$R *.res}
 

@@ -1369,15 +1369,15 @@ end;
 procedure TsmxTypeCfg.ReadCfg;
 var r, n: IXMLNode;
 begin
-  r := FXMLDocIntf.ChildNodes.FindNode('root');
+  r := FXMLDocIntf.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
 
-  n := r.ChildNodes.FindNode('cell');
+  n := r.ChildNodes.FindNode('Cell');
   if Assigned(n) then
   begin
-    CfgClassName := n.Attributes['cfgclassname'];
-    CellClassName := n.Attributes['cellclassname'];
+    CfgClassName := n.Attributes['CfgClassName'];
+    CellClassName := n.Attributes['CellClassName'];
   end;
 end;
 
@@ -1429,14 +1429,14 @@ end;
 procedure TsmxTypeCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
-  r := FXMLDocIntf.ChildNodes.FindNode('root');
+  r := FXMLDocIntf.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := FXMLDocIntf.AddChild('root');
+    r := FXMLDocIntf.AddChild('Root');
 
-  n := r.AddChild('cell');
-  n.Attributes['cfgclassname'] := CfgClassName;
-  n.Attributes['cellclassname'] := CellClassName;
+  n := r.AddChild('Cell');
+  n.Attributes['CfgClassName'] := CfgClassName;
+  n.Attributes['CellClassName'] := CellClassName;
 end;
 
 { TsmxControlCell }
@@ -1663,12 +1663,16 @@ begin
         pmOpen: Open;
         pmExecute: Execute;
       end;
+      v := 0;
       for i := 0 to ParamCount - 1 do
         if Params[i].ParamType in [ptUnknown, ptOutput, ptInputOutput] then
         begin
           if VarIsNull(Params[i].Value) then
-            ParamValues[Params[i].ParamName] := '' else
+            ParamValues[Params[i].ParamName] := ''
+          else
+          begin
             ParamValues[Params[i].ParamName] := Params[i].Value;
+          end;
         end else
         if Params[i].ParamType = ptResult then
         begin

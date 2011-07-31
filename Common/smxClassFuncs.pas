@@ -10,7 +10,7 @@ function CfgIDToCellClass(const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxB
 function NewCfg(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCell;
 function NewForm(AOwner: TComponent; const ADatabase: IsmxDatabase;
-  ACfgID, AIntfID: Integer; AID: Integer = 0): TsmxCustomForm;
+  ACfgID: Integer; AIntfID: Integer = 0; AID: Integer = 0): TsmxCustomForm;
 function VarToParams(V: Variant): TsmxParams;
 function ParamsToVar(Params: TsmxParams): Variant;
 function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
@@ -70,7 +70,7 @@ begin
 end;
 
 function NewForm(AOwner: TComponent; const ADatabase: IsmxDatabase;
-  ACfgID, AIntfID: Integer; AID: Integer = 0): TsmxCustomForm;
+  ACfgID: Integer; AIntfID: Integer = 0; AID: Integer = 0): TsmxCustomForm;
 var CellClass: TsmxBaseCellClass; FormClass: TsmxCustomFormClass;
 begin
   CellClass := CfgIDToCellClass(ADatabase, ACfgID);
@@ -79,7 +79,11 @@ begin
     if CellClass.InheritsFrom(TsmxCustomForm) then
       FormClass := TsmxCustomFormClass(CellClass);
   if Assigned(FormClass) then
-    Result := FormClass.CreateByIntfID(AOwner, ADatabase, ACfgID, AIntfID, AID) else
+  begin
+    if AIntfID = 0 then
+      Result := FormClass.Create(AOwner, ADatabase, ACfgID, AID) else
+      Result := FormClass.CreateByIntfID(AOwner, ADatabase, ACfgID, AIntfID, AID);
+  end else
     raise EsmxCellError(@SCellBuildError);
 end;
 

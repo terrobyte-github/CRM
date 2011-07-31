@@ -2258,9 +2258,9 @@ constructor TsmxActionLibAlgorithm.Create(AOwner: TComponent; const ADatabase: I
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FAction := TAction.Create(Self);
-  FAction.Caption := Cfg.AlgCaption;
-  FAction.Hint := Cfg.AlgCaption;
-  FAction.ShortCut := TShortCut(Cfg.AlgHotKey);
+  FAction.Caption := Cfg.AlgDefCaption;
+  FAction.Hint := Cfg.AlgDefHint;
+  FAction.ShortCut := TShortCut(Cfg.AlgDefHotKey);
   FAction.ImageIndex := TImageIndex(Cfg.AlgImageIndex);
   FAction.OnExecute := ProcExec;
 end;
@@ -2374,8 +2374,8 @@ begin
       Algorithms[i].CellVisible := AlgorithmVisible;
       Algorithms[i].CellHotKey := AlgorithmHotKey;
       Algorithms[i].CellCaption := AlgorithmCaption;
-      Algorithms[i].MenuPointID := AlgorithmMenuItemID;
-      Algorithms[i].ToolBoardID := AlgorithmToolBarID;
+      Algorithms[i].MenuPointID := AlgorithmMenuItemCfgID;
+      Algorithms[i].ToolBoardID := AlgorithmToolBarCfgID;
     end;
 end;
 

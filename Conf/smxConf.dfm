@@ -1,6 +1,6 @@
 object frmConf: TfrmConf
-  Left = 288
-  Top = 189
+  Left = 134
+  Top = 23
   Width = 759
   Height = 526
   Caption = #1050#1086#1085#1092#1080#1075#1091#1088#1072#1090#1086#1088
@@ -11,6 +11,7 @@ object frmConf: TfrmConf
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesktopCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -18,16 +19,16 @@ object frmConf: TfrmConf
   object Memo1: TMemo
     Left = 0
     Top = 0
-    Width = 751
-    Height = 366
+    Width = 743
+    Height = 362
     Align = alClient
     ScrollBars = ssBoth
     TabOrder = 0
   end
   object Panel1: TPanel
     Left = 0
-    Top = 366
-    Width = 751
+    Top = 362
+    Width = 743
     Height = 107
     Align = alBottom
     BevelOuter = bvNone
@@ -47,7 +48,7 @@ object frmConf: TfrmConf
     end
     object Label2: TLabel
       Left = 390
-      Top = 21
+      Top = 53
       Width = 48
       Height = 13
       Caption = #1055#1088#1086#1077#1082#1090':'
@@ -90,6 +91,7 @@ object frmConf: TfrmConf
       Width = 121
       Height = 21
       TabOrder = 0
+      OnKeyPress = Edit2KeyPress
     end
     object Button6: TButton
       Left = 576
@@ -137,7 +139,7 @@ object frmConf: TfrmConf
     end
     object ComboBox1: TComboBox
       Left = 440
-      Top = 12
+      Top = 44
       Width = 121
       Height = 21
       Style = csDropDownList
@@ -149,7 +151,7 @@ object frmConf: TfrmConf
     end
     object Button1: TButton
       Left = 576
-      Top = 9
+      Top = 41
       Width = 75
       Height = 25
       Caption = #1055#1088#1086#1077#1082#1090#1099'...'
@@ -199,11 +201,29 @@ object frmConf: TfrmConf
       TabOrder = 10
       OnClick = CheckBox1Click
     end
+    object Button2: TButton
+      Left = 304
+      Top = 9
+      Width = 75
+      Height = 25
+      Caption = #1054#1095#1080#1089#1090#1080#1090#1100
+      TabOrder = 11
+      OnClick = Button2Click
+    end
+    object Button3: TButton
+      Left = 392
+      Top = 9
+      Width = 75
+      Height = 25
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100
+      TabOrder = 12
+      OnClick = Button3Click
+    end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 473
-    Width = 751
+    Top = 469
+    Width = 743
     Height = 19
     Panels = <
       item

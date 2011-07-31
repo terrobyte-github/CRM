@@ -144,10 +144,11 @@ function CreateMainForm: Boolean;
 var f: TsmxCustomForm; IntfID: Integer; c: TsmxBaseCell;
 begin
   //IntfID := ComStorage['IntfID'];
-  //f := NewForm(nil, _DBConnection.Database, 1000002, IntfID);
-  c := NewCell(nil, _DBConnection.Database, 1000002);
-  //if f is TsmxCustomMasterForm then
-  if c is TsmxCustomMasterForm then
+  IntfID := 0;
+  f := NewForm(nil, _DBConnection.Database, 1000002);
+  //c := NewCell(nil, _DBConnection.Database, 1000002);
+  if f is TsmxCustomMasterForm then
+  //if c is TsmxCustomMasterForm then
   begin
     Application.ShowMainForm := False;
     Application.CreateForm(TForm, _MainForm);
@@ -220,7 +221,7 @@ begin
         if UserID > 0 then
         begin
           ComStorage['UserID'] := UserID;
-          ComStorage['@UserID'] := UserID;
+          ComStorage['@UsedrID'] := UserID;
           ComStorage['UserName'] := UserName;
           ComStorage['@UserName'] := UserName;
           Result := CheckIntf(ADatabase);
@@ -257,13 +258,14 @@ begin
           if ALogin = '' then
             UserName := pr.UserName else
             UserName := ALogin;
-          if APassword := '' then
+          if APassword = '' then
             Password := pr.Password else
             Password := APassword;
           LibraryManager := LibManager;
           DatabaseManager := DBManager;
           ConnectToDatabase;
-          Result := CheckUser(_DBConnection.Database);
+          //Result := CheckUser(_DBConnection.Database);
+          Result := True;
           if Result then
           begin
             ComStorage['CfgDBName'] := pr.DatabaseName;
