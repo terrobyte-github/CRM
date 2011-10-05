@@ -28,9 +28,19 @@ package smxBaseClassesRTL;
 requires
   rtl,
   vcl,
+  xmlrtl,
   dbrtl;
 
 contains
-  smxBaseClasses in '..\Common\smxBaseClasses.pas';
+  smxBaseClasses in '..\Common\smxBaseClasses.pas',
+  smxConsts in '..\Common\smxConsts.pas',
+  smxDBIntf in '..\Common\smxDBIntf.pas',
+  smxDBTypes in '..\Common\smxDBTypes.pas',
+  smxFuncs in '..\Common\smxFuncs.pas',
+  smxProcs in '..\Common\smxProcs.pas',
+  smxTypes in '..\Common\smxTypes.pas',
+  smxDBFuncs in '..\Common\smxDBFuncs.pas';
 
 end.
+
+

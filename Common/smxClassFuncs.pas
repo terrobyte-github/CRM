@@ -11,57 +11,101 @@ function NewCfg(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integ
 function NewCell(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCell;
 function NewForm(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AIntfID: Integer = 0; AID: Integer = 0): TsmxCustomForm;
-function VarToParams(V: Variant): TsmxParams;
-function ParamsToVar(Params: TsmxParams): Variant;
-function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
-function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
-function FieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
-  ADefValue: Variant): Variant;
-function ParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
-  ADefValue: Variant): Variant;
-function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
-function RequestReturnKeyValue(ARequest: TsmxCustomRequest; var AKey, AValue: Variant): Boolean;
+//function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
+function GetParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant;
+  var AValue: Variant): Boolean; overload;
+function GetParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant; overload;
+function GetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
+  ADefValue: Variant; var AValue: Variant): Boolean; overload;
+function GetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
+  ADefValue: Variant): Variant; overload;
+function SetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
+  AValue: Variant): Boolean;
+function GetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  ADefValue: Variant; var AValue: Variant): Boolean; overload;
+function GetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  ADefValue: Variant): Variant; overload;
+function SetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  AValue: Variant): Boolean;
+//function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
+function GetRequestKeyAndValue(ARequest: TsmxCustomRequest; var AKey, AValue: Variant): Boolean;
+function GetRequestValueByKey(ARequest: TsmxCustomRequest; AKey: Variant; var AValue: Variant): Boolean;
+function SetRequestValueByKey(ARequest: TsmxCustomRequest; AKey, AValue: Variant): Boolean;
 
 implementation
 
 uses
-  Variants, smxFuncs, smxConsts;
+  Variants, smxFuncs, smxConsts, smxClassProcs, smxProcs;
+
+function GetTypeCfgIDByCfgID(ADatabase: IsmxDatabase; ACfgID: Integer): Integer;
+var
+  Cell: TsmxBaseCell;
+  Request: IsmxDataSet;
+begin
+  Request := ADatabase.NewDataSet(smxClassProcs.SelectRequestCfg.DataSetType);
+  try
+  finally
+    Request := nil;
+  end;
+end;
 
 function CfgIDToCfgClass(const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCfgClass;
-var t: TsmxTypeCfg;
+var
+  TypeCfg: TsmxTypeCfg;
+  TypeCfgID: Integer;
 begin
-  t := TsmxTypeCfg.Create(nil, ADatabase, ACfgID);
+  //t := TsmxTypeCfg.Create(nil, ADatabase, ACfgID);
+
+  TypeCfg := TsmxTypeCfg.Create(nil);
   try
-    t.Initialize;
-    Result := t.CfgClass;
+    TypeCfg.CfgDatabase := ADatabase;
+    TypeCfg.CfgID := ACfgID;
+    //TypeCfg.UpdateSetting := smxProcs.UpdateSetting; // SelectCfgID;
+    //TypeCfg.Initialize;
+    TypeCfg.LoadCfg;
+    TypeCfg.ReadCfg;
+    Result := TypeCfg.CfgClass;
   finally
-    t.Free;
+    TypeCfg.Free;
   end;
 end;
 
 function CfgIDToCellClass(const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCellClass;
-var t: TsmxTypeCfg;
+var
+  TypeCfg: TsmxTypeCfg;
 begin
-  t := TsmxTypeCfg.Create(nil, ADatabase, ACfgID);
+  //t := TsmxTypeCfg.Create(nil, ADatabase, ACfgID);
+  TypeCfg := TsmxTypeCfg.Create(nil);
   try
-    t.Initialize;
-    Result := t.CellClass;
+    TypeCfg.CfgDatabase := ADatabase;
+    TypeCfg.CfgID := ACfgID;
+    //TypeCfg.Initialize;
+    TypeCfg.LoadCfg;
+    TypeCfg.ReadCfg;
+    Result := TypeCfg.CellClass;
   finally
-    t.Free;
+    TypeCfg.Free;
   end;
 end;
 
 function NewCfg(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCfg;
-var CfgClass: TsmxBaseCfgClass;
+var
+  CfgClass: TsmxBaseCfgClass;
 begin
   CfgClass := CfgIDToCfgClass(ADatabase, ACfgID);
   if Assigned(CfgClass) then
-    Result := CfgClass.Create(AOwner, ADatabase, ACfgID) else
+    //Result := CfgClass.Create(AOwner, ADatabase, ACfgID) else
+  begin
+    Result := CfgClass.Create(AOwner);
+    Result.CfgDatabase := ADatabase;
+    Result.CfgID := ACfgID;
+  end else
     raise EsmxCfgError(@SCfgBuildError);
 end;
 
 function NewCell(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCell;
-var CellClass: TsmxBaseCellClass;
+var
+  CellClass: TsmxBaseCellClass;
 begin
   CellClass := CfgIDToCellClass(ADatabase, ACfgID);
   if Assigned(CellClass) then
@@ -71,7 +115,9 @@ end;
 
 function NewForm(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AIntfID: Integer = 0; AID: Integer = 0): TsmxCustomForm;
-var CellClass: TsmxBaseCellClass; FormClass: TsmxCustomFormClass;
+var
+  CellClass: TsmxBaseCellClass;
+  FormClass: TsmxCustomFormClass;
 begin
   CellClass := CfgIDToCellClass(ADatabase, ACfgID);
   FormClass := nil;
@@ -87,92 +133,123 @@ begin
     raise EsmxCellError(@SCellBuildError);
 end;
 
-function VarToParams(V: Variant): TsmxParams;
-var i: Integer;
-begin
-  Result := TsmxParams.Create(TsmxParam);
-  if VarIsArray(V) and (VarArrayHighBound(V, 1) = 1) then
-    if VarIsArray(V[0]) and VarIsArray(V[1])
-      and (VarArrayHighBound(V[0], 1) = VarArrayHighBound(V[1], 1)) then
-    begin
-      for i := 0 to VarArrayHighBound(V[0], 1) do
-        with Result.Add do
-        begin
-          ParamName := V[0][i];
-          ParamValue := V[1][i];
-        end;
-    end;
-end;
-
-function ParamsToVar(Params: TsmxParams): Variant;
-var i: Integer; v1, v2: Variant;
-begin
-  Result := Unassigned;
-  if Params.Count > 0 then
-  begin
-    Result := VarArrayCreate([0, 1], varVariant);
-    v1 := VarArrayCreate([0, Params.Count - 1], varVariant);
-    v2 := VarArrayCreate([0, Params.Count - 1], varVariant);
-    for i := 0 to Params.Count - 1 do
-    begin
-      v1[i] := Params[i].ParamName;
-      v2[i] := Params[i].ParamValue;
-    end;
-    Result[0] := v1;
-    Result[1] := v2;
-  end;
-end;
-
-function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
-var CellClass: TsmxBaseCellClass;
+{function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
+var
+  CellClass: TsmxBaseCellClass;
 begin
   CellClass := TsmxBaseCellClass(FindClass(ACellClassName));
   Result := ACell is CellClass;
-end;
+end;}
 
-function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
-var p: TsmxParam;
+function GetParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant;
+  var AValue: Variant): Boolean;
+var
+  Param: TsmxParam;
 begin
-  Result := ADefValue;
+  Result := False;
+  AValue := ADefValue;
   if Assigned(AParams) then
   begin
-    p := AParams.FindByName(AName);
-    if Assigned(p) then
-      if not VarIsNull(p.ParamValue) then
-        Result := p.ParamValue;
+    Param := AParams.FindByName(AName);
+    if Assigned(Param) then
+    begin
+      AValue := Param.ParamValue;
+      Result := True;
+    end;
   end;
 end;
 
-function FieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
-  ADefValue: Variant): Variant;
-var f: IsmxField;
+function GetParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 begin
-  Result := ADefValue;
+  GetParamValueDef(AParams, AName, ADefValue, Result);
+end;
+
+function GetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
+  ADefValue: Variant; var AValue: Variant): Boolean;
+var
+  Field: IsmxField;
+begin
+  Result := False;
+  AValue := ADefValue;
   if Assigned(ARequest) then
   begin
-    f := ARequest.FindFieldSense(ASense);
-    if Assigned(f) then
-      if not VarIsNull(f.Value) then
-        Result := f.Value;
+    Field := ARequest.FindFieldSense(ASense);
+    if Assigned(Field) then
+    begin
+      AValue := Field.Value;
+      Result := True;
+    end;
   end;
 end;
 
-function ParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+function GetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
   ADefValue: Variant): Variant;
-var p: IsmxParam;
 begin
-  Result := ADefValue;
+  GetFieldSenseValueDef(ARequest, ASense, ADefValue, Result);
+end;
+
+function SetFieldSenseValueDef(ARequest: TsmxCustomRequest; ASense: TsmxFieldSense;
+  AValue: Variant): Boolean;
+var
+  Field: IsmxField;
+begin
+  Result := False;
   if Assigned(ARequest) then
   begin
-    p := ARequest.FindParamLocation(ALocation);
-    if Assigned(p) then
-      if not VarIsNull(p.Value) then
-        Result := p.Value;
+    Field := ARequest.FindFieldSense(ASense);
+    if Assigned(Field) then
+    begin
+      Field.Value := AValue;
+      Result := True;
+    end;
   end;
 end;
 
-function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
-var res: Integer; msg: String;
+function GetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  ADefValue: Variant; var AValue: Variant): Boolean;
+var
+  Param: IsmxParam;
+begin
+  Result := False;
+  AValue := ADefValue;
+  if Assigned(ARequest) then
+  begin
+    Param := ARequest.FindParamLocation(ALocation);
+    if Assigned(Param) then
+    begin
+      AValue := Param.Value;
+      Result := True;
+    end;
+  end;
+end;
+
+function GetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  ADefValue: Variant): Variant;
+begin
+  GetParamLocationValueDef(ARequest, ALocation, ADefValue, Result);
+end;
+
+function SetParamLocationValueDef(ARequest: TsmxCustomRequest; ALocation: TsmxParamLocation;
+  AValue: Variant): Boolean;
+var
+  Param: IsmxParam;
+begin
+  Result := False;
+  if Assigned(ARequest) then
+  begin
+    Param := ARequest.FindParamLocation(ALocation);
+    if Assigned(Param) then
+    begin
+      Param.Value := AValue;
+      Result := True;
+    end;
+  end;
+end;
+
+{function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
+var
+  res: Integer;
+  msg: String;
 begin
   Result := False;
   if not Assigned(ARequest) then
@@ -189,13 +266,13 @@ begin
       case CellDataSet.DataSetType of
         dstQuery:
         begin
-          res := FieldSenseValueDef(ARequest, fsResult, 1);
-          msg := FieldSenseValueDef(ARequest, fsMessage, '');
+          res := GetFieldSenseValueDef(ARequest, fsResult, 1);
+          msg := GetFieldSenseValueDef(ARequest, fsMessage, '');
         end;
         dstStoredProc:
         begin
-          res := ParamLocationValueDef(ARequest, plResult, 1);
-          msg := ParamLocationValueDef(ARequest, plMessage, '');
+          res := GetParamLocationValueDef(ARequest, plResult, 1);
+          msg := GetParamLocationValueDef(ARequest, plMessage, '');
         end;
       end;
       if res = 0 then
@@ -208,9 +285,9 @@ begin
       Database.RollbackTransaction;
     end;
   end;
-end;
+end;}
 
-function RequestReturnKeyValue(ARequest: TsmxCustomRequest; var AKey, AValue: Variant): Boolean;
+function GetRequestKeyAndValue(ARequest: TsmxCustomRequest; var AKey, AValue: Variant): Boolean;
 begin
   Result := False;
   AKey := Null; AValue := Null;
@@ -224,17 +301,48 @@ begin
     case CellDataSet.DataSetType of
       dstQuery:
       begin
-        AKey := FieldSenseValueDef(ARequest, fsKey, Null);
-        AValue := FieldSenseValueDef(ARequest, fsValue, Null);
+        Result := GetFieldSenseValueDef(ARequest, fsKey, Null, AKey);
+        Result := GetFieldSenseValueDef(ARequest, fsValue, Null, AValue) and Result;
       end;
       dstStoredProc:
       begin
-        AKey := ParamLocationValueDef(ARequest, plKey, Null);
-        AValue := ParamLocationValueDef(ARequest, plValue, Null);
+        Result := GetParamLocationValueDef(ARequest, plKey, Null, AKey);
+        Result := GetParamLocationValueDef(ARequest, plValue, Null, AValue) and Result;
       end;
     end;
-    Result := True;
   end;
+end;
+
+function GetRequestValueByKey(ARequest: TsmxCustomRequest; AKey: Variant; var AValue: Variant): Boolean;
+begin
+  Result := False;
+  AValue := Null;
+  if not Assigned(ARequest) then
+    Exit;
+  if not Assigned(ARequest.Database) or not Assigned(ARequest.CellDataSet) then
+    Exit;
+  if SetParamLocationValueDef(ARequest, plKey, AKey) then
+    with ARequest do
+    begin
+      Perform;
+      case CellDataSet.DataSetType of
+        dstQuery: Result := GetFieldSenseValueDef(ARequest, fsValue, Null, AValue);
+        dstStoredProc: Result := GetParamLocationValueDef(ARequest, plValue, Null, AValue);
+      end;
+    end;
+end;
+
+function SetRequestValueByKey(ARequest: TsmxCustomRequest; AKey, AValue: Variant): Boolean;
+begin
+  Result := False;
+  if not Assigned(ARequest) then
+    Exit;
+  if not Assigned(ARequest.Database) or not Assigned(ARequest.CellDataSet) then
+    Exit;
+  Result := SetParamLocationValueDef(ARequest, plKey, AKey) and
+    SetParamLocationValueDef(ARequest, plValue, AValue);
+  if Result then
+    ARequest.Perform;
 end;
 
 end.

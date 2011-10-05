@@ -22,6 +22,7 @@ type
 
   TsmxRequest = class(TsmxCustomRequest)
   private
+    FDataSetIntf: IsmxDataSet;
     function GetCfg: TsmxRequestCfg;
   protected
     procedure Initialize; override;
@@ -34,7 +35,7 @@ type
   public
     function FindFieldSense(AFieldSense: TsmxFieldSense; StartPos: Integer = 0): IsmxField; override;
     function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): IsmxParam; override;
-    procedure Perform(Same: Boolean = False); override;
+    procedure Perform; override;
     procedure RefreshParams; override;
   end;
 
@@ -399,9 +400,9 @@ type
 
   TsmxMenuPoint = class(TsmxCustomMenuPoint)
   private
-    function GetCfg: TsmxMenuPointCfg;
+    function GetCfg: TsmxMenuItemCfg;
   protected
-    property Cfg: TsmxMenuPointCfg read GetCfg;
+    property Cfg: TsmxMenuItemCfg read GetCfg;
   end;
 
   { TsmxMenuItem }
@@ -429,12 +430,12 @@ type
 
   TsmxMasterMenu = class(TsmxCustomMasterMenu)
   private
-    function GetCfg: TsmxMasterMenuCfg;
+    function GetCfg: TsmxMainMenuCfg;
   protected
     procedure CreateChilds; override;
     procedure InitChilds; override;
 
-    property Cfg: TsmxMasterMenuCfg read GetCfg;
+    property Cfg: TsmxMainMenuCfg read GetCfg;
   public
     function MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint; override;
   end;
@@ -648,7 +649,7 @@ implementation
 uses
   SysUtils, Variants, Graphics, ToolWin, {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,} smxFuncs,
-  smxClassFuncs, {smxLibFuncs,} smxConsts;
+  smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs;
 
 type
   { _TsmxBaseCell }
@@ -696,16 +697,15 @@ begin
       end;
 end;
 
-procedure TsmxRequest.Perform(Same: Boolean = False);
-var i: Integer;
+procedure TsmxRequest.Perform;
+var
+  i: Integer;
 begin
   if not Assigned(CellDataSet) then
     Exit;
   with CellDataSet do
   begin
     Close;
-    if not Same then
-      RefreshParams;
     try
       case Cfg.PerformanceMode of
         pmOpen: Open;
@@ -851,7 +851,7 @@ begin
           if Assigned(fld) then
             v := fld.Value;
         end;
-        plParentParams:
+        {plParentParams:
         begin
           prm := nil;
           c := ParentCell;
@@ -859,20 +859,20 @@ begin
             prm := TsmxCustomAlgorithm(c).Params.FindByName(ParamName);
           if Assigned(prm) then
             v := prm.ParamValue;
-        end;
-        plCommonParams:
+        end;}
+        {plCommonParams:
         begin
           //v := CommonStorage.ParamValues[ParamName];
           //v := FindCommonParamByNameLib(ParamName);
           if Assigned(CommonStorage) then
             v := CommonStorage.FindByName(ParamName);
-        end;
-        plParentCfgID:
+        end;}
+        {plParentCfgID:
         begin
           c := ParentCell;
           if Assigned(c) then
             v := c.CfgID;
-        end;
+        end;}
         plFormIntfID:
         begin
           if Assigned(f) then
@@ -1068,13 +1068,16 @@ begin
   FGrid := TsmxWheelDBGrid.Create(Self);
   FGrid.DataSource := FDataSource;
   FGrid.Options := FGrid.Options - [dgEditing];
-  if Cfg.GridColLines then
+  //if Cfg.GridColLines then
+  if goColLines in Cfg.GridOptions then
     FGrid.Options := FGrid.Options + [dgColLines] else
     FGrid.Options := FGrid.Options - [dgColLines];
-  if Cfg.GridRowLines then
+  //if Cfg.GridRowLines then
+  if goRowLines in Cfg.GridOptions then
     FGrid.Options := FGrid.Options + [dgRowLines] else
     FGrid.Options := FGrid.Options - [dgRowLines];
-  if Cfg.GridRowSelect then
+  //if Cfg.GridRowSelect then
+  if goRowSelect in Cfg.GridOptions then
     FGrid.Options := FGrid.Options + [dgRowSelect] else
     FGrid.Options := FGrid.Options - [dgRowSelect];
   InstallParent;
@@ -2079,12 +2082,15 @@ begin
 end;
 
 procedure TsmxLibAlgorithm.Execute(Same: Boolean = False);
+var
+  v: Variant;
 begin
   if Assigned(FLibProc) then
   begin
     if not Same then
       RefreshParams;
-    FLibProc(Self, ParamsToVar(Params));
+    smxClassProcs.ParamsToVar(Params, v);
+    FLibProc(Self, v);
   end;
 end;
 
@@ -2216,7 +2222,7 @@ begin
           if Assigned(fld) then
             v := fld.Value;
         end;
-        plParentParams: v := Null;
+        //plParentParams: v := Null;
         plCommonParams:
         begin
           //v := CommonStorage.ParamValues[ParamName];
@@ -2224,7 +2230,7 @@ begin
           if Assigned(CommonStorage) then
             v := CommonStorage.FindByName(ParamName);
         end;
-        plParentCfgID: v := Null;
+        //plParentCfgID: v := Null;
         plFormIntfID:
         begin
           if Assigned(f) then
@@ -2412,9 +2418,9 @@ end;
 
 { TsmxMenuPoint }
 
-function TsmxMenuPoint.GetCfg: TsmxMenuPointCfg;
+function TsmxMenuPoint.GetCfg: TsmxMenuItemCfg;
 begin
-  Result := TsmxMenuPointCfg(inherited Cfg);
+  Result := TsmxMenuItemCfg(inherited Cfg);
 end;
 
 { TsmxMenuItem }
@@ -2535,9 +2541,9 @@ begin
     AddItems(Cfg.MenuUnits.Root[i]);
 end;
 
-function TsmxMasterMenu.GetCfg: TsmxMasterMenuCfg;
+function TsmxMasterMenu.GetCfg: TsmxMainMenuCfg;
 begin
-  Result := TsmxMasterMenuCfg(inherited Cfg);
+  Result := TsmxMainMenuCfg(inherited Cfg);
 end;
 
 function TsmxMasterMenu.MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint;
@@ -3559,7 +3565,7 @@ begin
   InstallParent;
   SetCommonStorage(CommonStorage);
   SetLibraryManager(LibraryManager);
-  SetDatabaseManager(DatabaseManager);
+  //SetDatabaseManager(DatabaseManager);
   SetFormManager(FormManager);
   SetImageList(ImageList);
   //AddAlgorithms;

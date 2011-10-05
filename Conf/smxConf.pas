@@ -57,6 +57,7 @@ type
     procedure FillProjectList;
     function GetCellCfg(CfgID: Integer): String;
     function GetStateCfg(CfgID, IntfID: Integer): String;
+    procedure LoadCfg;
     //procedure ReadData(ImageList: TCustomImageList; Stream: TStream);
     //procedure ReadD2Stream(ImageList: TCustomImageList; Stream: TStream);
     //procedure ReadD3Stream(ImageList: TCustomImageList; Stream: TStream);
@@ -75,7 +76,7 @@ implementation
 {$R ..\Resource\pic.res}
 
 uses
-  smxCommonStorage, smxLibManager, smxDBManager, smxFuncs,
+  IniFiles, smxCommonStorage, smxLibManager, smxDBManager, smxFuncs,
   smxTypes, smxConsts, smxProcs, smxProjects, smxAddCell, smxClassFuncs;
 
 type
@@ -101,13 +102,15 @@ begin
   //FDatabaseIntf.LoginPrompt := False;
   FTargetRequest := TsmxTargetRequest.Create(Self);
   FImageList := TImageList.Create(Self);
+  LoadCfg;
   LoadImage;
   FProjectManager := TsmxProjectManager.Create(Self);
-  FProjectManager.FileName := '..\Cfg\proj.dat'; //'proj.dat'; //SFileProjectName;
+  FProjectManager.FileName := ComStorage['Path.Cfg'] + ComStorage['Init.FileProject']; //'..\Cfg\proj.dat'; //'proj.dat'; //SFileProjectName;
   FillProjectList;
   SaveProgVers;
-  LibManager.LibPath := '..\Lib\';
-  LibManager.ProcLibInfoName := 'LibInfo';
+  LibManager.LibPath := ComStorage['Path.Lib']; //'..\Lib\';
+  LibManager.ProcLibInfoName := ComStorage['LibManager.ProcLibInfo']; //'LibInfo';
+  LibManager.CheckComp := ComStorage['LibManager.CheckComp'];
   LibManager.CallLibrary('cCells.dll');
 end;
 
@@ -391,7 +394,11 @@ begin
   CheckDatabase;
   if (CfgID > 0) and (IntfID > 0) then
   begin
-    FCfg := TsmxStateCfg.CreateByIntfID(nil, FDBConnection.Database, CfgID, IntfID);
+    //FCfg := TsmxStateCfg.CreateByIntfID(nil, FDBConnection.Database, CfgID, IntfID);
+    FCfg := TsmxStateCfg.Create(nil);
+    TsmxStateCfg(FCfg).CfgDatabase := FDBConnection.Database;
+    TsmxStateCfg(FCfg).CfgID := CfgID;
+    TsmxStateCfg(FCfg).IntfID := IntfID;
     FCfg.Initialize;
     if CheckBox1.Checked then
       Result := _TsmxStateCfg(FCfg).FullXMLText else //GetFullStateCfg
@@ -589,6 +596,37 @@ procedure TfrmConf.Edit2KeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #13 then
     Button4.Click;
+end;
+
+procedure TfrmConf.LoadCfg;
+var f: TIniFile; sl, sl2: TStringList; i, j: Integer;
+begin
+  ComStorage['ConfPath'] := ExtractFilePath(Application.ExeName);
+  if FileExists(ComStorage['ConfPath'] + SFileConfigurationName) then
+  begin
+    f := TIniFile.Create(ComStorage['ConfPath'] + SFileConfigurationName);
+    try
+      sl := TStringList.Create;
+      try
+        sl2 := TStringList.Create;
+        try
+          f.ReadSections(sl);
+          for i := 0 to sl.Count - 1 do
+          begin
+            f.ReadSectionValues(sl[i], sl2);
+            for j := 0 to sl2.Count - 1 do
+              ComStorage[sl.Strings[i] + '.' + sl2.Names[j]] := sl2.Values[sl2.Names[j]]; //sl2.ValueFromIndex[j];
+          end;
+        finally
+          sl2.Free;
+        end;
+      finally
+        sl.Free;
+      end;
+    finally
+      f.Free;
+    end;
+  end;
 end;
 
 end.

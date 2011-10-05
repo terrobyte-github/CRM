@@ -5,8 +5,7 @@ uses
   smxAlgs in 'smxAlgs.pas',
   smxLibProcs in '..\Common\smxLibProcs.pas',
   smxLibFuncs in '..\Common\smxLibFuncs.pas',
-  smxLibTypes in '..\Common\smxLibTypes.pas',
-  smxProcs in '..\Common\smxProcs.pas';
+  smxLibTypes in '..\Common\smxLibTypes.pas';
 
 {$R *.res}
 

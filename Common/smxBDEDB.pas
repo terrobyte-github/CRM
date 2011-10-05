@@ -3,7 +3,7 @@ unit smxBDEDB;
 interface
 
 uses
-  Classes, DB, DBTables, smxDBIntf, smxBaseClasses;
+  Classes, DB, DBTables, smxDBIntf, smxBaseClasses, smxTypes;
 
 type
   { TsmxBDEDatabase }
@@ -58,6 +58,7 @@ type
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
+    function GetParamLocation: TsmxParamLocation;
     function GetVersion: String; override;
     procedure SetDataType(Value: TsmxDataType);
     procedure SetNumericScale(Value: Integer);
@@ -66,12 +67,14 @@ type
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(Value: Variant);
+    procedure SetParamLocation(Value: TsmxParamLocation);
   public
     constructor Create(AParam: TParam);
     destructor Destroy; override;
     //procedure AssignParam(Source: TObject);
     procedure AssignParam(const Source: IInterface);
-    procedure LoadStream(Stream: TStream);
+    procedure LoadFromStream(Stream: TStream);
+    procedure SaveToStream(Stream: TStream);
 
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
@@ -82,6 +85,7 @@ type
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
+    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
   end;
 
   { TsmxBDEDataSet }
@@ -99,7 +103,7 @@ type
     function GetEof: Boolean;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
-    function GetIsDataSet: Boolean;
+    //function GetIsDataSet: Boolean;
     function GetParam(Index: Integer): IsmxParam;
     function GetParamCount: Integer;
     function GetPrepare: Boolean;
@@ -148,7 +152,7 @@ type
     property Eof: Boolean read GetEof;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
-    property IsDataSet: Boolean read GetIsDataSet;
+    //property IsDataSet: Boolean read GetIsDataSet;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;
@@ -285,6 +289,8 @@ begin
   case DataSetType of
     dstQuery: Result := TsmxBDEQuery.Create;
     dstStoredProc: Result := TsmxBDEStoredProc.Create;
+    else
+      raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetUnknown);
   end;
   {if Assigned(Result) then
     Result.Database := Self else
@@ -378,7 +384,7 @@ end;
 
 function TsmxBDEParam.GetDataType: TsmxDataType;
 begin
-  Result := FParam.DataType
+  Result := FParam.DataType;
 end;
 
 function TsmxBDEParam.GetNumericScale: Integer;
@@ -437,7 +443,7 @@ begin
   Result := Vers;
 end;
 
-procedure TsmxBDEParam.LoadStream(Stream: TStream);
+procedure TsmxBDEParam.LoadFromStream(Stream: TStream);
 begin
   FParam.LoadFromStream(Stream, ftBlob);
 end;
@@ -487,6 +493,20 @@ end;
 procedure TsmxBDEParam.SetValue(Value: Variant);
 begin
   FParam.Value := Value;
+end;
+
+procedure TsmxBDEParam.SaveToStream(Stream: TStream);
+begin
+  //
+end;
+
+function TsmxBDEParam.GetParamLocation: TsmxParamLocation;
+begin
+  Result := plConst;
+end;
+
+procedure TsmxBDEParam.SetParamLocation(Value: TsmxParamLocation);
+begin               
 end;
 
 { TsmxBDEDataSet }
@@ -627,10 +647,10 @@ begin
   Result := FBDEDataSet.FieldCount;
 end;
 
-function TsmxBDEDataSet.GetIsDataSet: Boolean;
+{function TsmxBDEDataSet.GetIsDataSet: Boolean;
 begin
   Result := FBDEDataSet is TDataSet;
-end;
+end;}
 
 function TsmxBDEDataSet.GetParam(Index: Integer): IsmxParam;
 var p: TParam;

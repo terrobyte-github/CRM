@@ -20,11 +20,13 @@ type
     Font: TsmxCellFont;
   end;
 
-  TsmxParamLocation = (plInput, plConst, plOutput, plFilterDesk, plGrid,
-    plParentFormFilterDesk, plParentFormGrid, plParentParams, plCommonParams,
-    plKey, plValue, plResult, plMessage, plParentCfgID, plFormIntfID, plFormID);
+  TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
+    plForeignKey, plInput, plOutput, plFilterDesk, plGrid,
+    plParentFormFilterDesk, plParentFormGrid, plCommonParams,
+    plFormIntfID, plFormID);
 
-  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage);
+  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
+    fsForeignKey);
 
   TsmxPerformanceMode = (pmOpen, pmExecute);    
 
@@ -35,6 +37,10 @@ type
     Operation: TsmxOperationMode;
     DatabaseName: String;
   end;
+
+  TsmxGridOption = (goColLines, goRowLines, goRowSelect);
+
+  TsmxGridOptions = set of TsmxGridOption;
 
   TsmxPositionSize = record
     Left, Top, Height, Width: Integer;
@@ -80,6 +86,12 @@ type
   TsmxFuncDatabaseCLSID = function: TGUID;
 
   TsmxFuncNewResource = function(AName: String): TResourceStream;
+
+  TsmxModifySetting = record
+    InsertCfgID,
+    UpdateCfgID,
+    DeleteCfgID: Integer;
+  end;
 
 implementation
 

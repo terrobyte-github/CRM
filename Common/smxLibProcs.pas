@@ -10,7 +10,7 @@ procedure InitLib(ACall: TsmxFuncCallBack);
 procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
   ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
 
-const
+var
   Call: TsmxFuncCallBack = nil;
 
 implementation

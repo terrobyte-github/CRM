@@ -3,7 +3,7 @@ unit smxADODB;
 interface
 
 uses
-  Classes, DB, ADODB, smxDBIntf, smxBaseClasses;
+  Classes, DB, ADODB, smxDBIntf, smxBaseClasses, smxTypes;
 
 type
   { TsmxADODatabase }
@@ -58,6 +58,7 @@ type
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
+    function GetParamLocation: TsmxParamLocation;
     function GetVersion: String; override;
     procedure SetDataType(Value: TsmxDataType);
     procedure SetNumericScale(Value: Integer);
@@ -66,12 +67,14 @@ type
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(Value: Variant);
+    procedure SetParamLocation(Value: TsmxParamLocation);
   public
     constructor Create(AParam: TParameter);
     destructor Destroy; override;
     //procedure AssignParam(Source: TObject);
     procedure AssignParam(const Source: IInterface);
-    procedure LoadStream(Stream: TStream);
+    procedure LoadFromStream(Stream: TStream);
+    procedure SaveToStream(Stream: TStream);
 
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
@@ -82,6 +85,7 @@ type
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
+    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
   end;
 
   { TsmxADODataSet }
@@ -99,7 +103,7 @@ type
     function GetEof: Boolean;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
-    function GetIsDataSet: Boolean;
+    //function GetIsDataSet: Boolean;
     function GetParam(Index: Integer): IsmxParam;
     function GetParamCount: Integer;
     function GetPrepare: Boolean;
@@ -148,7 +152,7 @@ type
     property Eof: Boolean read GetEof;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
-    property IsDataSet: Boolean read GetIsDataSet;
+    //property IsDataSet: Boolean read GetIsDataSet;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;
@@ -284,6 +288,8 @@ begin
   case DataSetType of
     dstQuery: Result := TsmxADOQuery.Create;
     dstStoredProc: Result := TsmxADOStoredProc.Create;
+    else
+      raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetUnknown);
   end;
   {if Assigned(Result) then
     Result.Database := Self else
@@ -434,7 +440,7 @@ begin
   Result := Vers;
 end;
 
-procedure TsmxADOParam.LoadStream(Stream: TStream);
+procedure TsmxADOParam.LoadFromStream(Stream: TStream);
 begin
   FParam.LoadFromStream(Stream, ftBlob);
 end;
@@ -483,6 +489,20 @@ end;
 procedure TsmxADOParam.SetValue(Value: Variant);
 begin
   FParam.Value := Value;
+end;
+
+procedure TsmxADOParam.SaveToStream(Stream: TStream);
+begin
+  //FParam.
+end;
+
+function TsmxADOParam.GetParamLocation: TsmxParamLocation;
+begin
+  Result := plConst;
+end;
+
+procedure TsmxADOParam.SetParamLocation(Value: TsmxParamLocation);
+begin
 end;
 
 { TsmxADODataSet }
@@ -612,10 +632,10 @@ begin
   Result := FADODataSet.FieldCount;
 end;
 
-function TsmxADODataSet.GetIsDataSet: Boolean;
+{function TsmxADODataSet.GetIsDataSet: Boolean;
 begin
   Result := FADODataSet is TDataSet;
-end;
+end;}
 
 function TsmxADODataSet.GetParam(Index: Integer): IsmxParam;
 var p: TParameter;

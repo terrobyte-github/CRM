@@ -3,7 +3,7 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, XMLIntf{, smxClasses,} {smxCells,} {smxDBIntf};
+  Classes, Windows, XMLIntf, smxDBIntf {, smxClasses,} {smxCells,} {smxDBIntf};
 
 //function GetCurrentForm: TsmxCustomForm;
 //function GetCurrentPage: TsmxCustomPage;
@@ -14,18 +14,18 @@ uses
   //ACfgID: Integer): TsmxBaseCfg;
 //function NewCell(AOwner: TComponent; const ADB: IsmxDatabase;
   //ACfgID: Integer; AID: Integer = 0): TsmxBaseCell;
-function StreamToStr(Stream: TStream): String;
-function StrToStream(const Str: String): TStream;
-function HotKeyToStr(Key: Integer): String;
-function StrToHotKey(const Str: String): Integer;
-function StrToDateTimeEx(const Str: String): TDateTime;
+//function StreamToStr(Stream: TStream): String;
+//function StrToStream(const Str: String): TStream;
+function HotKeyToStr(AKey: Integer): String;
+function StrToHotKey(const AStr: String): Integer;
+function StrToDateTimeEx(const AStr: String): TDateTime;
 //function VarToParams(V: Variant): TsmxParams;
 //function ParamsToVar(Params: TsmxParams): Variant;
 //function IsCell(ACell: TsmxBaseCell; ACellClassName: String): Boolean;
-function Ask(M: String; uType: Cardinal): Integer; overload;
-function Ask(M: String): Boolean; overload;
-function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
-function VarStringToVar(V: Variant): Variant;
+function Ask(AMsg: String; AType: Cardinal): Integer; overload;
+function Ask(AMsg: String): Boolean; overload;
+function Inf(AMsg: String; AType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
+function VarStringToVar(AValue: Variant): Variant;
 //function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
 //function PerformRequest(ARequest: TsmxCustomRequest; Same: Boolean = False): Boolean;
 //function PerformRequest(ARequest: TsmxBaseCell; Same: Boolean = False): Boolean;
@@ -34,11 +34,13 @@ function NewXML(AEncoding: String = 'UTF-8'): IXMLDocument;
 function FormatXMLText(AText: String): String;
 function UnFormatXMLText(AText: String): String;
 function NewResource(AName: String): TResourceStream;
+//function IsBlobType(ADataType: TsmxDataType; AValue: Variant): Boolean;
+function IsBlobType(ADataType: TsmxDataType; ALength: Integer = 0): Boolean;
 
 implementation
 
 uses
-  Forms, Controls, Menus, SysUtils, StrUtils, Variants, XMLDoc{, smxFormManager};
+  Forms, Controls, Menus, SysUtils, StrUtils, Variants, XMLDoc, DB{, smxFormManager};
 
 {function GetCurrentForm: TsmxCustomForm;
 var h: HWND; f: TsmxBaseCell;
@@ -110,7 +112,7 @@ begin
   Result := CfgIDToCellClass(ADB, ACfgID).Create(AOwner, ADB, ACfgID, AID);
 end;}
 
-function StreamToStr(Stream: TStream): String;
+{function StreamToStr(Stream: TStream): String;
 var Len: Integer;
 begin
   with Stream do
@@ -133,27 +135,27 @@ begin
     WriteBuffer(Pointer(Str)^, Len);
     Position := 0;
   end;
+end;}
+
+function HotKeyToStr(AKey: Integer): String;
+begin
+  Result := ShortCutToText(TShortCut(AKey));
 end;
 
-function HotKeyToStr(Key: Integer): String;
+function StrToHotKey(const AStr: String): Integer;
 begin
-  Result := ShortCutToText(TShortCut(Key));
+  Result := Integer(TextToShortCut(AStr));
 end;
 
-function StrToHotKey(const Str: String): Integer;
+function StrToDateTimeEx(const AStr: String): TDateTime;
 begin
-  Result := Integer(TextToShortCut(Str));
-end;
-
-function StrToDateTimeEx(const Str: String): TDateTime;
-begin
-  if AnsiCompareText(Str, 'date') = 0 then
+  if AnsiCompareText(AStr, 'date') = 0 then
     Result := Date else
-  if AnsiCompareText(Str, 'time') = 0 then
+  if AnsiCompareText(AStr, 'time') = 0 then
     Result := Time else
-  if AnsiCompareText(Str, 'now') = 0 then
+  if AnsiCompareText(AStr, 'now') = 0 then
     Result := Now else
-    Result := StrToDateDef(Str, StrToDate('30.12.1899'));
+    Result := StrToDateDef(AStr, StrToDate('30.12.1899'));
 end;
 
 {function VarToParams(V: Variant): TsmxParams;
@@ -201,33 +203,33 @@ begin
     Result := False;
 end;}
 
-function Ask(M: String; uType: Cardinal): Integer;
+function Ask(AMsg: String; AType: Cardinal): Integer;
 var s: String;
 begin
-  case uType and $F0 of
+  case AType and $F0 of
     MB_ICONWARNING: s := 'Внимание';
     MB_ICONINFORMATION: s := 'К информации';
     MB_ICONQUESTION: s := 'Подтверждение';
     else s := 'Ошибка!';
   end;
-  Result := Application.MessageBox(PChar(M), PChar(s), uType);
+  Result := Application.MessageBox(PChar(AMsg), PChar(s), AType);
 end;
 
-function Ask(M: String): Boolean;
+function Ask(AMsg: String): Boolean;
 begin
-  Result := Ask(M, MB_YESNO + MB_ICONQUESTION) = mrYes;
+  Result := Ask(AMsg, MB_YESNO + MB_ICONQUESTION) = mrYes;
 end;
 
-function Inf(M: String; uType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
+function Inf(AMsg: String; AType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 begin
-  Result := Ask(M, uType);
+  Result := Ask(AMsg, AType);
 end;
 
-function VarStringToVar(V: Variant): Variant;
+function VarStringToVar(AValue: Variant): Variant;
 begin
-  if VarToStr(V) = '' then
+  if VarToStr(AValue) = '' then
     Result := Null else
-    Result := V;
+    Result := AValue;
 end;
 
 {function ParamValueDef(AParams: TsmxParams; AName: String; ADefValue: Variant): Variant;
@@ -329,6 +331,18 @@ function NewResource(AName: String): TResourceStream;
 begin
   Result := TResourceStream.Create(HInstance, AName, RT_RCDATA);
   Result.Position := 0;
+end;
+
+{function IsBlobType(ADataType: TsmxDataType; AValue: Variant): Boolean;
+begin
+  Result := ((ADataType in [ftString, ftFixedChar]) and (Length(VarToStr(AValue)) > 255)) or
+   (ADataType in [ftBlob..ftTypedBinary, ftOraBlob, ftOraClob]);
+end;}
+
+function IsBlobType(ADataType: TsmxDataType; ALength: Integer = 0): Boolean;
+begin
+  Result := ((ADataType in [ftString, ftFixedChar]) and (ALength > 255)) or
+    (ADataType in [ftBlob..ftTypedBinary, ftOraBlob, ftOraClob]);
 end;
 
 end.

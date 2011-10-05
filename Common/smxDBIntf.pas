@@ -3,7 +3,7 @@ unit smxDBIntf;
 interface
 
 uses
-  Classes, DB, SysUtils;
+  Classes, DB, SysUtils, smxTypes;
 
 const
   IID_IsmxDatabase: TGUID = '{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}';
@@ -58,7 +58,8 @@ type
     ['{BB7372C0-3457-487F-AB76-70717AFD7938}']
     //procedure AssignField(Source: TObject);
     procedure AssignField(const Source: IsmxField);
-    function CreateStream: TStream;
+    //function CreateStream: TStream;
+    procedure SaveToStream(Stream: TStream);
     function GetCalculated: Boolean;
     function GetDataType: TsmxDataType;
     function GetDefaultExpression: String;
@@ -69,12 +70,14 @@ type
     function GetFieldNo: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
+    function GetFieldSense: TsmxFieldSense;
     procedure SetCalculated(Value: Boolean);
     procedure SetDefaultExpression(Value: String);
     procedure SetDisplayFormat(Value: String);
     procedure SetFieldKind(Value: TsmxFieldKind);
     procedure SetFieldName(Value: String);
     procedure SetValue(Value: Variant);
+    procedure SetFieldSense(Value: TsmxFieldSense);
 
     property Calculated: Boolean read GetCalculated write SetCalculated;
     property DataType: TsmxDataType read GetDataType;
@@ -86,6 +89,7 @@ type
     property FieldNo: Integer read GetFieldNo;
     property Size: Integer read GetSize;
     property Value: Variant read GetValue write SetValue;
+    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
   end;
 
   { IsmxParam }
@@ -105,7 +109,9 @@ type
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
-    procedure LoadStream(Stream: TStream);
+    function GetParamLocation: TsmxParamLocation;
+    procedure LoadFromStream(Stream: TStream);
+    procedure SaveToStream(Stream: TStream);
     procedure SetDataType(Value: TsmxDataType);
     procedure SetNumericScale(Value: Integer);
     procedure SetParamName(const Value: String);
@@ -113,6 +119,7 @@ type
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(Value: Variant);
+    procedure SetParamLocation(Value: TsmxParamLocation);
 
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
@@ -123,6 +130,7 @@ type
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
+    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
   end;
   
   { IsmxDataSet }
@@ -149,7 +157,7 @@ type
     function GetEof: Boolean;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
-    function GetIsDataSet: Boolean;
+    //function GetIsDataSet: Boolean;
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
     function GetPrepare: Boolean;
@@ -184,7 +192,7 @@ type
     property Eof: Boolean read GetEof;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
-    property IsDataSet: Boolean read GetIsDataSet;
+    //property IsDataSet: Boolean read GetIsDataSet;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
     property Prepared: Boolean read GetPrepare write SetPrepare;

@@ -95,7 +95,7 @@ begin
           begin
             f.ReadSectionValues(sl[i], sl2);
             for j := 0 to sl2.Count - 1 do
-              ComStorage[sl2.Names[j]] := sl2.Values[sl2.Names[j]]; //sl2.ValueFromIndex[j];
+              ComStorage[sl.Strings[i] + '.' + sl2.Names[j]] := sl2.Values[sl2.Names[j]]; //sl2.ValueFromIndex[j];
           end;
         finally
           sl2.Free;
@@ -114,7 +114,7 @@ var s: String;
 begin
   s := ComStorage['CRMPath'];
   SetEnvironmentVariable(PChar('CRM'), PChar(s));
-  s := ';' + s + ComStorage['LibPath'];
+  s := ';' + s + ComStorage['Path.Lib'];
   SetEnvironmentVariable(PChar('Path'), PChar(GetEnvironmentVariable('Path') + s));
   {s := GetEnvironmentVariable('Path'); inf(s);
   s2 := ExtractFileDir(Application.ExeName); inf(s2);
@@ -134,8 +134,9 @@ begin
   AssignCallBackParams;
   LoadCfg;
   SaveVariables;
-  LibManager.LibPath := ComStorage['LibPath'];
-  LibManager.ProcLibInfoName := ComStorage['ProcLibInfo'];
+  LibManager.LibPath := ComStorage['Path.Lib'];
+  LibManager.ProcLibInfoName := ComStorage['LibManager.ProcLibInfo'];
+  LibManager.CheckComp := ComStorage['LibManager.CheckComp'];
   LoadCell;
   LoadImage;
 end;
@@ -184,7 +185,7 @@ begin
         Database := ADatabase;
         CommonStorage := ComStorage;
       end;
-      if RequestReturnKeyValue(TsmxCustomRequest(c), IntfID, IntfName) then
+      if GetRequestKeyAndValue(TsmxCustomRequest(c), IntfID, IntfName) then
       begin
         Result := IntfID > 0;
         if Result then
@@ -214,7 +215,7 @@ begin
         Database := ADatabase;
         CommonStorage := ComStorage;
       end;
-      if RequestReturnKeyValue(TsmxCustomRequest(c), UserID, UserName) then
+      if GetRequestKeyAndValue(TsmxCustomRequest(c), UserID, UserName) then
       begin
         if UserID = -1 then
           Inf(UserName) else
@@ -239,7 +240,7 @@ begin
   Result := False;
   pm := TsmxProjectManager.Create(nil);
   try
-    pm.FileName := ComStorage['CfgPath'] + ComStorage['FileProject']; //SFileProjectName;
+    pm.FileName := ComStorage['Path.Cfg'] + ComStorage['Init.FileProject']; //SFileProjectName;
     pm.ReadProjects;
     pr := pm.ProjectList.FindByName(AProjectName);
     if Assigned(pr) then

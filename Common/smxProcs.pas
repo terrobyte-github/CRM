@@ -3,10 +3,15 @@ unit smxProcs;
 interface
 
 uses
-  Classes, ImgList;
+  Classes, ImgList, smxTypes;
 
 procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
+procedure StreamToStr(AStream: TStream; var AStr: String);
+procedure StrToStream(const AStr: String; AStream: TStream);
+
+//var
+  //UpdateSetting: TsmxUpdateSetting;
 
 implementation
 
@@ -14,16 +19,19 @@ uses
   Windows, SysUtils, CommCtrl;
 
 procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
-var s, h, w: DWORD; buf: PChar; pfi: PVSFixedFileInfo;
+var
+  s, h, w: DWORD;
+  buf: PChar;
+  pfi: PVSFixedFileInfo;
 begin
   AVersMost := 0; AVersLeast := 0;
-  s := GetFileVersionInfoSize(PChar(AFileName), h);
+  s := Windows.GetFileVersionInfoSize(PChar(AFileName), h);
   if s > 0 then
   begin
-    buf := AllocMem(s);
+    buf := SysUtils.AllocMem(s);
     try
-      if GetFileVersionInfo(PChar(AFileName), h, s, buf) then
-        if VerQueryValue(buf, '\' , Pointer(pfi), w) then
+      if Windows.GetFileVersionInfo(PChar(AFileName), h, s, buf) then
+        if Windows.VerQueryValue(buf, '\' , Pointer(pfi), w) then
         begin
           AVersMost := pfi.dwFileVersionMS;
           AVersLeast := pfi.dwFileVersionLS;
@@ -41,9 +49,38 @@ begin
   AImageList.Handle := 0;
   LAdapter := TStreamAdapter.Create(AStream);
   try
-    AImageList.Handle := ImageList_Read(LAdapter);
+    AImageList.Handle := CommCtrl.ImageList_Read(LAdapter);
   finally
     LAdapter.Free;
+  end;
+end;
+
+procedure StreamToStr(AStream: TStream; var AStr: String);
+var
+  Len: Integer;
+begin
+  with AStream do
+  begin
+    Len := Size;
+    SetLength(AStr, Len);
+    Position := 0;
+    ReadBuffer(Pointer(AStr)^, Len);
+    Position := 0;
+  end;
+end;
+
+procedure StrToStream(const AStr: String; AStream: TStream);
+var
+  Len: Integer;
+begin
+  //Result := TMemoryStream.Create;
+  with AStream do
+  begin
+    Len := Length(AStr);
+    Size := Len;
+    Position := 0;
+    WriteBuffer(Pointer(AStr)^, Len);
+    Position := 0;
   end;
 end;
 

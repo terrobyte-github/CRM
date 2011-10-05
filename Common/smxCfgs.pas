@@ -18,7 +18,7 @@ uses
 type
   { TsmxLocationParam }
 
-  TsmxLocationParam = class(TsmxKitItem)
+  {TsmxLocationParam = class(TsmxKitItem)
   private
     FParamLocation: TsmxParamLocation;
     FParamName: String;
@@ -29,11 +29,11 @@ type
     property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
     property ParamName: String read FParamName write FParamName;
     property ParamDefValue: Variant read FParamDefValue write FParamDefValue;
-  end;
+  end;}
 
   { TsmxLocationParams }
 
-  TsmxLocationParams = class(TsmxKit)
+  {TsmxLocationParams = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxLocationParam;
   public
@@ -41,11 +41,11 @@ type
     function FindByName(AParamName: String): TsmxLocationParam;
 
     property Items[Index: Integer]: TsmxLocationParam read GetItem; default;
-  end;
+  end;}
 
   { TsmxRequestField }
 
-  TsmxRequestField = class(TsmxKitItem)
+  {TsmxRequestField = class(TsmxKitItem)
   private
     FFieldFormat: String;
     FFieldName: String;
@@ -56,11 +56,11 @@ type
     property FieldFormat: String read FFieldFormat write FFieldFormat;
     property FieldName: String read FFieldName write FFieldName;
     property FieldSense: TsmxFieldSense read FFieldSense write FFieldSense;
-  end;
+  end;}
 
   { TsmxRequestFields }
 
-  TsmxRequestFields = class(TsmxKit)
+  {TsmxRequestFields = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxRequestField;
   public
@@ -68,11 +68,11 @@ type
     function FindByName(AFieldName: String): TsmxRequestField;
 
     property Items[Index: Integer]: TsmxRequestField read GetItem; default;
-  end;
+  end;}
 
   { TsmxRequestCfg }
 
-  TsmxRequestCfg = class(TsmxCellCfg)
+  {TsmxRequestCfg = class(TsmxCellCfg)
   private
     FDataSetType: TsmxDataSetType;
     FPerformanceMode: TsmxPerformanceMode;
@@ -93,7 +93,7 @@ type
     property RequestFields: TsmxRequestFields read GetRequestFields;
     property RequestParams: TsmxLocationParams read GetRequestParams;
     property SQLText: String read FSQLText write FSQLText;
-  end;
+  end;}
 
   { TsmxColumnCfg }
 
@@ -102,11 +102,13 @@ type
     FColumnFieldName: String;
     FColumnText: TsmxCellText;
     FColumnTitle: TsmxCellText;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property ColumnFieldName: String read FColumnFieldName write FColumnFieldName;
     property ColumnText: TsmxCellText read FColumnText write FColumnText;
@@ -153,22 +155,26 @@ type
 
   TsmxGridCfg = class(TsmxCellCfg)
   private
-    FGridColLines: Boolean;
+    //FGridColLines: Boolean;
     FGridColumns: TsmxVisibleUnits;
-    FGridRowLines: Boolean;
-    FGridRowSelect: Boolean;
+    FGridOptions: TsmxGridOptions;
+    //FGridRowLines: Boolean;
+    //FGridRowSelect: Boolean;
     function GetGridColumns: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
-    property GridColLines: Boolean read FGridColLines write FGridColLines;
+    //property GridColLines: Boolean read FGridColLines write FGridColLines;
     property GridColumns: TsmxVisibleUnits read GetGridColumns;
-    property GridRowLines: Boolean read FGridRowLines write FGridRowLines;
-    property GridRowSelect: Boolean read FGridRowSelect write FGridRowSelect;
+    property GridOptions: TsmxGridOptions read FGridOptions write FGridOptions;
+    //property GridRowLines: Boolean read FGridRowLines write FGridRowLines;
+    //property GridRowSelect: Boolean read FGridRowSelect write FGridRowSelect;
   end;
 
   { TsmxLibAlgorithmCfg }
@@ -183,11 +189,13 @@ type
     FAlgParams: TsmxLocationParams;
     FAlgProcedure: String;
     function GetAlgParams: TsmxLocationParams;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property AlgDefCaption: String read FAlgDefCaption write FAlgDefCaption;
     property AlgDefHint: String read FAlgDefHint write FAlgDefHint;
@@ -241,12 +249,14 @@ type
   private
     FAlgorithmItems: TsmxAlgorithmItems;
     function GetAlgorithmItems: TsmxAlgorithmItems;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property AlgorithmItems: TsmxAlgorithmItems read GetAlgorithmItems;
   end;
@@ -261,11 +271,13 @@ type
     FFilterHeader: TsmxCellText;
     FFilterName: String;
     FValueFormat: String;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property Algorithm: TsmxAlgorithmSetting read FAlgorithm write FAlgorithm;
     property DisplayFormat: String read FDisplayFormat write FDisplayFormat;
@@ -283,12 +295,14 @@ type
     FFilters: TsmxVisibleUnits;
     FPrepareRequest: TsmxRequestSetting;
     function GetFilters: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property ApplyRequest: TsmxRequestSetting read FApplyRequest write FApplyRequest;
     property Filters: TsmxVisibleUnits read GetFilters;
@@ -302,11 +316,13 @@ type
     FFilterPanel: TsmxControlCellSetting;
     FGrid: TsmxControlCellSetting;
     FRequest: TsmxRequestSetting;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property FilterPanel: TsmxControlCellSetting read FFilterPanel write FFilterPanel;
     property Grid: TsmxControlCellSetting read FGrid write FGrid;
@@ -321,11 +337,13 @@ type
     FPageImageIndex: Integer;
     FSections: TsmxVisibleUnits;
     function GetSections: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property PageCaption: String read FPageCaption write FPageCaption;
     property PageImageIndex: Integer read FPageImageIndex write FPageImageIndex;
@@ -338,27 +356,31 @@ type
   private
     FSheets: TsmxVisibleUnits;
     function GetSheets: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property Sheets: TsmxVisibleUnits read GetSheets;
   end;
 
-  { TsmxMenuPointCfg }
+  { TsmxMenuItemCfg }
 
-  TsmxMenuPointCfg = class(TsmxCellCfg)
+  TsmxMenuItemCfg = class(TsmxCellCfg)
   private
     FItemCaption: String;
     FItemImageIndex: Integer;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property ItemCaption: String read FItemCaption write FItemCaption;
     property ItemImageIndex: Integer read FItemImageIndex write FItemImageIndex;
@@ -404,18 +426,20 @@ type
     property Root: TsmxHVisibleUnit read GetRoot;
   end;
 
-  { TsmxMasterMenuCfg }
+  { TsmxMainMenuCfg }
 
-  TsmxMasterMenuCfg = class(TsmxCellCfg)
+  TsmxMainMenuCfg = class(TsmxCellCfg)
   private
     FMenuUnits: TsmxHVisibleUnits;
     function GetMenuUnits: TsmxHVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property MenuUnits: TsmxHVisibleUnits read GetMenuUnits;
   end;
@@ -427,11 +451,13 @@ type
     FBarFlat: Boolean;
     FBarShowCaptions: Boolean;
     FBarShowHint: Boolean;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property BarFlat: Boolean read FBarFlat write FBarFlat;
     property BarShowCaptions: Boolean read FBarShowCaptions write FBarShowCaptions;
@@ -444,11 +470,13 @@ type
   private
     FBarUnits: TsmxVisibleUnits;
     function GetBarUnits: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property BarUnits: TsmxVisibleUnits read GetBarUnits;
   end;
@@ -467,12 +495,14 @@ type
     FPageManagers: TsmxVisibleUnits;
     FStatusBar: TsmxControlCellSetting;
     function GetPageManagers: TsmxVisibleUnits;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property AlgorithmList: TsmxAlgorithmListSetting read FAlgorithmList write FAlgorithmList;
     property ControlBar: TsmxControlCellSetting read FControlBar write FControlBar;
@@ -492,17 +522,17 @@ uses
 
 { TsmxLocationParam }
 
-constructor TsmxLocationParam.Create(AKit: TsmxKit);
+{constructor TsmxLocationParam.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
-  FParamLocation := plInput;
+  FParamLocation := plInOutput;
   FParamName := '';
   FParamDefValue := Null;
-end;
+end;}
 
 { TsmxLocationParams }
 
-function TsmxLocationParams.Add: TsmxLocationParam;
+{function TsmxLocationParams.Add: TsmxLocationParam;
 begin
   Result := TsmxLocationParam(inherited Add);
 end;
@@ -523,21 +553,21 @@ end;
 function TsmxLocationParams.GetItem(Index: Integer): TsmxLocationParam;
 begin
   Result := TsmxLocationParam(inherited Items[Index]);
-end;
+end;}
 
 { TsmxRequestField }
 
-constructor TsmxRequestField.Create(AKit: TsmxKit);
+{constructor TsmxRequestField.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FFieldFormat := '';
   FFieldName := '';
   FFieldSense := fsGeneral;
-end;
+end;}
 
 { TsmxRequestFields }
 
-function TsmxRequestFields.Add: TsmxRequestField;
+{function TsmxRequestFields.Add: TsmxRequestField;
 begin
   Result := TsmxRequestField(inherited Add);
 end;
@@ -558,11 +588,11 @@ end;
 function TsmxRequestFields.GetItem(Index: Integer): TsmxRequestField;
 begin
   Result := TsmxRequestField(inherited Items[Index]);
-end;
+end;}
 
 { TsmxRequestCfg }
 
-destructor TsmxRequestCfg.Destroy;
+{destructor TsmxRequestCfg.Destroy;
 begin
   if Assigned(FRequestParams) then
     FRequestParams.Free;
@@ -576,8 +606,10 @@ begin
   FDataSetType := dstUnknown;
   FPerformanceMode := pmOpen;
   FSQLText := '';
-  RequestParams.Clear;
-  RequestFields.Clear;
+  if Assigned(FRequestParams) then
+    FRequestParams.Clear;
+  if Assigned(FRequestFields) then
+    FRequestFields.Clear;
 end;
 
 function TsmxRequestCfg.GetRequestFields: TsmxRequestFields;
@@ -596,8 +628,10 @@ end;
 
 procedure TsmxRequestCfg.ReadCfg;
 var
-  r, n: IXMLNode; i: Integer;
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -613,6 +647,7 @@ begin
   n := r.ChildNodes.FindNode('Params');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //RequestParams.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Param' then
         with RequestParams.Add do
@@ -626,6 +661,7 @@ begin
   n := r.ChildNodes.FindNode('Fields');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //RequestFields.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Field' then
         with RequestFields.Add do
@@ -668,7 +704,7 @@ begin
       Attributes['Format'] := RequestFields[i].FieldFormat;
       Attributes['Sense'] := RequestFields[i].FieldSense;
     end;
-end;
+end;}
 
 { TsmxColumnCfg }
 
@@ -707,6 +743,7 @@ procedure TsmxColumnCfg.ReadCfg;
 var
   r, n, n2, n3: IXMLNode;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -797,7 +834,7 @@ constructor TsmxVisibleUnit.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   FCfgID := 0;
-  FUnitAlign := alClient;
+  FUnitAlign := alNone;
   FUnitEnable := False;
   FUnitHeight := 0;
   FUnitLeft := 0;
@@ -829,10 +866,12 @@ end;
 
 procedure TsmxGridCfg.Clear;
 begin
-  GridColLines := False;
-  GridRowLines := False;
-  GridRowSelect := False;
-  GridColumns.Clear;
+  //GridColLines := False;
+  //GridRowLines := False;
+  //GridRowSelect := False;
+  FGridOptions := [];
+  if Assigned(FGridColumns) then
+    FGridColumns.Clear;
 end;
 
 function TsmxGridCfg.GetGridColumns: TsmxVisibleUnits;
@@ -844,8 +883,10 @@ end;
 
 procedure TsmxGridCfg.ReadCfg;
 var
-  r, n: IXMLNode; i: Integer;
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -853,14 +894,16 @@ begin
   n := r.ChildNodes.FindNode('Grid');
   if Assigned(n) then
   begin
-    GridColLines := n.Attributes['ColLines'];
-    GridRowLines := n.Attributes['RowLines'];
-    GridRowSelect := n.Attributes['RowSelect'];
+    //GridColLines := n.Attributes['ColLines'];
+    //GridRowLines := n.Attributes['RowLines'];
+    //GridRowSelect := n.Attributes['RowSelect'];
+    GridOptions := TsmxGridOptions(Byte(n.Attributes['GridOptions']));
   end;
 
   n := r.ChildNodes.FindNode('Columns');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //GridColumns.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Column' then
         with GridColumns.Add do
@@ -887,9 +930,10 @@ begin
     r := XMLDoc.AddChild('Root');
 
   n := r.AddChild('Grid');
-  n.Attributes['ColLines'] := GridColLines;
-  n.Attributes['RowLines'] := GridRowLines;
-  n.Attributes['RowSelect'] := GridRowSelect;
+  //n.Attributes['ColLines'] := GridColLines;
+  //n.Attributes['RowLines'] := GridRowLines;
+  //n.Attributes['RowSelect'] := GridRowSelect;
+  n.Attributes['GridOptions'] := Byte(GridOptions);
 
   n := r.AddChild('Columns');
   for i := 0 to GridColumns.Count - 1 do
@@ -897,11 +941,11 @@ begin
     begin
       Attributes['CfgID'] := GridColumns[i].CfgID;
       Attributes['Align'] := GridColumns[i].UnitAlign;
-      Attributes['Enable'] := GridColumns[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(GridColumns[i].UnitEnable, True);
       Attributes['Height'] := GridColumns[i].UnitHeight;
       Attributes['Left'] := GridColumns[i].UnitLeft;
       Attributes['Top'] := GridColumns[i].UnitTop;
-      Attributes['Visible'] := GridColumns[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(GridColumns[i].UnitVisible, True);
       Attributes['Width'] := GridColumns[i].UnitWidth;
     end;
 end;
@@ -916,7 +960,8 @@ begin
   FAlgImageIndex := -1;
   FAlgLibrary := '';
   FAlgProcedure := '';
-  AlgParams.Clear;
+  if Assigned(FAlgParams) then
+    FAlgParams.Clear;
 end;
 
 function TsmxLibAlgorithmCfg.GetAlgParams: TsmxLocationParams;
@@ -927,8 +972,11 @@ begin
 end;
 
 procedure TsmxLibAlgorithmCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -947,6 +995,7 @@ begin
   n := r.ChildNodes.FindNode('Params');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //AlgParams.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Param' then
         with AlgParams.Add do
@@ -1034,7 +1083,8 @@ end;
 
 procedure TsmxAlgorithmListCfg.Clear;
 begin
-  AlgorithmItems.Clear;
+  if Assigned(FAlgorithmItems) then
+    FAlgorithmItems.Clear;
 end;
 
 function TsmxAlgorithmListCfg.GetAlgorithmItems: TsmxAlgorithmItems;
@@ -1045,8 +1095,11 @@ begin
 end;
 
 procedure TsmxAlgorithmListCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1054,6 +1107,7 @@ begin
   n := r.ChildNodes.FindNode('Algorithms');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //AlgorithmItems.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
     begin
       if n.ChildNodes[i].NodeName = 'Algorithm' then
@@ -1087,8 +1141,8 @@ begin
       Attributes['CfgID'] := AlgorithmItems[i].CfgID;
       Attributes['MenuItemCfgID'] := AlgorithmItems[i].AlgorithmMenuItemCfgID;
       Attributes['ToolBarCfgID'] := AlgorithmItems[i].AlgorithmToolBarCfgID;
-      Attributes['Enable'] := AlgorithmItems[i].AlgorithmEnable;
-      Attributes['Visible'] := AlgorithmItems[i].AlgorithmVisible;
+      Attributes['Enable'] := BoolToStr(AlgorithmItems[i].AlgorithmEnable, True);
+      Attributes['Visible'] := BoolToStr(AlgorithmItems[i].AlgorithmVisible, True);
       Attributes['HotKey'] := AlgorithmItems[i].AlgorithmHotKey;
       Attributes['Caption'] := AlgorithmItems[i].AlgorithmCaption;
       Attributes['Hint'] := AlgorithmItems[i].AlgorithmHint;
@@ -1122,7 +1176,7 @@ begin
       Style := [];
     end;
   end;
-  with Algorithm do
+  with FAlgorithm do
   begin
     CfgID := 0;
     Caption := '';
@@ -1133,8 +1187,10 @@ begin
 end;
 
 procedure TsmxFilterCfg.ReadCfg;
-var r, n, n2: IXMLNode;
+var
+  r, n, n2: IXMLNode;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1228,9 +1284,9 @@ begin
   begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Caption'] := Caption;
-    n.Attributes['Enable'] := Enable;
+    n.Attributes['Enable'] := BoolToStr(Enable, True);
     n.Attributes['HotKey'] := HotKey;
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
   end;
 end;
 
@@ -1245,19 +1301,20 @@ end;
 
 procedure TsmxFilterDeskCfg.Clear;
 begin
-  with ApplyRequest do
+  with FApplyRequest do
   begin
     CfgID := 0;
     Operation := omManual;
     DatabaseName := '';
   end;
-  with PrepareRequest do
+  with FPrepareRequest do
   begin
     CfgID := 0;
     Operation := omManual;
     DatabaseName := '';
   end;
-  Filters.Clear;
+  if Assigned(FFilters) then
+    FFilters.Clear;
 end;
 
 function TsmxFilterDeskCfg.GetFilters: TsmxVisibleUnits;
@@ -1268,8 +1325,11 @@ begin
 end;
 
 procedure TsmxFilterDeskCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1295,6 +1355,7 @@ begin
   n := r.ChildNodes.FindNode('Filters');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //Filters.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Filter' then
         with Filters.Add do
@@ -1341,11 +1402,11 @@ begin
     begin
       Attributes['CfgID'] := Filters[i].CfgID;
       Attributes['Align'] := Filters[i].UnitAlign;
-      Attributes['Enable'] := Filters[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(Filters[i].UnitEnable, True);
       Attributes['Height'] := Filters[i].UnitHeight;
       Attributes['Left'] := Filters[i].UnitLeft;
       Attributes['Top'] := Filters[i].UnitTop;
-      Attributes['Visible'] := Filters[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(Filters[i].UnitVisible, True);
       Attributes['Width'] := Filters[i].UnitWidth;
     end;
 end;
@@ -1354,16 +1415,16 @@ end;
 
 procedure TsmxSectionCfg.Clear;
 begin
-  with Request do
+  with FRequest do
   begin
     CfgID := 0;
     Operation := omManual;
     DatabaseName := '';
   end;
-  with Grid do
+  with FGrid do
   begin
     CfgID := 0;
-    Align := alClient;
+    Align := alNone;
     Enable := False;
     Visible := False;
     with PositionSize do
@@ -1374,15 +1435,15 @@ begin
       Width := 0;
     end;
   end;
-  with FilterPanel do
+  with FFilterPanel do
   begin
     CfgID := 0;
-    Align := alTop;
+    Align := alNone;
     Enable := False;
     Visible := False;
     with PositionSize do
     begin
-      Height := 49;
+      Height := 0;
       Left := 0;
       Top := 0;
       Width := 0;
@@ -1391,8 +1452,10 @@ begin
 end;
 
 procedure TsmxSectionCfg.ReadCfg;
-var r, n: IXMLNode;
+var
+  r, n: IXMLNode;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1462,8 +1525,8 @@ begin
   begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Align'] := Align;
-    n.Attributes['Enable'] := Enable;
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Enable'] := BoolToStr(Enable, True);
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
     with PositionSize do
     begin
       n.Attributes['Height'] := Height;
@@ -1478,8 +1541,8 @@ begin
   begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Align'] := Align;
-    n.Attributes['Enable'] := Enable;
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Enable'] := BoolToStr(Enable, True);
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
     with PositionSize do
     begin
       n.Attributes['Height'] := Height;
@@ -1494,9 +1557,10 @@ end;
 
 procedure TsmxPageCfg.Clear;
 begin
-  PageCaption := '';
-  PageImageIndex := -1;
-  Sections.Clear;
+  FPageCaption := '';
+  FPageImageIndex := -1;
+  if Assigned(FSections) then
+    FSections.Clear;
 end;
 
 function TsmxPageCfg.GetSections: TsmxVisibleUnits;
@@ -1507,8 +1571,11 @@ begin
 end;
 
 procedure TsmxPageCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1523,6 +1590,7 @@ begin
   n := r.ChildNodes.FindNode('Sections');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //Sections.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Section' then
         with Sections.Add do
@@ -1557,11 +1625,11 @@ begin
     begin
       Attributes['CfgID'] := Sections[i].CfgID;
       Attributes['Align'] := Sections[i].UnitAlign;
-      Attributes['Enable'] := Sections[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(Sections[i].UnitEnable, True);
       Attributes['Height'] := Sections[i].UnitHeight;
       Attributes['Left'] := Sections[i].UnitLeft;
       Attributes['Top'] := Sections[i].UnitTop;
-      Attributes['Visible'] := Sections[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(Sections[i].UnitVisible, True);
       Attributes['Width'] := Sections[i].UnitWidth;
     end;
 end;
@@ -1577,7 +1645,8 @@ end;
 
 procedure TsmxPageManagerCfg.Clear;
 begin
-  Sheets.Clear;
+  if Assigned(FSheets) then
+    FSheets.Clear;
 end;
 
 function TsmxPageManagerCfg.GetSheets: TsmxVisibleUnits;
@@ -1588,8 +1657,11 @@ begin
 end;
 
 procedure TsmxPageManagerCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1597,6 +1669,7 @@ begin
   n := r.ChildNodes.FindNode('Pages');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //Sheets.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Page' then
         with Sheets.Add do
@@ -1627,26 +1700,28 @@ begin
     begin
       Attributes['CfgID'] := Sheets[i].CfgID;
       Attributes['Align'] := Sheets[i].UnitAlign;
-      Attributes['Enable'] := Sheets[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(Sheets[i].UnitEnable, True);
       Attributes['Height'] := Sheets[i].UnitHeight;
       Attributes['Left'] := Sheets[i].UnitLeft;
       Attributes['Top'] := Sheets[i].UnitTop;
-      Attributes['Visible'] := Sheets[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(Sheets[i].UnitVisible, True);
       Attributes['Width'] := Sheets[i].UnitWidth;
     end;
 end;
 
-{ TsmxMenuPointCfg }
+{ TsmxMenuItemCfg }
 
-procedure TsmxMenuPointCfg.Clear;
+procedure TsmxMenuItemCfg.Clear;
 begin
   FItemCaption := '';
   FItemImageIndex := -1;
 end;
 
-procedure TsmxMenuPointCfg.ReadCfg;
-var r, n: IXMLNode;
+procedure TsmxMenuItemCfg.ReadCfg;
+var
+  r, n: IXMLNode;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1659,7 +1734,7 @@ begin
   end; 
 end;
 
-procedure TsmxMenuPointCfg.WriteCfg;
+procedure TsmxMenuItemCfg.WriteCfg;
 var r, n: IXMLNode;
 begin
   r := XMLDoc.ChildNodes.FindNode('Root');
@@ -1737,31 +1812,34 @@ begin
   Result := TsmxHVisibleUnit(inherited Root);
 end;
 
-{ TsmxMasterMenuCfg }
+{ TsmxMainMenuCfg }
 
-destructor TsmxMasterMenuCfg.Destroy;
+destructor TsmxMainMenuCfg.Destroy;
 begin
   if Assigned(FMenuUnits) then
     FMenuUnits.Free;
   inherited Destroy;
 end;
 
-procedure TsmxMasterMenuCfg.Clear;
+procedure TsmxMainMenuCfg.Clear;
 begin
-  MenuUnits.Root.Clear;
+  if Assigned(FMenuUnits) then
+    FMenuUnits.Root.Clear;
 end;
 
-function TsmxMasterMenuCfg.GetMenuUnits: TsmxHVisibleUnits;
+function TsmxMainMenuCfg.GetMenuUnits: TsmxHVisibleUnits;
 begin
   if not Assigned(FMenuUnits) then
     FMenuUnits := TsmxHVisibleUnits.Create(TsmxHVisibleUnit);
   Result := FMenuUnits;
 end;
 
-procedure TsmxMasterMenuCfg.ReadCfg;
+procedure TsmxMainMenuCfg.ReadCfg;
 
   procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxHVisibleUnit);
-  var i: Integer; u: TsmxHVisibleUnit;
+  var
+    i: Integer;
+    u: TsmxHVisibleUnit;
   begin
     u := AUnit.Add;
     with u do
@@ -1780,8 +1858,11 @@ procedure TsmxMasterMenuCfg.ReadCfg;
         AddUnits(ANode.ChildNodes[i], u);
   end;
 
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1789,13 +1870,14 @@ begin
   n := r.ChildNodes.FindNode('MenuItems');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //MenuUnits.Root.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'MenuItem' then
         AddUnits(n.ChildNodes[i], MenuUnits.Root);
   end; 
 end;
 
-procedure TsmxMasterMenuCfg.WriteCfg;
+procedure TsmxMainMenuCfg.WriteCfg;
 
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxHVisibleUnit);
   var i: Integer; n: IXMLNode;
@@ -1805,11 +1887,11 @@ procedure TsmxMasterMenuCfg.WriteCfg;
     begin
       Attributes['CfgID'] := AUnit.CfgID;
       Attributes['Align'] := AUnit.UnitAlign;
-      Attributes['Enable'] := AUnit.UnitEnable;
+      Attributes['Enable'] := BoolToStr(AUnit.UnitEnable, True);
       Attributes['Height'] := AUnit.UnitHeight;
       Attributes['Left'] := AUnit.UnitLeft;
       Attributes['Top'] := AUnit.UnitTop;
-      Attributes['Visible'] := AUnit.UnitVisible;
+      Attributes['Visible'] := BoolToStr(AUnit.UnitVisible, True);
       Attributes['Width'] := AUnit.UnitWidth;
     end;
     for i := 0 to AUnit.Count - 1 do
@@ -1838,8 +1920,10 @@ begin
 end;
 
 procedure TsmxToolBoardCfg.ReadCfg;
-var r, n: IXMLNode;
+var
+  r, n: IXMLNode;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1862,16 +1946,17 @@ begin
     r := XMLDoc.AddChild('Root');
 
   n := r.AddChild('ToolBar');
-  n.Attributes['Flat'] := BarFlat;
-  n.Attributes['ShowCaptions'] := BarShowCaptions;
-  n.Attributes['ShowHint'] := BarShowHint;
+  n.Attributes['Flat'] := BoolToStr(BarFlat, True);
+  n.Attributes['ShowCaptions'] := BoolToStr(BarShowCaptions, True);
+  n.Attributes['ShowHint'] := BoolToStr(BarShowHint, True);
 end;
 
 { TsmxControlBoardCfg }
 
 procedure TsmxControlBoardCfg.Clear;
 begin
-  BarUnits.Clear;
+  if Assigned(FBarUnits) then
+    FBarUnits.Clear;
 end;
 
 function TsmxControlBoardCfg.GetBarUnits: TsmxVisibleUnits;
@@ -1882,8 +1967,11 @@ begin
 end;
 
 procedure TsmxControlBoardCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -1891,6 +1979,7 @@ begin
   n := r.ChildNodes.FindNode('Bars');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //BarUnits.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Bar' then
         with BarUnits.Add do
@@ -1921,11 +2010,11 @@ begin
     begin
       Attributes['CfgID'] := BarUnits[i].CfgID;
       Attributes['Align'] := BarUnits[i].UnitAlign;
-      Attributes['Enable'] := BarUnits[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(BarUnits[i].UnitEnable, True);
       Attributes['Height'] := BarUnits[i].UnitHeight;
       Attributes['Left'] := BarUnits[i].UnitLeft;
       Attributes['Top'] := BarUnits[i].UnitTop;
-      Attributes['Visible'] := BarUnits[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(BarUnits[i].UnitVisible, True);
       Attributes['Width'] := BarUnits[i].UnitWidth;
     end;
 end;
@@ -1941,70 +2030,71 @@ end;
 
 procedure TsmxFormCfg.Clear;
 begin
-  FormCaption := '';
-  FormImageIndex := -1;
-  with FormPositionSize do
+  FFormCaption := '';
+  FFormImageIndex := -1;
+  with FFormPositionSize do
   begin
     Height := 480;
     Left := 150;
     Top := 100;
     Width := 640;
   end;
-  with AlgorithmList do
+  with FAlgorithmList do
   begin
     CfgID := 0;
     IsCreateMenuItem := False;
     IsCreateToolButton := False;
   end;
-  with ControlBar do
+  with FControlBar do
   begin
     CfgID := 0;
-    Align := alTop;
+    Align := alNone;
     Enable := False;
     Visible := False;
     with PositionSize do
     begin
-      Height := 28;
+      Height := 0;
       Left := 0;
       Top := 0;
       Width := 0;
     end;
   end;
-  with MainMenu do
+  with FMainMenu do
   begin
     CfgID := 0;
-    Align := alTop;
+    Align := alNone;
     Enable := False;
     Visible := False;
     with PositionSize do
     begin
-      Height := 21;
+      Height := 0;
       Left := 0;
       Top := 0;
       Width := 0;
     end;
   end;
-  with StateRequest do
+  with FStateRequest do
   begin
     CfgID := 0;
     Operation := omManual;
     DatabaseName := '';
   end;
-  with StatusBar do
+  with FStatusBar do
   begin
     CfgID := 0;
-    Align := alBottom;
+    Align := alNone;
     Enable := False;
     Visible := False;
     with PositionSize do
     begin
-      Height := 19;
+      Height := 0;
       Left := 0;
       Top := 0;
       Width := 0;
     end;
   end;
-  PageManagers.Clear;
+  if Assigned(FPageManagers) then
+    FPageManagers.Clear;
 end;
 
 function TsmxFormCfg.GetPageManagers: TsmxVisibleUnits;
@@ -2015,8 +2105,11 @@ begin
 end;
 
 procedure TsmxFormCfg.ReadCfg;
-var r, n: IXMLNode; i: Integer;
+var
+  r, n: IXMLNode;
+  i: Integer;
 begin
+  Clear;
   r := XMLDoc.ChildNodes.FindNode('Root');
   if not Assigned(r) then
     Exit;
@@ -2038,6 +2131,7 @@ begin
   n := r.ChildNodes.FindNode('PageManagers');
   if Assigned(n) and (n.ChildNodes.Count > 0) then
   begin
+    //PageManagers.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'PageManager' then
         with PageManagers.Add do
@@ -2148,11 +2242,11 @@ begin
     begin
       Attributes['CfgID'] := PageManagers[i].CfgID;
       Attributes['Align'] := PageManagers[i].UnitAlign;
-      Attributes['Enable'] := PageManagers[i].UnitEnable;
+      Attributes['Enable'] := BoolToStr(PageManagers[i].UnitEnable, True);
       Attributes['Height'] := PageManagers[i].UnitHeight;
       Attributes['Left'] := PageManagers[i].UnitLeft;
       Attributes['Top'] := PageManagers[i].UnitTop;
-      Attributes['Visible'] := PageManagers[i].UnitVisible;
+      Attributes['Visible'] := BoolToStr(PageManagers[i].UnitVisible, True);
       Attributes['Width'] := PageManagers[i].UnitWidth;
     end;
 
@@ -2162,7 +2256,7 @@ begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Align'] := Align;
     n.Attributes['Enable'] := BoolToStr(Enable, True);
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
     with PositionSize do
     begin
       n.Attributes['Height'] := Height;
@@ -2176,8 +2270,8 @@ begin
   with AlgorithmList do
   begin
     n.Attributes['CfgID'] := CfgID;
-    n.Attributes['IsCreateMenuItem'] := IsCreateMenuItem;
-    n.Attributes['IsCreateToolButton'] := IsCreateToolButton;
+    n.Attributes['IsCreateMenuItem'] := BoolToStr(IsCreateMenuItem, True);
+    n.Attributes['IsCreateToolButton'] := BoolToStr(IsCreateToolButton, True);
   end;
 
   n := r.AddChild('ControlBar');
@@ -2185,8 +2279,8 @@ begin
   begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Align'] := Align;
-    n.Attributes['Enable'] := Enable;
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Enable'] := BoolToStr(Enable, True);
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
     with PositionSize do
     begin
       n.Attributes['Height'] := Height;
@@ -2209,8 +2303,8 @@ begin
   begin
     n.Attributes['CfgID'] := CfgID;
     n.Attributes['Align'] := Align;
-    n.Attributes['Enable'] := Enable;
-    n.Attributes['Visible'] := Visible;
+    n.Attributes['Enable'] := BoolToStr(Enable, True);
+    n.Attributes['Visible'] := BoolToStr(Visible, True);
     with PositionSize do
     begin
       n.Attributes['Height'] := Height;
@@ -2222,15 +2316,15 @@ begin
 end;
 
 initialization
-  RegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
+  RegisterClasses([{TsmxRequestCfg,} TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
     TsmxAlgorithmListCfg,TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg,
-    TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuPointCfg, TsmxMasterMenuCfg,
+    TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuItemCfg, TsmxMainMenuCfg,
     TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
 
 finalization
-  UnRegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
+  UnRegisterClasses([{TsmxRequestCfg,} TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
     TsmxAlgorithmListCfg,TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg,
-    TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuPointCfg, TsmxMasterMenuCfg,
+    TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuItemCfg, TsmxMainMenuCfg,
     TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
 
 end.

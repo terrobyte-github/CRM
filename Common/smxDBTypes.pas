@@ -8,6 +8,10 @@ uses
 type
   TsmxFuncNewDatabase = function: IsmxDatabase;
 
+  TsmxParamsArray = array of IsmxParam;
+
+  TsmxFieldsArray = array of IsmxField;
+
 implementation
 
 end.

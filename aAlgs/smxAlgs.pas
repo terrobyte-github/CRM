@@ -27,19 +27,61 @@ implementation
 
 uses
   Windows, Controls, Variants, smxClassFuncs, smxLibFuncs, smxConsts, smxDBIntf,
-  smxTypes;
+  smxTypes, smxClassProcs, smxFuncs;
+
+function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
+var
+  res: Integer;
+  msg: String;
+begin
+  Result := False;
+  if not Assigned(ARequest) then
+    Exit;
+  if not Assigned(ARequest.Database) or not Assigned(ARequest.CellDataSet) then
+    Exit;
+  with ARequest do
+  begin
+    if not Database.InTransaction then
+      Database.StartTransaction;
+    try
+      res := 1; msg := '';
+      Perform;//(ASame);
+      case CellDataSet.DataSetType of
+        dstQuery:
+        begin
+          res := GetFieldSenseValueDef(ARequest, fsResult, 1);
+          msg := GetFieldSenseValueDef(ARequest, fsMessage, '');
+        end;
+        dstStoredProc:
+        begin
+          res := GetParamLocationValueDef(ARequest, plResult, 1);
+          msg := GetParamLocationValueDef(ARequest, plMessage, '');
+        end;
+      end;
+      if res = 0 then
+        Database.CommitTransaction else
+        Database.RollbackTransaction;
+      if msg <> '' then
+        Inf(msg);
+      Result := res = 0;
+    except
+      Database.RollbackTransaction;
+    end;
+  end;
+end;
 
 procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
   c: TsmxBaseCell; f: TsmxCustomForm;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, 'FormID', 0);
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, 'FormID', 0);
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
     finally
       ap.Free;
     end;
@@ -79,12 +121,13 @@ var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
   c: TsmxBaseCell; f: TsmxCustomForm;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, '@EventID', 0);
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, '@EventID', 0);
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
     finally
       ap.Free;
     end;
@@ -124,12 +167,13 @@ var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
   c: TsmxBaseCell; f: TsmxCustomForm;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, '@ProblemID', 0);
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, '@ProblemID', 0);
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
     finally
       ap.Free;
     end;
@@ -215,12 +259,13 @@ var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
   f: TsmxCustomForm;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, 'FormID', 0);
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, 'FormID', 0);
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
     finally
       ap.Free;
     end;
@@ -277,12 +322,13 @@ var CfgDBName, RequestDBName: String; RequestCfgID: Integer; FormRefresh: Boolea
   ap: TsmxParams; c, r: TsmxBaseCell;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      RequestCfgID := ParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := ParamValueDef(ap, 'RequestDBName', '');
-      FormRefresh := ParamValueDef(ap, 'FormRefresh', False);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
+      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
+      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
     finally
       ap.Free;
     end;
@@ -322,15 +368,16 @@ var CfgDBName, RequestDBName: String; FormCfgID, FormID, RequestCfgID, IntfID: I
   r2: TsmxCustomRequest; fld: IsmxField; prm: TsmxParam;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, 'FormID', 0);
-      RequestCfgID := ParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := ParamValueDef(ap, 'RequestDBName', '');
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
-      FormRefresh := ParamValueDef(ap, 'FormRefresh', False);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, 'FormID', 0);
+      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
+      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
+      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
     finally
       ap.Free;
     end;
@@ -400,15 +447,16 @@ var CfgDBName, RequestDBName: String; FormCfgID, FormID, RequestCfgID, IntfID: I
   r2: TsmxCustomRequest; fld: IsmxField; prm: IsmxParam;
 begin
   try
-    ap := VarToParams(Params);
+    ap := TsmxParams.Create(TsmxParam);
+    smxClassProcs.VarToParams(Params, ap);
     try
-      CfgDBName := ParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := ParamValueDef(ap, 'FormCfgID', 0);
-      FormID := ParamValueDef(ap, 'FormID', 0);
-      RequestCfgID := ParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := ParamValueDef(ap, 'RequestDBName', '');
-      IntfID := ParamValueDef(ap, 'IntfID', 0);
-      FormRefresh := ParamValueDef(ap, 'FormRefresh', False);
+      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
+      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
+      FormID := GetParamValueDef(ap, 'FormID', 0);
+      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
+      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
+      IntfID := GetParamValueDef(ap, 'IntfID', 0);
+      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
     finally
       ap.Free;
     end;

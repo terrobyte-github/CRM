@@ -48,8 +48,8 @@ type
     FLibList: TsmxLibItems;
     FProgVersMajor: Word;
     FProgVersMinor: Word;
-    FLibPath: String;
-    FProcLibInfoName: String;
+    //FLibPath: String;
+    //FProcLibInfoName: String;
     function GetLibrary(Index: Integer): THandle;
     function GetLibraryCount: Integer;
     procedure DestroyLibs;
@@ -76,8 +76,8 @@ type
 
     property LibraryCount: Integer read GetLibraryCount;
     property Libraries[Index: Integer]: THandle read GetLibrary; default;
-    property LibPath: String read FLibPath write FLibPath;
-    property ProcLibInfoName: String read FProcLibInfoName write FProcLibInfoName;
+    //property LibPath: String read FLibPath write FLibPath;
+    //property ProcLibInfoName: String read FProcLibInfoName write FProcLibInfoName;
   end;
 
 function LibManager: TsmxLibraryManager;
@@ -301,13 +301,17 @@ end;
 function TsmxLibraryManager.CheckLibraryComp(ALibHandle: THandle): Boolean;
 var li: TsmxLibInfo;
 begin
-  Result := False;
-  if ALibHandle > 0 then
-    if GetLibraryInfo(ALibHandle, li) then
-      if (li.CompProgVers.Major > FProgVersMajor)
-          or ((li.CompProgVers.Major = FProgVersMajor)
-            and (li.CompProgVers.Minor >= FProgVersMinor)) then
-        Result := True;
+  if CheckComp then
+  begin
+    Result := False;
+    if ALibHandle > 0 then
+      if GetLibraryInfo(ALibHandle, li) then
+        if (li.CompProgVers.Major > FProgVersMajor)
+            or ((li.CompProgVers.Major = FProgVersMajor)
+              and (li.CompProgVers.Minor >= FProgVersMinor)) then
+          Result := True;
+  end else
+    Result := True;
 end;
 
 function TsmxLibraryManager.CheckLibraryComp(ALibName: String): Boolean;
@@ -327,7 +331,7 @@ end;
 
 function TsmxLibraryManager.GetLibHandle(ALibName: String): THandle;
 begin
-  Result := LoadLibrary(PChar(FLibPath + ALibName));
+  Result := LoadLibrary(PChar(LibPath + ALibName));
   if Result <= HINSTANCE_ERROR then
     Result := 0;
 end;

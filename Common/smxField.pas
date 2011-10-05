@@ -3,7 +3,7 @@ unit smxField;
 interface
 
 uses
-  Classes, DB, smxBaseClasses, smxDBIntf;
+  Classes, DB, smxBaseClasses, smxDBIntf, smxTypes;
 
 type
   { TsmxField }
@@ -22,6 +22,7 @@ type
     function GetFieldNo: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
+    function GetFieldSense: TsmxFieldSense;
     function GetVersion: String; override;
     procedure SetCalculated(Value: Boolean);
     procedure SetDefaultExpression(Value: String);
@@ -29,12 +30,14 @@ type
     procedure SetFieldKind(Value: TsmxFieldKind);
     procedure SetFieldName(Value: String);
     procedure SetValue(Value: Variant);
+    procedure SetFieldSense(Value: TsmxFieldSense);
   public
     constructor Create(AField: TField);
     destructor Destroy; override;
     //procedure AssignField(Source: TObject);
     procedure AssignField(const Source: IsmxField);
-    function CreateStream: TStream;
+    //function CreateStream: TStream;
+    procedure SaveToStream(Stream: TStream);
 
     property Calculated: Boolean read GetCalculated write SetCalculated;
     property DataType: TsmxDataType read GetDataType;
@@ -46,6 +49,7 @@ type
     property FieldNo: Integer read GetFieldNo;
     property Size: Integer read GetSize;
     property Value: Variant read GetValue write SetValue;
+    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
   end;
 
 implementation
@@ -84,9 +88,21 @@ begin
     raise EsmxDBInterfaceError.CreateRes(@SDBIntfFieldInvalid);
 end;
 
-function TsmxField.CreateStream: TStream;
+{function TsmxField.CreateStream: TStream;
 begin
   Result := FField.DataSet.CreateBlobStream(FField, bmRead);
+end;}
+
+procedure TsmxField.SaveToStream(Stream: TStream);
+var
+  s: TStream;
+begin
+  s := FField.DataSet.CreateBlobStream(FField, bmRead);
+  try
+    Stream.CopyFrom(s, 0);
+  finally
+    s.Free;
+  end;
 end;
 
 function TsmxField.GetCalculated: Boolean;
@@ -187,6 +203,15 @@ end;
 procedure TsmxField.SetValue(Value: Variant);
 begin
   FField.Value := Value;
+end;
+
+function TsmxField.GetFieldSense: TsmxFieldSense;
+begin
+  Result := fsGeneral;
+end;
+
+procedure TsmxField.SetFieldSense(Value: TsmxFieldSense);
+begin  
 end;
 
 end.

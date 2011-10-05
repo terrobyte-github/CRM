@@ -19,7 +19,9 @@ uses
 type
   { TsmxBaseCfg }
 
-  TsmxTargetRequest = class;
+  //TsmxTargetRequest = class;
+  //TsmxCustomRequest = class;
+  TsmxRequestCfg = class;
 
   EsmxCfgError = class(Exception);
 
@@ -27,28 +29,42 @@ type
   private
     FCfgDatabaseIntf: IsmxDatabase;
     FCfgID: Integer;
-    FTargetRequest: TsmxTargetRequest;
+    //FTargetRequest: TsmxTargetRequest;
+    //FRequest: TsmxCustomRequest;
     FXMLDocIntf: IXMLDocument;
+    //FModifySetting: TsmxModifySetting;
+    FSelectRequestCfg: TsmxRequestCfg;
+    //function CfgIDToDataSet(ACfgID: Integer): IsmxDataSet;
+    function GetRequest(ARequestCfg: TsmxRequestCfg): IsmxDataSet;
+    function GetRequestCfg(ACfgID: Integer): TsmxRequestCfg;
   protected
+    function GetXMLText: String; virtual;
+    procedure SetXMLText(Value: String); virtual;
+    procedure SetCfgDatabase(const Value: IsmxDatabase); virtual;
+    procedure SetCfgID(Value: Integer); virtual;
+    //procedure SetModifySetting(Value: TsmxModifySetting); virtual;
+    procedure SetSelectRequestCfg(Value: TsmxRequestCfg); virtual;
+
+    //property TargetRequest: TsmxTargetRequest read FTargetRequest;
+    //property Request: TsmxCustomRequest read FRequest;
+    property XMLDoc: IXMLDocument read FXMLDocIntf;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); reintroduce; virtual;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure Clear; virtual;
+    //procedure Finalize; virtual;
+    //procedure Initialize; virtual;
     procedure LoadCfg; virtual;
     procedure ReadCfg; virtual;
     procedure SaveCfg; virtual;
     procedure WriteCfg; virtual;
-    function GetXMLText: String; virtual;
-    procedure SetXMLText(Value: String); virtual;
 
-    property TargetRequest: TsmxTargetRequest read FTargetRequest;
-    property XMLDoc: IXMLDocument read FXMLDocIntf;
+    property CfgDatabase: IsmxDatabase read FCfgDatabaseIntf write SetCfgDatabase;
+    property CfgID: Integer read FCfgID write SetCfgID;
+    //property ModifySetting: TsmxModifySetting read FModifySetting write SetModifySetting;
+    property SelectRequestCfg: TsmxRequestCfg read FSelectRequestCfg write SetSelectRequestCfg;
     property XMLText: String read GetXMLText write SetXMLText;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); reintroduce; virtual;
-    destructor Destroy; override;
-    procedure Clear; virtual;
-    procedure Finalize;
-    procedure Initialize;
-
-    property CfgDatabase: IsmxDatabase read FCfgDatabaseIntf;
-    property CfgID: Integer read FCfgID;
   end;
 
   TsmxBaseCfgClass = class of TsmxBaseCfg;
@@ -63,12 +79,24 @@ type
   { TsmxCustomLibraryManager }
 
   TsmxCustomLibraryManager = class(TsmxComponent)
+  private
+    FLibPath: String;
+    FProcLibInfoName: String;
+    FCheckComp: Boolean;
+  protected
+    procedure SetLibPath(Value: String); virtual;
+    procedure SetProcLibInfoName(Value: String); virtual;
+    procedure SetCheckComp(Value: Boolean); virtual;
   public
     function GetProcedure(ALibHandle: THandle; AProcName: String): Pointer; overload; virtual;
     function GetProcedure(ALibName, AProcName: String): Pointer; overload; virtual;
     function CheckLibraryComp(ALibHandle: THandle): Boolean; overload; virtual;
     function CheckLibraryComp(ALibName: String): Boolean; overload; virtual;
     function CallLibrary(ALibName: String): THandle; virtual;
+
+    property CheckComp: Boolean read FCheckComp write SetCheckComp;
+    property LibPath: String read FLibPath write SetLibPath;
+    property ProcLibInfoName: String read FProcLibInfoName write SetProcLibInfoName;
   end;
 
   { TsmxCustomDatabaseManager }
@@ -109,7 +137,7 @@ type
     FParentCell: TsmxBaseCell;
     FCommonStorage: TsmxCustomCommonStorage;
     FLibraryManager: TsmxCustomLibraryManager;
-    FDatabaseManager: TsmxCustomDatabaseManager;
+    //FDatabaseManager: TsmxCustomDatabaseManager;
     function GetCellCount: Integer;
     function GetCell(Index: Integer): TsmxBaseCell;
     function GetRootCell: TsmxBaseCell;
@@ -126,7 +154,6 @@ type
     procedure UnInitialize; virtual;
     procedure SetCommonStorage(Value: TsmxCustomCommonStorage); virtual;
     procedure SetLibraryManager(Value: TsmxCustomLibraryManager); virtual;
-    procedure SetDatabaseManager(Value: TsmxCustomDatabaseManager); virtual;
 
     property Cfg: TsmxBaseCfg read FCfg;
     property CellList: TList read FCellList;
@@ -144,7 +171,6 @@ type
     property RootCell: TsmxBaseCell read GetRootCell;
     property CommonStorage: TsmxCustomCommonStorage read FCommonStorage write SetCommonStorage;
     property LibraryManager: TsmxCustomLibraryManager read FLibraryManager write SetLibraryManager;
-    property DatabaseManager: TsmxCustomDatabaseManager read FDatabaseManager write SetDatabaseManager;
   end;
 
   TsmxBaseCellClass = class of TsmxBaseCell;
@@ -152,7 +178,8 @@ type
   { TsmxCellCfg }
 
   TsmxCellCfg = class(TsmxBaseCfg)
-  protected
+  //protected
+  public
     procedure LoadCfg; override;
     procedure SaveCfg; override;
   end;
@@ -169,13 +196,15 @@ type
     procedure SetCfgClassName(Value: String);
     procedure SetCellClass(Value: TsmxBaseCellClass);
     procedure SetCellClassName(Value: String);
-  protected
-    procedure LoadCfg; override;
-    procedure ReadCfg; override;
-    procedure SaveCfg; override;
-    procedure WriteCfg; override;
+  //protected
+    //procedure LoadCfg; override;
+    //procedure ReadCfg; override;
+    //procedure SaveCfg; override;
+    //procedure WriteCfg; override;
   public
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property CfgClass: TsmxBaseCfgClass read FCfgClass write SetCfgClass;
     property CfgClassName: String read FCfgClassName write SetCfgClassName;
@@ -405,13 +434,13 @@ type
 
   TsmxCellState = class(TsmxKitItem)
   private
-    FID: Integer;
+    FStateID: Integer;
     FStateUnits: TsmxStateUnits;
   public
     constructor Create(AKit: TsmxKit); override;
     destructor Destroy; override;
 
-    property ID: Integer read FID write FID;
+    property StateID: Integer read FStateID write FStateID;
     property StateUnits: TsmxStateUnits read FStateUnits;
   end;
 
@@ -422,7 +451,7 @@ type
     function GetItem(Index: Integer): TsmxCellState;
   public
     function Add: TsmxCellState;
-    function FindByID(AID: Integer): TsmxCellState;
+    function FindByStateID(AStateID: Integer): TsmxCellState;
 
     property Items[Index: Integer]: TsmxCellState read GetItem; default;
   end;
@@ -462,26 +491,30 @@ type
     FCellStates: TsmxCellStates;
     function GetCellStates: TsmxCellStates;
   protected
-    procedure LoadCfg; override;
-    procedure ReadCfg; override;
-    procedure SaveCfg; override;
-    procedure WriteCfg; override;
+    //procedure LoadCfg; override;
+    //procedure ReadCfg; override;
+    //procedure SaveCfg; override;
+    //procedure WriteCfg; override;
     function GetXMLText: String; override;
     procedure SetXMLText(Value: String); override;
     function GetFullXMLText: String; virtual;
+    procedure SetIntfID(Value: Integer); virtual;
 
     property XMLDocList: TsmxXMLDocItems read FXMLDocList;
     property FullXMLText: String read GetFullXMLText;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+    {constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
       ACfgID: Integer); override;
     constructor CreateByIntfID(AOwner: TComponent; const ADatabase: IsmxDatabase;
-      ACfgID: Integer; AIntfID: Integer); virtual;
+      ACfgID: Integer; AIntfID: Integer); virtual;}
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
     property CellStates: TsmxCellStates read GetCellStates;
-    property IntfID: Integer read FIntfID default 0;
+    property IntfID: Integer read FIntfID write SetIntfID;
   end;
 
   TsmxStateCfgClass = class of TsmxStateCfg;
@@ -592,24 +625,30 @@ type
     FDatabaseName: String;
     FDatabaseIntf: IsmxDatabase;
     FOperationMode: TsmxOperationMode;
+    FDatabaseManager: TsmxCustomDatabaseManager;
   protected
-    FDataSetIntf: IsmxDataSet;
+    //FDataSetIntf: IsmxDataSet;
     //function GetInternalObject: TObject; override;
+    function GetDatabase: IsmxDatabase; virtual;
     procedure SetDatabaseName(Value: String); virtual;
     procedure SetDatabase(const Value: IsmxDatabase); virtual;
-    procedure SetDatabaseManager(Value: TsmxCustomDatabaseManager); override;
+    procedure SetDatabaseManager(Value: TsmxCustomDatabaseManager); virtual;
+    function GetDataSet: IsmxDataSet; virtual;
+
+    //property CellDataSet: IsmxDataSet read GetDataSet;
   public
     destructor Destroy; override;
     function FindFieldSense(AFieldSense: TsmxFieldSense; StartPos: Integer = 0): IsmxField; virtual;
     function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): IsmxParam; virtual;
-    procedure Perform(Same: Boolean = False); virtual;
+    procedure Perform; virtual;
     procedure RefreshParams; virtual;
-    procedure Prepare(Forcibly: Boolean = False); virtual;
+    procedure Prepare; virtual;
 
-    property CellDataSet: IsmxDataSet read FDataSetIntf;
+    property CellDataSet: IsmxDataSet read GetDataSet; //FDataSetIntf;
     property DatabaseName: String read FDatabaseName write SetDatabaseName;
-    property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
+    property Database: IsmxDatabase read GetDatabase write SetDatabase;
     property OperationMode: TsmxOperationMode read FOperationMode write FOperationMode default omManual;
+    property DatabaseManager: TsmxCustomDatabaseManager read FDatabaseManager write SetDatabaseManager;
   end;
 
   { TsmxCustomColumn }
@@ -994,15 +1033,99 @@ type
     property Form: TForm read FForm write SetForm;
   end;
 
+  { TsmxLocationParam }
+
+  TsmxLocationParam = class(TsmxKitItem)
+  private
+    FParamLocation: TsmxParamLocation;
+    FParamName: String;
+    FParamDefValue: Variant;
+  public
+    constructor Create(AKit: TsmxKit); override;
+
+    property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
+    property ParamName: String read FParamName write FParamName;
+    property ParamDefValue: Variant read FParamDefValue write FParamDefValue;
+  end;
+
+  { TsmxLocationParams }
+
+  TsmxLocationParams = class(TsmxKit)
+  private
+    function GetItem(Index: Integer): TsmxLocationParam;
+  public
+    function Add: TsmxLocationParam;
+    function FindByName(AParamName: String): TsmxLocationParam;
+
+    property Items[Index: Integer]: TsmxLocationParam read GetItem; default;
+  end;
+
+  { TsmxRequestField }
+
+  TsmxRequestField = class(TsmxKitItem)
+  private
+    FFieldFormat: String;
+    FFieldName: String;
+    FFieldSense: TsmxFieldSense;
+  public
+    constructor Create(AKit: TsmxKit); override;
+
+    property FieldFormat: String read FFieldFormat write FFieldFormat;
+    property FieldName: String read FFieldName write FFieldName;
+    property FieldSense: TsmxFieldSense read FFieldSense write FFieldSense;
+  end;
+
+  { TsmxRequestFields }
+
+  TsmxRequestFields = class(TsmxKit)
+  private
+    function GetItem(Index: Integer): TsmxRequestField;
+  public
+    function Add: TsmxRequestField;
+    function FindByName(AFieldName: String): TsmxRequestField;
+
+    property Items[Index: Integer]: TsmxRequestField read GetItem; default;
+  end;
+
+  { TsmxRequestCfg }
+
+  TsmxRequestCfg = class(TsmxCellCfg)
+  private
+    FDataSetType: TsmxDataSetType;
+    FPerformanceMode: TsmxPerformanceMode;
+    FRequestFields: TsmxRequestFields;
+    FRequestParams: TsmxLocationParams;
+    FSQLText: String;
+    FModifySetting: TsmxModifySetting;
+    function GetRequestFields: TsmxRequestFields;
+    function GetRequestParams: TsmxLocationParams;
+  protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
+    procedure SetModifySetting(Value: TsmxModifySetting); virtual;
+  public
+    destructor Destroy; override;
+    procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
+
+    property DataSetType: TsmxDataSetType read FDataSetType write FDataSetType;
+    property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write FPerformanceMode;
+    property RequestFields: TsmxRequestFields read GetRequestFields;
+    property RequestParams: TsmxLocationParams read GetRequestParams;
+    property SQLText: String read FSQLText write FSQLText;
+    property ModifySetting: TsmxModifySetting read FModifySetting write SetModifySetting;
+  end;
+
 implementation
 
 uses
   DB, Variants, ComObj, StrUtils{, XMLDoc}, smxFuncs, smxClassFuncs, smxDBTypes,
-  smxConsts;
+  smxConsts, smxProcs, smxDBFuncs;
 
 { TsmxBaseCfg }
 
-constructor TsmxBaseCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+{constructor TsmxBaseCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer);
 begin
   inherited Create(AOwner);
@@ -1011,11 +1134,21 @@ begin
   FTargetRequest := TsmxTargetRequest.Create(Self);
   FTargetRequest.Database := FCfgDatabaseIntf;
   FXMLDocIntf := NewXML; //NewXMLDocument;
+end;}
+
+constructor TsmxBaseCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  //FCfgDatabaseIntf := ADatabase;
+  //FCfgID := ACfgID;
+  //FTargetRequest := TsmxTargetRequest.Create(Self);
+  //FTargetRequest.Database := FCfgDatabaseIntf;
+  FXMLDocIntf := smxFuncs.NewXML; //NewXMLDocument;
 end;
 
 destructor TsmxBaseCfg.Destroy;
 begin
-  FTargetRequest.Free;
+  //FTargetRequest.Free;
   FCfgDatabaseIntf := nil;
   FXMLDocIntf := nil;
   inherited Destroy;
@@ -1030,7 +1163,7 @@ begin
   Result := FormatXMLText(FXMLDocIntf.XML.Text);
 end;
 
-procedure TsmxBaseCfg.Finalize;
+{procedure TsmxBaseCfg.Finalize;
 begin
   try
     WriteCfg;
@@ -1038,21 +1171,40 @@ begin
   except
     raise EsmxCfgError.CreateRes(@SCfgFinalizeError);
   end;
-end;
+end;}
 
-procedure TsmxBaseCfg.Initialize;
+{procedure TsmxBaseCfg.Initialize;
 begin
   try
-    Clear;
-    LoadCfg; 
+    //Clear;
+    LoadCfg;
     ReadCfg;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
   end;
-end;
+end;}
 
 procedure TsmxBaseCfg.LoadCfg;
+var
+  Request: IsmxDataSet;
+  Value: Variant;
 begin
+  if not(Assigned(FCfgDatabaseIntf) and Assigned(FSelectRequestCfg) and (FCfgID > 0)) then
+    raise EsmxCfgError.CreateResFmt(@SCfgLoadError, [ClassName, FCfgID]);
+  try
+    Request := GetRequest(FSelectRequestCfg);
+    try
+      if smxDBFuncs.GetValueByKeyDS(Request, FCfgID, Value, FSelectRequestCfg.PerformanceMode) then
+      begin
+        FXMLDocIntf.XML.Text := Value;
+        FXMLDocIntf.Active := True;
+      end;
+    finally
+      Request := nil;
+    end;
+  except
+    raise EsmxCfgError.CreateResFmt(@SCfgLoadError, [ClassName, FCfgID]);
+  end;
 end;
 
 procedure TsmxBaseCfg.ReadCfg;
@@ -1060,7 +1212,37 @@ begin
 end;
 
 procedure TsmxBaseCfg.SaveCfg;
+var
+  Request: IsmxDataSet;
+  RequestCfgID: Integer;
+  RequestCfg: TsmxRequestCfg;
+  Key: Variant;
 begin
+  if not(Assigned(FCfgDatabaseIntf) and Assigned(FSelectRequestCfg)) then
+    raise EsmxCfgError.CreateResFmt(@SCfgSaveError, [ClassName, FCfgID]);
+  if FCfgID = 0 then
+    RequestCfgID := FSelectRequestCfg.ModifySetting.InsertCfgID else
+    RequestCfgID := FSelectRequestCfg.ModifySetting.UpdateCfgID;
+  if RequestCfgID = 0 then
+    raise EsmxCfgError.CreateResFmt(@SCfgSaveError, [ClassName, FCfgID]);
+  try
+    RequestCfg := GetRequestCfg(RequestCfgID);
+    try
+      Request := GetRequest(RequestCfg);
+      try
+        Key := FCfgID;
+        if smxDBFuncs.SetValueByKeyDS(Request, Key, FXMLDocIntf.XML.Text, RequestCfg.PerformanceMode) then
+          FCfgID := Key else
+          raise EsmxCfgError.CreateResFmt(@SCfgSaveError, [ClassName, FCfgID]);
+      finally
+        Request := nil;
+      end;
+    finally
+      RequestCfg.Free;
+    end;
+  except
+    raise EsmxCfgError.CreateResFmt(@SCfgSaveError, [ClassName, FCfgID]);
+  end;
 end;
 
 procedure TsmxBaseCfg.SetXMLText(Value: String);
@@ -1068,7 +1250,7 @@ begin
   try
     FXMLDocIntf.XML.Text := UnFormatXMLText(Value);
     FXMLDocIntf.Active := True;
-    Clear;
+    //Clear;
     ReadCfg;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
@@ -1077,6 +1259,76 @@ end;
 
 procedure TsmxBaseCfg.WriteCfg;
 begin
+end;
+
+procedure TsmxBaseCfg.SetCfgDatabase(const Value: IsmxDatabase);
+begin
+  FCfgDatabaseIntf := Value;
+end;
+
+procedure TsmxBaseCfg.SetCfgID(Value: Integer);
+begin
+  FCfgID := Value;
+end;
+
+{procedure TsmxBaseCfg.SetModifySetting(Value: TsmxModifySetting);
+begin
+  FModifySetting := Value;
+end;}
+
+procedure TsmxBaseCfg.SetSelectRequestCfg(Value: TsmxRequestCfg);
+begin
+  FSelectRequestCfg := Value;
+end;
+
+{function TsmxBaseCfg.CfgIDToDataSet(ACfgID: Integer): IsmxDataSet;
+var
+  RequestCfg: TsmxRequestCfg;
+begin
+  Result := nil;
+  if Assigned(FCfgDatabaseIntf) and Assigned(FSelectRequestCfg) and (ACfgID > 0) then
+  begin
+    RequestCfg := TsmxRequestCfg.Create(nil);
+    try
+      RequestCfg.CfgDatabase := FCfgDatabaseIntf;
+      RequestCfg.CfgID := ACfgID;
+      RequestCfg.SelectRequestCfg := FSelectRequestCfg;
+      RequestCfg.LoadCfg;
+      RequestCfg.ReadCfg;
+      Result := FCfgDatabaseIntf.NewDataSet(RequestCfg.DataSetType);
+      Result.Database := FCfgDatabaseIntf;
+      Result.SQL.Text := RequestCfg.SQLText;
+      //Result.Prepare;
+    finally
+      RequestCfg.Free;
+    end;
+  end;
+end;}
+
+function TsmxBaseCfg.GetRequest(ARequestCfg: TsmxRequestCfg): IsmxDataSet;
+var
+  i: Integer;
+begin
+  Result := FCfgDatabaseIntf.NewDataSet(ARequestCfg.DataSetType);
+  Result.Database := FCfgDatabaseIntf;
+  Result.SQL.Text := ARequestCfg.SQLText;
+  Result.Prepare;
+  for i := 0 to ARequestCfg.RequestParams.Count - 1 do
+    Result.ParamByName(ARequestCfg.RequestParams[i].ParamName).ParamLocation :=
+      ARequestCfg.RequestParams[i].ParamLocation;
+  for i := 0 to ARequestCfg.RequestFields.Count - 1 do
+    Result.FieldByName(ARequestCfg.RequestFields[i].FieldName).FieldSense :=
+      ARequestCfg.RequestFields[i].FieldSense;
+end;
+
+function TsmxBaseCfg.GetRequestCfg(ACfgID: Integer): TsmxRequestCfg;
+begin
+  Result := TsmxRequestCfg.Create(nil);
+  Result.CfgDatabase := FCfgDatabaseIntf;
+  Result.CfgID := ACfgID;
+  Result.SelectRequestCfg := FSelectRequestCfg;
+  Result.LoadCfg;
+  Result.ReadCfg;
 end;
 
 { TsmxCustomCommonStorage }
@@ -1133,6 +1385,21 @@ procedure TsmxCustomDatabaseManager.RemoveDBConnection(ADBConnection: TsmxDBConn
 begin
 end;
 
+procedure TsmxCustomLibraryManager.SetCheckComp(Value: Boolean);
+begin
+  FCheckComp := Value;
+end;
+
+procedure TsmxCustomLibraryManager.SetLibPath(Value: String);
+begin
+  FLibPath := Value;
+end;
+
+procedure TsmxCustomLibraryManager.SetProcLibInfoName(Value: String);
+begin
+  FProcLibInfoName := Value;
+end;
+
 { TsmxCustomFormManager }
 
 function TsmxCustomFormManager.FindByComboID(ACfgID: Integer; AID: Integer = 0): TsmxCustomForm;
@@ -1161,7 +1428,9 @@ begin
   FCfgDatabaseIntf := ADatabase;
   FCfgID := ACfgID;
   FCfg := NewCfg(Self, FCfgDatabaseIntf, FCfgID);
-  FCfg.Initialize;  
+  //FCfg.Initialize;
+  FCfg.LoadCfg;
+  FCfg.ReadCfg;
   FCellList := TList.Create;
 end;
 
@@ -1280,18 +1549,6 @@ begin
       Cells[i].LibraryManager := FLibraryManager;
 end;
 
-procedure TsmxBaseCell.SetDatabaseManager(Value: TsmxCustomDatabaseManager);
-var i: Integer;
-begin
-  if Assigned(FDatabaseManager) then
-    for i := 0 to CellCount - 1 do
-      Cells[i].DatabaseManager := nil;
-  FDatabaseManager := Value;
-  if Assigned(FDatabaseManager) then
-    for i := 0 to CellCount - 1 do
-      Cells[i].DatabaseManager := FDatabaseManager;
-end;
-
 procedure TsmxBaseCell.SetParentCell(Value: TsmxBaseCell);
 begin
   if Assigned(FParentCell) then
@@ -1315,22 +1572,44 @@ end;
 { TsmxCellCfg }
 
 procedure TsmxCellCfg.LoadCfg;
+var
+  //Cell: TsmxBaseCell;
+  Request: TsmxCustomRequest;
+  Value: Variant;
 begin
-  FTargetRequest['ConfID'] := IntToStr(FCfgID);
+  {FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['ConfBlob'] :=
     FTargetRequest.DoRequest('select ConfBlob from tConfigs where ConfID = :ConfID');
   if FTargetRequest['ConfBlob'] <> '' then
   begin
     FXMLDocIntf.XML.Text := FTargetRequest['ConfBlob'];
     FXMLDocIntf.Active := True;
+  end;}
+
+  //if Assigned(FCfgDatabaseIntf) and (FUpdateSetting.SelectCfgID > 0) and (FCfgID > 0) then
+  begin
+    //Cell := smxClassFuncs.NewCell(nil, FCfgDatabaseIntf, FUpdateSetting.SelectCfgID);
+    Request := TsmxCustomRequest.Create(nil, FCfgDatabaseIntf, FCfgID);
+    try
+      {if Cell is TsmxCustomRequest then
+        if smxClassFuncs.GetRequestValueByKey(TsmxCustomRequest(Cell), FCfgID, Value) then
+        begin
+          FXMLDocIntf.XML.Text := Value;
+          FXMLDocIntf.Active := True;
+        end;}
+    finally
+      //Cell.Free;
+      Request.Free;
+    end;
   end;
 end;
 
 procedure TsmxCellCfg.SaveCfg;
 var
-  Request: IsmxDataSet;
+  //Request: IsmxDataSet;
+  Cell: TsmxBaseCell;
 begin
-  FTargetRequest['ConfID'] := IntToStr(FCfgID);
+  {FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['ConfBlob'] := FXMLDocIntf.XML.Text;
   //FTargetRequest.DoExecute('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
   Request := FTargetRequest.NewRequest('update tConfigs set ConfBlob = :ConfBlob where ConfID = :ConfID');
@@ -1339,7 +1618,18 @@ begin
     FTargetRequest.PrepRequest(Request, True, pmExecute);
   finally
     Request := nil;
-  end;
+  end;}
+
+  //if Assigned(FCfgDatabaseIntf) and (FUpdateSetting.UpdateCfgID > 0) and (FCfgID > 0) then
+  {begin
+    //Cell := smxClassFuncs.NewCell(nil, FCfgDatabaseIntf, FUpdateSetting.UpdateCfgID);
+    try
+      if Cell is TsmxCustomRequest then
+        smxClassFuncs.SetRequestValueByKey(TsmxCustomRequest(Cell), FCfgID, FXMLDocIntf.XML.Text);
+    finally
+      Cell.Free;
+    end;
+  end;}
 end;
 
 { TsmxTypeCfg }
@@ -1352,9 +1642,11 @@ begin
   FCfgClass := nil;
 end;
 
-procedure TsmxTypeCfg.LoadCfg;
-begin
-  FTargetRequest['ConfID'] := IntToStr(FCfgID);
+{procedure TsmxTypeCfg.LoadCfg;
+var
+  RequestCfg: TsmxRequestCfg;
+begin}
+  {FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['ConfBlob'] :=
     FTargetRequest.DoRequest('select c2.ConfBlob from tConfigs c ' +
       'join tConfigs c2 on c2.ConfID = c.ConfConfID ' +
@@ -1363,11 +1655,36 @@ begin
   begin
     FXMLDocIntf.XML.Text := FTargetRequest['ConfBlob'];
     FXMLDocIntf.Active := True;
-  end;
-end;
+  end;}
+
+  //if Assigned(FCfgDatabaseIntf) and (FUpdateSetting.SelectCfgID > 0) and (FCfgID > 0) then
+  {begin
+    //Cell := smxClassFuncs.NewCell(nil, FCfgDatabaseIntf, FUpdateSetting.SelectCfgID);
+    //Request := TsmxCustomRequest.Create(nil, FCfgDatabaseIntf, FCfgID);
+    RequestCfg := TsmxRequestCfg.Create(nil);
+    try
+      RequestCfg.CfgDatabase := FCfgDatabaseIntf;
+      //RequestCfg.CfgID := FUpdateSetting.SelectCfgID;
+      //RequestCfg.UpdateSetting := FUpdateSetting;
+      RequestCfg.Initialize;}
+
+      {if Cell is TsmxCustomRequest then
+        if smxClassFuncs.GetRequestValueByKey(TsmxCustomRequest(Cell), FCfgID, Value) then
+        begin
+          FXMLDocIntf.XML.Text := Value;
+          FXMLDocIntf.Active := True;
+        end;}
+    {finally
+      //Cell.Free;
+      //Request.Free;
+      RequestCfg.Free;
+    end;
+  end;}
+//end;
 
 procedure TsmxTypeCfg.ReadCfg;
-var r, n: IXMLNode;
+var
+  r, n: IXMLNode;
 begin
   r := FXMLDocIntf.ChildNodes.FindNode('Root');
   if not Assigned(r) then
@@ -1381,14 +1698,14 @@ begin
   end;
 end;
 
-procedure TsmxTypeCfg.SaveCfg;
-begin
-  FTargetRequest['ConfID'] := IntToStr(FCfgID);
+//procedure TsmxTypeCfg.SaveCfg;
+//begin
+  {FTargetRequest['ConfID'] := IntToStr(FCfgID);
   FTargetRequest['ConfBlob'] := FXMLDocIntf.XML.Text;
   FTargetRequest.DoExecute('update tConfigs c set c.ConfBlob = :ConfBlob ' +
     'where c.ConfID = ' +
-    '(select c2.ConfConfID from tConfigs c2 where c2.ConfID = :ConfID');
-end;
+    '(select c2.ConfConfID from tConfigs c2 where c2.ConfID = :ConfID');}
+//end;
 
 procedure TsmxTypeCfg.SetCfgClass(Value: TsmxBaseCfgClass);
 begin
@@ -1622,7 +1939,8 @@ end;
 
 function TsmxTargetRequest.PrepRequest(const ARequest: IsmxDataSet; Get: Boolean = True;
   Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
-var i: Integer; f: IsmxField; v: Variant; s: TStream;
+var
+  i: Integer; f: IsmxField; v: Variant; s: TStream; str: String;
 begin
   Result := False;
   with ARequest do
@@ -1633,28 +1951,27 @@ begin
     for i := 0 to ParamCount - 1 do
       if Params[i].ParamType in [ptUnknown, ptInput, ptInputOutput] then
       begin
-        f := nil;
         if Assigned(DSFrom) then
-          f := DSFrom.FindField(Params[i].ParamName);
-        if Assigned(f) then
-          Params[i].AssignParam(f)
-        else
         begin
-          if ParamValues[Params[i].ParamName] = '' then
-            Params[i].Value := Null
-          else
+          f := DSFrom.FindField(Params[i].ParamName);
+          if Assigned(f) then
+            Params[i].AssignParam(f) else
+            Params[i].Value := Null;
+        end else
+        begin
+          if IsBlobType(Params[i].DataType) then
           begin
-            if Params[i].DataType = ftBlob then
-            begin
-              s := StrToStream(ParamValues[Params[i].ParamName]);
-              try
-                Params[i].LoadStream(s);
-              finally
-                s.Free;
-              end;
-            end else
-              Params[i].Value := ParamValues[Params[i].ParamName];
-          end;
+            s := TMemoryStream.Create;
+            try
+              StrToStream(ParamValues[Params[i].ParamName], s);
+              Params[i].LoadFromStream(s);
+            finally
+              s.Free;
+            end;
+          end else
+          if ParamValues[Params[i].ParamName] <> '' then
+            Params[i].Value := ParamValues[Params[i].ParamName] else
+            Params[i].Value := Null;
         end;
       end;
     if Get then
@@ -1667,12 +1984,20 @@ begin
       for i := 0 to ParamCount - 1 do
         if Params[i].ParamType in [ptUnknown, ptOutput, ptInputOutput] then
         begin
-          if VarIsNull(Params[i].Value) then
-            ParamValues[Params[i].ParamName] := ''
-          else
+          if IsBlobType(Params[i].DataType) then
           begin
-            ParamValues[Params[i].ParamName] := Params[i].Value;
-          end;
+            s := TMemoryStream.Create;
+            try
+              Params[i].SaveToStream(s);
+              StreamToStr(s, str);
+              ParamValues[Params[i].ParamName] := str;
+            finally
+              s.Free;
+            end;
+          end else
+          if not VarIsNull(Params[i].Value) then
+            ParamValues[Params[i].ParamName] := Params[i].Value else
+            ParamValues[Params[i].ParamName] := '';
         end else
         if Params[i].ParamType = ptResult then
         begin
@@ -2040,7 +2365,7 @@ end;
 constructor TsmxCellState.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
-  FID := 0;
+  FStateID := 0;
   FStateUnits := TsmxStateUnits.Create(TsmxStateUnit);
 end;
 
@@ -2057,12 +2382,12 @@ begin
   Result := TsmxCellState(inherited Add);
 end;
 
-function TsmxCellStates.FindByID(AID: Integer): TsmxCellState;
+function TsmxCellStates.FindByStateID(AStateID: Integer): TsmxCellState;
 var i: Integer;
 begin
   Result := nil;
   for i := 0 to Count - 1 do
-    if Items[i].ID = AID then
+    if Items[i].StateID = AStateID then
     begin
       Result := Items[i];
       Break;
@@ -2115,7 +2440,7 @@ end;
 
 { TsmxStateCfg }
 
-constructor TsmxStateCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+{constructor TsmxStateCfg.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
@@ -2127,6 +2452,12 @@ constructor TsmxStateCfg.CreateByIntfID(AOwner: TComponent; const ADatabase: Ism
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FIntfID := AIntfID;
+  FXMLDocList := TsmxXMLDocItems.Create(TsmxXMLDocItem);
+end;}
+
+constructor TsmxStateCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
   FXMLDocList := TsmxXMLDocItems.Create(TsmxXMLDocItem);
 end;
 
@@ -2140,7 +2471,8 @@ end;
 
 procedure TsmxStateCfg.Clear;
 begin
-  CellStates.Clear;
+  if Assigned(FCellStates) then
+    CellStates.Clear;
 end;
 
 function TsmxStateCfg.GetCellStates: TsmxCellStates;
@@ -2171,7 +2503,7 @@ begin
   try
     XMLDocItem.XMLDoc.XML.Text := UnFormatXMLText(Value);
     XMLDocItem.XMLDoc.Active := True;
-    Clear;
+    //Clear;
     ReadCfg;
   except
     raise EsmxCfgError.CreateRes(@SCfgInitializeError);
@@ -2183,12 +2515,12 @@ function TsmxStateCfg.GetFullXMLText: String;
   procedure AddNodes(const ANode: IXMLNode; AUnit: TsmxStateUnit);
   var i: Integer; n: IXMLNode;
   begin
-    n := ANode.AddChild('cell');
+    n := ANode.AddChild('Cell');
     with n do
     begin
-      Attributes['id'] := AUnit.CfgID;
-      Attributes['enable'] := AUnit.UnitEnable;
-      Attributes['visible'] := AUnit.UnitVisible;
+      Attributes['CfgID'] := AUnit.CfgID;
+      Attributes['Enable'] := AUnit.UnitEnable;
+      Attributes['Visible'] := AUnit.UnitVisible;
     end;
     for i := 0 to AUnit.Count - 1 do
       AddNodes(n, AUnit[i]);
@@ -2196,27 +2528,27 @@ function TsmxStateCfg.GetFullXMLText: String;
 
 var r, n, n2, n3: IXMLNode; i, j: Integer;
 begin
-  r := FXMLDocIntf.ChildNodes.FindNode('root');
+  r := FXMLDocIntf.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := FXMLDocIntf.AddChild('root');
+    r := FXMLDocIntf.AddChild('Root');
 
-  n := r.AddChild('states');
+  n := r.AddChild('States');
   for i := 0 to CellStates.Count - 1 do
   begin
-    n2 := n.AddChild('state');
-    n2.Attributes['id'] := CellStates[i].ID;
-    n3 := n2.AddChild('cells');
+    n2 := n.AddChild('State');
+    n2.Attributes['StateID'] := CellStates[i].StateID;
+    n3 := n2.AddChild('Cells');
     for j := 0 to CellStates[i].StateUnits.Root.Count - 1 do
       AddNodes(n3, CellStates[i].StateUnits.Root[j]);
   end;
   Result := FormatXMLText(FXMLDocIntf.XML.Text);
 end;
 
-procedure TsmxStateCfg.LoadCfg;
+{procedure TsmxStateCfg.LoadCfg;
 var IntfID: Integer; XMLText: String; XMLDocIntf: IXMLDocument;
-begin
-  FXMLDocList.Clear;
+begin}
+  {FXMLDocList.Clear;
   FTargetRequest['IntfID'] := IntToStr(FIntfID);
   FTargetRequest['ConfID'] := IntToStr(FCfgID);
   with FTargetRequest.ForRequest('select ic.IntfID, ic.IntfConfBlob ' +
@@ -2242,43 +2574,44 @@ begin
       end;
       Next;
     end;
-  end;
-end;
+  end;}
+//end;
 
 procedure TsmxStateCfg.ReadCfg;
 
   procedure AddUnits(const ANode: IXMLNode; AUnit: TsmxStateUnit; AIntfID: Integer);
   var i: Integer; u: TsmxStateUnit;
   begin
-    u := AUnit.FindByCfgID(ANode.Attributes['id']);
+    u := AUnit.FindByCfgID(ANode.Attributes['StateID']);
     if not Assigned(u) then
       u := AUnit.Add;
     with u do
     begin
       FIntfID := AIntfID;
-      FCfgID := ANode.Attributes['id'];
-      FUnitEnable := ANode.Attributes['enable'];
-      FUnitVisible := ANode.Attributes['visible'];
+      FCfgID := ANode.Attributes['CfgID'];
+      FUnitEnable := ANode.Attributes['Enable'];
+      FUnitVisible := ANode.Attributes['Visible'];
     end;
     for i := 0 to ANode.ChildNodes.Count - 1 do
-      if ANode.ChildNodes[i].NodeName = 'cell' then
+      if ANode.ChildNodes[i].NodeName = 'Cell' then
         AddUnits(ANode.ChildNodes[i], u, AIntfID);
   end;
 
 var r, n, n2: IXMLNode; i, j, k: Integer; s: TsmxCellState;
 begin
+  Clear;
   for k := 0 to FXMLDocList.Count - 1 do
   begin
-    r := FXMLDocList[k].XMLDoc.ChildNodes.FindNode('root');
+    r := FXMLDocList[k].XMLDoc.ChildNodes.FindNode('Root');
     if Assigned(r) then
     begin
-      n := r.ChildNodes.FindNode('states');
+      n := r.ChildNodes.FindNode('States');
       if Assigned(n) and (n.ChildNodes.Count > 0) then
       begin
         for i := 0 to n.ChildNodes.Count - 1 do
-          if n.ChildNodes[i].NodeName = 'state' then
+          if n.ChildNodes[i].NodeName = 'State' then
           begin
-            s := CellStates.FindByID(n.ChildNodes[i].Attributes['id']);
+            s := CellStates.FindByStateID(n.ChildNodes[i].Attributes['StateID']);
             if not Assigned(s) then
             begin
               s := CellStates.Add;
@@ -2286,11 +2619,11 @@ begin
             end;
             with s do
             begin
-              ID := n.ChildNodes[i].Attributes['id'];
-              n2 := n.ChildNodes[i].ChildNodes.FindNode('cells');
+              StateID := n.ChildNodes[i].Attributes['StateID'];
+              n2 := n.ChildNodes[i].ChildNodes.FindNode('Cells');
               if Assigned(n2) and (n2.ChildNodes.Count > 0) then
                 for j := 0 to n2.ChildNodes.Count - 1 do
-                  if n2.ChildNodes[j].NodeName = 'cell' then
+                  if n2.ChildNodes[j].NodeName = 'Cell' then
                     AddUnits(n2.ChildNodes[j], StateUnits.Root, FXMLDocList[k].ID);
             end;
           end;
@@ -2299,13 +2632,13 @@ begin
   end;
 end;
 
-procedure TsmxStateCfg.SaveCfg;
-var XMLDocItem: TsmxXMLDocItem; 
+{procedure TsmxStateCfg.SaveCfg;
+var XMLDocItem: TsmxXMLDocItem;
 begin
   XMLDocItem := FXMLDocList.FindByID(FIntfID);
   if Assigned(XMLDocItem) then
-  begin
-    FTargetRequest['IntfID'] := IntToStr(FIntfID);
+  begin}
+    {FTargetRequest['IntfID'] := IntToStr(FIntfID);
     FTargetRequest['ConfID'] := IntToStr(FCfgID);
     FTargetRequest['IntfConfBlob'] := XMLDocItem.XMLDoc.XML.Text;
     if VarIsNull(FTargetRequest.DoRequest('select IntfConfID from tIntfsConfs ' +
@@ -2313,9 +2646,9 @@ begin
       FTargetRequest.DoExecute('insert into tIntfsConfs (IntfID, ConfID, IntfConfBlob) ' +
         'values (:IntfID, :ConfID, :IntfConfBlob)') else
       FTargetRequest.DoExecute('update tIntfsConfs set IntfConfBlob = :IntfConfBlob ' +
-        'where IntfID = :IntfID and ConfID = :ConfID');
-  end;
-end;
+        'where IntfID = :IntfID and ConfID = :ConfID');}
+  //end;
+//end;
 
 procedure TsmxStateCfg.WriteCfg;
 
@@ -2324,12 +2657,12 @@ procedure TsmxStateCfg.WriteCfg;
   begin
     if AUnit.IntfID = FIntfID then
     begin
-      n := ANode.AddChild('cell');
+      n := ANode.AddChild('Cell');
       with n do
       begin
-        Attributes['id'] := AUnit.CfgID;
-        Attributes['enable'] := AUnit.UnitEnable;
-        Attributes['visible'] := AUnit.UnitVisible;
+        Attributes['CfgID'] := AUnit.CfgID;
+        Attributes['Enable'] := AUnit.UnitEnable;
+        Attributes['Visible'] := AUnit.UnitVisible;
       end;
     end;
     for i := 0 to AUnit.Count - 1 do
@@ -2345,20 +2678,25 @@ begin
     XMLDocItem.ID := FIntfID;
   end;
 
-  r := XMLDocItem.XMLDoc.ChildNodes.FindNode('root');
+  r := XMLDocItem.XMLDoc.ChildNodes.FindNode('Root');
   if Assigned(r) then
     r.ChildNodes.Clear else
-    r := XMLDocItem.XMLDoc.AddChild('root');
+    r := XMLDocItem.XMLDoc.AddChild('Root');
 
-  n := r.AddChild('states');
+  n := r.AddChild('States');
   for i := 0 to CellStates.Count - 1 do
   begin
-    n2 := n.AddChild('state');
-    n2.Attributes['id'] := CellStates[i].ID;
-    n3 := n2.AddChild('cells');
+    n2 := n.AddChild('State');
+    n2.Attributes['StateID'] := CellStates[i].StateID;
+    n3 := n2.AddChild('Cells');
     for j := 0 to CellStates[i].StateUnits.Root.Count - 1 do
       AddNodes(n3, CellStates[i].StateUnits.Root[j]);
   end;
+end;
+
+procedure TsmxStateCfg.SetIntfID(Value: Integer);
+begin
+  FIntfID := Value;
 end;
 
 { TsmxProjectItem }
@@ -2577,7 +2915,7 @@ end;
 
 destructor TsmxCustomRequest.Destroy;
 begin
-  FDataSetIntf := nil;
+  //FDataSetIntf := nil;
   FDatabaseIntf := nil;
   inherited Destroy;
 end;
@@ -2599,15 +2937,22 @@ begin
   Result := nil;
 end;
 
-procedure TsmxCustomRequest.Perform(Same: Boolean = False);
+procedure TsmxCustomRequest.Perform;
 begin
 end;
 
-procedure TsmxCustomRequest.Prepare(Forcibly: Boolean = False);
+procedure TsmxCustomRequest.Prepare;
 begin
   if Assigned(CellDataSet) then
-    if not CellDataSet.Active and (OperationMode = omAutomatic) or Forcibly then
+  begin
+    if not CellDataSet.Prepared then
+      CellDataSet.Prepare;
+    if OperationMode = omAutomatic then
+    begin
+      RefreshParams;
       Perform;
+    end;
+  end;
 end;
 
 procedure TsmxCustomRequest.RefreshParams;
@@ -2620,34 +2965,47 @@ begin
 end;
 
 procedure TsmxCustomRequest.SetDatabaseName(Value: String);
-var dbc: TsmxDBConnection;
+var
+  DatabaseConnection: TsmxDBConnection;
 begin
-  if FDatabaseName <> '' then
+  if (FDatabaseName <> '') and Assigned(FDatabaseManager) then
     SetDatabase(nil);
   FDatabaseName := Value;
-  if FDatabaseName <> '' then
-    if Assigned(DatabaseManager) then
-    begin
-      dbc := DatabaseManager.FindByName(FDatabaseName);
-      if Assigned(dbc) then
-        if Assigned(dbc.Database) then
-          SetDatabase(dbc.Database);
-    end;
+  if (FDatabaseName <> '') and Assigned(FDatabaseManager) then
+  begin
+    DatabaseConnection := FDatabaseManager.FindByName(FDatabaseName);
+    if Assigned(DatabaseConnection) then
+      if Assigned(DatabaseConnection.Database) then
+        SetDatabase(DatabaseConnection.Database);
+  end;
 end;
 
 procedure TsmxCustomRequest.SetDatabaseManager(Value: TsmxCustomDatabaseManager);
-var dbc: TsmxDBConnection;
+var
+  DatabaseConnection: TsmxDBConnection;
 begin
-  if Assigned(DatabaseManager) then
+  if Assigned(FDatabaseManager) and (FDatabaseName <> '') then
     SetDatabase(nil);
-  inherited SetDatabaseManager(Value);
-  if Assigned(DatabaseManager) then
+  FDatabaseManager := Value;
+  if Assigned(FDatabaseManager) and (FDatabaseName <> '') then
   begin
-    dbc := DatabaseManager.FindByName(FDatabaseName);
-    if Assigned(dbc) then
-      if Assigned(dbc.Database) then
-        SetDatabase(dbc.Database);
+    DatabaseConnection := DatabaseManager.FindByName(FDatabaseName);
+    if Assigned(DatabaseConnection) then
+      if Assigned(DatabaseConnection.Database) then
+        SetDatabase(DatabaseConnection.Database);
   end;
+end;
+
+function TsmxCustomRequest.GetDatabase: IsmxDatabase;
+begin
+  if not Assigned(FDatabaseIntf) then
+    FDatabaseIntf := FCfgDatabaseIntf;
+  Result := FDatabaseIntf;
+end;
+
+function TsmxCustomRequest.GetDataSet: IsmxDataSet;
+begin
+  Result := nil;
 end;
 
 { TsmxCustomGrid }
@@ -3084,7 +3442,7 @@ begin
         if Assigned(p) then
           p.Value := Filters[i].FilterValue;
       end;
-      ApplyRequest.Perform(True);
+      ApplyRequest.Perform;
     end;
 end;
 
@@ -3172,7 +3530,7 @@ procedure TsmxCustomSection.Prepare(Forcibly: Boolean = False);
 begin
   //inherited Prepare(Forcibly);
   if Assigned(Request) then
-    Request.Prepare(Forcibly);
+    Request.Prepare; //(Forcibly);
   if Assigned(Grid) then
     Grid.Prepare(Forcibly);
   if Assigned(FilterDesk) then
@@ -3541,8 +3899,14 @@ begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FIntfID := AIntfID;
   FID := AID;
-  FStateCfg := TsmxStateCfg.CreateByIntfID(Self, CfgDatabase, CfgID, FIntfID);
-  FStateCfg.Initialize;
+  //FStateCfg := TsmxStateCfg.CreateByIntfID(Self, CfgDatabase, CfgID, FIntfID);
+  FStateCfg := TsmxStateCfg.Create(Self);
+  //FStateCfg.CfgDatabase := ADatabase;
+  //FStateCfg.CfgID := ACfgID;
+  //FStateCfg.IntfID := AIntfID;
+  //FStateCfg.Initialize;
+  FStateCfg.LoadCfg;
+  FStateCfg.ReadCfg;
   FPageManagerList := TList.Create;
   CreateChilds; 
   InitChilds;
@@ -3633,7 +3997,7 @@ begin
 end;}
 
 procedure TsmxCustomForm.ChangeState;
-var ID: Integer; //f: IsmxField;
+var ID: Integer; v: Variant; //f: IsmxField;
 begin
   {ID := 0;
   if Assigned(FStateRequest) then
@@ -3644,12 +4008,12 @@ begin
       if not VarIsNull(f.Value) then
         ID := f.Value;
   end;}
+  ID := 0;
   if Assigned(FStateRequest) then
   begin
     FStateRequest.Perform;
-    ID := FieldSenseValueDef(FStateRequest, fsKey, 0);
-  end else
-    ID := 0;
+    ID := GetFieldSenseValueDef(FStateRequest, fsKey, 0);
+  end;
   if FStateID <> ID then
   begin
     FStateID := ID;
@@ -3723,7 +4087,7 @@ var i: Integer; cs: TsmxCellState;
 begin
   cs := nil;
   if Assigned(FStateCfg) then
-    cs := FStateCfg.CellStates.FindByID(FStateID);
+    cs := FStateCfg.CellStates.FindByStateID(FStateID);
   if Assigned(cs) then
     for i := 0 to cs.StateUnits.Root.Count - 1 do
       PutCell(cs.StateUnits.Root[i], Self);
@@ -3789,5 +4153,195 @@ begin
   FForm := Value;
 end;
 
-end.
+{ TsmxLocationParam }
 
+constructor TsmxLocationParam.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  FParamLocation := plConst;
+  FParamName := '';
+  FParamDefValue := Null;
+end;
+
+{ TsmxLocationParams }
+
+function TsmxLocationParams.Add: TsmxLocationParam;
+begin
+  Result := TsmxLocationParam(inherited Add);
+end;
+
+function TsmxLocationParams.FindByName(AParamName: String): TsmxLocationParam;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if AnsiCompareText(Items[i].ParamName, AParamName) = 0 then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxLocationParams.GetItem(Index: Integer): TsmxLocationParam;
+begin
+  Result := TsmxLocationParam(inherited Items[Index]);
+end;
+
+{ TsmxRequestField }
+
+constructor TsmxRequestField.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  FFieldFormat := '';
+  FFieldName := '';
+  FFieldSense := fsGeneral;
+end;
+
+{ TsmxRequestFields }
+
+function TsmxRequestFields.Add: TsmxRequestField;
+begin
+  Result := TsmxRequestField(inherited Add);
+end;
+
+function TsmxRequestFields.FindByName(AFieldName: String): TsmxRequestField;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if AnsiCompareText(Items[i].FieldName, AFieldName) = 0 then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxRequestFields.GetItem(Index: Integer): TsmxRequestField;
+begin
+  Result := TsmxRequestField(inherited Items[Index]);
+end;
+
+{ TsmxRequestCfg }
+
+destructor TsmxRequestCfg.Destroy;
+begin
+  if Assigned(FRequestParams) then
+    FRequestParams.Free;
+  if Assigned(FRequestFields) then
+    FRequestFields.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxRequestCfg.Clear;
+begin
+  FDataSetType := dstUnknown;
+  FPerformanceMode := pmOpen;
+  FSQLText := '';
+  if Assigned(FRequestParams) then
+    FRequestParams.Clear;
+  if Assigned(FRequestFields) then
+    FRequestFields.Clear;
+end;
+
+function TsmxRequestCfg.GetRequestFields: TsmxRequestFields;
+begin
+  if not Assigned(FRequestFields) then
+    FRequestFields := TsmxRequestFields.Create(TsmxRequestField);
+  Result := FRequestFields;
+end;
+
+function TsmxRequestCfg.GetRequestParams: TsmxLocationParams;
+begin
+  if not Assigned(FRequestParams) then
+    FRequestParams := TsmxLocationParams.Create(TsmxLocationParam);
+  Result := FRequestParams;
+end;
+
+procedure TsmxRequestCfg.ReadCfg;
+var
+  r, n: IXMLNode;
+  i: Integer;
+begin
+  Clear;
+  r := XMLDoc.ChildNodes.FindNode('Root');
+  if not Assigned(r) then
+    Exit;
+
+  n := r.ChildNodes.FindNode('Request');
+  if Assigned(n) then
+  begin
+    SQLText := n.Attributes['SQLText'];
+    DataSetType := n.Attributes['Type'];
+    PerformanceMode := n.Attributes['Perform'];
+  end;
+
+  n := r.ChildNodes.FindNode('Params');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    //RequestParams.Clear;
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'Param' then
+        with RequestParams.Add do
+        begin
+          ParamName := n.ChildNodes[i].Attributes['Name'];
+          ParamDefValue := VarStringToVar(n.ChildNodes[i].Attributes['DefValue']);
+          ParamLocation := n.ChildNodes[i].Attributes['Location'];
+        end;
+  end;
+
+  n := r.ChildNodes.FindNode('Fields');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    //RequestFields.Clear;
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'Field' then
+        with RequestFields.Add do
+        begin
+          FieldName := n.ChildNodes[i].Attributes['Name'];
+          FieldFormat := n.ChildNodes[i].Attributes['Format'];
+          FieldSense := n.ChildNodes[i].Attributes['Sense'];
+        end;
+  end;
+end;
+
+procedure TsmxRequestCfg.WriteCfg;
+var
+  r, n: IXMLNode; i: Integer;
+begin
+  r := XMLDoc.ChildNodes.FindNode('Root');
+  if Assigned(r) then
+    r.ChildNodes.Clear else
+    r := XMLDoc.AddChild('Root');
+
+  n := r.AddChild('Request');
+  n.Attributes['SQLText'] := SQLText;
+  n.Attributes['Type'] := DataSetType;
+  n.Attributes['Perform'] := PerformanceMode;
+
+  n := r.AddChild('Params');
+  for i := 0 to RequestParams.Count - 1 do
+    with n.AddChild('Param') do
+    begin
+      Attributes['Name'] := RequestParams[i].ParamName;
+      Attributes['DefValue'] := RequestParams[i].ParamDefValue;
+      Attributes['Location'] := RequestParams[i].ParamLocation;
+    end;
+
+  n := r.AddChild('Fields');
+  for i := 0 to RequestFields.Count - 1 do
+    with n.AddChild('Field') do
+    begin
+      Attributes['Name'] := RequestFields[i].FieldName;
+      Attributes['Format'] := RequestFields[i].FieldFormat;
+      Attributes['Sense'] := RequestFields[i].FieldSense;
+    end;
+end;
+
+procedure TsmxRequestCfg.SetModifySetting(Value: TsmxModifySetting);
+begin
+  FModifySetting := Value;
+end;
+
+end.

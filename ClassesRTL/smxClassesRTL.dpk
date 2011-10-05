@@ -26,20 +26,12 @@ package smxClassesRTL;
 {$IMPLICITBUILD OFF}
 
 requires
-  rtl,
-  smxBaseClassesRTL,
-  vcl,
-  dbrtl,
-  xmlrtl,
-  inet;
+  smxBaseClassesRTL;
 
 contains
   smxClasses in '..\Common\smxClasses.pas',
-  smxTypes in '..\Common\smxTypes.pas',
   smxClassFuncs in '..\Common\smxClassFuncs.pas',
-  smxConsts in '..\Common\smxConsts.pas',
-  smxDBIntf in '..\Common\smxDBIntf.pas',
-  smxFuncs in '..\Common\smxFuncs.pas',
-  smxDBTypes in '..\Common\smxDBTypes.pas';
+  smxClassTypes in '..\Common\smxClassTypes.pas',
+  smxClassProcs in '..\Common\smxClassProcs.pas';
 
 end.

@@ -26,23 +26,13 @@ package smxCellsRTL;
 {$IMPLICITBUILD OFF}
 
 requires
-  rtl,
-  vcl,
-  dbrtl,
-  vcldb,
-  xmlrtl,
   smxClassesRTL,
-  inet;
+  vcldb;
 
 contains
   smxCells in '..\Common\smxCells.pas',
   smxCfgs in '..\Common\smxCfgs.pas',
   smxFilterCells in '..\Common\smxFilterCells.pas',
-  smxClassTypes in '..\Common\smxClassTypes.pas',
-  smxLibFuncs in '..\Common\smxLibFuncs.pas',
-  smxLibProcs in '..\Common\smxLibProcs.pas',
-  smxLibTypes in '..\Common\smxLibTypes.pas',
-  smxProcs in '..\Common\smxProcs.pas',
   smxWheelDBGrid in '..\Common\smxWheelDBGrid.pas';
 
 end.
