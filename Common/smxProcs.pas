@@ -65,7 +65,7 @@ begin
     SetLength(AStr, Len);
     Position := 0;
     ReadBuffer(Pointer(AStr)^, Len);
-    Position := 0;
+    //Position := 0;
   end;
 end;
 
@@ -80,7 +80,7 @@ begin
     Size := Len;
     Position := 0;
     WriteBuffer(Pointer(AStr)^, Len);
-    Position := 0;
+    //Position := 0;
   end;
 end;
 

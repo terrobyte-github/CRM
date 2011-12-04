@@ -3,7 +3,7 @@ unit smxDBIntf;
 interface
 
 uses
-  Classes, DB, SysUtils, smxTypes;
+  Classes, DB, SysUtils, smxBaseIntf{, smxTypes};
 
 const
   IID_IsmxDatabase: TGUID = '{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}';
@@ -20,7 +20,7 @@ type
 
   TsmxDataSetType = (dstUnknown, dstQuery, dstStoredProc);
 
-  IsmxDatabase = interface(IInterface)
+  IsmxDatabase = interface(IsmxBaseInterface)
     ['{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}']
     procedure CommitTransaction;
     function GetConnected: Boolean;
@@ -47,18 +47,19 @@ type
     property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     property Params: TStrings read GetParams write SetParams;
   end;
-  
+
   { IsmxField }
 
   TsmxFieldKind = TFieldKind;
 
   TsmxDataType = TFieldType;
 
-  IsmxField = interface(IInterface)
+  IsmxField = interface(IsmxBaseInterface)
     ['{BB7372C0-3457-487F-AB76-70717AFD7938}']
     //procedure AssignField(Source: TObject);
     procedure AssignField(const Source: IsmxField);
     //function CreateStream: TStream;
+    procedure LoadFromStream(Stream: TStream);
     procedure SaveToStream(Stream: TStream);
     function GetCalculated: Boolean;
     function GetDataType: TsmxDataType;
@@ -70,14 +71,18 @@ type
     function GetFieldNo: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
-    function GetFieldSense: TsmxFieldSense;
+    //function GetFieldSense: TsmxFieldSense;
+    //function GetIsBlob: Boolean;
     procedure SetCalculated(Value: Boolean);
     procedure SetDefaultExpression(Value: String);
     procedure SetDisplayFormat(Value: String);
     procedure SetFieldKind(Value: TsmxFieldKind);
     procedure SetFieldName(Value: String);
     procedure SetValue(Value: Variant);
-    procedure SetFieldSense(Value: TsmxFieldSense);
+    //procedure SetFieldSense(Value: TsmxFieldSense);
+    function IsBlob: Boolean;
+    function IsNull: Boolean;
+    procedure Clear;
 
     property Calculated: Boolean read GetCalculated write SetCalculated;
     property DataType: TsmxDataType read GetDataType;
@@ -89,14 +94,15 @@ type
     property FieldNo: Integer read GetFieldNo;
     property Size: Integer read GetSize;
     property Value: Variant read GetValue write SetValue;
-    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    //property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    //property IsBlob: Boolean read GetIsBlob;
   end;
 
   { IsmxParam }
 
   TsmxParamType = TParamType;
 
-  IsmxParam = interface(IInterface)
+  IsmxParam = interface(IsmxBaseInterface)
     ['{564458C3-CD9E-402C-800A-06C6065CCF1B}']
     //procedure AssignParam(Source: TObject);
     procedure AssignParam(const Source: IInterface);
@@ -109,7 +115,8 @@ type
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
-    function GetParamLocation: TsmxParamLocation;
+    //function GetParamLocation: TsmxParamLocation;
+    //function GetIsBlob: Boolean;
     procedure LoadFromStream(Stream: TStream);
     procedure SaveToStream(Stream: TStream);
     procedure SetDataType(Value: TsmxDataType);
@@ -119,7 +126,10 @@ type
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(Value: Variant);
-    procedure SetParamLocation(Value: TsmxParamLocation);
+    //procedure SetParamLocation(Value: TsmxParamLocation);
+    function IsBlob: Boolean;
+    function IsNull: Boolean;
+    procedure Clear;
 
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
@@ -130,12 +140,13 @@ type
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
-    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
+    //property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
+    //property IsBlob: Boolean read GetIsBlob;
   end;
-  
+
   { IsmxDataSet }
 
-  IsmxDataSet = interface(IInterface)
+  IsmxDataSet = interface(IsmxBaseInterface)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
     function AddField(const FieldName: String): IsmxField;
@@ -171,7 +182,7 @@ type
     procedure Open;
     function ParamByName(const Value: String): IsmxParam;
     procedure Post;
-    procedure Prepare;
+    //procedure Prepare;
     procedure Prior;
     procedure Remove;
     procedure RemoveParam(const Value: IsmxParam);
@@ -183,6 +194,7 @@ type
     procedure SetPrepare(Value: Boolean);
     procedure SetRecordNo(Value: Integer);
     procedure SetSQL(Value: TStrings);
+    function IsEmpty: Boolean;
 
     property Active: Boolean read GetActive write SetActive;
     property Bof: Boolean read GetBof;
@@ -204,4 +216,3 @@ type
 implementation
 
 end.
- 

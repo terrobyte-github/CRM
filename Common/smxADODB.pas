@@ -58,7 +58,8 @@ type
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
-    function GetParamLocation: TsmxParamLocation;
+    //function GetParamLocation: TsmxParamLocation;
+    function GetIsBlob: Boolean;
     function GetVersion: String; override;
     procedure SetDataType(Value: TsmxDataType);
     procedure SetNumericScale(Value: Integer);
@@ -67,7 +68,7 @@ type
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(Value: Variant);
-    procedure SetParamLocation(Value: TsmxParamLocation);
+    //procedure SetParamLocation(Value: TsmxParamLocation);
   public
     constructor Create(AParam: TParameter);
     destructor Destroy; override;
@@ -85,7 +86,8 @@ type
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
-    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
+    //property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
+    property IsBlob: Boolean read GetIsBlob;
   end;
 
   { TsmxADODataSet }
@@ -115,11 +117,11 @@ type
     procedure SetDatabase(const Value: IsmxDatabase);
     procedure SetField(Index: Integer; const Value: IsmxField);
     procedure SetParam(Index: Integer; const Value: IsmxParam);
-    procedure SetPrepare(Value: Boolean);
+    procedure SetPrepare(Value: Boolean); virtual;
     procedure SetRecordNo(Value: Integer);
     procedure SetSQL(Value: TStrings); virtual;
   public
-    procedure Add; 
+    procedure Add;
     function AddField(const FieldName: String): IsmxField;
     function AddParam: IsmxParam;
     procedure ClearFields;
@@ -138,7 +140,7 @@ type
     procedure Open;
     function ParamByName(const Value: String): IsmxParam;
     procedure Post;
-    procedure Prepare; virtual;
+    //procedure Prepare; virtual;
     procedure Prior;
     procedure Remove;
     procedure RemoveField(const Value: IsmxField);
@@ -169,11 +171,12 @@ type
     function GetDataSetType: TsmxDataSetType; override;
     function GetSQL: TStrings; override;
     procedure SetSQL(Value: TStrings); override;
+    //procedure SetPrepare(Value: Boolean); override;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Execute; override;
-    procedure Prepare; override;
+    //procedure Prepare; override;
   end;
 
   { TsmxADOStoredProc }
@@ -186,11 +189,12 @@ type
     function GetDataSetType: TsmxDataSetType; override;
     function GetSQL: TStrings; override;
     procedure SetSQL(Value: TStrings); override;
+    procedure SetPrepare(Value: Boolean); override;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Execute; override;
-    procedure Prepare; override;
+    //procedure Prepare; override;
   end;
 
 function NewADODatabase: IsmxDatabase;
@@ -199,7 +203,7 @@ function NewADODatabase: IsmxDatabase;
 implementation
 
 uses
-  StrUtils, {ActiveX,} smxConsts, smxField;
+  StrUtils, {ActiveX,} smxConsts, smxField, smxProcs, smxFuncs;
 
 const
   Vers = '1.0';
@@ -341,7 +345,7 @@ end;
 constructor TsmxADOParam.Create(AParam: TParameter);
 begin
   inherited Create;
-  FParam := AParam;  
+  FParam := AParam;
 end;
 
 destructor TsmxADOParam.Destroy;
@@ -441,8 +445,12 @@ begin
 end;
 
 procedure TsmxADOParam.LoadFromStream(Stream: TStream);
+var
+  Str: String;
 begin
-  FParam.LoadFromStream(Stream, ftBlob);
+  //FParam.LoadFromStream(Stream, ftBlob);
+  smxProcs.StreamToStr(Stream, Str);
+  FParam.Value := Str;
 end;
 
 procedure TsmxADOParam.SetDataType(Value: TsmxDataType);
@@ -493,16 +501,21 @@ end;
 
 procedure TsmxADOParam.SaveToStream(Stream: TStream);
 begin
-  //FParam.
+  smxProcs.StrToStream(FParam.Value, Stream);
 end;
 
-function TsmxADOParam.GetParamLocation: TsmxParamLocation;
+{function TsmxADOParam.GetParamLocation: TsmxParamLocation;
 begin
   Result := plConst;
 end;
 
 procedure TsmxADOParam.SetParamLocation(Value: TsmxParamLocation);
 begin
+end;}
+
+function TsmxADOParam.GetIsBlob: Boolean;
+begin
+  Result := smxFuncs.IsBlobType(FParam.DataType, Length(FParam.Value));
 end;
 
 { TsmxADODataSet }
@@ -717,9 +730,9 @@ begin
   FADODataSet.Post;
 end;
 
-procedure TsmxADODataSet.Prepare;
+{procedure TsmxADODataSet.Prepare;
 begin
-end;
+end;}
 
 procedure TsmxADODataSet.Prior;
 begin
@@ -836,10 +849,10 @@ begin
   Result := TADOQuery(FADODataSet).SQL;
 end;
 
-procedure TsmxADOQuery.Prepare;
+{procedure TsmxADOQuery.Prepare;
 begin
   TADOQuery(FADODataSet).Prepared := True;
-end;
+end;}
 
 procedure TsmxADOQuery.SetSQL(Value: TStrings);
 begin
@@ -883,12 +896,20 @@ begin
   //TADOStoredProc(FADODataSet).ProcedureName := FSQL.Text;
 end;
 
-procedure TsmxADOStoredProc.Prepare;
+{procedure TsmxADOStoredProc.Prepare;
 begin
   TADOStoredProc(FADODataSet).ProcedureName :=
     WideString(AnsiReplaceStr(FSQL.Text, sLineBreak, ''));
   TADOStoredProc(FADODataSet).Parameters.Refresh;
   TADOStoredProc(FADODataSet).Prepared := True;
+end;}
+
+procedure TsmxADOStoredProc.SetPrepare(Value: Boolean);
+begin
+  TADOStoredProc(FADODataSet).ProcedureName :=
+    WideString(AnsiReplaceStr(FSQL.Text, sLineBreak, ''));
+  //TADOStoredProc(FADODataSet).Parameters.Refresh;
+  inherited SetPrepare(Value);
 end;
 
 procedure TsmxADOStoredProc.SetSQL(Value: TStrings);

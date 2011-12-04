@@ -72,28 +72,34 @@ type
 
   { TsmxRequestCfg }
 
-  {TsmxRequestCfg = class(TsmxCellCfg)
+  TsmxRequestCfg = class(TsmxCellCfg)
   private
-    FDataSetType: TsmxDataSetType;
-    FPerformanceMode: TsmxPerformanceMode;
-    FRequestFields: TsmxRequestFields;
-    FRequestParams: TsmxLocationParams;
-    FSQLText: String;
-    function GetRequestFields: TsmxRequestFields;
-    function GetRequestParams: TsmxLocationParams;
-  protected
-    procedure ReadCfg; override;
-    procedure WriteCfg; override;
+    FReqDataSetType: TsmxDataSetType;
+    FReqPerformanceMode: TsmxPerformanceMode;
+    FReqFields: TsmxSenseFields;
+    FReqParams: TsmxLocationParams;
+    FReqSQLText: String;
+    FReqModifySetting: TsmxModifySetting;
+    function GetReqFields: TsmxSenseFields;
+    function GetReqParams: TsmxLocationParams;
+    procedure SetReqModifySetting(Value: TsmxModifySetting);
+  //protected
+    //procedure ReadCfg; override;
+    //procedure WriteCfg; override;
+    //procedure SetModifySetting(Value: TsmxModifySetting); virtual;
   public
     destructor Destroy; override;
     procedure Clear; override;
+    procedure ReadCfg; override;
+    procedure WriteCfg; override;
 
-    property DataSetType: TsmxDataSetType read FDataSetType write FDataSetType;
-    property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write FPerformanceMode;
-    property RequestFields: TsmxRequestFields read GetRequestFields;
-    property RequestParams: TsmxLocationParams read GetRequestParams;
-    property SQLText: String read FSQLText write FSQLText;
-  end;}
+    property ReqDataSetType: TsmxDataSetType read FReqDataSetType write FReqDataSetType;
+    property ReqPerformanceMode: TsmxPerformanceMode read FReqPerformanceMode write FReqPerformanceMode;
+    property ReqFields: TsmxSenseFields read GetReqFields;
+    property ReqParams: TsmxLocationParams read GetReqParams;
+    property ReqSQLText: String read FReqSQLText write FReqSQLText;
+    property ReqModifySetting: TsmxModifySetting read FReqModifySetting write SetReqModifySetting;
+  end;
 
   { TsmxColumnCfg }
 
@@ -592,38 +598,44 @@ end;}
 
 { TsmxRequestCfg }
 
-{destructor TsmxRequestCfg.Destroy;
+destructor TsmxRequestCfg.Destroy;
 begin
-  if Assigned(FRequestParams) then
-    FRequestParams.Free;
-  if Assigned(FRequestFields) then
-    FRequestFields.Free;
+  if Assigned(FReqParams) then
+    FReqParams.Free;
+  if Assigned(FReqFields) then
+    FReqFields.Free;
   inherited Destroy;
 end;
 
 procedure TsmxRequestCfg.Clear;
 begin
-  FDataSetType := dstUnknown;
-  FPerformanceMode := pmOpen;
-  FSQLText := '';
-  if Assigned(FRequestParams) then
-    FRequestParams.Clear;
-  if Assigned(FRequestFields) then
-    FRequestFields.Clear;
+  FReqDataSetType := dstUnknown;
+  FReqPerformanceMode := pmOpen;
+  FReqSQLText := '';
+  with FReqModifySetting do
+  begin
+    InsertCfgID := 0;
+    UpdateCfgID := 0;
+    DeleteCfgID := 0;
+  end;
+  if Assigned(FReqParams) then
+    FReqParams.Clear;
+  if Assigned(FReqFields) then
+    FReqFields.Clear;
 end;
 
-function TsmxRequestCfg.GetRequestFields: TsmxRequestFields;
+function TsmxRequestCfg.GetReqFields: TsmxSenseFields;
 begin
-  if not Assigned(FRequestFields) then
-    FRequestFields := TsmxRequestFields.Create(TsmxRequestField);
-  Result := FRequestFields;
+  if not Assigned(FReqFields) then
+    FReqFields := TsmxSenseFields.Create(TsmxSenseField);
+  Result := FReqFields;
 end;
 
-function TsmxRequestCfg.GetRequestParams: TsmxLocationParams;
+function TsmxRequestCfg.GetReqParams: TsmxLocationParams;
 begin
-  if not Assigned(FRequestParams) then
-    FRequestParams := TsmxLocationParams.Create(TsmxLocationParam);
-  Result := FRequestParams;
+  if not Assigned(FReqParams) then
+    FReqParams := TsmxLocationParams.Create(TsmxLocationParam);
+  Result := FReqParams;
 end;
 
 procedure TsmxRequestCfg.ReadCfg;
@@ -639,9 +651,9 @@ begin
   n := r.ChildNodes.FindNode('Request');
   if Assigned(n) then
   begin
-    SQLText := n.Attributes['SQLText'];
-    DataSetType := n.Attributes['Type'];
-    PerformanceMode := n.Attributes['Perform'];
+    ReqSQLText := n.Attributes['SQLText'];
+    ReqDataSetType := n.Attributes['Type'];
+    ReqPerformanceMode := n.Attributes['Perform'];
   end;
 
   n := r.ChildNodes.FindNode('Params');
@@ -650,11 +662,13 @@ begin
     //RequestParams.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Param' then
-        with RequestParams.Add do
+        with ReqParams.Add do
         begin
           ParamName := n.ChildNodes[i].Attributes['Name'];
           ParamDefValue := VarStringToVar(n.ChildNodes[i].Attributes['DefValue']);
           ParamLocation := n.ChildNodes[i].Attributes['Location'];
+          ParamType := n.ChildNodes[i].Attributes['ParamType'];
+          DataType := n.ChildNodes[i].Attributes['DataType'];
         end;
   end;
 
@@ -664,18 +678,28 @@ begin
     //RequestFields.Clear;
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Field' then
-        with RequestFields.Add do
+        with ReqFields.Add do
         begin
           FieldName := n.ChildNodes[i].Attributes['Name'];
           FieldFormat := n.ChildNodes[i].Attributes['Format'];
           FieldSense := n.ChildNodes[i].Attributes['Sense'];
         end;
   end;
+
+  n := r.ChildNodes.FindNode('Modify');
+  if Assigned(n) then
+    with ReqModifySetting do
+    begin
+      InsertCfgID := n.Attributes['InsertCfgID'];
+      UpdateCfgID := n.Attributes['UpdateCfgID'];
+      DeleteCfgID := n.Attributes['DeleteCfgID'];
+    end;
 end;
 
 procedure TsmxRequestCfg.WriteCfg;
 var
-  r, n: IXMLNode; i: Integer;
+  r, n: IXMLNode;
+  i: Integer;
 begin
   r := XMLDoc.ChildNodes.FindNode('Root');
   if Assigned(r) then
@@ -683,28 +707,35 @@ begin
     r := XMLDoc.AddChild('Root');
 
   n := r.AddChild('Request');
-  n.Attributes['SQLText'] := SQLText;
-  n.Attributes['Type'] := DataSetType;
-  n.Attributes['Perform'] := PerformanceMode;
+  n.Attributes['SQLText'] := ReqSQLText;
+  n.Attributes['Type'] := ReqDataSetType;
+  n.Attributes['Perform'] := ReqPerformanceMode;
 
   n := r.AddChild('Params');
-  for i := 0 to RequestParams.Count - 1 do
+  for i := 0 to ReqParams.Count - 1 do
     with n.AddChild('Param') do
     begin
-      Attributes['Name'] := RequestParams[i].ParamName;
-      Attributes['DefValue'] := RequestParams[i].ParamDefValue;
-      Attributes['Location'] := RequestParams[i].ParamLocation;
+      Attributes['Name'] := ReqParams[i].ParamName;
+      Attributes['DefValue'] := ReqParams[i].ParamDefValue;
+      Attributes['Location'] := ReqParams[i].ParamLocation;
+      Attributes['ParamType'] := ReqParams[i].ParamType;
+      Attributes['DataType'] := ReqParams[i].DataType;
     end;
 
   n := r.AddChild('Fields');
-  for i := 0 to RequestFields.Count - 1 do
+  for i := 0 to ReqFields.Count - 1 do
     with n.AddChild('Field') do
     begin
-      Attributes['Name'] := RequestFields[i].FieldName;
-      Attributes['Format'] := RequestFields[i].FieldFormat;
-      Attributes['Sense'] := RequestFields[i].FieldSense;
+      Attributes['Name'] := ReqFields[i].FieldName;
+      Attributes['Format'] := ReqFields[i].FieldFormat;
+      Attributes['Sense'] := ReqFields[i].FieldSense;
     end;
-end;}
+end;
+
+procedure TsmxRequestCfg.SetReqModifySetting(Value: TsmxModifySetting);
+begin
+  FReqModifySetting := Value;
+end;
 
 { TsmxColumnCfg }
 
@@ -1003,6 +1034,8 @@ begin
           ParamName := n.ChildNodes[i].Attributes['Name'];
           ParamDefValue := VarStringToVar(n.ChildNodes[i].Attributes['DefValue']);
           ParamLocation := n.ChildNodes[i].Attributes['Location'];
+          ParamType := n.ChildNodes[i].Attributes['ParamType'];
+          DataType := n.ChildNodes[i].Attributes['DataType']
         end;
   end;
 end;
@@ -2322,7 +2355,7 @@ initialization
     TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
 
 finalization
-  UnRegisterClasses([{TsmxRequestCfg,} TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
+  UnRegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg, TsmxLibAlgorithmCfg,
     TsmxAlgorithmListCfg,TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg,
     TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuItemCfg, TsmxMainMenuCfg,
     TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);

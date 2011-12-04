@@ -3,19 +3,36 @@ unit smxClassProcs;
 interface
 
 uses
-  smxClasses, smxDBIntf;
+  Classes, smxClasses, smxDBIntf;
 
 //procedure RegistrationClasses(AClasses: array of TsmxComponent);
 procedure VarToParams(AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 
 var
-  SelectRequestCfg: TsmxRequestCfg = nil;
+  //SelectRequestCfg: TsmxRequestCfg = nil;
+  SelectRequest: TsmxCustomRequest = nil;
+//function SelectRequest: TsmxCustomRequest;
+//function DataStream: TStream;
 
 implementation
 
 uses
   Variants;
+
+//var
+  //_SelectRequest: TsmxCustomRequest = nil;
+  //_DataStream: TStream = nil;
+
+{function SelectRequest: TsmxCustomRequest;
+begin
+  Result := _SelectRequest;
+end;}
+
+{function DataStream: TStream;
+begin
+  Result := _DataStream;
+end;}
 
 {procedure RegistrationClasses(AClasses: array of TsmxComponent);
 var i: Integer;
@@ -59,12 +76,18 @@ begin
     v2 := Variants.VarArrayCreate([0, AParams.Count - 1], varVariant);
     for i := 0 to AParams.Count - 1 do
     begin
-      v1[i] := AParams[i].ParamName;
-      v2[i] := AParams[i].ParamValue;
+      v1[i] := AParams.Items[i].ParamName;
+      v2[i] := AParams.Items[i].ParamValue;
     end;
     AValue[0] := v1;
     AValue[1] := v2;
   end;
 end;
+
+//initialization
+  //_DataStream := TMemoryStream.Create;
+
+//finalization
+  //_DataStream.Free;
 
 end.

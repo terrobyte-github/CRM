@@ -11,6 +11,8 @@ type
   TsmxField = class(TsmxInterfacedComponent, IsmxField)
   private
     FField: TField;
+    //FStream: TStream;
+    //function GetStream: TStream;
   protected
     function GetCalculated: Boolean;
     function GetDataType: TsmxDataType;
@@ -22,7 +24,8 @@ type
     function GetFieldNo: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
-    function GetFieldSense: TsmxFieldSense;
+    //function GetFieldSense: TsmxFieldSense;
+    function GetIsBlob: Boolean;
     function GetVersion: String; override;
     procedure SetCalculated(Value: Boolean);
     procedure SetDefaultExpression(Value: String);
@@ -30,13 +33,16 @@ type
     procedure SetFieldKind(Value: TsmxFieldKind);
     procedure SetFieldName(Value: String);
     procedure SetValue(Value: Variant);
-    procedure SetFieldSense(Value: TsmxFieldSense);
+    //procedure SetFieldSense(Value: TsmxFieldSense);
+
+    //property Stream: TStream read GetStream;
   public
     constructor Create(AField: TField);
     destructor Destroy; override;
     //procedure AssignField(Source: TObject);
     procedure AssignField(const Source: IsmxField);
     //function CreateStream: TStream;
+    procedure LoadFromStream(Stream: TStream);
     procedure SaveToStream(Stream: TStream);
 
     property Calculated: Boolean read GetCalculated write SetCalculated;
@@ -49,13 +55,14 @@ type
     property FieldNo: Integer read GetFieldNo;
     property Size: Integer read GetSize;
     property Value: Variant read GetValue write SetValue;
-    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    //property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    property IsBlob: Boolean read GetIsBlob;
   end;
 
 implementation
 
 uses
-  smxConsts;
+  smxConsts, smxProcs;
 
 const
   Vers = '1.0';
@@ -71,6 +78,8 @@ end;
 destructor TsmxField.Destroy;
 begin
   FField := nil;
+  //if Assigned(FStream) then
+    //FStream.Free;
   inherited Destroy;
 end;
 
@@ -94,15 +103,16 @@ begin
 end;}
 
 procedure TsmxField.SaveToStream(Stream: TStream);
-var
-  s: TStream;
+//var
+  //s: TStream;
 begin
-  s := FField.DataSet.CreateBlobStream(FField, bmRead);
+  {s := FField.DataSet.CreateBlobStream(FField, bmRead);
   try
     Stream.CopyFrom(s, 0);
   finally
     s.Free;
-  end;
+  end;}
+  smxProcs.StrToStream(FField.Value, Stream);
 end;
 
 function TsmxField.GetCalculated: Boolean;
@@ -205,13 +215,33 @@ begin
   FField.Value := Value;
 end;
 
-function TsmxField.GetFieldSense: TsmxFieldSense;
+{function TsmxField.GetFieldSense: TsmxFieldSense;
 begin
   Result := fsGeneral;
 end;
 
 procedure TsmxField.SetFieldSense(Value: TsmxFieldSense);
-begin  
+begin
+end;}
+
+function TsmxField.GetIsBlob: Boolean;
+begin
+  Result := FField.IsBlob;
 end;
+
+procedure TsmxField.LoadFromStream(Stream: TStream);
+var
+  Str: String;
+begin
+  smxProcs.StreamToStr(Stream, Str);
+  FField.Value := Str;
+end;
+
+{function TsmxField.GetStream: TStream;
+begin
+  if not Assigned(FStream) then
+    FStream := TMemoryStream.Create;
+  Result := FStream;
+end;}
 
 end.

@@ -39,7 +39,8 @@ contains
   smxFuncs in '..\Common\smxFuncs.pas',
   smxProcs in '..\Common\smxProcs.pas',
   smxTypes in '..\Common\smxTypes.pas',
-  smxDBFuncs in '..\Common\smxDBFuncs.pas';
+  smxDBFuncs in '..\Common\smxDBFuncs.pas',
+  smxBaseIntf in '..\Common\smxBaseIntf.pas';
 
 end.
 

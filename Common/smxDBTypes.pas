@@ -8,9 +8,9 @@ uses
 type
   TsmxFuncNewDatabase = function: IsmxDatabase;
 
-  TsmxParamsArray = array of IsmxParam;
+  TsmxParamArray = array of IsmxParam;
 
-  TsmxFieldsArray = array of IsmxField;
+  TsmxFieldArray = array of IsmxField;
 
 implementation
 

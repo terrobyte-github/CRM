@@ -5,9 +5,9 @@ interface
 uses
   smxDBIntf, smxDBTypes, smxTypes;
 
-function GetParamsLocationCountDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): Integer;
+{function GetParamsLocationCountDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): Integer;
 function GetParamsLocationDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
-  AParams: TsmxParamsArray): Boolean;
+  AParams: TsmxParamArray): Boolean;
 function GetParamLocationDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): IsmxParam;
 function GetParamLocationValueDefDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
   ADevValue: Variant; var AValue: Variant): Boolean; overload;
@@ -17,7 +17,7 @@ function SetParamLocationValueDS(const ADataSet: IsmxDataSet; ALocation: TsmxPar
   AValue: Variant): Boolean;
 function GetFieldsSenseCountDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): Integer;
 function GetFieldsSenseDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
-  AFields: TsmxFieldsArray): Boolean;
+  AFields: TsmxFieldArray): Boolean;
 function GetFieldSenseDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): IsmxField;
 function GetFieldSenseValueDefDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
   ADevValue: Variant; var AValue: Variant): Boolean; overload;
@@ -26,14 +26,14 @@ function GetFieldSenseValueDefDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldS
 function GetValueByKeyDS(ADataSet: IsmxDataSet; AKey: Variant;
   var AValue: Variant; AMode: TsmxPerformanceMode = pmOpen): Boolean;
 function SetValueByKeyDS(ADataSet: IsmxDataSet; var AKey: Variant;
-  AValue: Variant; AMode: TsmxPerformanceMode = pmExecute): Boolean;
+  AValue: Variant; AMode: TsmxPerformanceMode = pmExecute): Boolean;}
 
 implementation
 
 uses
   Variants;
 
-function GetParamsLocationCountDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): Integer;
+{function GetParamsLocationCountDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): Integer;
 var
   i: Integer;
 begin
@@ -46,15 +46,15 @@ begin
 end;
 
 function GetParamsLocationDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
-  AParams: TsmxParamsArray): Boolean;
+  AParams: TsmxParamArray): Boolean;
 var
   i, j: Integer;
 begin
   Result := False;
   j := GetParamsLocationCountDS(ADataSet, ALocation);
+  SetLength(AParams, j);
   if j > 0 then
   begin
-    SetLength(AParams, j);
     j := 0;
     for i := 0 to ADataSet.ParamCount - 1 do
       if ADataSet.Params[i].ParamLocation = ALocation then
@@ -68,12 +68,15 @@ end;
 
 function GetParamLocationDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation): IsmxParam;
 var
-  Params: TsmxParamsArray;
+  Params: TsmxParamArray;
 begin
   Result := nil;
   Params := nil;
   if GetParamsLocationDS(ADataSet, ALocation, Params) then
+  begin
     Result := Params[0];
+    SetLength(Params, 0);
+  end;
 end;
 
 function GetParamLocationValueDefDS(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
@@ -124,15 +127,15 @@ begin
 end;
 
 function GetFieldsSenseDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
-  AFields: TsmxFieldsArray): Boolean;
+  AFields: TsmxFieldArray): Boolean;
 var
   i, j: Integer;
 begin
   Result := False;
   j := GetFieldsSenseCountDS(ADataSet, ASense);
+  SetLength(AFields, j);
   if j > 0 then
   begin
-    SetLength(AFields, j);
     j := 0;
     for i := 0 to ADataSet.FieldCount - 1 do
       if ADataSet.Fields[i].FieldSense = ASense then
@@ -146,12 +149,15 @@ end;
 
 function GetFieldSenseDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): IsmxField;
 var
-  Fields: TsmxFieldsArray;
+  Fields: TsmxFieldArray;
 begin
   Result := nil;
   Fields := nil;
   if GetFieldsSenseDS(ADataSet, ASense, Fields) then
+  begin
     Result := Fields[0];
+    SetLength(Fields, 0);
+  end;
 end;
 
 function GetFieldSenseValueDefDS(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
@@ -209,6 +215,6 @@ begin
       dstStoredProc: GetParamLocationValueDefDS(ADataSet, plKey, AKey, AKey);
     end;
   end;
-end;
+end;}
 
 end.

@@ -22,8 +22,7 @@ type
 
   TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
     plForeignKey, plInput, plOutput, plFilterDesk, plGrid,
-    plParentFormFilterDesk, plParentFormGrid, plCommonParams,
-    plFormIntfID, plFormID);
+    plParentFilterDesk, plParentGrid, plCommonParams, plFormID);
 
   TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
     fsForeignKey);
@@ -92,6 +91,8 @@ type
     UpdateCfgID,
     DeleteCfgID: Integer;
   end;
+
+  TsmxModifyRequest = (mrInsert, mrUpdate, mrDelete);
 
 implementation
 

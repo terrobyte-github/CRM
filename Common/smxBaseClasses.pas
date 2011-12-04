@@ -3,7 +3,7 @@ unit smxBaseClasses;
 interface
 
 uses
-  Classes;
+  Classes, smxBaseIntf;
 
 type
   { TsmxComponent }
@@ -21,11 +21,11 @@ type
 
   { TsmxInterfacedComponent }
 
-  TsmxInterfacedComponent = class(TInterfacedObject)
+  TsmxInterfacedComponent = class(TInterfacedObject, IsmxBaseInterface)
   protected
     function GetVersion: String; virtual;
   public
-    class function GetDescription: String; virtual;
+    function GetDescription: String; virtual;
 
     property Version: String read GetVersion;
   end;
@@ -65,14 +65,14 @@ end;
 
 { TsmxInterfacedComponent }
 
-class function TsmxInterfacedComponent.GetDescription: String;
+function TsmxInterfacedComponent.GetDescription: String;
 begin
   Result := ClassName;
 end;
 
 function TsmxInterfacedComponent.GetVersion: String;
 begin
-  Result := '';
+  Result := smxIntfVersion;
 end;
 
 end.

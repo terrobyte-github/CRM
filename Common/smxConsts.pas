@@ -10,6 +10,7 @@ const
   //SFileProjectName = 'proj.dat';
   SFileConfigurationName = '..\Cfg\conf.ini'; //'conf.ini'; //'Cfg\cfg.ini';
   SXMLDocTextDef = '<?xml version="1.0"?><Root></Root>';
+  SFilterNameSuffix = 'Text';
 
 resourcestring
   { DBInterface }
@@ -21,17 +22,18 @@ resourcestring
   SDBIntfDataSetUnknown = 'Type of dataset unknown';
 
   { Cfg }
-  SCfgBuildError = 'Configuration build error';
-  SCfgFinalizeError = 'Configuration finalize error';
-  SCfgInitializeError = 'Configuration initialize error';
-  SCfgLoadError = 'ClassName %s of configuration with ID %d load error';
-  SCfgSaveError = 'ClassName %s of configuration with ID %d save error';
-  SCfgReadError = 'ClassName %s of configuration with ID %d read error';
-  SCfgWriteError = 'ClassName %s of configuration with ID %d write error';
+  SCfgBuildError = 'A ClassName %s of configuration with ID %d build error';
+  //SCfgFinalizeError = 'Configuration finalize error';
+  //SCfgInitializeError = 'Configuration initialize error';
+  SCfgLoadError = 'A ClassName %s of configuration with ID %d load error';
+  SCfgSaveError = 'A ClassName %s of configuration with ID %d save error';
+  SCfgReadError = 'A ClassName %s of configuration with ID %d read error';
+  SCfgWriteError = 'A ClassName %s of configuration with ID %d write error';
+  SCfgRemoveError = 'A ClassName %s of configuration with ID %d remove error';
 
   { Cell }
-  SCellBuildError = 'Cell build error';
-  SCellRequestPerformError = 'Request perform Error';
+  SCellBuildError = 'A cell with ID %d build error';
+  SCellRequestPerformError = 'A ClassName %s of Request with ID %d perform error';
 
   { LibManager }
   //SLibManagerFreeError = 'Library free error';
@@ -41,8 +43,10 @@ resourcestring
   SAlgExecuteError = 'Algorithm execute error';
 
   { Kit }
-  SKitParamNotFound = 'The parameter is not found';
-  SKitParamExists = 'The parameter already exists';
+  SKitItemNotFound = 'In a ClassName %s item with name %s is not found';
+  SKitItemExist = 'In a ClassName %s item with name %s already exist';
+  SKitItemClassTypeError = 'Cannot set a ClassName %s to a ClassName %s';
+  SKitItemAssignError = 'Cannot assign a ClassName %s to a ClassName %s';
 
 implementation
 

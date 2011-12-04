@@ -6,7 +6,7 @@ uses
   Classes, Windows, smxClasses;
 
 type
-  TsmxProcAlgExecute = procedure(Algorithm: TsmxCustomAlgorithm; Params: Variant);
+  TsmxProcAlgExecute = procedure(Algorithm: TsmxCustomAlgorithm{; Params: Variant});
 
   //TsmxFuncNewCell = function(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer): TsmxBaseCell;
 
@@ -22,6 +22,10 @@ type
   //TsmxProcAddFormIntoManager = procedure(AForm: TsmxCustomForm);
 
   //TsmxProcDelFormFromManager = procedure(AForm: TsmxCustomForm);
+
+  //TsmxLocationParamArray = Array of TsmxLocationParam;
+
+  //TsmxSenseFieldArray = Array of TsmxSenseField;
 
 implementation
 
