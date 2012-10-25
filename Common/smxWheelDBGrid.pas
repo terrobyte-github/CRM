@@ -44,11 +44,10 @@ procedure TsmxWheelDBGrid.WheelDownProc(Sender: TObject; Shift: TShiftState; Mou
   var Handled: Boolean);
 begin
   with TDBGrid(Sender) do
-    if Assigned(DataSource) then
-      if Assigned(DataSource.DataSet) then
-        if DataSource.DataSet.Active then
-          if DataSource.DataSet.RecNo < DataSource.DataSet.RecordCount then
-            DataSource.DataSet.MoveBy(1);
+    if Assigned(DataSource) and Assigned(DataSource.DataSet) then
+      if DataSource.DataSet.Active
+          and (DataSource.DataSet.RecNo < DataSource.DataSet.RecordCount) then
+        DataSource.DataSet.MoveBy(1);
   Handled := True;
 end;
 
@@ -56,11 +55,9 @@ procedure TsmxWheelDBGrid.WheelUpProc(Sender: TObject; Shift: TShiftState; Mouse
   var Handled: Boolean);
 begin
   with TDBGrid(Sender) do
-    if Assigned(DataSource) then
-      if Assigned(DataSource.DataSet) then
-        if DataSource.DataSet.Active then
-          if DataSource.DataSet.RecNo > 0 then
-            DataSource.DataSet.MoveBy(-1);
+    if Assigned(DataSource) and Assigned(DataSource.DataSet) then
+      if DataSource.DataSet.Active and (DataSource.DataSet.RecNo > 0) then
+        DataSource.DataSet.MoveBy(-1);
   Handled := True;
 end;
 

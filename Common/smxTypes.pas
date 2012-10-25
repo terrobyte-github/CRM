@@ -3,7 +3,7 @@ unit smxTypes;
 interface
 
 uses
-  Classes, Controls, Graphics;
+  Classes, Controls, Graphics, Types;
 
 type
   TsmxCellFont = record
@@ -14,20 +14,13 @@ type
   end;
 
   TsmxCellText = record
-    Text: String;
+    Caption: String;
     Align: TAlignment;
     Color: Integer;
     Font: TsmxCellFont;
   end;
 
-  TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
-    plForeignKey, plInput, plOutput, plFilterDesk, plGrid,
-    plParentFilterDesk, plParentGrid, plCommonParams, plFormID);
-
-  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
-    fsForeignKey);
-
-  TsmxPerformanceMode = (pmOpen, pmExecute);    
+  TsmxPerformanceMode = (pmOpen, pmExecute);
 
   TsmxOperationMode = (omManual, omAutomatic);
 
@@ -41,29 +34,25 @@ type
 
   TsmxGridOptions = set of TsmxGridOption;
 
-  TsmxPositionSize = record
-    Left, Top, Height, Width: Integer;
-  end;
-  
   TsmxControlCellSetting = record
     CfgID: Integer;
     Align: TAlign;
     Enable, Visible: Boolean;
-    PositionSize: TsmxPositionSize;
+    Position: TRect;
   end;
 
-  TsmxAlgorithmListSetting = record
+  {TsmxAlgorithmListSetting = record
     CfgID: Integer;
     IsCreateMenuItem: Boolean;
     IsCreateToolButton: Boolean;
-  end;
+  end;}
 
   TsmxAlgorithmSetting = record
     CfgID: Integer;
     Caption: String;
-    Enable: Boolean;
+    Hint: String;
     HotKey: Integer;
-    Visible: Boolean;
+    ImageIndex: Integer;
   end;
 
   TsmxGenerationMode = (gmFunction, gmCOM);
@@ -84,15 +73,19 @@ type
 
   TsmxFuncDatabaseCLSID = function: TGUID;
 
-  TsmxFuncNewResource = function(AName: String): TResourceStream;
+  TsmxFuncNewResource = function(AName: String; AStream: TResourceStream): Boolean;
 
-  TsmxModifySetting = record
+  {TsmxModifySetting = record
     InsertCfgID,
     UpdateCfgID,
     DeleteCfgID: Integer;
-  end;
+  end;}
 
   TsmxModifyRequest = (mrInsert, mrUpdate, mrDelete);
+
+  TsmxFilterOption = (foApplyValue, foPrepareValue);
+
+  TsmxFilterOptions = set of TsmxFilterOption;
 
 implementation
 

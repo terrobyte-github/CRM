@@ -5,43 +5,22 @@ interface
 uses
   Classes, smxClasses, smxDBIntf;
 
-//procedure RegistrationClasses(AClasses: array of TsmxComponent);
-procedure VarToParams(AValue: Variant; AParams: TsmxParams);
+procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
+procedure AllCells(ACell: TsmxBaseCell; AList: TList;
+  AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);
+procedure AllParents(ACell: TsmxBaseCell; AList: TList;
+  AClassList: array of TsmxBaseCellClass);
 
 var
-  //SelectRequestCfg: TsmxRequestCfg = nil;
-  SelectRequest: TsmxCustomRequest = nil;
-//function SelectRequest: TsmxCustomRequest;
-//function DataStream: TStream;
+  gSelectRequest: TsmxCustomRequest = nil;
 
 implementation
 
 uses
   Variants;
 
-//var
-  //_SelectRequest: TsmxCustomRequest = nil;
-  //_DataStream: TStream = nil;
-
-{function SelectRequest: TsmxCustomRequest;
-begin
-  Result := _SelectRequest;
-end;}
-
-{function DataStream: TStream;
-begin
-  Result := _DataStream;
-end;}
-
-{procedure RegistrationClasses(AClasses: array of TsmxComponent);
-var i: Integer;
-begin
-  for i := Low(AClasses) to High(AClasses) do
-    RegisterClass(TPersistentClass(AClasses[i]));
-end;}
-
-procedure VarToParams(AValue: Variant; AParams: TsmxParams);
+procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 var
   i: Integer;
 begin
@@ -84,10 +63,74 @@ begin
   end;
 end;
 
-//initialization
-  //_DataStream := TMemoryStream.Create;
+procedure AllCells(ACell: TsmxBaseCell; AList: TList;
+  AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);
 
-//finalization
-  //_DataStream.Free;
+  function IsClass(ACurCell: TsmxBaseCell): Boolean;
+  var
+    i: Integer;
+  begin
+    Result := False;
+    for i := Low(AClassList) to High(AClassList) do
+      if ACurCell is AClassList[i] then
+        Result := True;
+  end;
+
+  function IsActive(ACurCell: TsmxBaseCell): Boolean;
+  begin
+    Result := True;
+    if ACurCell is TsmxControlCell then
+      Result := TsmxControlCell(ACurCell).CellActive;
+  end;
+
+  procedure AddChilds(ACurCell: TsmxBaseCell; AIsEmpty: Boolean);
+  var
+    i: Integer;
+  begin
+    if (AIsEmpty or IsClass(ACurCell)) and (not AIsActive or IsActive(ACurCell)) then
+      AList.Add(ACurCell);
+    for i := 0 to ACurCell.CellCount - 1 do
+      AddChilds(ACurCell.Cells[i], AIsEmpty);
+  end;
+
+var
+  i: Integer;
+begin
+  if not Assigned(AList) then
+    Exit;
+  AList.Clear;
+  for i := 0 to ACell.CellCount - 1 do
+    AddChilds(ACell.Cells[i], Length(AClassList) = 0);
+end;
+
+procedure AllParents(ACell: TsmxBaseCell; AList: TList;
+  AClassList: array of TsmxBaseCellClass);
+
+  function IsClass(ACurCell: TsmxBaseCell): Boolean;
+  var
+    i: Integer;
+  begin
+    Result := False;
+    for i := Low(AClassList) to High(AClassList) do
+      if ACurCell is AClassList[i] then
+        Result := True;
+  end;
+
+var
+  Cell: TsmxBaseCell;
+  Empty: Boolean;
+begin
+  if not Assigned(AList) then
+    Exit;
+  AList.Clear;
+  Empty := Length(AClassList) = 0;
+  Cell := ACell.CellParent;
+  while Assigned(Cell) do
+  begin
+    if Empty or IsClass(Cell) then
+      AList.Add(Cell);
+    Cell := Cell.CellParent;
+  end;
+end;
 
 end.

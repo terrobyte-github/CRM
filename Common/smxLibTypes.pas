@@ -8,7 +8,7 @@ uses
 type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;
 
-  TsmxVers = record
+  TsmxVersion = record
     Major, Minor, Release, Build: Word;
   end;
 
@@ -21,9 +21,9 @@ type
   TsmxLibInfo = record
     FullName: String;
     Description: String;
-    LibVers: TsmxVers;
+    LibVersion: TsmxVersion;
     LibTypes: TsmxLibTypes;
-    CompProgVers: TsmxVers;
+    ProgVersion: TsmxVersion;
     ProcInitLib: TsmxProcInitLib;
   end;
 
@@ -31,14 +31,6 @@ type
 
   TsmxResourceType = (rtImageList);
 
-  //TsmxProcLoadResource = procedure(AStream: TResourceStream; AName: String);
-
-  //TsmxFuncFindCommonParamByName = function(AName: String): Variant;
-
-  //TsmxFuncFindDatabaseByName = function(ADatabaseName: String): IsmxDatabase;
-
-  //TsmxFuncFindProcedureByName = function(ALibName, AProcName: String): Pointer;
-  
 implementation
 
 end.

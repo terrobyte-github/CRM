@@ -8,7 +8,7 @@ uses
 procedure LibInfo(var ALibInfo: TsmxLibInfo);
 procedure InitLib(ACall: TsmxFuncCallBack);
 procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
-  ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
+  ATypes: TsmxLibTypes = [ltAlgorithm]; const ADesc: String = '');
 
 var
   Call: TsmxFuncCallBack = nil;
@@ -29,21 +29,21 @@ end;
 procedure InitLib(ACall: TsmxFuncCallBack);
 begin
   Call := ACall;
-  //if Assigned(Call) then
-    //Application.Handle := HWND(Integer(Call(0)));
 end;
 
 procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
-  ATypes: TsmxLibTypes = [ltAlgorithm]; ADesc: String = '');
-var s: String; VersM, VersL: Cardinal;
+  ATypes: TsmxLibTypes = [ltAlgorithm]; const ADesc: String = '');
+var
+  s: String;
+  VersM, VersL: Cardinal;
 begin
-  s := GetModuleName(HInstance);
+  s := SysUtils.GetModuleName(HInstance);
   with Info do
   begin
     FullName := s;
     Description := ADesc;
-    GetFileFullVersion(s, VersM, VersL);
-    with LibVers do
+    smxProcs.GetFileFullVersion(s, VersM, VersL);
+    with LibVersion do
     begin
       Major := LongRec(VersM).Hi;
       Minor := LongRec(VersM).Lo;
@@ -51,7 +51,7 @@ begin
       Build := LongRec(VersL).Lo;
     end;
     LibTypes := ATypes;
-    with CompProgVers do
+    with ProgVersion do
     begin
       Major := ACompMajor;
       Minor := ACompMinor;

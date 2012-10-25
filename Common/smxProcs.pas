@@ -5,20 +5,17 @@ interface
 uses
   Classes, ImgList, smxTypes;
 
-procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
+procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
 procedure StreamToStr(AStream: TStream; var AStr: String);
 procedure StrToStream(const AStr: String; AStream: TStream);
-
-//var
-  //UpdateSetting: TsmxUpdateSetting;
 
 implementation
 
 uses
   Windows, SysUtils, CommCtrl;
 
-procedure GetFileFullVersion(AFileName: String; var AVersMost, AVersLeast: Cardinal);
+procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var
   s, h, w: DWORD;
   buf: PChar;
@@ -65,7 +62,6 @@ begin
     SetLength(AStr, Len);
     Position := 0;
     ReadBuffer(Pointer(AStr)^, Len);
-    //Position := 0;
   end;
 end;
 
@@ -73,14 +69,12 @@ procedure StrToStream(const AStr: String; AStream: TStream);
 var
   Len: Integer;
 begin
-  //Result := TMemoryStream.Create;
   with AStream do
   begin
     Len := Length(AStr);
     Size := Len;
     Position := 0;
     WriteBuffer(Pointer(AStr)^, Len);
-    //Position := 0;
   end;
 end;
 

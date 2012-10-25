@@ -492,8 +492,8 @@ initialization
   RegisterClasses([TsmxEditFilter, TsmxDateTimeFilter, TsmxBitBtnFilter,
     TsmxNumEditFilter, TsmxLabelFilter]);
 
-finalization
+{finalization
   UnRegisterClasses([TsmxEditFilter, TsmxDateTimeFilter, TsmxBitBtnFilter,
-    TsmxNumEditFilter, TsmxLabelFilter]);
+    TsmxNumEditFilter, TsmxLabelFilter]);}
 
 end.

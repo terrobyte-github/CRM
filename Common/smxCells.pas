@@ -23,36 +23,12 @@ type
   TsmxRequest = class(TsmxCustomRequest)
   private
     FDataSetIntf: IsmxDataSet;
-    //function GetCfg: TsmxRequestCfg;
   protected
-    //procedure UnInitialize; override;
-    //procedure SetDatabaseName(Value: String); override;
-    procedure SetDatabase(const Value: IsmxDatabase); override;
-    procedure SetDataSetType(Value: TsmxDataSetType); override;
-    //procedure SetDBManager(Value: TsmxCustomDBManager); override;
-    function GetDataSet: IsmxDataSet; virtual;
-    function GetParamValue(Name: String): Variant; override;
-    procedure SetParamValue(Name: String; Value: Variant); override;
-    function GetFieldValue(Name: String): Variant; override;
-    procedure SetFieldValue(Name: String; Value: Variant); override;
-
-    //property Cfg: TsmxRequestCfg read GetCfg;
-    property CellDataSet: IsmxDataSet read GetDataSet;
+    function GetDataSet: IsmxDataSet; override;
+    procedure InternalInitialize; override;
+    procedure SetDataSet(const Value: IsmxDataSet); override;
   public
-    //function FindFieldSense(AFieldSense: TsmxFieldSense; StartPos: Integer = 0): IsmxField; override;
-    //function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): IsmxParam; override;
     destructor Destroy; override;
-    procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
-      ASelectRequest: TsmxCustomRequest = nil); override;
-    procedure Prepare; override;
-    procedure Perform; override;
-    procedure RefreshParams; override;
-    procedure First; override;
-    procedure Last; override;
-    procedure Next; override;
-    procedure Prior; override;
-    function GetBof: Boolean; override;
-    function GetEof: Boolean; override;
   end;
 
   { TsmxColumn }
@@ -811,14 +787,14 @@ procedure TsmxRequest.RefreshParams;
   begin
     Result := False;
     AValue := Variants.Null;
-    Filter := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
+    if AForm is TsmxCustomStandardForm then
+      for i := 0 to TsmxCustomStandardForm(AForm).PageManagerCount - 1 do
       begin
-        Page := AForm.PageManagers[i].ActivePage;
+        Page := TsmxCustomStandardForm(AForm).PageManagers[i].ActivePage;
         if Assigned(Page) then
           for j := 0 to Page.SectionCount - 1 do
           begin
+            Filter := nil;
             if Assigned(Page.Sections[j].FilterDesk) then
               Filter := Page.Sections[j].FilterDesk.FindFilterByName(AName);
             if Assigned(Filter) then
@@ -836,23 +812,25 @@ procedure TsmxRequest.RefreshParams;
   var
     i, j: Integer;
     Page: TsmxCustomPage;
-    Field: TsmxSenseField;
+    Field: IsmxField;
   begin
     Result := False;
     AValue := Variants.Null;
-    Field := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
+    if AForm is TsmxCustomStandardForm then
+      for i := 0 to TsmxCustomStandardForm(AForm).PageManagerCount - 1 do
       begin
-        Page := AForm.PageManagers[i].ActivePage;
+        Page := TsmxCustomStandardForm(AForm).PageManagers[i].ActivePage;
         if Assigned(Page) then
           for j := 0 to Page.SectionCount - 1 do
           begin
-            if Assigned(Page.Sections[j].Request) then
-              Field := Page.Sections[j].Request.RequestFields.FindByName(AName);
+            Field := nil;
+            if Assigned(Page.Sections[j].Grid)
+                and Assigned(Page.Sections[j].Grid.Request)
+                and Assigned(Page.Sections[j].Grid.Request.DataSet) then
+              Field := Page.Sections[j].Grid.Request.DataSet.FindField(AName);
             if Assigned(Field) then
             begin
-              AValue := Page.Sections[j].Request.FieldValue[AName];
+              AValue := Field.Value;
               Result := True;
               Exit;
             end;
@@ -860,114 +838,129 @@ procedure TsmxRequest.RefreshParams;
       end;
   end;
 
+  function FindFilterOnSection(ASection: TsmxCustomSection; AName: String;
+    var AValue: Variant): Boolean;
+  var
+    Filter: TsmxCustomFilter;
+  begin
+    Result := False;
+    AValue := Variants.Null;
+    Filter := nil;
+    if Assigned(ASection.FilterDesk) then
+      Filter := ASection.FilterDesk.FindFilterByName(AName);
+    if Assigned(Filter) then
+    begin
+      AValue := Filter.FilterValue;
+      Result := True;
+    end;
+  end;
+
+  function FindFieldOnSection(ASection: TsmxCustomSection; AName: String;
+    var AValue: Variant): Boolean;
+  var
+    i: Integer;
+    Page: TsmxCustomPage;
+    Field: IsmxField;
+  begin
+    Result := False;
+    AValue := Variants.Null;
+    Page := nil;
+    if ASection.CellParent is TsmxCustomPage then
+      Page := TsmxCustomPage(ASection.CellParent);
+    if Assigned(Page) then
+      for i := 0 to Page.SectionCount - 1 do
+        if Page.Sections[i] <> ASection then
+        begin
+          Field := nil;
+          if Assigned(Page.Sections[i].Grid)
+              and Assigned(Page.Sections[i].Grid.Request)
+              and Assigned(Page.Sections[i].Grid.Request.DataSet) then
+            Field := Page.Sections[i].Grid.Request.DataSet.FindField(AName);
+          if Assigned(Field) then
+          begin
+            AValue := Field.Value;
+            Result := True;
+            Exit;
+          end;
+        end;
+  end;
+
 var
-  i, j: integer;
+  i: integer;
   Form, PForm: TsmxCustomForm;
+
   //Filter: TsmxCustomFilter;
   //Field: TsmxSenseField;
+
   Value: Variant;
   Res: Boolean;
+  Cell: TsmxBaseCell;
 begin
-  if not Assigned(CellDataSet) then
+  if not Assigned(DataSet) then
     Exit;
   Form := AccessoryForm;
-  for i := 0 to RequestParams.Count - 1 do
+  for i := 0 to DataSet.ParamCount - 1 do
     //with RequestParams[i] do
     begin
       Value := Variants.Null;
-      case RequestParams[i].ParamLocation of
-        plConst,
-        plKey,
-        plValue,
-        plResult,
-        plMessage,
-        plForeignKey,
-        plInput,
-        plOutput:
+      case DataSet.Params[i].ParamLocation of
+        plConst .. plOutput:
         begin
-          Value := RequestParams[i].ParamDefValue; //RequestParams.ParamByName(RequestParams[i].ParamName).ParamDefValue;
+          Value := DefValueList.Values[DataSet.Params[i].ParamName]; //RequestParams.ParamByName(RequestParams[i].ParamName).ParamDefValue;
         end;
         plFilterDesk:
         begin
-          //Filter := nil;
-          if ParentCell is TsmxCustomSection then
-            with TsmxCustomSection(ParentCell) do
-              if Assigned(FilterDesk) then
-                if Assigned(FilterDesk.FindFilterByName(RequestParams[i].ParamName)) then
-                  Value := FilterDesk.FindFilterByName(RequestParams[i].ParamName).FilterValue;
-          //if Assigned(Filter) then
-            //Value := Filter.FilterValue;
+          if CellParent is TsmxCustomSection then
+            FindFilterOnSection(TsmxCustomSection(CellParent),
+              DataSet.Params[i].ParamName, Value);
         end;
         plGrid:
         begin
-          //Field := nil;
-          if ParentCell is TsmxCustomSection then
-            if ParentCell.ParentCell is TsmxCustomPage then
-              with TsmxCustomPage(ParentCell.ParentCell) do
-                for j := 0 to SectionCount - 1 do
-                  if Sections[j] <> ParentCell then
-                    if Assigned(Sections[j].Request) then
-                      if Assigned(Sections[j].Request.RequestFields.FindByName(RequestParams[i].ParamName)) then
-                    //begin
-                      //Field := Sections[j].Request.RequestFields.FindByName(RequestParams[i].ParamName);
-                      //if Assigned(Field) then
-                        begin
-                          Value := Sections[j].Request.FieldValue[RequestParams[i].ParamName];
-                          Break;
-                        end;
-                    //end;
-          //if Assigned(Field) then
-            //Value := FieldValue[Field.FieldName];
-            //Value := Field.Value;
+          if CellParent is TsmxCustomSection then
+            FindFieldOnSection(TsmxCustomSection(CellParent),
+              DataSet.Params[i].ParamName, Value);
         end;
         plParentFilterDesk:
         begin
-          //Filter := nil;
           Res := False;
           if Assigned(Form) then
             PForm := Form.ParentForm else
             PForm := nil;
           while Assigned(PForm) and not Res do
           begin
-            Res := FindFilterOnForm(PForm, RequestParams[i].ParamName, Value);
+            Res := FindFilterOnForm(PForm, DataSet.Params[i].ParamName, Value);
             PForm := PForm.ParentForm;
           end;
-          //if Assigned(Filter) then
-            //Value := Filter.FilterValue;
         end;
         plParentGrid:
         begin
-          //Field := nil;
           Res := False;
           if Assigned(Form) then
             PForm := Form.ParentForm else
             PForm := nil;
           while Assigned(PForm) and not Res do
           begin
-            Res := FindFieldOnForm(PForm, RequestParams[i].ParamName, Value);
+            Res := FindFieldOnForm(PForm, DataSet.Params[i].ParamName, Value);
             PForm := PForm.ParentForm;
           end;
-          //if Assigned(Field) then
-            //Value := FieldValue[Field.FieldName];
-            //Value := Field.Value;
         end;
-        plCommonParams:
+        plStorageParams:
         begin
-          if Assigned(CommonStorage) then
-            Value := CommonStorage[RequestParams[i].ParamName];
+          if Assigned(StorageManager) then
+            Value := StorageManager.Values[DataSet.Params[i].ParamName];
         end;
-        plFormID:
+        plParentParams:
         begin
-          if Assigned(Form) then
-            Value := Form.ID;
+          Res := False;
+          Cell := CellParent;
+          while Assigned(Cell) and not Res do
+          begin
+            Res := Cell.CellParams(DataSet.Params[i].ParamName, Value);
+            Cell := Cell.CellParent;
+          end;
         end;
       end;
-      {if CellDataSet.ParamByName(ParamName).IsBlob then
-      begin
-        smxProcs.StrToStream(Value, DataStream);
-        CellDataSet.ParamByName(ParamName).LoadFromStream(DataStream);
-      end else}
-      CellDataSet.ParamByName(RequestParams[i].ParamName).Value := Value;
+      DataSet.Params[i].Value := Value;
     end;
 end;
 
@@ -4204,12 +4197,6 @@ end;
 
 initialization
   RegisterClasses([TsmxRequest, TsmxDBColumn, TsmxDBGrid, TsmxActionLibAlgorithm,
-    TsmxActionList,TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet,
-    TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxToolBar, TsmxControlBar,
-    TsmxStandardForm, TsmxMainForm]);
-
-finalization
-  UnRegisterClasses([TsmxRequest, TsmxDBColumn, TsmxDBGrid, TsmxActionLibAlgorithm,
     TsmxActionList,TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet,
     TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxToolBar, TsmxControlBar,
     TsmxStandardForm, TsmxMainForm]);

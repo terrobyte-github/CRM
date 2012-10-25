@@ -10,7 +10,7 @@ uses
   smxDBIntf in '..\Common\smxDBIntf.pas',
   smxADODB in '..\Common\smxADODB.pas',
   smxConsts in '..\Common\smxConsts.pas',
-  smxField in '..\Common\smxField.pas';
+  smxDBClasses in '..\Common\smxDBClasses.pas';
 
 exports
   DllGetClassObject,

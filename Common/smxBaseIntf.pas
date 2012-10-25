@@ -13,6 +13,7 @@ type
     function GetVersion: String;
     function GetDescription: String;
 
+    property Description: String read GetDescription;
     property Version: String read GetVersion;
   end;
 
