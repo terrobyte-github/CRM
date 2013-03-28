@@ -24,22 +24,22 @@ type
 
   TsmxOperationMode = (omManual, omAutomatic);
 
-  TsmxRequestSetting = record
+  {TsmxRequestSetting = record
     CfgID: Integer;
     Operation: TsmxOperationMode;
     DatabaseName: String;
-  end;
+  end;}
 
   TsmxGridOption = (goColLines, goRowLines, goRowSelect);
 
   TsmxGridOptions = set of TsmxGridOption;
 
-  TsmxControlCellSetting = record
+  {TsmxControlCellSetting = record
     CfgID: Integer;
     Align: TAlign;
     Enable, Visible: Boolean;
     Position: TRect;
-  end;
+  end;}
 
   {TsmxAlgorithmListSetting = record
     CfgID: Integer;
@@ -47,13 +47,13 @@ type
     IsCreateToolButton: Boolean;
   end;}
 
-  TsmxAlgorithmSetting = record
+  {TsmxAlgorithmSetting = record
     CfgID: Integer;
     Caption: String;
     Hint: String;
     HotKey: Integer;
     ImageIndex: Integer;
-  end;
+  end;}
 
   TsmxGenerationMode = (gmFunction, gmCOM);
 
@@ -73,7 +73,7 @@ type
 
   TsmxFuncDatabaseCLSID = function: TGUID;
 
-  TsmxFuncNewResource = function(AName: String; AStream: TResourceStream): Boolean;
+  TsmxFuncNewResource = function(Name: String; Stream: TResourceStream): Boolean;
 
   {TsmxModifySetting = record
     InsertCfgID,
@@ -81,11 +81,25 @@ type
     DeleteCfgID: Integer;
   end;}
 
-  TsmxModifyRequest = (mrInsert, mrUpdate, mrDelete);
+  TsmxChangeMode = (cmReplace, cmAdd);
 
-  TsmxFilterOption = (foApplyValue, foPrepareValue);
+  TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
+
+  TsmxFilterOption = (foApplyValue, foPrepareValue, foApplyText, foPrepareText);
 
   TsmxFilterOptions = set of TsmxFilterOption;
+
+  TsmxFormPosition = (fpDefault, fpDesktopCenter, fpOwnerFormCenter);
+
+  TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
+
+  TsmxPageManagerStyle = (pmsTab, pmsFlat);
+
+  TsmxMenuItemStyle = (misPoint, misDivider);
+
+  TsmxToolItemStyle = (tisButton, tisCheck, tisDivider);
+
+  TsmxStatusItemStyle = (sisText, sisDraw);
 
 implementation
 

@@ -14,385 +14,48 @@ interface
 
 uses
   Classes, Controls, ComCtrls, DB, DBGrids, Forms, ExtCtrls, StdCtrls, Menus,
-  ActnList, Windows, ImgList, smxClasses, smxCfgs, smxWheelDBGrid, smxDBIntf,
-  smxTypes, smxClassTypes;
+  ActnList, Windows, ImgList, Graphics, smxBaseClasses, smxClasses, smxCfgs,
+  smxWheelDBGrid, smxDBIntf, smxTypes, smxClassTypes, smxManagerIntf;
 
 type
-  { TsmxRequest }
+  { TsmxAction }
 
-  TsmxRequest = class(TsmxCustomRequest)
+  TsmxAction = class(TsmxCustomAlgorithm)
   private
-    FDataSetIntf: IsmxDataSet;
-  protected
-    function GetDataSet: IsmxDataSet; override;
-    procedure InternalInitialize; override;
-    procedure SetDataSet(const Value: IsmxDataSet); override;
-  public
-    destructor Destroy; override;
-  end;
-
-  { TsmxColumn }
-
-  TsmxColumn = class(TsmxCustomColumn)
-  private
-    function GetCfg: TsmxColumnCfg;
-  protected
-    property Cfg: TsmxColumnCfg read GetCfg;
-  end;
-
-  { TsmxDBColumn }
-
-  TsmxDBColumn = class(TsmxColumn)
-  private
-    FColumn: TColumn;
-  protected
-    function GetInternalObject: TObject; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-
-    property Column: TColumn read FColumn;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxGrid }
-
-  {TsmxGrid = class(TsmxCustomGrid)
-  private
-    function GetCfg: TsmxGridCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxGridCfg read GetCfg;
-  end;}
-
-  { TsmxDBGrid }
-
-  TsmxDBGrid = class(TsmxCustomGrid)
-  private
-    FDataSource: TDataSource;
-    FGrid: TsmxWheelDBGrid;
-  protected
-    function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellCursor: TCursor; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellCursor(Value: TCursor); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-    procedure SetRequest(Value: TsmxCustomRequest); override;
-
-    property Grid: TsmxWheelDBGrid read FGrid;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-    procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
-      ASelectRequest: TsmxCustomRequest = nil); override;
-  end;
-
-  { TsmxFilter }
-
-  TsmxFilter = class(TsmxCustomFilter)
-  private
-    function GetCfg: TsmxFilterCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxFilterCfg read GetCfg;
-  end;
-
-  { TsmxPanelFilter }
-
-  TsmxPanelFilter = class(TsmxFilter)
-  private
-    FHeader: TLabel;
-    FPanel: TPanel;
-  protected
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-
-    property Header: TLabel read FHeader;
-    property Panel: TPanel read FPanel;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxFilterDesk }
-
-  TsmxFilterDesk = class(TsmxCustomFilterDesk)
-  private
-    function GetCfg: TsmxFilterDeskCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxFilterDeskCfg read GetCfg;
-  end;
-
-  { TsmxPanelFilterDesk }
-
-  TsmxPanelFilterDesk = class(TsmxFilterDesk)
-  private
-    FPanel: TPanel;
-  protected
-    function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-
-    property Panel: TPanel read FPanel;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxSection }
-
-  TsmxSection = class(TsmxCustomSection)
-  private
-    function GetCfg: TsmxSectionCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxSectionCfg read GetCfg;
-  end;
-
-  { TsmxPanelSection }
-
-  TsmxPanelSection = class(TsmxSection)
-  private
-    FPanel: TPanel;
-  protected
-    function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-
-    property Panel: TPanel read FPanel;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxPage }
-
-  TsmxPage = class(TsmxCustomPage)
-  private
-    function GetCfg: TsmxPageCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxPageCfg read GetCfg;
-  end;
-
-  { TsmxTabSheet }
-
-  TsmxTabSheet = class(TsmxPage)
-  private
-    FPage: TTabSheet;
-  protected
-    function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-
-    property Page: TTabSheet read FPage;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxPageManager }
-
-  TsmxPageManager = class(TsmxCustomPageManager)
-  private
-    function GetCfg: TsmxPageManagerCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxPageManagerCfg read GetCfg;
-  end;
-
-  { TsmxPageControl }
-
-  TsmxPageControl = class(TsmxPageManager)
-  private
-    FPageControl: TPageControl;
-  protected
-    function GetActivePage: TsmxCustomPage; override;
-    function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure InstallParent; override;
-    procedure SetActivePage(Value: TsmxCustomPage); override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetImageList(Value: TCustomImageList); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-    procedure UnInstallParent; override;
-
-    property PageControl: TPageControl read FPageControl;
-  public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-  end;
-
-  { TsmxLibAlgorithm }
-
-  TsmxLibAlgorithm = class(TsmxCustomAlgorithm)
-  private
-    FLibProc: TsmxProcAlgExecute;
-    function GetCfg: TsmxLibAlgorithmCfg;
-  protected
-    procedure AddParams; override;
-    procedure ProcExec(Sender: TObject); virtual;
-    procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
-
-    property Cfg: TsmxLibAlgorithmCfg read GetCfg;
-    property LibProc: TsmxProcAlgExecute read FLibProc;
-  public
-    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
-    destructor Destroy; override;
-    procedure Execute(Same: Boolean = False); override;
-    procedure RefreshParams; override;
-    function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): TsmxParam; override;
-  end;
-
-  { TsmxActionLibAlgorithm }
-
-  TsmxActionLibAlgorithm = class(TsmxCustomAlgorithm)
-  private
-    FLibProc: TsmxProcAlgExecute;
     FAction: TAction;
-    FParams: TsmxParams;
-    FAlgorithmLibrary: String;
-    FAlgorithmProcName: String;
-    procedure ProcExec(Sender: TObject);
-    function GetLibProc: TsmxProcAlgExecute;
+    function GetAction: TAction;
+    procedure ActionExecute(Sender: TObject);
   protected
-    function GetInternalObject: TObject; override;
     function GetAlgorithmCaption: String; override;
-    function GetAlgorithmEnable: Boolean; override;
+    function GetAlgorithmEnabled: Boolean; override;
+    function GetAlgorithmHint: String; override;
     function GetAlgorithmHotKey: Integer; override;
     function GetAlgorithmImageIndex: Integer; override;
     function GetAlgorithmVisible: Boolean; override;
-    procedure SetAlgorithmCaption(Value: String); override;
-    procedure SetAlgorithmEnable(Value: Boolean); override;
+    function GetInternalObject: TObject; override;
+    function GetProcudure: Pointer; virtual;
+    procedure InitializeEvent; virtual;
+    procedure InternalInitialize; override;
+    procedure InternalRefreshParams; override;
+    procedure ResetCellProps; override;
+    procedure SetAlgorithmCaption(const Value: String); override;
+    procedure SetAlgorithmEnabled(Value: Boolean); override;
+    procedure SetAlgorithmHint(const Value: String); override;
     procedure SetAlgorithmHotKey(Value: Integer); override;
     procedure SetAlgorithmImageIndex(Value: Integer); override;
     procedure SetAlgorithmVisible(Value: Boolean); override;
-    function GetAlgorithmHint: String; virtual;
-    procedure SetAlgorithmHint(Value: String); virtual;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
-    procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
-    procedure SetAlgorithmLibrary(Value: String); virtual;
-    procedure SetAlgorithmProcName(Value: String); virtual;
+    //procedure ProcExec(Sender: TObject); virtual;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
+    procedure SetSlaveIndex(Value: Integer); override;
 
-    property Action: TAction read FAction;
-    property Params: TsmxParams read FParams;
-    property LibProc: TsmxProcAlgExecute read GetLibProc;
+    property Action: TAction read GetAction;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-    procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
-      ASelectRequest: TsmxCustomRequest = nil); override;
-    procedure RefreshParams; override;
-    procedure Execute; override;
-
-    property AlgorithmLibrary: String read FAlgorithmLibrary write SetAlgorithmLibrary;
-    property AlgorithmProcName: String read FAlgorithmProcName write SetAlgorithmProcName;
-  end;
-
-  { TsmxAlgorithmList }
-
-  TsmxAlgorithmList = class(TsmxCustomAlgorithmList)
-  private
-    function GetCfg: TsmxAlgorithmListCfg;
-  protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
-
-    property Cfg: TsmxAlgorithmListCfg read GetCfg;
+    //procedure Execute(Same: Boolean = False); override;
+    //procedure RefreshParams; override;
+   // function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): TsmxParam; override;
   end;
 
   { TsmxActionList }
@@ -400,52 +63,529 @@ type
   TsmxActionList = class(TsmxCustomAlgorithmList)
   private
     FActionList: TActionList;
+    function GetActionList: TActionList;
   protected
+    //function GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass; override;
     function GetInternalObject: TObject; override;
-    //procedure SetImageList(Value: TCustomImageList); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    //procedure InternalInitialize; override;
+    procedure SetImageList(Value: TCustomImageList); override;
+    procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); override;
+    //procedure SetParentCell(Value: TsmxBaseCell); override;
 
-    property ActionList: TActionList read FActionList;
+    property ActionList: TActionList read GetActionList;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-    procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
-      ASelectRequest: TsmxCustomRequest = nil); override;
+    //procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
+    //  ASelectRequest: TsmxCustomRequest = nil); override;
+
+    property IsAltSlaveClass default True;
   end;
+
+  { TsmxRequest }
+
+  TsmxRequest = class(TsmxCustomRequest)
+  protected
+    function GetDataSet: IsmxDataSet; virtual;
+    procedure InitializeDataSet; virtual;
+    procedure InternalInitialize; override;
+    procedure InternalRefreshParams; override;
+    procedure ResetCellProps; override;
+  end;
+
+  { TsmxRequestList }
+
+  TsmxRequestList = class(TsmxCustomRequestList)
+  protected
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+  public
+    property IsAltSlaveClass default True;
+    property IsOwnerBeParent default True;
+  end;
+
+  { TsmxColumn }
+
+  TsmxColumn = class(TsmxCustomColumn)
+  private
+    FColumn: TColumn;
+    function GetColumn: TColumn;
+  protected
+    function GetCellVisible: Boolean; override;
+    function GetCellWidth: Integer; override;
+    function GetColumnAlignment: TAlignment; override;
+    function GetColumnCaption: String; override;
+    function GetColumnColor: TColor; override;
+    function GetColumnFont: TFont; override;
+    function GetColumnValue: Variant; override;
+    function GetFieldName: String; override;
+    function GetHeaderAlignment: TAlignment; override;
+    function GetHeaderColor: TColor; override;
+    function GetHeaderFont: TFont; override;
+    function GetHeaderCaption: String; override;
+    function GetInternalObject: TObject; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    procedure SetCellVisible(Value: Boolean); override;
+    procedure SetCellWidth(Value: Integer); override;
+    procedure SetColumnAlignment(Value: TAlignment); override;
+    procedure SetColumnCaption(const Value: String); override;
+    procedure SetColumnColor(Value: TColor); override;
+    procedure SetColumnFont(Value: TFont); override;
+    procedure SetColumnValue(const Value: Variant); override;
+    procedure SetFieldName(const Value: String); override;
+    procedure SetHeaderAlignment(Value: TAlignment); override;
+    procedure SetHeaderCaption(const Value: String); override;
+    procedure SetHeaderColor(Value: TColor); override;
+    procedure SetHeaderFont(Value: TFont); override;
+    procedure SetSlaveIndex(Value: Integer); override;
+
+    property Column: TColumn read GetColumn;
+  public
+    destructor Destroy; override;
+  end;
+
+  { TsmxDBGrid }
+
+  TsmxDBGrid = class(TsmxCustomGrid)
+  private
+    //FDataSource: TDataSource;
+    FDBGrid: TsmxWheelDBGrid;
+    //function GetDataSource: TDataSource;
+    function GetDBGrid: TsmxWheelDBGrid;
+    //function GetDataSource: TDataSource;
+    procedure DBGridCellClick(Column: TColumn);
+    procedure DBGridDataChange(Sender: TObject; Field: TField);
+    //procedure DBGridDblClick(Sender: TObject);
+    procedure DBGridTitleClick(Column: TColumn);
+  protected
+    //function GetCellAlign: TAlign; override;
+    //function GetCellAnchors: TAnchors; override;
+    //function GetCellCursor: TCursor; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    function GetCellHint: String; override;
+    function GetInternalObject: TObject; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure InternalInitialize; override;
+    procedure InternalRefresh; override;
+    procedure ResetCellProps; override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellAnchors(Value: TAnchors); override;
+    //procedure SetCellCursor(Value: TCursor); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    //procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetGridOptions(Value: TsmxGridOptions); override;
+    procedure SetRequest(Value: TsmxCustomRequest); override;
+
+    //property DataSource: TDataSource read GetDataSource;
+    property DBGrid: TsmxWheelDBGrid read GetDBGrid;
+  public
+    destructor Destroy; override;
+  end;
+
+  { TsmxFilter }
+
+  {TsmxFilter = class(TsmxCustomFilter)
+  private
+    function GetCfg: TsmxFilterCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxFilterCfg read GetCfg;
+  end;}
+
+  { TsmxPanelFilter }
+
+  TsmxPanelFilter = class(TsmxCustomFilter)
+  private
+    FHeader: TLabel;
+    FPanel: TPanel;
+    function GetHeader: TLabel;
+    function GetPanel: TPanel;
+  protected
+    //function GetCellAlign: TAlign; override;
+    //function GetCellAnchors: TAnchors; override;
+    //function GetCellCursor: TCursor; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    function GetFilter: TObject; virtual;
+    function GetHeaderAlignment: TAlignment; override;
+    function GetHeaderCaption: String; override;
+    function GetHeaderColor: TColor; override;
+    function GetHeaderFont: TFont; override;
+    function GetInternalObject: TObject; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellAnchors(Value: TAnchors); override;
+    //procedure SetCellCursor(Value: TCursor); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    procedure SetHeaderAlignment(Value: TAlignment); override;
+    procedure SetHeaderCaption(const Value: String); override;
+    procedure SetHeaderColor(Value: TColor); override;
+    procedure SetHeaderFont(Value: TFont); override;
+    //procedure UnBindFilterObjects; virtual;
+
+    property Header: TLabel read GetHeader;
+    property Panel: TPanel read GetPanel;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+  end;
+
+  { TsmxFilterDesk }
+
+  {TsmxFilterDesk = class(TsmxCustomFilterDesk)
+  private
+    function GetCfg: TsmxFilterDeskCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxFilterDeskCfg read GetCfg;
+  end;}
+
+  { TsmxPanelFilterDesk }
+
+  TsmxPanelFilterDesk = class(TsmxCustomFilterDesk)
+  private
+    FPanel: TPanel;
+    function GetPanel: TPanel;
+    procedure RefreshValueParams(DataSet: IsmxDataSet);
+  protected
+    //function GetCellAlign: TAlign; override;
+    //function GetCellAnchors: TAnchors; override;
+    //function GetCellCursor: TCursor; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    //function GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass; override;
+    function GetCellCaption: String; override;
+    function GetCellHint: String; override;
+    function GetInternalObject: TObject; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure InternalApply; override;
+    procedure InternalInitialize; override;
+    procedure InternalPrepare; override;
+    procedure ResetCellProps; override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellAnchors(Value: TAnchors); override;
+    //procedure SetCellCursor(Value: TCursor); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); override;
+
+    property Panel: TPanel read GetPanel;
+  public
+    //constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+    property IsAltSlaveClass default True;
+  end;
+
+  { TsmxSection }
+
+  {TsmxSection = class(TsmxCustomSection)
+  private
+    function GetCfg: TsmxSectionCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxSectionCfg read GetCfg;
+  end;}
+
+  { TsmxPanelSection }
+
+  TsmxPanelSection = class(TsmxCustomSection)
+  private
+    FPanel: TPanel;
+    function GetPanel: TPanel;
+  protected
+    //function GetCellAlign: TAlign; override;
+    //function GetCellAnchors: TAnchors; override;
+    //function GetCellCursor: TCursor; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    function GetInternalObject: TObject; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellAnchors(Value: TAnchors); override;
+    //procedure SetCellCursor(Value: TCursor); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    //procedure SetFilterDesk(Value: TsmxCustomFilterDesk); override;
+    //procedure SetGrid(Value: TsmxCustomGrid); override;
+
+    property Panel: TPanel read GetPanel;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+  end;
+
+  { TsmxPage }
+
+  {TsmxPage = class(TsmxCustomPage)
+  private
+    function GetCfg: TsmxPageCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxPageCfg read GetCfg;
+  end;}
+
+  { TsmxTabSheet }
+
+  TsmxTabSheet = class(TsmxCustomPage)
+  private
+    FPage: TTabSheet;
+    function GetPage: TTabSheet;
+  protected
+    function GetCellActive: Boolean; override;
+    function GetCellCaption: String; override;
+    function GetCellHint: String; override;
+    function GetCellImageIndex: Integer; override;
+    //function GetCellAlign: TAlign; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    function GetInternalObject: TObject; override;
+    //procedure InternalInitialize; override;
+    procedure SetCellActive(Value: Boolean); override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellImageIndex(Value: Integer); override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    procedure SetSlaveIndex(Value: Integer); override;
+
+    property Page: TTabSheet read GetPage;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+  end;
+
+  { TsmxPageManager }
+
+  {TsmxPageManager = class(TsmxCustomPageManager)
+  private
+    function GetCfg: TsmxPageManagerCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxPageManagerCfg read GetCfg;
+  end;}
+
+  { TsmxPageControl }
+
+  TsmxPageControl = class(TsmxCustomPageManager)
+  private
+    FPageControl: TPageControl;
+    function GetPageControl: TPageControl;
+    procedure PageControlChange(Sender: TObject);
+  protected
+    //function GetActivePage: TsmxCustomPage; override;
+    //function GetCellAlign: TAlign; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    function GetInternalObject: TObject; override;
+    function GetIsMultiLine: Boolean; override;
+    function GetPageManagerStyle: TsmxPageManagerStyle; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    //procedure InstallParent; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    //procedure SetActivePage(Value: TsmxCustomPage); override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    procedure SetImageList(Value: TCustomImageList); override;
+    procedure SetIsMultiLine(Value: Boolean); override;
+    procedure SetPageManagerStyle(Value: TsmxPageManagerStyle); override;
+    //procedure UnInstallParent; override;
+
+    property PageControl: TPageControl read GetPageControl;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+  end;
+
+  { TsmxLibAction }
+
+  {TsmxLibAction = class(TsmxAction)
+  private
+    FAlgorithmProcName: String;
+    FAlgorithmLibrary: String;
+    //FLibProc: TsmxProcAlgExecute;
+    //FAction: TAction;
+    //FParams: TsmxParams;
+    //FAlgorithmLibrary: String;
+    //FAlgorithmProcName: String;
+    //procedure ActionExecute(Sender: TObject);
+    //function GetAction: TAction;
+    function GetProcPointer: Pointer;
+  protected
+    //function GetAlgorithmCaption: String; override;
+    //function GetAlgorithmEnabled: Boolean; override;
+    //function GetAlgorithmHint: String; override;
+    //function GetAlgorithmHotKey: Integer; override;
+    //function GetAlgorithmImageIndex: Integer; override;
+    //function GetAlgorithmVisible: Boolean; override;
+    //function GetInternalObject: TObject; override;
+    procedure InternalInitialize; override;
+    //procedure InternalRefreshParams; override;
+    procedure ResetCellProps; override;
+    //procedure SetAlgorithmCaption(const Value: String); override;
+    //procedure SetAlgorithmEnabled(Value: Boolean); override;
+    //procedure SetAlgorithmHint(const Value: String); override;
+    //procedure SetAlgorithmHotKey(Value: Integer); override;
+    //procedure SetAlgorithmImageIndex(Value: Integer); override;
+    //procedure SetAlgorithmVisible(Value: Boolean); override;
+    //procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
+    procedure SetAlgorithmLibrary(const Value: String); virtual;
+    procedure SetAlgorithmProcName(const Value: String); virtual;
+
+    //property Action: TAction read GetAction;
+    //property Params: TsmxParams read FParams;
+    //property LibProc: TsmxProcAlgExecute read GetLibProc;
+  public
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //destructor Destroy; override;
+    //procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
+    //  ASelectRequest: TsmxCustomRequest = nil); override;
+    //procedure RefreshParams; override;
+    //procedure Execute; override;
+
+    property AlgorithmLibrary: String read FAlgorithmLibrary write SetAlgorithmLibrary;
+    property AlgorithmProcName: String read FAlgorithmProcName write SetAlgorithmProcName;
+  end;}
+
+  { TsmxActionList }
+
+  {TsmxActionList = class(TsmxCustomAlgorithmList)
+  private
+    function GetCfg: TsmxActionListCfg;
+  protected
+    //procedure CreateChilds; override;
+    //procedure InitChilds; override;
+
+    property Cfg: TsmxActionListCfg read GetCfg;
+  end;}
 
   { TsmxMenuPoint }
 
-  TsmxMenuPoint = class(TsmxCustomMenuPoint)
+  {TsmxMenuPoint = class(TsmxCustomMenuPoint)
   private
     function GetCfg: TsmxMenuItemCfg;
   protected
     property Cfg: TsmxMenuItemCfg read GetCfg;
-  end;
+  end;}
 
   { TsmxMenuItem }
 
-  TsmxMenuItem = class(TsmxMenuPoint)
+  TsmxMenuItem = class(TsmxCustomMenuItem)
   private
     FMenuItem: TMenuItem;
+    function GetMenuItem: TMenuItem;
   protected
-    function GetInternalObject: TObject; override;
-    function GetCellEnable: Boolean; override;
+    function GetCellCaption: String; override;
+    function GetCellEnabled: Boolean; override;
+    function GetCellHint: String; override;
+    function GetCellImageIndex: Integer; override;
     function GetCellVisible: Boolean; override;
-    procedure SetCellEnable(Value: Boolean); override;
+    function GetInternalObject: TObject; override;
+    function GetIsChecked: Boolean; override;
+    function GetMenuItemHotKey: Integer; override;
+    function GetMenuItemStyle: TsmxMenuItemStyle; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellEnabled(Value: Boolean); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetCellVisible(Value: Boolean); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
+    procedure SetIsChecked(Value: Boolean); override;
+    procedure SetMenuItemHotKey(Value: Integer); override;
+    procedure SetMenuItemStyle(Value: TsmxMenuItemStyle); override;
+    procedure SetSlaveIndex(Value: Integer); override;
 
-    property MenuItem: TMenuItem read FMenuItem;
+    property MenuItem: TMenuItem read GetMenuItem;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
-    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
+    //procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
+    //procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
   end;
 
   { TsmxMasterMenu }
 
-  TsmxMasterMenu = class(TsmxCustomMasterMenu)
+  {TsmxMasterMenu = class(TsmxCustomMasterMenu)
   private
     function GetCfg: TsmxMainMenuCfg;
   protected
@@ -455,74 +595,128 @@ type
     property Cfg: TsmxMainMenuCfg read GetCfg;
   public
     function MenuPointParent(ACfgID: Integer): TsmxCustomMenuPoint; override;
-  end;
+  end;}
 
   { TsmxMainMenu }
 
-  TsmxMainMenu = class(TsmxMasterMenu)
+  TsmxMainMenu = class(TsmxCustomMainMenu)
   private
     FMainMenu: TMainMenu;
+    function GetMainMenu: TMainMenu;
   protected
-    function GetInternalObject: TObject; override;
-    function GetCellEnable: Boolean; override;
+    function GetCellEnabled: Boolean; override;
     function GetCellVisible: Boolean; override;
-    procedure SetCellEnable(Value: Boolean); override;
+    function GetInternalObject: TObject; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure SetCellEnabled(Value: Boolean); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetCellVisible(Value: Boolean); override;
     procedure SetImageList(Value: TCustomImageList); override;
+    //procedure SetMenuItemList(Value: TsmxCustomMenuItem); override;
 
-    property MainMenu: TMainMenu read FMainMenu;
+    property MainMenu: TMainMenu read GetMainMenu;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
   end;
 
-  { TsmxToolBoard }
+  { TsmxPopupMenu }
 
-  TsmxToolBoard = class(TsmxCustomToolBoard)
+  TsmxPopupMenu = class(TsmxCustomPopupMenu)
   private
-    function GetCfg: TsmxToolBoardCfg;
+    FPopupMenu: TPopupMenu;
+    function GetPopupMenu: TPopupMenu;
   protected
-    property Cfg: TsmxToolBoardCfg read GetCfg;
+    function GetInternalObject: TObject; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure SetImageList(Value: TCustomImageList); override;
+
+    property PopupMenu: TPopupMenu read GetPopupMenu;
+  public
+    destructor Destroy; override;
+  end;
+
+  { TsmxPopupList }
+
+  TsmxPopupList = class(TsmxCustomPopupList)
+  protected
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+  end;
+
+  { TsmxToolItem }
+
+  TsmxToolItem = class(TsmxCustomToolItem)
+  private
+    FToolButton: TToolButton;
+    function GetToolButton: TToolButton;
+  protected
+    function GetCellCaption: String; override;
+    function GetCellHint: String; override;
+    function GetCellImageIndex: Integer; override;
+    function GetInternalObject: TObject; override;
+    function GetIsChecked: Boolean; override;
+    function GetToolItemStyle: TsmxToolItemStyle; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    procedure SetIsChecked(Value: Boolean); override;
+    procedure SetToolItemStyle(Value: TsmxToolItemStyle); override;
+
+    property ToolButton: TToolButton read GetToolButton;
+  public
+    destructor Destroy; override;
   end;
 
   { TsmxToolBar }
 
-  TsmxToolBar = class(TsmxToolBoard)
+  TsmxToolBar = class(TsmxCustomToolBoard)
   private
     FToolBar: TToolBar;
+    function GetToolBar: TToolBar;
   protected
+    //function GetCellAlign: TAlign; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
     function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
+    function GetIsFlat: Boolean; override;
+    function GetIsShowCaptions: Boolean; override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetImageList(Value: TCustomImageList); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
+    procedure SetIsFlat(Value: Boolean); override;
+    procedure SetIsShowCaptions(Value: Boolean); override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    //procedure SetParentCell(Value: TsmxBaseCell); override;
     //procedure Initialize; override;
     //procedure UnInitialize; override;
 
-    property ToolBar: TToolBar read FToolBar;
+    property ToolBar: TToolBar read GetToolBar;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-    procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
-    procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
-    procedure Prepare(Forcibly: Boolean = False); override;
+    //procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
+    //procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
+    //procedure Prepare(Forcibly: Boolean = False); override;
   end;
 
   { TsmxControlBoard }
 
-  TsmxControlBoard = class(TsmxCustomControlBoard)
+  {TsmxControlBoard = class(TsmxCustomControlBoard)
   private
     function GetCfg: TsmxControlBoardCfg;
   protected
@@ -530,34 +724,78 @@ type
     procedure InitChilds; override;
 
     property Cfg: TsmxControlBoardCfg read GetCfg;
-  end;
+  end;}
 
   { TsmxControlBar }
 
-  TsmxControlBar = class(TsmxControlBoard)
+  TsmxControlBar = class(TsmxCustomControlBoard)
   private
     FControlBar: TControlBar;
+    function GetControlBar: TControlBar;
   protected
     function GetInternalObject: TObject; override;
-    function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
-    function GetCellHeight: Integer; override;
-    function GetCellLeft: Integer; override;
-    function GetCellTop: Integer; override;
-    function GetCellVisible: Boolean; override;
-    function GetCellWidth: Integer; override;
-    procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
-    procedure SetCellHeight(Value: Integer); override;
-    procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellTop(Value: Integer); override;
-    procedure SetCellVisible(Value: Boolean); override;
-    procedure SetCellWidth(Value: Integer); override;
-    procedure SetParentCell(Value: TsmxBaseCell); override;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    //function GetCellAlign: TAlign; override;
+    //function GetCellEnabled: Boolean; override;
+    //function GetCellHeight: Integer; override;
+    //function GetCellLeft: Integer; override;
+    //function GetCellTop: Integer; override;
+    //function GetCellVisible: Boolean; override;
+    //function GetCellWidth: Integer; override;
+    //procedure SetCellAlign(Value: TAlign); override;
+    //procedure SetCellEnabled(Value: Boolean); override;
+    //procedure SetCellHeight(Value: Integer); override;
+    //procedure SetCellLeft(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    //procedure SetCellTop(Value: Integer); override;
+    //procedure SetCellVisible(Value: Boolean); override;
+    //procedure SetCellWidth(Value: Integer); override;
+    //procedure SetParentCell(Value: TsmxBaseCell); override;
 
-    property ControlBar: TControlBar read FControlBar;
+    property ControlBar: TControlBar read GetControlBar;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    destructor Destroy; override;
+  end;
+
+  { TsmxStatusPanel }
+
+  TsmxStatusPanel = class(TsmxCustomStatusItem)
+  private
+    FStatusPanel: TStatusPanel;
+    function GetStatusPanel: TStatusPanel;
+  protected
+    function GetCellCaption: String; override;
+    function GetCellWidth: Integer; override;
+    function GetStatusItemAlignment: TAlignment; override;
+    function GetStatusItemStyle: TsmxStatusItemStyle; override;
+    procedure InternalInitialize; override;
+    procedure ResetCellProps; override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellWidth(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+    procedure SetSlaveIndex(Value: Integer); override;
+    procedure SetStatusItemAlignment(Value: TAlignment); override;
+    procedure SetStatusItemStyle(Value: TsmxStatusItemStyle); override;
+
+    property StatusPanel: TStatusPanel read GetStatusPanel;
+  public
+    destructor Destroy; override;
+  end;
+
+  { TsmxStatusBar }
+
+  TsmxStatusBar = class(TsmxCustomStatusBoard)
+  private
+    FStatusBar: TStatusBar;
+    function GetStatusBar: TStatusBar;
+    procedure StatusBarDraw(StatusBar: TStatusBar; Panel: TStatusPanel; const Rect: TRect);
+  protected
+    function GetSlaveClass: TsmxOwnerCellClass; override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+
+    property StatusBar: TStatusBar read GetStatusBar;
+  public
     destructor Destroy; override;
   end;
 
@@ -565,58 +803,84 @@ type
 
   TsmxForm = class(TsmxCustomForm)
   private
-    function GetCfg: TsmxFormCfg;
+    FForm: TForm;
+    FFormImageIndex: Integer;
+    function GetForm: TForm;
   protected
-    procedure CreateChilds; override;
-    procedure InitChilds; override;
+    function GetCellActive: Boolean; override;
+    function GetCellCaption: String; override;
+    function GetCellHint: String; override;
+    function GetCellImageIndex: Integer; override;
+    function GetFormBorder: TsmxFormBorder; override;
+    function GetFormPosition: TsmxFormPosition; override;
+    function GetInternalObject: TObject; override;
+    //function GetIsMainForm: Boolean; override;
+    function GetIsMaximize: Boolean; override;
+    function GetModalResult: TModalResult; override;
+    procedure InternalInitialize; override;
+    procedure SetCellActive(Value: Boolean); override;
+    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetFormBorder(Value: TsmxFormBorder); override;
+    procedure SetFormPosition(Value: TsmxFormPosition); override;
+    procedure SetImageList(Value: TCustomImageList); override;
+    //procedure SetIsMainForm(Value: Boolean); override;
+    procedure SetIsMaximize(Value: Boolean); override;
+    procedure SetModalResult(Value: TModalResult); override;
 
-    property Cfg: TsmxFormCfg read GetCfg;
+    property Form: TForm read GetForm;
+  public
+    destructor Destroy; override;
+    procedure Close; override;
+    procedure Show; override;
+    function ShowModal: TModalResult; override;
   end;
 
   { TsmxStandardForm }
 
-  TsmxStandardForm = class(TsmxForm)
+  {TsmxStandardForm = class(TsmxCustomStandardForm)
   private
     FForm: TForm;
   protected
     procedure ProcClose(Sender: TObject; var Action: TCloseAction); virtual;
-    function GetFormModalResult:  TModalResult; override;
+   // function GetFormModalResult:  TModalResult; override;
     function GetInternalObject: TObject; override;
     function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
+    function GetCellEnabled: Boolean; override;
     function GetCellHeight: Integer; override;
     function GetCellLeft: Integer; override;
     function GetCellTop: Integer; override;
     function GetCellVisible: Boolean; override;
     function GetCellWidth: Integer; override;
-    procedure SetFormManager(Value: TsmxCustomFormManager); override;
-    procedure SetFormModalResult(Value: TModalResult); override;
+    //procedure SetFormManager(Value: TsmxCustomFormManager); override;
+    //procedure SetFormModalResult(Value: TModalResult); override;
     procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
+    procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellHeight(Value: Integer); override;
     procedure SetCellLeft(Value: Integer); override;
     procedure SetCellTop(Value: Integer); override;
     procedure SetCellVisible(Value: Boolean); override;
     procedure SetCellWidth(Value: Integer); override;
     procedure SetImageList(Value: TCustomImageList); override;
-    procedure Initialize; override;
-    procedure UnInitialize; override;
+    //procedure Initialize; override;
+    //procedure UnInitialize; override;
 
     property Form: TForm read FForm;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
-      ACfgID: Integer; AID: Integer = 0); override;
-    constructor CreateByIntfID(AOwner: TComponent; const ADatabase: IsmxDatabase;
-      ACfgID, AIntfID: Integer; AID: Integer = 0); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+    //  ACfgID: Integer; AID: Integer = 0); override;
+    //constructor CreateByIntfID(AOwner: TComponent; const ADatabase: IsmxDatabase;
+    //  ACfgID, AIntfID: Integer; AID: Integer = 0); override;
     destructor Destroy; override;
-    procedure CloseForm; override;
-    procedure ShowForm; override;
-    function ShowModalForm: TModalResult; override;
-  end;
+    //procedure CloseForm; override;
+    //procedure ShowForm; override;
+    //function ShowModalForm: TModalResult; override;
+  end;}
 
   { TsmxMasterForm }
 
-  TsmxMasterForm = class(TsmxCustomMasterForm)
+  {TsmxMasterForm = class(TsmxCustomMasterForm)
   private
     function GetCfg: TsmxFormCfg;
   protected
@@ -624,11 +888,11 @@ type
     procedure InitChilds; override;
 
     property Cfg: TsmxFormCfg read GetCfg;
-  end;
+  end;}
 
   { TsmxMainForm }
 
-  TsmxMainForm = class(TsmxMasterForm)
+  {TsmxMainForm = class(TsmxMasterForm)
   private
     //FForm: TForm;
     //procedure SetForm(AForm: TForm);
@@ -637,7 +901,7 @@ type
     procedure ProcCloseQuery(Sender: TObject; var CanClose: Boolean); virtual;
     function GetInternalObject: TObject; override;
     function GetCellAlign: TAlign; override;
-    function GetCellEnable: Boolean; override;
+    function GetCellEnabled: Boolean; override;
     function GetCellHeight: Integer; override;
     function GetCellLeft: Integer; override;
     function GetCellTop: Integer; override;
@@ -645,7 +909,7 @@ type
     function GetCellWidth: Integer; override;
     procedure Initialize; override;
     procedure SetCellAlign(Value: TAlign); override;
-    procedure SetCellEnable(Value: Boolean); override;
+    procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellHeight(Value: Integer); override;
     procedure SetCellLeft(Value: Integer); override;
     procedure SetCellTop(Value: Integer); override;
@@ -659,12 +923,12 @@ type
     procedure ShowForm; override;
 
     //property Form: TForm read FForm write SetForm;
-  end;
+  end;}
 
 implementation
 
 uses
-  SysUtils, Variants, Graphics, ToolWin, {smxCommonStorage, smxLibManager,
+  SysUtils, Variants, ToolWin, {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,} smxFuncs,
   smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs;
 
@@ -679,585 +943,805 @@ type
   _TMenuItem = class(TMenuItem)
   end;
 
-{ TsmxRequest }
+{ TsmxAction }
 
-destructor TsmxRequest.Destroy; override;
+{constructor TsmxAction.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
-  FDataSetIntf := nil;
+  inherited Create(AOwner, ADatabase, ACfgID);
+  //@FLibProc := LibManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
+  //@FLibProc := FindProcedureByNameLib(Cfg.AlgLibrary, Cfg.AlgProcedure);
+  //AddParams;
+end;}
+
+destructor TsmxAction.Destroy;
+begin
   inherited Destroy;
+  if Assigned(FAction) then
+    FAction.Free;
 end;
 
-{function TsmxRequest.GetCfg: TsmxRequestCfg;
+procedure TsmxAction.ActionExecute(Sender: TObject);
 begin
-  Result := TsmxRequestCfg(inherited Cfg);
-end;}
-
-{function TsmxRequest.FindFieldSense(AFieldSense: TsmxFieldSense; StartPos: Integer = 0): IsmxField;
-var i: Integer;
-begin
-  Result := nil;
-  if not Assigned(CellDataSet) then
-    Exit;
-  for i := StartPos to Cfg.RequestFields.Count - 1 do
-    with Cfg.RequestFields[i] do
-      if FieldSense = AFieldSense then
-      begin
-        Result := CellDataSet.FindField(FieldName);
-        Break;
-      end;
+  Execute;
 end;
 
-function TsmxRequest.FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): IsmxParam;
-var i: Integer;
+function TsmxAction.GetAction: TAction;
+begin
+  if not Assigned(FAction) then
+  begin
+    FAction := TAction.Create(Self);
+    FAction.OnExecute := ActionExecute;
+  end;
+  Result := FAction;
+end;
+
+function TsmxAction.GetAlgorithmCaption: String;
+begin
+  Result := Action.Caption;
+end;
+
+procedure TsmxAction.SetAlgorithmCaption(const Value: String);
+begin
+  Action.Caption := Value;
+end;
+
+function TsmxAction.GetAlgorithmEnabled: Boolean;
+begin
+  Result := Action.Enabled;
+end;
+
+procedure TsmxAction.SetAlgorithmEnabled(Value: Boolean);
+begin
+  Action.Enabled := Value;
+end;
+
+function TsmxAction.GetAlgorithmHint: String;
+begin
+  Result := Action.Hint;
+end;
+
+procedure TsmxAction.SetAlgorithmHint(const Value: String);
+begin
+  Action.Hint := Value;
+end;
+
+function TsmxAction.GetAlgorithmHotKey: Integer;
+begin
+  Result := Integer(Action.ShortCut);
+end;
+
+procedure TsmxAction.SetAlgorithmHotKey(Value: Integer);
+begin
+  Action.ShortCut := TShortCut(Value);
+end;
+
+function TsmxAction.GetAlgorithmImageIndex: Integer;
+begin
+  Result := Integer(Action.ImageIndex);
+end;
+
+procedure TsmxAction.SetAlgorithmImageIndex(Value: Integer);
+begin
+  Action.ImageIndex := TImageIndex(Value);
+end;
+
+function TsmxAction.GetAlgorithmVisible: Boolean;
+begin
+  Result := Action.Visible;
+end;
+
+procedure TsmxAction.SetAlgorithmVisible(Value: Boolean);
+begin
+  Action.Visible := Value;
+end;
+
+function TsmxAction.GetInternalObject: TObject;
+begin
+  Result := Action;
+end;
+
+function TsmxAction.GetProcudure: Pointer;
 begin
   Result := nil;
-  if not Assigned(CellDataSet) then
-    Exit;
-  for i := StartPos to Cfg.RequestParams.Count - 1 do
-    with Cfg.RequestParams[i] do
-      if ParamLocation = AParamLocation then
-      begin
-        Result := CellDataSet.FindParam(ParamName);
-        Break;
-      end;
-end;}
+end;
 
-procedure TsmxRequest.Prepare;
+procedure TsmxAction.InitializeEvent;
+var
+  Proc: Pointer;
+  Method: TMethod;
+begin
+  Proc := GetProcudure;
+  if Assigned(Proc) then
+  begin
+    Method.Code := Proc;
+    Method.Data := Self;
+    OnExecute := TsmxComponentEvent(Method);
+  end;
+end;
+
+procedure TsmxAction.InternalInitialize;
 var
   i: Integer;
+  Form: TsmxCustomForm;
 begin
-  if Assigned(CellDataSet) then
+  inherited InternalInitialize;
+  if Cfg is TsmxAlgorithmCfg then
   begin
-    CellDataSet.Database := Database;
-    CellDataSet.SQL.Text := SQLText;
-    if not CellDataSet.Prepared then
-      CellDataSet.Prepared := True;
-    CellDataSet.ClearParams;
-    for i := 0 to RequestParams.Count - 1 do
-      with CellDataSet.AddParam do
+    AlgorithmCaption := TsmxAlgorithmCfg(Cfg).AlgorithmCaption;
+    AlgorithmEnabled := TsmxAlgorithmCfg(Cfg).AlgorithmEnabled;
+    AlgorithmHint := TsmxAlgorithmCfg(Cfg).AlgorithmHint;
+    AlgorithmHotKey := TsmxAlgorithmCfg(Cfg).AlgorithmHotKey;
+    AlgorithmImageIndex := TsmxAlgorithmCfg(Cfg).AlgorithmImageIndex;
+    AlgorithmVisible := TsmxAlgorithmCfg(Cfg).AlgorithmVisible;
+    for i := 0 to TsmxAlgorithmCfg(Cfg).AlgorithmParams.Count - 1 do
+      with AlgorithmParams.Add do
       begin
-        ParamName := RequestParams[i].ParamName;
-        DataType := RequestParams[i].DataType;
-        ParamType := RequestParams[i].ParamType;
-        //Value := RequestParams[i].ParamDefValue;
+        DataType := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].DataType;
+        ParamLocation := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamLocation;
+        ParamType := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamType;
+        ParamName := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamName;
+        ParamValue := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].Value;
       end;
-    CellDataSet.ClearFields;
-    for i := 0 to RequestFields.Count - 1 do
-      with CellDataSet.AddField(RequestFields[i].FieldName) do
-      begin
-        DisplayFormat := RequestFields[i].FieldFormat;
-      end;
-    if OperationMode = omAutomatic then
-    begin
-      RefreshParams;
-      Perform;
-    end;
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+      OnRefreshParams := smxClassFuncs.GetEventForm(Form, TsmxAlgorithmCfg(Cfg).RefreshParamsCfgID);
   end;
 end;
 
-procedure TsmxRequest.Perform;
-//var
-  //i: Integer;
-begin
-  if Assigned(CellDataSet) then
-  begin
-    try
-      CellDataSet.Close;
-      case PerformanceMode of
-        pmOpen: CellDataSet.Open;
-        pmExecute: CellDataSet.Execute;
-      end;
-      //for i := 0 to CellDataSet.FieldCount - 1 do
-        //CellDataSet.Fields[i].DisplayFormat :=
-          //RequestFields.FieldByName(CellDataSet.Fields[i].FieldName).FieldFormat;
-    except
-      raise EsmxCellError.CreateResFmt(@SCellRequestPerformError, [ClassName, CfgID]);
-    end;
-  end;
-end;
-
-procedure TsmxRequest.RefreshParams;
-
-  function FindFilterOnForm(AForm: TsmxCustomForm; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    i, j: Integer;
-    Page: TsmxCustomPage;
-    Filter: TsmxCustomFilter;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    if AForm is TsmxCustomStandardForm then
-      for i := 0 to TsmxCustomStandardForm(AForm).PageManagerCount - 1 do
-      begin
-        Page := TsmxCustomStandardForm(AForm).PageManagers[i].ActivePage;
-        if Assigned(Page) then
-          for j := 0 to Page.SectionCount - 1 do
-          begin
-            Filter := nil;
-            if Assigned(Page.Sections[j].FilterDesk) then
-              Filter := Page.Sections[j].FilterDesk.FindFilterByName(AName);
-            if Assigned(Filter) then
-            begin
-              AValue := Filter.FilterValue;
-              Result := True;
-              Exit;
-            end;
-          end;
-      end;
-  end;
-
-  function FindFieldOnForm(AForm: TsmxCustomForm; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    i, j: Integer;
-    Page: TsmxCustomPage;
-    Field: IsmxField;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    if AForm is TsmxCustomStandardForm then
-      for i := 0 to TsmxCustomStandardForm(AForm).PageManagerCount - 1 do
-      begin
-        Page := TsmxCustomStandardForm(AForm).PageManagers[i].ActivePage;
-        if Assigned(Page) then
-          for j := 0 to Page.SectionCount - 1 do
-          begin
-            Field := nil;
-            if Assigned(Page.Sections[j].Grid)
-                and Assigned(Page.Sections[j].Grid.Request)
-                and Assigned(Page.Sections[j].Grid.Request.DataSet) then
-              Field := Page.Sections[j].Grid.Request.DataSet.FindField(AName);
-            if Assigned(Field) then
-            begin
-              AValue := Field.Value;
-              Result := True;
-              Exit;
-            end;
-          end;
-      end;
-  end;
-
-  function FindFilterOnSection(ASection: TsmxCustomSection; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    Filter: TsmxCustomFilter;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    Filter := nil;
-    if Assigned(ASection.FilterDesk) then
-      Filter := ASection.FilterDesk.FindFilterByName(AName);
-    if Assigned(Filter) then
-    begin
-      AValue := Filter.FilterValue;
-      Result := True;
-    end;
-  end;
-
-  function FindFieldOnSection(ASection: TsmxCustomSection; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    i: Integer;
-    Page: TsmxCustomPage;
-    Field: IsmxField;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    Page := nil;
-    if ASection.CellParent is TsmxCustomPage then
-      Page := TsmxCustomPage(ASection.CellParent);
-    if Assigned(Page) then
-      for i := 0 to Page.SectionCount - 1 do
-        if Page.Sections[i] <> ASection then
-        begin
-          Field := nil;
-          if Assigned(Page.Sections[i].Grid)
-              and Assigned(Page.Sections[i].Grid.Request)
-              and Assigned(Page.Sections[i].Grid.Request.DataSet) then
-            Field := Page.Sections[i].Grid.Request.DataSet.FindField(AName);
-          if Assigned(Field) then
-          begin
-            AValue := Field.Value;
-            Result := True;
-            Exit;
-          end;
-        end;
-  end;
-
+procedure TsmxAction.InternalRefreshParams;
 var
-  i: integer;
-  Form, PForm: TsmxCustomForm;
-
-  //Filter: TsmxCustomFilter;
-  //Field: TsmxSenseField;
-
+  i, j: Integer;
+  Form: TsmxCustomForm;
   Value: Variant;
-  Res: Boolean;
-  Cell: TsmxBaseCell;
+  List: TList;
+  Cell: TsmxOwnerCell;
 begin
-  if not Assigned(DataSet) then
-    Exit;
-  Form := AccessoryForm;
-  for i := 0 to DataSet.ParamCount - 1 do
-    //with RequestParams[i] do
+  inherited InternalRefreshParams;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
+  List := TList.Create;
+  try
+    for i := 0 to AlgorithmParams.Count - 1 do
     begin
-      Value := Variants.Null;
-      case DataSet.Params[i].ParamLocation of
-        plConst .. plOutput:
+      //Value := Variants.Null;
+      case AlgorithmParams[i].ParamLocation of
+        {plConst .. plOutput, plFilterDesk .. plParentGrid:
         begin
-          Value := DefValueList.Values[DataSet.Params[i].ParamName]; //RequestParams.ParamByName(RequestParams[i].ParamName).ParamDefValue;
-        end;
+          Value := Variants.Null; //AlgorithmParams[i].ParamValue;
+        end;}
         plFilterDesk:
         begin
-          if CellParent is TsmxCustomSection then
-            FindFilterOnSection(TsmxCustomSection(CellParent),
-              DataSet.Params[i].ParamName, Value);
+          if ActionCell is TsmxCustomFilterDesk then
+          begin
+            Cell := TsmxCustomFilterDesk(ActionCell).FindSlaveByName(AlgorithmParams[i].ParamName);
+            if Assigned(Cell) then
+              AlgorithmParams[i].ParamValue := TsmxCustomFilter(Cell).FilterValue;
+          end else
+          if smxClassFuncs.FindFilterOnForm(Form, AlgorithmParams[i].ParamName, Value) then
+            AlgorithmParams[i].ParamValue := Value;
         end;
         plGrid:
         begin
-          if CellParent is TsmxCustomSection then
-            FindFieldOnSection(TsmxCustomSection(CellParent),
-              DataSet.Params[i].ParamName, Value);
+          if ActionCell is TsmxCustomGrid then
+          begin
+            Cell := TsmxCustomGrid(ActionCell).FindSlaveByName(AlgorithmParams[i].ParamName);
+            if Assigned(Cell) then
+              AlgorithmParams[i].ParamValue := TsmxCustomColumn(Cell).ColumnValue;
+          end else
+          if smxClassFuncs.FindColumnOnForm(Form, AlgorithmParams[i].ParamName, Value) then
+            AlgorithmParams[i].ParamValue := Value;
         end;
         plParentFilterDesk:
         begin
-          Res := False;
-          if Assigned(Form) then
-            PForm := Form.ParentForm else
-            PForm := nil;
-          while Assigned(PForm) and not Res do
-          begin
-            Res := FindFilterOnForm(PForm, DataSet.Params[i].ParamName, Value);
-            PForm := PForm.ParentForm;
-          end;
+          smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
+          for j := 0 to List.Count - 1 do
+            if FindFilterOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            begin
+              AlgorithmParams[i].ParamValue := Value;
+              Break;
+            end;
         end;
         plParentGrid:
         begin
-          Res := False;
-          if Assigned(Form) then
-            PForm := Form.ParentForm else
-            PForm := nil;
-          while Assigned(PForm) and not Res do
-          begin
-            Res := FindFieldOnForm(PForm, DataSet.Params[i].ParamName, Value);
-            PForm := PForm.ParentForm;
-          end;
+          smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
+          for j := 0 to List.Count - 1 do
+            if FindColumnOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            begin
+              AlgorithmParams[i].ParamValue := Value;
+              Break;
+            end;
         end;
         plStorageParams:
         begin
           if Assigned(StorageManager) then
-            Value := StorageManager.Values[DataSet.Params[i].ParamName];
+            AlgorithmParams[i].ParamValue := StorageManager.Values[AlgorithmParams[i].ParamName];
         end;
         plParentParams:
         begin
-          Res := False;
-          Cell := CellParent;
-          while Assigned(Cell) and not Res do
-          begin
-            Res := Cell.CellParams(DataSet.Params[i].ParamName, Value);
-            Cell := Cell.CellParent;
-          end;
+          smxClassProcs.AllParents(Self, List, []);
+          for j := 0 to List.Count - 1 do
+            if TsmxBaseCell(List[j]).CellParams(AlgorithmParams[i].ParamName, Value) then
+            begin
+              AlgorithmParams[i].ParamValue := Value;
+              Break;
+            end;
         end;
       end;
-      DataSet.Params[i].Value := Value;
+      //AlgorithmParams[i].ParamValue := Value;
     end;
-end;
-
-procedure TsmxRequest.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
-  ASelectRequest: TsmxCustomRequest = nil);
-begin
-  inherited Initialize(ACfgDatabase, ACfgID, ASelectRequest);
-  Cfg := smxClassFuncs.NewCfg(Self, ACfgDatabase, ACfgID, ASelectRequest);
-  try
-    if Cfg is TsmxRequestCfg then
-      with TsmxRequestCfg(Cfg) do
-      begin
-        DataSetType := ReqDataSetType;
-        PerformanceMode := ReqPerformanceMode;
-        RequestFields := ReqFields;
-        RequestParams := ReqParams;
-        SQLText := ReqSQLText;
-        RequestModify := ReqModifySetting;
-      end
-    else
-      raise EsmxCellError.CreateResFmt(@SCellBuildError, [ACfgID]);
   finally
-    Cfg.Free;
+    List.Free;
   end;
 end;
 
-{procedure TsmxRequest.UnInitialize;
+procedure TsmxAction.ResetCellProps;
 begin
-  if Assigned(FDataSetIntf) then
+  inherited ResetCellProps;
+  AlgorithmCaption := '';
+  AlgorithmEnabled := False;
+  AlgorithmHint := '';
+  AlgorithmHotKey := 0;
+  AlgorithmImageIndex := -1;
+  AlgorithmParams.Clear;
+  AlgorithmVisible := False;
+  OnExecute := nil;
+  OnRefreshParams := nil;
+end;
+
+procedure TsmxAction.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Action.ActionList := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
   begin
-    FDataSetIntf.Close;
-    FDataSetIntf := nil;
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TCustomActionList then
+      Action.ActionList := TCustomActionList(Obj);
   end;
+end;
+
+{procedure TsmxAction.SetLibraryManager(Value: TsmxCustomLibraryManager);
+begin
+  if Assigned(LibraryManager) then
+    FLibProc := nil;
+  inherited SetLibraryManager(Value);
+  if Assigned(LibraryManager) then
+    @FLibProc := LibraryManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
 end;}
+
+procedure TsmxAction.SetSlaveIndex(Value: Integer);
+begin
+  inherited SetSlaveIndex(Value);
+  Action.Index := Value;
+end;
+
+{ TsmxActionList }
+
+{constructor TsmxActionList.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+begin
+  inherited Create(AOwner, ADatabase, ACfgID);
+  FActionList := TActionList.Create(Self);
+  //FActionList.Images := ImageList;
+  //InstallParent;
+end;}
+
+destructor TsmxActionList.Destroy;
+begin
+  //UnInstallParent;
+  inherited Destroy;
+  if Assigned(FActionList) then
+    FActionList.Free;
+end;
+
+function TsmxActionList.GetActionList: TActionList;
+begin
+  if not Assigned(FActionList) then
+    FActionList := TActionList.Create(Self);
+  Result := FActionList;
+end;
+
+{function TsmxActionList.GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass;
+begin
+  if Cfg is TsmxAlgorithmListCfg then
+    Result := TsmxOwnerCellClass(smxClassFuncs.CfgIDToCellClass(
+      TsmxAlgorithmListCfg(Cfg).SlaveCells[Index].CfgID, SelectRequest))
+  else
+    Result := inherited GetAltSlaveClass(Index);
+end;}
+
+function TsmxActionList.GetInternalObject: TObject;
+begin
+  Result := ActionList;
+end;
+
+function TsmxActionList.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxAction;
+end;
+
+procedure TsmxActionList.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    ActionList.Images := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    ActionList.Images := ImageList;
+end;
+
+{procedure TsmxActionList.SetParentCell(Value: TsmxBaseCell);
+begin
+  inherited SetParentCell(Value);
+  FActionList.Images := ImageList;
+end;}
+
+procedure TsmxActionList.SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem);
+begin
+  inherited SetSlaveCellProps(Slave, Item);
+  if (Slave is TsmxCustomAlgorithm) and (Item is TsmxAlgorithmKitItem) then
+  begin
+    TsmxCustomAlgorithm(Slave).AlgorithmEnabled := TsmxAlgorithmKitItem(Item).ItemEnabled;
+    TsmxCustomAlgorithm(Slave).AlgorithmVisible := TsmxAlgorithmKitItem(Item).ItemVisible;
+  end;
+end;
+
+{ TsmxRequest }
 
 function TsmxRequest.GetDataSet: IsmxDataSet;
 begin
-  if not Assigned(FDataSetIntf) and Assigned(Database) and (DataSetType <> dstUnknown) then
-    FDataSetIntf := Database.NewDataSet(DataSetType);
-  Result := FDataSetIntf;
+  Result := nil;
 end;
 
-procedure TsmxRequest.SetDatabase(const Value: IsmxDatabase);
+procedure TsmxRequest.InitializeDataSet;
+var
+  i: Integer;
+  DataSetIntf: IsmxDataSet;
 begin
-  //if Assigned(Database) then
-    //UnInitialize;
-  inherited SetDatabase(Value);
-  if Database <> Value then
-    FDataSetIntf := nil;
-  //if Assigned(Database) then
-    //Initialize;
-end;
-
-procedure TsmxRequest.SetDataSetType(Value: TsmxDataSetType);
-begin
-  inherited SetDataSetType(Value);
-  if DataSetType <> Value then
-    FDataSetIntf := nil;
-end;
-
-procedure TsmxRequest.First;
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.First;
-end;
-
-function TsmxRequest.GetBof: Boolean;
-begin
-  if Assigned(CellDataSet) then
-    Result := CellDataSet.Bof else
-    Result := False;
-end;
-
-function TsmxRequest.GetEof: Boolean;
-begin
-  if Assigned(CellDataSet) then
-    Result := CellDataSet.Eof else
-    Result := False;
-end;
-
-function TsmxRequest.GetFieldValue(Name: String): Variant;
-begin
-  if Assigned(CellDataSet) then
-    Result := CellDataSet.FieldByName(Name).Value else
-    Result := Variants.Null;
-end;
-
-function TsmxRequest.GetParamValue(Name: String): Variant;
-begin
-  if Assigned(CellDataSet) then
-    Result := CellDataSet.ParamByName(Name).Value else
-    Result := Variants.Null;
-end;
-
-procedure TsmxRequest.Last;
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.Last;
-end;
-
-procedure TsmxRequest.Next;
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.Next;
-end;
-
-procedure TsmxRequest.Prior;
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.Prior;
-end;
-
-procedure TsmxRequest.SetFieldValue(Name: String; Value: Variant);
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.FieldByName(Name).Value := Value;
-end;
-
-procedure TsmxRequest.SetParamValue(Name: String; Value: Variant);
-begin
-  if Assigned(CellDataSet) then
-    CellDataSet.ParamByName(Name).Value := Value;
-end;
-
-{procedure TsmxRequest.SetDatabaseName(Value: String);
-//var db: IsmxDatabase; //dbc: TsmxDBConnection;
-begin
-  if Assigned(Database) then
-    //SetDatabase(nil);
-    UnInitialize;
-  inherited SetDatabaseName(Value);
-  //dbc := DBManager.FindByName(Value);
-  //if Assigned(dbc) then
-    //if Assigned(dbc.Database) then
-      //SetDatabase(dbc.Database);
-  //db := FindDatabaseByNameLib(Value);
-  //if Assigned(db) then
-    //SetDatabase(db);
-  if Assigned(Database) then
-    Initialize;
-end;}
-
-{procedure TsmxRequest.SetDBManager(Value: TsmxCustomDBManager);
-begin
-  if Assigned(Database) then
-    UnInitialize;
-  inherited SetDBManager(Value);
-  if Assigned(Database) then
-    Initialize;
-end;}
-
-{ TsmxColumn }
-
-function TsmxColumn.GetCfg: TsmxColumnCfg;
-begin
-  Result := TsmxColumnCfg(inherited Cfg);
-end;
-
-{ TsmxDBColumn }
-
-constructor TsmxDBColumn.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FColumn := TColumn.Create(nil);
-  FColumn.FieldName := Cfg.ColumnFieldName;
-  FColumn.Alignment := Cfg.ColumnText.Align;
-  FColumn.Color := Cfg.ColumnText.Color;
-  FColumn.Font.Color := Cfg.ColumnText.Font.Color;
-  FColumn.Font.Name := Cfg.ColumnText.Font.Name;
-  FColumn.Font.Size := Cfg.ColumnText.Font.Size;
-  FColumn.Font.Style := Cfg.ColumnText.Font.Style;
-  FColumn.Title.Caption := Cfg.ColumnTitle.Text;
-  FColumn.Title.Alignment := Cfg.ColumnTitle.Align;
-  FColumn.Title.Color := Cfg.ColumnTitle.Color;
-  FColumn.Title.Font.Color := Cfg.ColumnTitle.Font.Color;
-  FColumn.Title.Font.Name := Cfg.ColumnTitle.Font.Name;
-  FColumn.Title.Font.Size := Cfg.ColumnTitle.Font.Size;
-  FColumn.Title.Font.Style := Cfg.ColumnTitle.Font.Style;
-end;
-
-destructor TsmxDBColumn.Destroy;
-begin
-  FColumn.Free;
-  inherited Destroy;
-end;
-
-function TsmxDBColumn.GetInternalObject: TObject;
-begin
-  Result := FColumn;
-end;
-
-function TsmxDBColumn.GetCellVisible: Boolean;
-begin
-  Result := FColumn.Visible;
-end;
-
-function TsmxDBColumn.GetCellWidth: Integer;
-begin
-  Result := FColumn.Width;
-end;
-
-procedure TsmxDBColumn.SetCellVisible(Value: Boolean);
-begin
-  FColumn.Visible := Value;
-end;
-
-procedure TsmxDBColumn.SetCellWidth(Value: Integer);
-begin
-  FColumn.Width := Value;
-end;
-
-procedure TsmxDBColumn.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
-begin
-  if Assigned(ParentCell) then
-    FColumn.Collection := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  DataSetIntf := GetDataSet;
+  if Assigned(DataSetIntf) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TDBGrid then
-      FColumn.Collection := TDBGrid(c).Columns;
+    if Cfg is TsmxRequestCfg then
+    begin
+      DataSetIntf.SQL.Text := TsmxRequestCfg(Cfg).SQLText;
+      for i := 0 to TsmxRequestCfg(Cfg).Fields.Count - 1 do
+        with DataSetIntf.AddField(TsmxRequestCfg(Cfg).Fields[i].FieldName) do
+        begin
+          DisplayFormat := TsmxRequestCfg(Cfg).Fields[i].DisplayFormat;
+          FieldSense := TsmxRequestCfg(Cfg).Fields[i].FieldSense;
+        end;
+      for i := 0 to TsmxRequestCfg(Cfg).Params.Count - 1 do
+        with DataSetIntf.AddParam(TsmxRequestCfg(Cfg).Params[i].ParamName) do
+        begin
+          DataType := TsmxRequestCfg(Cfg).Params[i].DataType;
+          ParamLocation := TsmxRequestCfg(Cfg).Params[i].ParamLocation;
+          ParamType := TsmxRequestCfg(Cfg).Params[i].ParamType;
+          Value := TsmxRequestCfg(Cfg).Params[i].Value;
+        end;
+    end;
+    DataSet := DataSetIntf;
   end;
 end;
 
-{ TsmxGrid }
-
-{procedure TsmxGrid.CreateChilds;
-var i: Integer; c: TsmxBaseCell;
+procedure TsmxRequest.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+  //DataSetIntf: IsmxDataSet;
+  //i: Integer;
 begin
-  ColumnList.Count := Cfg.GridColumns.Count;
-  for i := 0 to Cfg.GridColumns.Count - 1 do
-    with Cfg.GridColumns[i] do
-      if CfgID > 0 then
-      begin
-        c := NewCell(Self, CfgDatabase, CfgID);
-        if c is TsmxCustomColumn then
-          ColumnList[i] := c else
-          raise EsmxCellError.CreateRes(@SCellBuildError);
-      end else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-end;
+  inherited InternalInitialize;
+  if Cfg is TsmxRequestCfg then
+  begin
+    DatabaseName := TsmxRequestCfg(Cfg).DatabaseName;
+    OperationMode := TsmxRequestCfg(Cfg).OperationMode;
+    PerformanceMode := TsmxRequestCfg(Cfg).PerformanceMode;
+    ModifyPerformances[mrDelete] := TsmxRequestCfg(Cfg).DeletePerformance;
+    ModifyPerformances[mrInsert] := TsmxRequestCfg(Cfg).InsertPerformance;
+    ModifyPerformances[mrUpdate] := TsmxRequestCfg(Cfg).UpdatePerformance;
 
-function TsmxGrid.GetCfg: TsmxGridCfg;
-begin
-  Result := TsmxGridCfg(inherited Cfg);
-end;
-
-procedure TsmxGrid.InitChilds;
-var i: Integer;
-begin
-  for i := 0 to Cfg.GridColumns.Count - 1 do
-    with Cfg.GridColumns[i] do
+    //DataSetIntf := smxClassFuncs.NewIntf(CfgID, SelectRequest) as IsmxDataSet;
+    {DataSetIntf := GetDataSet;
+    if Assigned(DataSetIntf) then
     begin
-      Columns[i].CellAlign := UnitAlign;
-      Columns[i].CellEnable := UnitEnable;
-      Columns[i].CellHeight := UnitHeight;
-      Columns[i].CellLeft := UnitLeft;
-      Columns[i].CellTop := UnitTop;
-      Columns[i].CellVisible := UnitVisible;
-      Columns[i].CellWidth := UnitWidth;
+      DataSetIntf.SQL.Text := TsmxRequestCfg(Cfg).SQLText;
+      for i := 0 to TsmxRequestCfg(Cfg).Fields.Count - 1 do
+        with DataSetIntf.AddField(TsmxRequestCfg(Cfg).Fields[i].FieldName) do
+        begin
+          DisplayFormat := TsmxRequestCfg(Cfg).Fields[i].DisplayFormat;
+          FieldSense := TsmxRequestCfg(Cfg).Fields[i].FieldSense;
+        end;
+      for i := 0 to TsmxRequestCfg(Cfg).Params.Count - 1 do
+        with DataSetIntf.AddParam(TsmxRequestCfg(Cfg).Params[i].ParamName) do
+        begin
+          DataType := TsmxRequestCfg(Cfg).Params[i].DataType;
+          ParamLocation := TsmxRequestCfg(Cfg).Params[i].ParamLocation;
+          ParamType := TsmxRequestCfg(Cfg).Params[i].ParamType;
+          Value := TsmxRequestCfg(Cfg).Params[i].Value;
+        end;
+      DataSet := DataSetIntf;
+    end;}
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+    begin
+      ModifyRequests[mrDelete] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).DeleteReqCfgID);
+      ModifyRequests[mrInsert] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).InsertReqCfgID);
+      ModifyRequests[mrUpdate] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).UpdateReqCfgID);
+
+      OnDelete := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
+      OnExecute := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
+      OnInsert := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
+      OnPrepare := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
+      OnRefreshParams := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
+      OnUpdate := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
     end;
-end;}
+  end; //else
+    //raise EsmxCellError.CreateFmt(@rsCellActionError, [ClassName, 'initialize']);
+end;
+
+procedure TsmxRequest.InternalRefreshParams;
+var
+  i, j: integer;
+  Form: TsmxCustomForm;
+  Value: Variant;
+  List: TList;
+  Cell: TsmxOwnerCell;
+begin
+  inherited InternalRefreshParams;
+  if not Assigned(CurDataSet) then
+    Exit;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
+  List := TList.Create;
+  try
+    for i := 0 to CurDataSet.ParamCount - 1 do
+    begin
+      //Value := Variants.Null;
+      case CurDataSet.Params[i].ParamLocation of
+        {plConst .. plOutput, plFilterDesk .. plParentGrid:
+        begin
+          Value := Variants.Null; //FCurDataSetIntf.Params[i].Value;
+        end;}
+        plFilterDesk:
+        begin
+          {smxClassProcs.AllParents(Self, List, [TsmxCustomSection]);
+          if List.Count > 0 then
+            smxClassFuncs.FindFilterOnSection(TsmxCustomSection(List[0]),
+              FCurDataSetIntf.Params[i].ParamName, Value);}
+          //Cell := nil;
+          if RequestCell is TsmxCustomFilterDesk then
+          begin
+            Cell := TsmxCustomFilterDesk(RequestCell).FindSlaveByName(CurDataSet.Params[i].ParamName);
+            if Assigned(Cell) then
+              CurDataSet.Params[i].Value := TsmxCustomFilter(Cell).FilterValue;
+          end else
+          if smxClassFuncs.FindFilterOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
+            CurDataSet.Params[i].Value := Value;
+        end;
+        plGrid:
+        begin
+          {smxClassProcs.AllParents(Self, List, [TsmxCustomPage]);
+          if List.Count > 0 then
+            for j := 0 to TsmxCustomPage(List[0]).SlaveCount - 1 do
+              if not smxClassFuncs.ExistsParent(Self, TsmxCustomPage(List[0]).Slaves[j]) then
+                if smxClassFuncs.FindColumnOnSection(TsmxCustomPage(List[0]).Slaves[j],
+                    FCurDataSetIntf.Params[i].ParamName, Value) then
+                  Break;}
+          if RequestCell is TsmxCustomGrid then
+          begin
+            if RequestCell.CellParent is TsmxCustomSection then
+              if RequestCell.CellParent.CellParent is TsmxCustomPage then
+                with TsmxCustomPage(RequestCell.CellParent.CellParent) do
+                  for j := 0 to SlaveCount - 1 do
+                    if RequestCell.CellParent <> Slaves[j] then
+                      if smxClassFuncs.FindColumnOnSection(Slaves[j], CurDataSet.Params[i].ParamName, Value) then
+                      begin
+                        CurDataSet.Params[i].Value := Value;
+                        Break;
+                      end;
+          end else
+          if smxClassFuncs.FindColumnOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
+            CurDataSet.Params[i].Value := Value;
+        end;
+        plParentFilterDesk:
+        begin
+          smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
+          for j := 0 to List.Count - 1 do
+            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
+            begin
+              CurDataSet.Params[i].Value := Value;
+              Break;
+            end;
+        end;
+        plParentGrid:
+        begin
+          smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
+          for j := 0 to List.Count - 1 do
+            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
+            begin
+              CurDataSet.Params[i].Value := Value;
+              Break;
+            end;
+        end;
+        plStorageParams:
+        begin
+          if Assigned(StorageManager) then
+            CurDataSet.Params[i].Value := StorageManager.Values[CurDataSet.Params[i].ParamName];
+        end;
+        plParentParams:
+        begin
+          smxClassProcs.AllParents(Self, List, []);
+          for j := 0 to List.Count - 1 do
+            if TsmxBaseCell(List[j]).CellParams(CurDataSet.Params[i].ParamName, Value) then
+            begin
+              CurDataSet.Params[i].Value := Value;
+              Break;
+            end;
+        end;
+      end;
+      //FCurDataSetIntf.Params[i].Value := Value;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TsmxRequest.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  DatabaseName := '';
+  DataSet := nil;
+  ModifyPerformances[mrDelete] := pmOpen;
+  ModifyPerformances[mrInsert] := pmOpen;
+  ModifyPerformances[mrUpdate] := pmOpen;
+  ModifyRequests[mrDelete] := nil;
+  ModifyRequests[mrInsert] := nil;
+  ModifyRequests[mrUpdate] := nil;
+  OperationMode := omManual;
+  PerformanceMode := pmOpen;
+  OnDelete := nil;
+  OnExecute := nil;
+  OnInsert := nil;
+  OnPrepare := nil;
+  OnRefreshParams := nil;
+  OnUpdate := nil;
+end;
+
+{ TsmxRequestList }
+
+function TsmxRequestList.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxRequest;
+end;
+
+{ TsmxColumn }
+
+destructor TsmxColumn.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FColumn) then
+    FColumn.Free;
+end;
+
+function TsmxColumn.GetCellVisible: Boolean;
+begin
+  Result := Column.Visible;
+end;
+
+procedure TsmxColumn.SetCellVisible(Value: Boolean);
+begin
+  Column.Visible := Value;
+end;
+
+function TsmxColumn.GetCellWidth: Integer;
+begin
+  Result := Column.Width;
+end;
+
+procedure TsmxColumn.SetCellWidth(Value: Integer);
+begin
+  Column.Width := Value;
+end;
+
+function TsmxColumn.GetColumn: TColumn;
+begin
+  if not Assigned(FColumn) then
+    FColumn := TColumn.Create(nil);
+  Result := FColumn;
+end;
+
+function TsmxColumn.GetColumnAlignment: TAlignment;
+begin
+  Result := Column.Alignment;
+end;
+
+procedure TsmxColumn.SetColumnAlignment(Value: TAlignment);
+begin
+  Column.Alignment := Value;
+end;
+
+function TsmxColumn.GetColumnCaption: String;
+begin
+  if Assigned(Column.Field) then
+    Result := Variants.VarToStr(Column.Field.Value) else
+    Result := '';
+end;
+
+procedure TsmxColumn.SetColumnCaption(const Value: String);
+begin
+  if Assigned(Column.Field) then
+    Column.Field.Value := smxFuncs.StrToVar(Value);
+end;
+
+function TsmxColumn.GetColumnColor: TColor;
+begin
+  Result := Column.Color;
+end;
+
+procedure TsmxColumn.SetColumnColor(Value: TColor);
+begin
+  Column.Color := Value;
+end;
+
+function TsmxColumn.GetColumnFont: TFont;
+begin
+  Result := Column.Font;
+end;
+
+procedure TsmxColumn.SetColumnFont(Value: TFont);
+begin
+  Column.Font := Value;
+end;
+
+function TsmxColumn.GetColumnValue: Variant;
+begin
+  if Assigned(Column.Field) then
+    Result := Column.Field.Value else
+    Result := Variants.Null;
+end;
+
+procedure TsmxColumn.SetColumnValue(const Value: Variant);
+begin
+  if Assigned(Column.Field) then
+    Column.Field.Value := Value;
+end;
+
+function TsmxColumn.GetFieldName: String;
+begin
+  Result := Column.FieldName;
+end;
+
+procedure TsmxColumn.SetFieldName(const Value: String);
+begin
+  Column.FieldName := Value;
+end;
+
+function TsmxColumn.GetHeaderAlignment: TAlignment;
+begin
+  Result := Column.Title.Alignment;
+end;
+
+procedure TsmxColumn.SetHeaderAlignment(Value: TAlignment);
+begin
+  Column.Title.Alignment := Value;
+end;
+
+function TsmxColumn.GetHeaderCaption: String;
+begin
+  Result := Column.Title.Caption;
+end;
+
+procedure TsmxColumn.SetHeaderCaption(const Value: String);
+begin
+  Column.Title.Caption := Value;
+end;
+
+function TsmxColumn.GetHeaderColor: TColor;
+begin
+  Result := Column.Title.Color;
+end;
+
+procedure TsmxColumn.SetHeaderColor(Value: TColor);
+begin
+  Column.Title.Color := Value;
+end;
+
+function TsmxColumn.GetHeaderFont: TFont;
+begin
+  Result := Column.Title.Font;
+end;
+
+procedure TsmxColumn.SetHeaderFont(Value: TFont);
+begin
+  Column.Title.Font := Value;
+end;
+
+function TsmxColumn.GetInternalObject: TObject;
+begin
+  Result := Column;
+end;
+
+procedure TsmxColumn.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxColumnCfg then
+  begin
+    ColumnAlignment := TsmxColumnCfg(Cfg).ColumnText.Align;
+    //ColumnCaption := TsmxColumnCfg(Cfg).ColumnText.Caption;
+    ColumnColor := TColor(TsmxColumnCfg(Cfg).ColumnText.Color);
+    ColumnFont.Color := TColor(TsmxColumnCfg(Cfg).ColumnText.Font.Color);
+    ColumnFont.Name := TsmxColumnCfg(Cfg).ColumnText.Font.Name;
+    ColumnFont.Size := TsmxColumnCfg(Cfg).ColumnText.Font.Size;
+    ColumnFont.Style := TsmxColumnCfg(Cfg).ColumnText.Font.Style;
+    FieldName := TsmxColumnCfg(Cfg).ColumnFieldName;
+    HeaderAlignment := TsmxColumnCfg(Cfg).ColumnHeader.Align;
+    HeaderCaption := TsmxColumnCfg(Cfg).ColumnHeader.Caption;
+    HeaderColor := TColor(TsmxColumnCfg(Cfg).ColumnHeader.Color);
+    HeaderFont.Color := TColor(TsmxColumnCfg(Cfg).ColumnHeader.Font.Color);
+    HeaderFont.Name := TsmxColumnCfg(Cfg).ColumnHeader.Font.Name;
+    HeaderFont.Size := TsmxColumnCfg(Cfg).ColumnHeader.Font.Size;
+    HeaderFont.Style := TsmxColumnCfg(Cfg).ColumnHeader.Font.Style;
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+      OnPushHeader := smxClassFuncs.GetEventForm(Form, TsmxColumnCfg(Cfg).PushHeaderAlgCfgID);
+  end;
+end;
+
+procedure TsmxColumn.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  ColumnAlignment := taLeftJustify;
+  //ColumnCaption := TsmxColumnCfg(Cfg).ColumnText.Caption;
+  ColumnColor := Graphics.clBlack;
+  ColumnFont.Color := Graphics.clBlack;
+  ColumnFont.Name := '';
+  ColumnFont.Size := 0;
+  ColumnFont.Style := [];
+  FieldName := '';
+  HeaderAlignment := taLeftJustify;
+  HeaderCaption := '';
+  HeaderColor := Graphics.clBlack;
+  HeaderFont.Color := Graphics.clBlack;
+  HeaderFont.Name := '';
+  HeaderFont.Size := 0;
+  HeaderFont.Style := [];
+  OnPushHeader := nil;
+end;
+
+procedure TsmxColumn.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Column.Collection := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TDBGrid then
+      Column.Collection := TDBGrid(Obj).Columns;
+  end;
+end;
+
+procedure TsmxColumn.SetSlaveIndex(Value: Integer);
+begin
+  inherited SetSlaveIndex(Value);
+  Column.Index := Value;
+end;
 
 { TsmxDBGrid }
 
-constructor TsmxDBGrid.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FDataSource := TDataSource.Create(Self);
-  FGrid := TsmxWheelDBGrid.Create(Self);
-  FGrid.DataSource := FDataSource;
-  FGrid.Options := FGrid.Options - [dgEditing];
-  //if Cfg.GridColLines then
-  //if goColLines in Cfg.GridOptions then
-    //FGrid.Options := FGrid.Options + [dgColLines] else
-    //FGrid.Options := FGrid.Options - [dgColLines];
-  //if Cfg.GridRowLines then
-  //if goRowLines in Cfg.GridOptions then
-    //FGrid.Options := FGrid.Options + [dgRowLines] else
-    //FGrid.Options := FGrid.Options - [dgRowLines];
-  //if Cfg.GridRowSelect then
-  //if goRowSelect in Cfg.GridOptions then
-    //FGrid.Options := FGrid.Options + [dgRowSelect] else
-    //FGrid.Options := FGrid.Options - [dgRowSelect];
-  //InstallParent;
-end;
-
 destructor TsmxDBGrid.Destroy;
 begin
-  //UnInstallParent;
-  FDataSource.Free;
   inherited Destroy;
-  FGrid.Free;      
+  if Assigned(FDBGrid) then
+  begin
+    FDBGrid.DataSource.Free;
+    FDBGrid.Free;
+  end;
 end;
 
-procedure TsmxDBGrid.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
+{procedure TsmxDBGrid.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil);
 var
   Cfg: TsmxBaseCfg;
@@ -1267,8 +1751,8 @@ begin
   inherited Initialize(ACfgDatabase, ACfgID, ASelectRequest);
   Cfg := smxClassFuncs.NewCfg(Self, ACfgDatabase, ACfgID, ASelectRequest);
   try
-    if Cfg is TsmxGridCfg then
-      with TsmxGridCfg(Cfg) do
+    if Cfg is TsmxDBGridCfg then
+      with TsmxDBGridCfg(Cfg) do
       begin
         FGrid.Options := FGrid.Options - [dgEditing];
         if goColLines in Cfg.GridOptions then
@@ -1304,126 +1788,259 @@ begin
   finally
     Cfg.Free;
   end;
-end;
+end;}
 
-function TsmxDBGrid.GetInternalObject: TObject;
+{function TsmxDBGrid.GetCellAlign: TAlign;
 begin
-  Result := FGrid;
-end;
-
-function TsmxDBGrid.GetCellAlign: TAlign;
-begin
-  Result := FGrid.Align;
-end;
-
-function TsmxDBGrid.GetCellCursor: TCursor;
-begin
-  Result := FGrid.Cursor;
-end;
-
-function TsmxDBGrid.GetCellEnable: Boolean;
-begin
-  Result := FGrid.Enabled;
-end;
-
-function TsmxDBGrid.GetCellHeight: Integer;
-begin
-  Result := FGrid.Height;
-end;
-
-function TsmxDBGrid.GetCellLeft: Integer;
-begin
-  Result := FGrid.Left;
-end;
-
-function TsmxDBGrid.GetCellTop: Integer;
-begin
-  Result := FGrid.Top;
-end;
-
-function TsmxDBGrid.GetCellVisible: Boolean;
-begin
-  Result := FGrid.Visible;
-end;
-
-function TsmxDBGrid.GetCellWidth: Integer;
-begin
-  Result := FGrid.Width;
+  Result := Grid.Align;
 end;
 
 procedure TsmxDBGrid.SetCellAlign(Value: TAlign);
 begin
-  FGrid.Align := Value;
+  Grid.Align := Value;
+end;
+
+function TsmxDBGrid.GetCellAnchors: TAnchors;
+begin
+  Result := Grid.Anchors;
+end;
+
+procedure TsmxDBGrid.SetCellAnchors(Value: TAnchors);
+begin
+  Grid.Anchors := Value;
+end;
+
+function TsmxDBGrid.GetCellCursor: TCursor;
+begin
+  Result := Grid.Cursor;
 end;
 
 procedure TsmxDBGrid.SetCellCursor(Value: TCursor);
 begin
-  FGrid.Cursor := Value;
+  Grid.Cursor := Value;
 end;
 
-procedure TsmxDBGrid.SetCellEnable(Value: Boolean);
+function TsmxDBGrid.GetCellEnabled: Boolean;
 begin
-  FGrid.Enabled := Value;
+  Result := Grid.Enabled;
+end;
+
+procedure TsmxDBGrid.SetCellEnabled(Value: Boolean);
+begin
+  Grid.Enabled := Value;
+end;
+
+function TsmxDBGrid.GetCellHeight: Integer;
+begin
+  Result := Grid.Height;
 end;
 
 procedure TsmxDBGrid.SetCellHeight(Value: Integer);
 begin
-  FGrid.Height := Value;
+  Grid.Height := Value;
+end;
+
+function TsmxDBGrid.GetCellLeft: Integer;
+begin
+  Result := Grid.Left;
 end;
 
 procedure TsmxDBGrid.SetCellLeft(Value: Integer);
 begin
-  FGrid.Left := Value;
+  Grid.Left := Value;
+end;
+
+function TsmxDBGrid.GetCellTop: Integer;
+begin
+  Result := Grid.Top;
 end;
 
 procedure TsmxDBGrid.SetCellTop(Value: Integer);
 begin
-  FGrid.Top := Value;
+  Grid.Top := Value;
+end;
+
+function TsmxDBGrid.GetCellVisible: Boolean;
+begin
+  Result := Grid.Visible;
 end;
 
 procedure TsmxDBGrid.SetCellVisible(Value: Boolean);
 begin
-  FGrid.Visible := Value;
+  Grid.Visible := Value;
+end;
+
+function TsmxDBGrid.GetCellWidth: Integer;
+begin
+  Result := Grid.Width;
 end;
 
 procedure TsmxDBGrid.SetCellWidth(Value: Integer);
 begin
-  FGrid.Width := Value;
+  Grid.Width := Value;
+end;}
+
+function TsmxDBGrid.GetCellHint: String;
+begin
+  Result := DBGrid.Hint;
 end;
 
-procedure TsmxDBGrid.SetParentCell(Value: TsmxBaseCell);
-var
-  Obj: TObject;
+procedure TsmxDBGrid.SetCellHint(const Value: String);
 begin
-  if Assigned(ParentCell) then
-    FGrid.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  DBGrid.Hint := Value;
+end;
+
+function TsmxDBGrid.GetDBGrid: TsmxWheelDBGrid;
+begin
+  if not Assigned(FDBGrid) then
   begin
-    Obj := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if Obj is TWinControl then
-      FGrid.Parent := TWinControl(Obj);
+    FDBGrid := TsmxWheelDBGrid.Create(Self);
+    FDBGrid.DataSource := TDataSource.Create(Self);
+    FDBGrid.DataSource.OnDataChange := DBGridDataChange;
+    FDBGrid.Options := FDBGrid.Options - [dgEditing];
+    FDBGrid.OnDblClick := ControlDblClick;
+    FDBGrid.OnTitleClick := DBGridTitleClick;
+    FDBGrid.OnCellClick := DBGridCellClick;
+  end;
+  Result := FDBGrid;
+end;
+
+function TsmxDBGrid.GetInternalObject: TObject;
+begin
+  Result := DBGrid;
+end;
+
+function TsmxDBGrid.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxColumn;
+end;
+
+procedure TsmxDBGrid.DBGridCellClick(Column: TColumn);
+var
+  Slave: TsmxOwnerCell;
+begin
+  Slave := FindSlaveByInternalObject(Column);
+  if Slave is TsmxCustomColumn then
+    TsmxCustomColumn(Slave).Snap;
+end;
+
+procedure TsmxDBGrid.DBGridDataChange(Sender: TObject; Field: TField);
+begin
+  ChangeRow;
+end;
+
+{procedure TsmxDBGrid.DBGridDblClick(Sender: TObject);
+begin
+  DoubleSnap;
+end;}
+
+procedure TsmxDBGrid.DBGridTitleClick(Column: TColumn);
+var
+  Slave: TsmxOwnerCell;
+begin
+  Slave := FindSlaveByInternalObject(Column);
+  if Slave is TsmxCustomColumn then
+    TsmxCustomColumn(Slave).PushHeader;
+end;
+
+procedure TsmxDBGrid.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxGridCfg then
+  begin
+    GridOptions := TsmxGridCfg(Cfg).GridOptions;
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+    begin
+      Request := smxClassFuncs.GetRequestForm(Form, TsmxGridCfg(Cfg).RequestCfgID);
+      OnChangeRow := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).ChangeRowAlgCfgID);
+      //OnPressDouble := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).PressDoubleAlgCfgID);
+      //OnPressHeader := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).PressHeaderAlgCfgID);
+      OnRefresh := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).RefreshAlgCfgID);
+    end;
   end;
 end;
 
+procedure TsmxDBGrid.InternalRefresh;
+var
+  OldIsManualRefreshParams: Boolean;
+begin
+  inherited InternalRefresh;
+  if Assigned(Request) then
+  begin
+    OldIsManualRefreshParams := Request.IsManualRefreshParams;
+    try
+      Request.IsManualRefreshParams := False;
+      Request.Prepare;
+      if Request.OperationMode = omManual then
+      begin
+        Request.RefreshParams;
+        Request.Execute;
+      end;
+    finally
+      Request.IsManualRefreshParams := OldIsManualRefreshParams;
+    end;
+  end;
+end;
+
+procedure TsmxDBGrid.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  GridOptions := [];
+  Request := nil;
+  OnChangeRow := nil;
+end;
+
+{procedure TsmxDBGrid.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Grid.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      Grid.Parent := TWinControl(Obj);
+  end;
+end;}
+
+procedure TsmxDBGrid.SetGridOptions(Value: TsmxGridOptions);
+begin
+  inherited SetGridOptions(Value);
+  if goColLines in Value then
+    DBGrid.Options := DBGrid.Options + [dgColLines] else
+    DBGrid.Options := DBGrid.Options - [dgColLines];
+  if goRowLines in Value then
+    DBGrid.Options := DBGrid.Options + [dgRowLines] else
+    DBGrid.Options := DBGrid.Options - [dgRowLines];
+  if goRowSelect in Value then
+    DBGrid.Options := DBGrid.Options + [dgRowSelect] else
+    DBGrid.Options := DBGrid.Options - [dgRowSelect];
+end;
+
 procedure TsmxDBGrid.SetRequest(Value: TsmxCustomRequest);
-var c: TObject;
+var
+  Obj: TObject;
 begin
   if Assigned(Request) then
-    FDataSource.DataSet := nil;
+    DBGrid.DataSource.DataSet := nil;
   inherited SetRequest(Value);
   if Assigned(Request) then
-    if Assigned(Request.CellDataSet) then
+    if Assigned(Request.DataSet) then
     begin
-      c := Request.CellDataSet.GetDataSet;
-      if c is TDataSet then
-        FDataSource.DataSet := TDataSet(c);
+      Obj := TObject(Request.DataSet.GetInternalRef);
+      if Obj is TDataSet then
+        DBGrid.DataSource.DataSet := TDataSet(Obj);
     end;
 end;
 
 { TsmxFilter }
 
-procedure TsmxFilter.CreateChilds;
+{procedure TsmxFilter.CreateChilds;
 var c: TsmxBaseCell;
 begin
   with Cfg.Algorithm do
@@ -1447,15 +2064,15 @@ begin
     with Cfg.Algorithm do
     begin
       Algorithm.CellCaption := Caption;
-      Algorithm.CellEnable := Enable;
+      Algorithm.CellEnabled := Enabled;
       Algorithm.CellHotKey := HotKey;
       Algorithm.CellVisible := Visible;
     end;
-end;
+end;}
 
 { TsmxPanelFilter }
 
-constructor TsmxPanelFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxPanelFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FilterName := Cfg.FilterName;
@@ -1488,103 +2105,269 @@ begin
     end;
   end;
   FHeader.Top := 4;
-end;
+end;}
 
 destructor TsmxPanelFilter.Destroy;
 begin
-  FHeader.Parent := nil;
-  FHeader.Free;
-  FPanel.Free;
   inherited Destroy;
+  //UnBindFilterObjects;
+  if GetFilter is TControl then
+    TControl(GetFilter).Parent := nil;
+  if Assigned(FHeader) then
+    FHeader.Free;
+  if Assigned(FPanel) then
+    FPanel.Free;
 end;
 
-function TsmxPanelFilter.GetCellAlign: TAlign;
+{function TsmxPanelFilter.GetCellAlign: TAlign;
 begin
-  Result := FPanel.Align;
-end;
-
-function TsmxPanelFilter.GetCellEnable: Boolean;
-begin
-  Result := FPanel.Enabled;
-end;
-
-function TsmxPanelFilter.GetCellHeight: Integer;
-begin
-  Result := FPanel.Height;
-end;
-
-function TsmxPanelFilter.GetCellLeft: Integer;
-begin
-  Result := FPanel.Left;
-end;
-
-function TsmxPanelFilter.GetCellTop: Integer;
-begin
-  Result := FPanel.Top;
-end;
-
-function TsmxPanelFilter.GetCellVisible: Boolean;
-begin
-  Result := FPanel.Visible;
-end;
-
-function TsmxPanelFilter.GetCellWidth: Integer;
-begin
-  Result := FPanel.Width;
+  Result := Panel.Align;
 end;
 
 procedure TsmxPanelFilter.SetCellAlign(Value: TAlign);
 begin
-  FPanel.Align := Value;
+  Panel.Align := Value;
 end;
 
-procedure TsmxPanelFilter.SetCellEnable(Value: Boolean);
+function TsmxPanelFilter.GetCellAnchors: TAnchors;
 begin
-  FPanel.Enabled := Value;
+  Result := Panel.Anchors;
+end;
+
+procedure TsmxPanelFilter.SetCellAnchors(Value: TAnchors);
+begin
+  Panel.Anchors := Value;
+end;
+
+function TsmxPanelFilter.GetCellCursor: TCursor;
+begin
+  Result := Panel.Cursor;
+end;
+
+procedure TsmxPanelFilter.SetCellCursor(Value: TCursor);
+begin
+  Panel.Cursor := Value;
+end;
+
+function TsmxPanelFilter.GetCellEnabled: Boolean;
+begin
+  Result := Panel.Enabled;
+end;
+
+procedure TsmxPanelFilter.SetCellEnabled(Value: Boolean);
+begin
+  Panel.Enabled := Value;
+end;
+
+function TsmxPanelFilter.GetCellHeight: Integer;
+begin
+  Result := Panel.Height;
 end;
 
 procedure TsmxPanelFilter.SetCellHeight(Value: Integer);
 begin
-  FPanel.Height := Value;
+  Panel.Height := Value;
+end;
+
+function TsmxPanelFilter.GetCellLeft: Integer;
+begin
+  Result := Panel.Left;
 end;
 
 procedure TsmxPanelFilter.SetCellLeft(Value: Integer);
 begin
-  FPanel.Left := Value;
+  Panel.Left := Value;
+end;
+
+function TsmxPanelFilter.GetCellTop: Integer;
+begin
+  Result := Panel.Top;
 end;
 
 procedure TsmxPanelFilter.SetCellTop(Value: Integer);
 begin
-  FPanel.Top := Value;
+  Panel.Top := Value;
+end;
+
+function TsmxPanelFilter.GetCellVisible: Boolean;
+begin
+  Result := Panel.Visible;
 end;
 
 procedure TsmxPanelFilter.SetCellVisible(Value: Boolean);
 begin
-  FPanel.Visible := Value;
+  Panel.Visible := Value;
+end;
+
+function TsmxPanelFilter.GetCellWidth: Integer;
+begin
+  Result := Panel.Width;
 end;
 
 procedure TsmxPanelFilter.SetCellWidth(Value: Integer);
 begin
-  FPanel.Width := Value;
+  Panel.Width := Value;
+end;}
+
+function TsmxPanelFilter.GetHeader: TLabel;
+begin
+  if not Assigned(FHeader) then
+  begin
+    FHeader := TLabel.Create(Self);
+    FHeader.Parent := Panel;
+    FHeader.Left := 4;
+    FHeader.Top := 4;
+    FHeader.Width := Panel.Width - 8;
+    FHeader.Anchors := [akLeft, akRight];
+  end;
+  Result := FHeader;
 end;
 
-procedure TsmxPanelFilter.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxPanelFilter.GetHeaderAlignment: TAlignment;
 begin
-  if Assigned(ParentCell) then
-    FPanel.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  Result := Header.Alignment;
+end;
+
+procedure TsmxPanelFilter.SetHeaderAlignment(Value: TAlignment);
+begin
+  Header.Alignment := Value;
+end;
+
+function TsmxPanelFilter.GetHeaderCaption: String;
+begin
+  Result := Header.Caption;
+end;
+
+procedure TsmxPanelFilter.SetHeaderCaption(const Value: String);
+begin
+  Header.Caption := Value;
+end;
+
+function TsmxPanelFilter.GetHeaderColor: TColor;
+begin
+  Result := Header.Color;
+end;
+
+procedure TsmxPanelFilter.SetHeaderColor(Value: TColor);
+begin
+  Header.Color := Value;
+end;
+
+function TsmxPanelFilter.GetHeaderFont: TFont;
+begin
+  Result := Header.Font;
+end;
+
+procedure TsmxPanelFilter.SetHeaderFont(Value: TFont);
+begin
+  Header.Font := Value;
+end;
+
+function TsmxPanelFilter.GetFilter: TObject;
+begin
+  Result := nil;
+end;
+
+function TsmxPanelFilter.GetInternalObject: TObject;
+begin
+  Result := Panel;
+end;
+
+function TsmxPanelFilter.GetPanel: TPanel;
+begin
+  if not Assigned(FPanel) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TWinControl then
-      FPanel.Parent := TWinControl(c);
+    FPanel := TPanel.Create(Self);
+    FPanel.Caption := '';
+    FPanel.Height := 49;
+    FPanel.BevelOuter := bvNone;
+  end;
+  Result := FPanel;
+end;
+
+procedure TsmxPanelFilter.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxFilterCfg then
+  begin
+    DisplayFormat := TsmxFilterCfg(Cfg).DisplayFormat;
+    FilterAlignment := TsmxFilterCfg(Cfg).FilterText.Align;
+    FilterCaption := TsmxFilterCfg(Cfg).FilterText.Caption;
+    FilterColor := TColor(TsmxFilterCfg(Cfg).FilterText.Color);
+    FilterFont.Color := TColor(TsmxFilterCfg(Cfg).FilterText.Font.Color);
+    FilterFont.Name := TsmxFilterCfg(Cfg).FilterText.Font.Name;
+    FilterFont.Size := TsmxFilterCfg(Cfg).FilterText.Font.Size;
+    FilterFont.Style := TsmxFilterCfg(Cfg).FilterText.Font.Style;
+    FilterOptions := TsmxFilterCfg(Cfg).FilterOptions;
+    FilterValue := TsmxFilterCfg(Cfg).FilterValue;
+    HeaderAlignment := TsmxFilterCfg(Cfg).FilterHeader.Align;
+    HeaderCaption := TsmxFilterCfg(Cfg).FilterHeader.Caption;
+    HeaderColor := TColor(TsmxFilterCfg(Cfg).FilterHeader.Color);
+    HeaderFont.Color := TColor(TsmxFilterCfg(Cfg).FilterHeader.Font.Color);
+    HeaderFont.Name := TsmxFilterCfg(Cfg).FilterHeader.Font.Name;
+    HeaderFont.Size := TsmxFilterCfg(Cfg).FilterHeader.Font.Size;
+    HeaderFont.Style := TsmxFilterCfg(Cfg).FilterHeader.Font.Style;
+    ValueFormat := TsmxFilterCfg(Cfg).ValueFormat;
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+    begin
+      //Request := smxClassFuncs.GetRequestForm(Form, TsmxFilterCfg(Cfg).RequestCfgID);
+      OnChangeFilter := smxClassFuncs.GetEventForm(Form, TsmxFilterCfg(Cfg).ChangeFilterAlgCfgID);
+    end;
   end;
 end;
 
+procedure TsmxPanelFilter.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  DisplayFormat := '';
+  FilterAlignment := taLeftJustify;
+  FilterCaption := '';
+  FilterColor := Graphics.clBlack;
+  FilterFont.Color := Graphics.clBlack;
+  FilterFont.Name := '';
+  FilterFont.Size := 0;
+  FilterFont.Style := [];
+  FilterOptions := [];
+  FilterValue := Variants.Null;
+  HeaderAlignment := taLeftJustify;
+  HeaderCaption := '';
+  HeaderColor := Graphics.clBlack;
+  HeaderFont.Color := Graphics.clBlack;
+  HeaderFont.Name := '';
+  HeaderFont.Size := 0;
+  HeaderFont.Style := [];
+  //Request := nil;
+  ValueFormat := '';
+  OnChangeFilter := nil;
+end;
+
+procedure TsmxPanelFilter.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Panel.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      Panel.Parent := TWinControl(Obj);
+  end;
+end;
+
+{procedure TsmxPanelFilter.UnBindFilterObjects;
+begin
+  if Assigned(FHeader) then
+    FHeader.Parent := nil;
+end;}
+
 { TsmxFilterDesk }
 
-procedure TsmxFilterDesk.CreateChilds;
+{procedure TsmxFilterDesk.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
   with Cfg.ApplyRequest do
@@ -1640,124 +2423,338 @@ begin
     with Cfg.Filters[i] do
     begin
       Filters[i].CellAlign := UnitAlign;
-      Filters[i].CellEnable := UnitEnable;
+      Filters[i].CellEnabled := UnitEnabled;
       Filters[i].CellHeight := UnitHeight;
       Filters[i].CellLeft := UnitLeft;
       Filters[i].CellTop := UnitTop;
       Filters[i].CellVisible := UnitVisible;
       Filters[i].CellWidth := UnitWidth;
     end;
-end;
+end;}
 
 { TsmxPanelFilterDesk }
 
-constructor TsmxPanelFilterDesk.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxPanelFilterDesk.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FPanel := TPanel.Create(Self);
-  FPanel.BevelOuter := bvNone;
-  InstallParent;
-end;
+  inherited Create(AOwner);
+  IsAltSlaveClass := True;
+end;}
 
 destructor TsmxPanelFilterDesk.Destroy;
 begin
-  UnInstallParent;
-  FPanel.Free;
+  //UnInstallParent;
   inherited Destroy;
+  if Assigned(FPanel) then
+    FPanel.Free;
 end;
 
-function TsmxPanelFilterDesk.GetInternalObject: TObject;
+{function TsmxPanelFilterDesk.GetCellAlign: TAlign;
 begin
-  Result := FPanel;
-end;
-
-function TsmxPanelFilterDesk.GetCellAlign: TAlign;
-begin
-  Result := FPanel.Align;
-end;
-
-function TsmxPanelFilterDesk.GetCellEnable: Boolean;
-begin
-  Result := FPanel.Enabled;
-end;
-
-function TsmxPanelFilterDesk.GetCellHeight: Integer;
-begin
-  Result := FPanel.Height;
-end;
-
-function TsmxPanelFilterDesk.GetCellLeft: Integer;
-begin
-  Result := FPanel.Left;
-end;
-
-function TsmxPanelFilterDesk.GetCellTop: Integer;
-begin
-  Result := FPanel.Top;
-end;
-
-function TsmxPanelFilterDesk.GetCellVisible: Boolean;
-begin
-  Result := FPanel.Visible;
-end;
-
-function TsmxPanelFilterDesk.GetCellWidth: Integer;
-begin
-  Result := FPanel.Width;
+  Result := Panel.Align;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellAlign(Value: TAlign);
 begin
-  FPanel.Align := Value;
+  Panel.Align := Value;
 end;
 
-procedure TsmxPanelFilterDesk.SetCellEnable(Value: Boolean);
+function TsmxPanelFilterDesk.GetCellAnchors: TAnchors;
 begin
-  FPanel.Enabled := Value;
+  Result := Panel.Anchors;
+end;
+
+procedure TsmxPanelFilterDesk.SetCellAnchors(Value: TAnchors);
+begin
+  Panel.Anchors := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellCursor: TCursor;
+begin
+  Result := Panel.Cursor;
+end;
+
+procedure TsmxPanelFilterDesk.SetCellCursor(Value: TCursor);
+begin
+  Panel.Cursor := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellEnabled: Boolean;
+begin
+  Result := Panel.Enabled;
+end;
+
+procedure TsmxPanelFilterDesk.SetCellEnabled(Value: Boolean);
+begin
+  Panel.Enabled := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellHeight: Integer;
+begin
+  Result := Panel.Height;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellHeight(Value: Integer);
 begin
-  FPanel.Height := Value;
+  Panel.Height := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellLeft: Integer;
+begin
+  Result := Panel.Left;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellLeft(Value: Integer);
 begin
-  FPanel.Left := Value;
+  Panel.Left := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellTop: Integer;
+begin
+  Result := Panel.Top;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellTop(Value: Integer);
 begin
-  FPanel.Top := Value;
+  Panel.Top := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellVisible: Boolean;
+begin
+  Result := Panel.Visible;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellVisible(Value: Boolean);
 begin
-  FPanel.Visible := Value;
+  Panel.Visible := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellWidth: Integer;
+begin
+  Result := Panel.Width;
 end;
 
 procedure TsmxPanelFilterDesk.SetCellWidth(Value: Integer);
 begin
-  FPanel.Width := Value;
+  Panel.Width := Value;
+end;}
+
+function TsmxPanelFilterDesk.GetCellCaption: String;
+begin
+  Result := Panel.Caption;
 end;
 
-procedure TsmxPanelFilterDesk.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+procedure TsmxPanelFilterDesk.SetCellCaption(const Value: String);
 begin
-  if Assigned(ParentCell) then
-    FPanel.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  Panel.Caption := Value;
+end;
+
+function TsmxPanelFilterDesk.GetCellHint: String;
+begin
+  Result := Panel.Hint;
+end;
+
+procedure TsmxPanelFilterDesk.SetCellHint(const Value: String);
+begin
+  Panel.Hint := Value;
+end;
+
+function TsmxPanelFilterDesk.GetInternalObject: TObject;
+begin
+  Result := Panel;
+end;
+
+function TsmxPanelFilterDesk.GetPanel: TPanel;
+begin
+  if not Assigned(FPanel) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TWinControl then
-      FPanel.Parent := TWinControl(c);
+    FPanel := TPanel.Create(Self);
+    FPanel.Caption := '';
+    FPanel.BevelOuter := bvNone;
+  end;
+  Result := FPanel;
+end;
+
+{function TsmxPanelFilterDesk.GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass;
+begin
+  if Cfg is TsmxFilterDeskCfg then
+    Result := TsmxOwnerCellClass(smxClassFuncs.CfgIDToCellClass(
+      TsmxFilterDeskCfg(Cfg).SlaveCells[Index].CfgID, SelectRequest))
+  else
+    Result := inherited GetAltSlaveClass(Index);
+end;}
+
+function TsmxPanelFilterDesk.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxPanelFilter;
+end;
+
+procedure TsmxPanelFilterDesk.InternalApply;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalApply;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.ModifyRequests[mrUpdate];
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        for i := 0 to SlaveCount - 1 do
+        begin
+          if foApplyValue in Slaves[i].FilterOptions then
+            DataSet.ParamByName(Slaves[i].SlaveName).Value :=
+              Slaves[i].FilterValue;
+          if foApplyText in Slaves[i].FilterOptions then
+            DataSet.ParamByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value :=
+              smxFuncs.StrToVar(Slaves[i].FilterCaption);
+        end;
+        Request.Update;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxFilterDeskCfg then
+  begin
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+    begin
+      Request := smxClassFuncs.GetRequestForm(Form, TsmxFilterDeskCfg(Cfg).RequestCfgID);
+      OnApply := smxClassFuncs.GetEventForm(Form, TsmxFilterDeskCfg(Cfg).ApplyAlgCfgID);
+      OnPrepare := smxClassFuncs.GetEventForm(Form, TsmxFilterDeskCfg(Cfg).PrepareAlgCfgID);
+    end;
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.InternalPrepare;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.DataSet;
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        Request.Execute;
+        for i := 0 to SlaveCount - 1 do
+        begin
+          case Request.PerformanceMode of
+            pmOpen:
+            begin
+              if foPrepareValue in Slaves[i].FilterOptions then
+                Slaves[i].FilterValue :=
+                  DataSet.FieldByName(Slaves[i].SlaveName).Value;
+              if foPrepareText in Slaves[i].FilterOptions then
+                Slaves[i].FilterCaption :=
+                  Variants.VarToStr(DataSet.FieldByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value);
+            end;
+            pmExecute:
+            begin
+              if foPrepareValue in Slaves[i].FilterOptions then
+                Slaves[i].FilterValue :=
+                  DataSet.ParamByName(Slaves[i].SlaveName).Value;
+              if foPrepareText in Slaves[i].FilterOptions then
+                Slaves[i].FilterCaption :=
+                  Variants.VarToStr(DataSet.ParamByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value);
+            end;
+          end;
+        end;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.RefreshValueParams(DataSet: IsmxDataSet);
+var
+  i, j: Integer;
+  List: TList;
+  Value: Variant;
+begin
+  List := TList.Create;
+  try
+    for i := 0 to DataSet.ParamCount - 1 do
+      case DataSet.Params[i].ParamLocation of
+        plStorageParams:
+        begin
+          if Assigned(StorageManager) then
+            DataSet.Params[i].Value := StorageManager.Values[DataSet.Params[i].ParamName];
+        end;
+        plParentParams:
+        begin
+          smxClassProcs.AllParents(Self, List, []);
+          for j := 0 to List.Count - 1 do
+            if TsmxBaseCell(List[j]).CellParams(DataSet.Params[i].ParamName, Value) then
+            begin
+              DataSet.Params[i].Value := Value;
+              Break;
+            end;
+        end;
+        else
+          DataSet.Params[i].Value := Variants.Null;
+      end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  OnApply := nil;
+  OnPrepare := nil;
+  Request := nil;
+end;
+
+procedure TsmxPanelFilterDesk.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Panel.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      Panel.Parent := TWinControl(Obj);
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem);
+begin
+  inherited SetSlaveCellProps(Slave, Item);
+  if (Slave is TsmxCustomFilter) and (Item is TsmxFilterKitItem) then
+  begin
+    TsmxCustomFilter(Slave).DisplayFormat := TsmxFilterKitItem(Item).DisplayFormat;
+    TsmxCustomFilter(Slave).FilterOptions := TsmxFilterKitItem(Item).FilterOptions;
+    TsmxCustomFilter(Slave).ValueFormat := TsmxFilterKitItem(Item).ValueFormat;
   end;
 end;
 
 { TsmxSection }
 
-procedure TsmxSection.CreateChilds;
+{procedure TsmxSection.CreateChilds;
 var c: TsmxBaseCell;
 begin
   with Cfg.Request do
@@ -1803,7 +2800,7 @@ begin
     with Cfg.Grid do
     begin
       Grid.CellAlign := Align;
-      Grid.CellEnable := Enable;
+      Grid.CellEnabled := Enabled;
       Grid.CellVisible := Visible;
       with PositionSize do
       begin
@@ -1817,7 +2814,7 @@ begin
     with Cfg.FilterPanel do
     begin
       FilterDesk.CellAlign := Align;
-      FilterDesk.CellEnable := Enable;
+      FilterDesk.CellEnabled := Enabled;
       FilterDesk.CellVisible := Visible;
       with PositionSize do
       begin
@@ -1827,119 +2824,203 @@ begin
         FilterDesk.CellWidth := Width;
       end;
     end;
-end;
+end;}
 
 { TsmxPanelSection }
 
-constructor TsmxPanelSection.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxPanelSection.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FPanel := TPanel.Create(Self);
   FPanel.BevelOuter := bvNone;
   //Initialize;
   InstallParent;
-end;
+end;}
 
 destructor TsmxPanelSection.Destroy;
 begin
-  UnInstallParent;
+  //UnInstallParent;
   //UnInitialize;
-  FPanel.Free;
   inherited Destroy;
+  if Assigned(FPanel) then
+    FPanel.Free;
 end;
 
-function TsmxPanelSection.GetInternalObject: TObject;
+{function TsmxPanelSection.GetCellAlign: TAlign;
 begin
-  Result := FPanel;
-end;
-
-function TsmxPanelSection.GetCellAlign: TAlign;
-begin
-  Result := FPanel.Align;
-end;
-
-function TsmxPanelSection.GetCellEnable: Boolean;
-begin
-  Result := FPanel.Enabled;
-end;
-
-function TsmxPanelSection.GetCellHeight: Integer;
-begin
-  Result := FPanel.Height;
-end;
-
-function TsmxPanelSection.GetCellLeft: Integer;
-begin
-  Result := FPanel.Left;
-end;
-
-function TsmxPanelSection.GetCellTop: Integer;
-begin
-  Result := FPanel.Top;
-end;
-
-function TsmxPanelSection.GetCellVisible: Boolean;
-begin
-  Result := FPanel.Visible;
-end;
-
-function TsmxPanelSection.GetCellWidth: Integer;
-begin
-  Result := FPanel.Width;
+  Result := Panel.Align;
 end;
 
 procedure TsmxPanelSection.SetCellAlign(Value: TAlign);
 begin
-  FPanel.Align := Value;
+  Panel.Align := Value;
 end;
 
-procedure TsmxPanelSection.SetCellEnable(Value: Boolean);
+function TsmxPanelSection.GetCellAnchors: TAnchors;
 begin
-  FPanel.Enabled := Value;
+  Result := Panel.Anchors;
+end;
+
+procedure TsmxPanelSection.SetCellAnchors(Value: TAnchors);
+begin
+  Panel.Anchors := Value;
+end;
+
+function TsmxPanelSection.GetCellCursor: TCursor;
+begin
+  Result := Panel.Cursor;
+end;
+
+procedure TsmxPanelSection.SetCellCursor(Value: TCursor);
+begin
+  Panel.Cursor := Value;
+end;
+
+function TsmxPanelSection.GetCellEnabled: Boolean;
+begin
+  Result := Panel.Enabled;
+end;
+
+procedure TsmxPanelSection.SetCellEnabled(Value: Boolean);
+begin
+  Panel.Enabled := Value;
+end;
+
+function TsmxPanelSection.GetCellHeight: Integer;
+begin
+  Result := Panel.Height;
 end;
 
 procedure TsmxPanelSection.SetCellHeight(Value: Integer);
 begin
-  FPanel.Height := Value;
+  Panel.Height := Value;
+end;
+
+function TsmxPanelSection.GetCellLeft: Integer;
+begin
+  Result := Panel.Left;
 end;
 
 procedure TsmxPanelSection.SetCellLeft(Value: Integer);
 begin
-  FPanel.Left := Value;
+  Panel.Left := Value;
+end;
+
+function TsmxPanelSection.GetCellTop: Integer;
+begin
+  Result := Panel.Top;
 end;
 
 procedure TsmxPanelSection.SetCellTop(Value: Integer);
 begin
-  FPanel.Top := Value;
+  Panel.Top := Value;
+end;
+
+function TsmxPanelSection.GetCellVisible: Boolean;
+begin
+  Result := Panel.Visible;
 end;
 
 procedure TsmxPanelSection.SetCellVisible(Value: Boolean);
 begin
-  FPanel.Visible := Value;
+  Panel.Visible := Value;
+end;
+
+function TsmxPanelSection.GetCellWidth: Integer;
+begin
+  Result := Panel.Width;
 end;
 
 procedure TsmxPanelSection.SetCellWidth(Value: Integer);
 begin
-  FPanel.Width := Value;
+  Panel.Width := Value;
+end;}
+
+function TsmxPanelSection.GetInternalObject: TObject;
+begin
+  Result := Panel;
 end;
 
-procedure TsmxPanelSection.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxPanelSection.GetPanel: TPanel;
 begin
-  if Assigned(ParentCell) then
-    FPanel.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  if not Assigned(FPanel) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TWinControl then
-      FPanel.Parent := TWinControl(c);
+    FPanel := TPanel.Create(Self);
+    FPanel.Caption := '';
+    FPanel.BevelOuter := bvNone;
+  end;
+  Result := FPanel;
+end;
+
+procedure TsmxPanelSection.InternalInitialize;
+
+  function CreateControl(AItem: TsmxControlKitItem; AForm: TsmxCustomForm): TsmxControlCell;
+  begin
+    Result := nil;
+    if AItem.CfgID > 0 then
+    begin
+      Result := TsmxControlCell(smxClassFuncs.NewCell(Self, AItem.CfgID, SelectRequest));
+      Result.CellParent := Self;
+      Result.Initialize;
+      Result.CellActive := AItem.ItemActive;
+      Result.CellAlign := AItem.ItemAlign;
+      Result.CellAnchors := AItem.ItemAnchors;
+      Result.CellCursor := AItem.ItemCursor;
+      Result.CellEnabled := AItem.ItemEnabled;
+      Result.CellHeight := AItem.ItemHeight;
+      Result.CellLeft := AItem.ItemLeft;
+      Result.CellTop := AItem.ItemTop;
+      Result.CellVisible := AItem.ItemVisible;
+      Result.CellWidth := AItem.ItemWidth;
+      if Assigned(AForm) then
+        Result.PopupMenu := smxClassFuncs.GetPopupMenuForm(AForm, AItem.PopupMenuCfgID);
+    end;
+  end;
+
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxSectionCfg then
+  begin
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    FilterDesk := TsmxCustomFilterDesk(CreateControl(TsmxSectionCfg(Cfg).FilterDesk, Form));
+    Grid := TsmxCustomGrid(CreateControl(TsmxSectionCfg(Cfg).Grid, Form));
   end;
 end;
 
+procedure TsmxPanelSection.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  FilterDesk := nil;
+  Grid := nil;
+end;
+
+procedure TsmxPanelSection.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Panel.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      Panel.Parent := TWinControl(Obj);
+  end;
+end;
+
+{procedure TsmxPanelSection.SetFilterDesk(Value: TsmxCustomFilterDesk);
+begin
+  inherited SetFilterDesk(Value);
+  if Assigned(FilterDesk) then
+    FilterDesk.CellParent := Self;
+end;}
+
 { TsmxPage }
 
-procedure TsmxPage.CreateChilds;
+{procedure TsmxPage.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
   SectionList.Count := Cfg.Sections.Count;
@@ -1967,44 +3048,93 @@ begin
     with Cfg.Sections[i] do
     begin
       Sections[i].CellAlign := UnitAlign;
-      Sections[i].CellEnable := UnitEnable;
+      Sections[i].CellEnabled := UnitEnabled;
       Sections[i].CellHeight := UnitHeight;
       Sections[i].CellLeft := UnitLeft;
       Sections[i].CellTop := UnitTop;
       Sections[i].CellVisible := UnitVisible;
       Sections[i].CellWidth := UnitWidth;
     end;
-end;
+end;}
 
 { TsmxTabSheet }
 
-constructor TsmxTabSheet.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxTabSheet.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FPage := TTabSheet.Create(Self);
   FPage.Caption := Cfg.PageCaption;
   FPage.ImageIndex := TImageIndex(Cfg.PageImageIndex);
   InstallParent;
-end;
+end;}
 
 destructor TsmxTabSheet.Destroy;
 begin
-  UnInstallParent;
-  FPage.Free;
+  //UnInstallParent;
   inherited Destroy;
+  if Assigned(FPage) then
+    FPage.Free;
 end;
 
-function TsmxTabSheet.GetInternalObject: TObject;
+function TsmxTabSheet.GetCellActive: Boolean;
 begin
-  Result := FPage;
+  if Assigned(Page.PageControl) then
+    Result := Page = Page.PageControl.ActivePage else
+    Result := False;
 end;
 
-function TsmxTabSheet.GetCellAlign: TAlign;
+procedure TsmxTabSheet.SetCellActive(Value: Boolean);
+begin
+  if Assigned(Page.PageControl) then
+    Page.PageControl.ActivePage := Page;
+end;
+
+function TsmxTabSheet.GetCellCaption: String;
+begin
+  Result := Page.Caption;
+end;
+
+procedure TsmxTabSheet.SetCellCaption(const Value: String);
+begin
+  Page.Caption := Value;
+end;
+
+function TsmxTabSheet.GetCellHint: String;
+begin
+  Result := Page.Hint;
+end;
+
+procedure TsmxTabSheet.SetCellHint(const Value: String);
+begin
+  Page.Hint := Value;
+end;
+
+function TsmxTabSheet.GetCellImageIndex: Integer;
+begin
+  Result := Page.ImageIndex;
+end;
+
+procedure TsmxTabSheet.SetCellImageIndex(Value: Integer);
+begin
+  Page.ImageIndex := Value;
+end;
+
+function TsmxTabSheet.GetCellVisible: Boolean;
+begin
+  Result := Page.TabVisible;
+end;
+
+procedure TsmxTabSheet.SetCellVisible(Value: Boolean);
+begin
+  Page.TabVisible := Value;
+end;
+
+{function TsmxTabSheet.GetCellAlign: TAlign;
 begin
   Result := FPage.Align;
 end;
 
-function TsmxTabSheet.GetCellEnable: Boolean;
+function TsmxTabSheet.GetCellEnabled: Boolean;
 begin
   Result := FPage.Enabled;
 end;
@@ -2024,11 +3154,6 @@ begin
   Result := FPage.Top;
 end;
 
-function TsmxTabSheet.GetCellVisible: Boolean;
-begin
-  Result := FPage.TabVisible;
-end;
-
 function TsmxTabSheet.GetCellWidth: Integer;
 begin
   Result := FPage.Width;
@@ -2039,7 +3164,7 @@ begin
   FPage.Align := Value;
 end;
 
-procedure TsmxTabSheet.SetCellEnable(Value: Boolean);
+procedure TsmxTabSheet.SetCellEnabled(Value: Boolean);
 begin
   FPage.Enabled := Value;
 end;
@@ -2059,33 +3184,60 @@ begin
   FPage.Top := Value;
 end;
 
-procedure TsmxTabSheet.SetCellVisible(Value: Boolean);
-begin
-  FPage.TabVisible := Value;
-end;
-
 procedure TsmxTabSheet.SetCellWidth(Value: Integer);
 begin
   FPage.Width := Value;
+end;}
+
+function TsmxTabSheet.GetInternalObject: TObject;
+begin
+  Result := Page;
 end;
 
-procedure TsmxTabSheet.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxTabSheet.GetPage: TTabSheet;
 begin
-  if Assigned(ParentCell) then
-    FPage.PageControl := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  if not Assigned(FPage) then
+    FPage := TTabSheet.Create(Self);
+  Result := FPage;
+end;
+
+{procedure TsmxTabSheet.InternalInitialize;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxPageCfg then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TPageControl then
-      FPage.PageControl := TPageControl(c);
   end;
+end;}
+
+procedure TsmxPageControl.PageControlChange(Sender: TObject);
+begin
+  ChangePage;
+end;
+
+procedure TsmxTabSheet.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Page.PageControl := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TPageControl then
+      Page.PageControl := TPageControl(Obj);
+  end;
+end;
+
+procedure TsmxTabSheet.SetSlaveIndex(Value: Integer);
+begin
+  inherited SetSlaveIndex(Value);
+  Page.PageIndex := Value;
 end;
 
 { TsmxPageManager }
 
-procedure TsmxPageManager.CreateChilds;
+{procedure TsmxPageManager.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
   PageList.Count := Cfg.Sheets.Count;
@@ -2113,40 +3265,41 @@ begin
     with Cfg.Sheets[i] do
     begin
       Pages[i].CellAlign := UnitAlign;
-      Pages[i].CellEnable := UnitEnable;
+      Pages[i].CellEnabled := UnitEnabled;
       Pages[i].CellHeight := UnitHeight;
       Pages[i].CellLeft := UnitLeft;
       Pages[i].CellTop := UnitTop;
       Pages[i].CellVisible := UnitVisible;
       Pages[i].CellWidth := UnitWidth;
     end;
-end;
+end;}
 
 { TsmxPageControl }
 
-constructor TsmxPageControl.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxPageControl.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FPageControl := TPageControl.Create(Self);
   //FPageControl.Images := ImageList;
   InstallParent;
-end;
+end;}
 
 destructor TsmxPageControl.Destroy;
 begin
-  UnInstallParent;
-  FPageControl.Free;
+  //UnInstallParent;
   inherited Destroy;
+  if Assigned(FPageControl) then
+    FPageControl.Free;
 end;
 
-function TsmxPageControl.GetActivePage: TsmxCustomPage;
+{function TsmxPageControl.GetActivePage: TsmxCustomPage;
 begin
   Result := Pages[FPageControl.ActivePageIndex];
 end;
 
-function TsmxPageControl.GetInternalObject: TObject;
+procedure TsmxPageControl.SetActivePage(Value: TsmxCustomPage);
 begin
-  Result := FPageControl;
+  FPageControl.ActivePageIndex := PageList.IndexOf(Value);
 end;
 
 function TsmxPageControl.GetCellAlign: TAlign;
@@ -2154,7 +3307,7 @@ begin
   Result := FPageControl.Align;
 end;
 
-function TsmxPageControl.GetCellEnable: Boolean;
+function TsmxPageControl.GetCellEnabled: Boolean;
 begin
   Result := FPageControl.Enabled;
 end;
@@ -2182,32 +3335,14 @@ end;
 function TsmxPageControl.GetCellWidth: Integer;
 begin
   Result := FPageControl.Width;
-end;
+end;}
 
-procedure TsmxPageControl.InstallParent;
-var f: TForm;
-begin
-  f := TForm.Create(nil);
-  try
-    FPageControl.Parent := f;
-    inherited InstallParent;
-    FPageControl.Parent := nil;
-  finally
-    f.Free;
-  end;
-end;
-
-procedure TsmxPageControl.SetActivePage(Value: TsmxCustomPage);
-begin
-  FPageControl.ActivePageIndex := PageList.IndexOf(Value);
-end;
-
-procedure TsmxPageControl.SetCellAlign(Value: TAlign);
+{procedure TsmxPageControl.SetCellAlign(Value: TAlign);
 begin
   FPageControl.Align := Value;
 end;
 
-procedure TsmxPageControl.SetCellEnable(Value: Boolean);
+procedure TsmxPageControl.SetCellEnabled(Value: Boolean);
 begin
   FPageControl.Enabled := Value;
 end;
@@ -2215,15 +3350,6 @@ end;
 procedure TsmxPageControl.SetCellHeight(Value: Integer);
 begin
   FPageControl.Height := Value;
-end;
-
-procedure TsmxPageControl.SetImageList(Value: TCustomImageList);
-begin
-  if Assigned(ImageList) then
-    FPageControl.Images := nil;
-  inherited SetImageList(Value);
-  if Assigned(ImageList) then
-    FPageControl.Images := ImageList;
 end;
 
 procedure TsmxPageControl.SetCellLeft(Value: Integer);
@@ -2244,23 +3370,110 @@ end;
 procedure TsmxPageControl.SetCellWidth(Value: Integer);
 begin
   FPageControl.Width := Value;
+end;}
+
+{procedure TsmxPageControl.InstallParent;
+var f: TForm;
+begin
+  f := TForm.Create(nil);
+  try
+    FPageControl.Parent := f;
+    inherited InstallParent;
+    FPageControl.Parent := nil;
+  finally
+    f.Free;
+  end;
+end;}
+
+function TsmxPageControl.GetInternalObject: TObject;
+begin
+  Result := PageControl;
 end;
 
-procedure TsmxPageControl.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxPageControl.GetIsMultiLine: Boolean;
 begin
-  if Assigned(ParentCell) then
-    FPageControl.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  Result := PageControl.MultiLine;
+end;
+
+procedure TsmxPageControl.SetIsMultiLine(Value: Boolean);
+begin
+  PageControl.MultiLine := Value;
+end;
+
+function TsmxPageControl.GetPageManagerStyle: TsmxPageManagerStyle;
+const
+  InOutStyle: array[TTabStyle] of TsmxPageManagerStyle =
+    (pmsTab, pmsTab, pmsFlat);
+begin
+  Result := InOutStyle[PageControl.Style];
+end;
+
+procedure TsmxPageControl.SetPageManagerStyle(Value: TsmxPageManagerStyle);
+const
+  OutInStyle: array[TsmxPageManagerStyle] of TTabStyle =
+    (tsTabs, tsFlatButtons);
+begin
+  PageControl.Style := OutInStyle[Value];
+end;
+
+function TsmxPageControl.GetPageControl: TPageControl;
+begin
+  if not Assigned(FPageControl) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TWinControl then
-      FPageControl.Parent := TWinControl(c);
+    FPageControl := TPageControl.Create(Self);
+    FPageControl.OnChange := PageControlChange;
+  end;
+  Result := FPageControl;
+end;
+
+function TsmxPageControl.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxTabSheet;
+end;
+
+procedure TsmxPageControl.InternalInitialize;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxPageManagerCfg then
+  begin
+    IsMultiLine := TsmxPageManagerCfg(Cfg).IsMultiLine;
+    PageManagerStyle := TsmxPageManagerCfg(Cfg).PageManagerStyle;
   end;
 end;
 
-procedure TsmxPageControl.UnInstallParent;
+procedure TsmxPageControl.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  IsMultiLine := False;
+  PageManagerStyle := pmsTab;
+  OnChangePage := nil;
+end;
+
+procedure TsmxPageControl.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    PageControl.Images := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    PageControl.Images := ImageList;
+end;
+
+procedure TsmxPageControl.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    PageControl.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      PageControl.Parent := TWinControl(Obj);
+  end;
+end;
+
+{procedure TsmxPageControl.UnInstallParent;
 var f: TForm;
 begin
   f := TForm.Create(nil);
@@ -2271,212 +3484,11 @@ begin
   finally
     f.Free;
   end;
-end;
-
-{ TsmxLibAlgorithm }
-
-{constructor TsmxLibAlgorithm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  //@FLibProc := LibManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
-  //@FLibProc := FindProcedureByNameLib(Cfg.AlgLibrary, Cfg.AlgProcedure);
-  //AddParams;
 end;}
 
-destructor TsmxLibAlgorithm.Destroy;
-begin
-  FLibProc := nil;
-  inherited Destroy;
-end;
+{ TsmxLibAction }
 
-procedure TsmxLibAlgorithm.AddParams;
-var i: Integer;
-begin
-  for i := 0 to Cfg.AlgParams.Count - 1 do
-    with Params.Add do
-      ParamName := Cfg.AlgParams[i].ParamName;
-end;
-
-procedure TsmxLibAlgorithm.Execute(Same: Boolean = False);
-var
-  v: Variant;
-begin
-  if Assigned(FLibProc) then
-  begin
-    if not Same then
-      RefreshParams;
-    smxClassProcs.ParamsToVar(Params, v);
-    FLibProc(Self, v);
-  end;
-end;
-
-procedure TsmxLibAlgorithm.ProcExec(Sender: TObject);
-begin
-  Execute;
-end;
-
-function TsmxLibAlgorithm.FindParamLocation(AParamLocation: TsmxParamLocation;
-  StartPos: Integer = 0): TsmxParam;
-var i: Integer;
-begin
-  Result := nil;
-  for i := StartPos to Cfg.AlgParams.Count - 1 do
-    with Cfg.AlgParams[i] do
-      if ParamLocation = AParamLocation then
-      begin
-        Result := Params.FindByName(ParamName);
-        Break;
-      end;
-end;
-
-function TsmxLibAlgorithm.GetCfg: TsmxLibAlgorithmCfg;
-begin
-  Result := TsmxLibAlgorithmCfg(inherited Cfg);
-end;
-
-procedure TsmxLibAlgorithm.RefreshParams;
-
-  function FindFilterOnForm(AForm: TsmxCustomForm; AName: String): TsmxCustomFilter;
-  var i, j: Integer; p: TsmxCustomPage;
-  begin
-    Result := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
-      begin
-         p := AForm.PageManagers[i].ActivePage;
-         if Assigned(p) then
-           for j := 0 to p.SectionCount - 1 do
-           begin
-             if Assigned(p.Sections[j].FilterDesk) then
-               Result := p.Sections[j].FilterDesk.FindFilterByName(AName);
-             if Assigned(Result) then
-               Exit;
-           end;
-      end;
-  end;
-
-  function FindFieldOnForm(AForm: TsmxCustomForm; AName: String): IsmxField;
-  var i, j: Integer; p: TsmxCustomPage;
-  begin
-    Result := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
-      begin
-        p := AForm.PageManagers[i].ActivePage;
-        if Assigned(p) then
-          for j := 0 to p.SectionCount - 1 do
-          begin
-            if Assigned(p.Sections[j].Request) then
-              if Assigned(p.Sections[j].Request.CellDataSet) then
-                Result := p.Sections[j].Request.CellDataSet.FindField(AName);
-            if Assigned(Result) then
-              Exit;
-          end;
-      end;
-  end;
-
-var i: integer; v: Variant; c: TsmxBaseCell; f, fp: TsmxCustomForm;
-  flt: TsmxCustomFilter; fld: IsmxField;
-begin
-  c := RootCell;
-  if c is TsmxCustomForm then
-    f := TsmxCustomForm(c) else
-    f := nil;
-  for i := 0 to Cfg.AlgParams.Count - 1 do
-    with Cfg.AlgParams[i] do
-    begin
-      v := Null;
-      case ParamLocation of
-        plInput: v := Null;
-        plConst: v := ParamDefValue;
-        plOutput,
-        plKey,
-        plValue,
-        plResult,
-        plMessage: v := Null;
-        plFilterDesk:
-        begin
-          flt := nil;
-          if Assigned(f) then
-            flt := FindFilterOnForm(f, ParamName);
-          if Assigned(flt) then
-            v := flt.FilterValue;
-        end;
-        plGrid:
-        begin
-          fld := nil;
-          if Assigned(f) then
-            fld := FindFieldOnForm(f, ParamName);
-          if Assigned(fld) then
-            v := fld.Value;
-        end;
-        plParentFormFilterDesk:
-        begin
-          flt := nil;
-          if Assigned(f) then
-            fp := f.ParentForm else
-            fp := nil;
-          while Assigned(fp) and not Assigned(flt) do
-          begin
-            flt := FindFilterOnForm(fp, ParamName);
-            fp := fp.ParentForm;
-          end;
-          if Assigned(flt) then
-            v := flt.FilterValue;
-        end;
-        plParentFormGrid:
-        begin
-          fld := nil;
-          if Assigned(f) then
-            fp := f.ParentForm else
-            fp := nil;
-          while Assigned(fp) and not Assigned(fld) do
-          begin
-            fld := FindFieldOnForm(fp, ParamName);
-            fp := fp.ParentForm;
-          end;
-          if Assigned(fld) then
-            v := fld.Value;
-        end;
-        //plParentParams: v := Null;
-        plCommonParams:
-        begin
-          //v := CommonStorage.ParamValues[ParamName];
-          //v := FindCommonParamByNameLib(ParamName);
-          if Assigned(CommonStorage) then
-            v := CommonStorage.FindByName(ParamName);
-        end;
-        //plParentCfgID: v := Null;
-        plFormIntfID:
-        begin
-          if Assigned(f) then
-            v := f.IntfID;
-        end;
-        plFormID:
-        begin
-          if Assigned(f) then
-            v := f.ID;
-        end;
-      end;
-
-      if not VarIsNull(v) then
-        Params.Values[ParamName] := v else
-        Params.Values[ParamName] := ParamDefValue;
-    end;
-end;
-
-procedure TsmxLibAlgorithm.SetLibraryManager(Value: TsmxCustomLibraryManager);
-begin
-  if Assigned(LibraryManager) then
-    FLibProc := nil;
-  inherited SetLibraryManager(Value);
-  if Assigned(LibraryManager) then
-    @FLibProc := LibraryManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
-end;
-
-{ TsmxActionLibAlgorithm }
-
-constructor TsmxActionLibAlgorithm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxLibAction.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FAction := TAction.Create(Self);
@@ -2487,145 +3499,113 @@ begin
   //FAction.ImageIndex := TImageIndex(Cfg.AlgImageIndex);
   FAction.OnExecute := ProcExec;
   FParams := TsmxParams.Create(TsmxParam);
-end;
+end;}
 
-destructor TsmxActionLibAlgorithm.Destroy;
+{destructor TsmxLibAction.Destroy;
 begin
-  FParams.Free;
+  //FParams.Free;
   inherited Destroy;
-  FAction.OnExecute := nil;
-  FAction.Free;
-end;
+  //FAction.OnExecute := nil;
+  if Assigned(FAction) then
+    FAction.Free;
+end;}
 
-function TsmxActionLibAlgorithm.GetInternalObject: TObject;
+{function TsmxLibAction.GetAction: TAction;
 begin
+  if not Assigned(FAction) then
+  begin
+    FAction := TAction.Create(Self);
+    FAction.OnExecute := ActionExecute;
+  end;
   Result := FAction;
 end;
 
-function TsmxActionLibAlgorithm.GetAlgorithmCaption: String;
+function TsmxLibAction.GetAlgorithmCaption: String;
 begin
-  Result := FAction.Caption;
+  Result := Action.Caption;
 end;
 
-function TsmxActionLibAlgorithm.GetAlgorithmEnable: Boolean;
+procedure TsmxLibAction.SetAlgorithmCaption(const Value: String);
 begin
-  Result := FAction.Enabled;
+  Action.Caption := Value;
 end;
 
-function TsmxActionLibAlgorithm.GetAlgorithmHotKey: Integer;
+function TsmxLibAction.GetAlgorithmEnabled: Boolean;
 begin
-  Result := Integer(FAction.ShortCut);
+  Result := Action.Enabled;
 end;
 
-function TsmxActionLibAlgorithm.GetAlgorithmImageIndex: Integer;
+procedure TsmxLibAction.SetAlgorithmEnabled(Value: Boolean);
 begin
-  Result := Integer(FAction.ImageIndex);
+  Action.Enabled := Value;
 end;
 
-function TsmxActionLibAlgorithm.GetAlgorithmVisible: Boolean;
+function TsmxLibAction.GetAlgorithmHint: String;
 begin
-  Result := FAction.Visible;
+  Result := Action.Hint;
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmCaption(Value: String);
+procedure TsmxLibAction.SetAlgorithmHint(const Value: String);
 begin
-  FAction.Caption := Value;
+  Action.Hint := Value;
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmEnable(Value: Boolean);
+function TsmxLibAction.GetAlgorithmHotKey: Integer;
 begin
-  FAction.Enabled := Value;
+  Result := Integer(Action.ShortCut);
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmHotKey(Value: Integer);
+procedure TsmxLibAction.SetAlgorithmHotKey(Value: Integer);
 begin
-  FAction.ShortCut := TShortCut(Value);
+  Action.ShortCut := TShortCut(Value);
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmImageIndex(Value: Integer);
+function TsmxLibAction.GetAlgorithmImageIndex: Integer;
 begin
-  FAction.ImageIndex := TImageIndex(Value);
+  Result := Integer(Action.ImageIndex);
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmVisible(Value: Boolean);
+procedure TsmxLibAction.SetAlgorithmImageIndex(Value: Integer);
 begin
-  FAction.Visible := Value;
+  Action.ImageIndex := TImageIndex(Value);
 end;
 
-procedure TsmxActionLibAlgorithm.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxLibAction.GetAlgorithmVisible: Boolean;
 begin
-  if Assigned(ParentCell) then
-    FAction.ActionList := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  Result := Action.Visible;
+end;
+
+procedure TsmxLibAction.SetAlgorithmVisible(Value: Boolean);
+begin
+  Action.Visible := Value;
+end;
+
+function TsmxLibAction.GetInternalObject: TObject;
+begin
+  Result := Action;
+end;}
+
+{procedure TsmxLibAction.InternalInitialize;
+var
+  Proc: Pointer;
+  Method: TMethod;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxLibAlgorithmCfg then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TCustomActionList then
-      FAction.ActionList := TCustomActionList(c);
+    AlgorithmLibrary := TsmxLibAlgorithmCfg(Cfg).AlgorithmLibrary;
+    AlgorithmProcName := TsmxLibAlgorithmCfg(Cfg).AlgorithmProcedure;
+    Proc := GetProcPointer;
+    if Assigned(Proc) then
+    begin
+      Method.Code := Proc;
+      Method.Data := Self;
+      OnExecute := TsmxComponentEvent(Method);
+    end;
   end;
-end;
+end;}
 
-procedure TsmxActionLibAlgorithm.RefreshParams;
-
-  function FindFilterOnForm(AForm: TsmxCustomForm; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    i, j: Integer;
-    Page: TsmxCustomPage;
-    Filter: TsmxCustomFilter;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    Filter := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
-      begin
-        Page := AForm.PageManagers[i].ActivePage;
-        if Assigned(Page) then
-          for j := 0 to Page.SectionCount - 1 do
-          begin
-            if Assigned(Page.Sections[j].FilterDesk) then
-              Filter := Page.Sections[j].FilterDesk.FindFilterByName(AName);
-            if Assigned(Filter) then
-            begin
-              AValue := Filter.FilterValue;
-              Result := True;
-              Exit;
-            end;
-          end;
-      end;
-  end;
-
-  function FindFieldOnForm(AForm: TsmxCustomForm; AName: String;
-    var AValue: Variant): Boolean;
-  var
-    i, j: Integer;
-    Page: TsmxCustomPage;
-    Field: TsmxSenseField;
-  begin
-    Result := False;
-    AValue := Variants.Null;
-    Field := nil;
-    if Assigned(AForm) then
-      for i := 0 to AForm.PageManagerCount - 1 do
-      begin
-        Page := AForm.PageManagers[i].ActivePage;
-        if Assigned(Page) then
-          for j := 0 to Page.SectionCount - 1 do
-          begin
-            if Assigned(Page.Sections[j].Request) then
-              Field := Page.Sections[j].Request.RequestFields.FindByName(AName);
-            if Assigned(Field) then
-            begin
-              AValue := Page.Sections[j].Request.FieldValue[AName];
-              Result := True;
-              Exit;
-            end;
-          end;
-      end;
-  end;
-
+{procedure TsmxLibAction.InternalRefreshParams;
 var
   i: integer;
   Value: Variant;
@@ -2634,7 +3614,7 @@ var
   //Field: TsmxSenseField;
   Res: Boolean;
 begin
-  Form := AccessoryForm;
+  //Form := AccessoryForm;
   for i := 0 to AlgorithmParams.Count - 1 do
     //with AlgorithmParams[i] do
     begin
@@ -2649,41 +3629,23 @@ begin
         plInput,
         plOutput:
         begin
-          Value := AlgorithmParams[i].ParamDefValue; //AlgorithmParams.ParamByName(AlgorithmParams[i].ParamName).ParamDefValue;
+          ;//Value := AlgorithmParams[i].ParamDefValue; //AlgorithmParams.ParamByName(AlgorithmParams[i].ParamName).ParamDefValue;
         end;
         plFilterDesk:
         begin
-          {Filter := nil;
           if Assigned(Form) then
-            Filter := FindFilterOnForm(Form, ParamName);
-          if Assigned(Filter) then
-            Value := Filter.FilterValue;}
-          if Assigned(Form) then
-            FindFilterOnForm(Form, AlgorithmParams[i].ParamName, Value);
+            //FindFilterOnForm(Form, AlgorithmParams[i].ParamName, Value);
         end;
         plGrid:
         begin
-          {Field := nil;
-          if Assigned(Form) then
-            Field := FindFieldOnForm(Form, ParamName);
-          if Assigned(Field) then
-            Value := FieldValue[Field.FieldName];}
             //Value := Field.Value;
           if Assigned(Form) then
-            FindFieldOnForm(Form, AlgorithmParams[i].ParamName, Value);
+            //FindFieldOnForm(Form, AlgorithmParams[i].ParamName, Value);
         end;
         plParentFilterDesk:
         begin
           //Filter := nil;
           Res := False;
-          if Assigned(Form) then
-            PForm := Form.ParentForm else
-            PForm := nil;
-          while Assigned(PForm) and not Res do
-          begin
-            Res := FindFilterOnForm(PForm, AlgorithmParams[i].ParamName, Value);
-            PForm := PForm.ParentForm;
-          end;
           //if Assigned(Filter) then
             //Value := Filter.FilterValue;
         end;
@@ -2691,106 +3653,70 @@ begin
         begin
           //Field := nil;
           Res := False;
-          if Assigned(Form) then
-            PForm := Form.ParentForm else
-            PForm := nil;
-          while Assigned(PForm) and not Res do
-          begin
-            Res := FindFieldOnForm(PForm, AlgorithmParams[i].ParamName, Value);
-            PForm := PForm.ParentForm;
-          end;
           //if Assigned(Field) then
             //Value := FieldValue[Field.FieldName];
             //Value := Field.Value;
         end;
         //plParentParams: v := Null;
-        plCommonParams:
-        begin
-          //v := CommonStorage.ParamValues[ParamName];
-          //v := FindCommonParamByNameLib(ParamName);
-          if Assigned(CommonStorage) then
-            Value := CommonStorage[AlgorithmParams[i].ParamName];
-        end;
-        //plParentCfgID: v := Null;
-        {plFormIntfID:
-        begin
-          if Assigned(f) then
-            v := f.IntfID;
-        end;}
-        plFormID:
-        begin
-          if Assigned(Form) then
-            Value := Form.ID;
-        end;
+
       end;
 
-      Params.ParamByName(AlgorithmParams[i].ParamName).ParamValue := Value;
+      //Params.ParamByName(AlgorithmParams[i].ParamName).ParamValue := Value;
 
-      {if not VarIsNull(v) then
-        Params.Values[ParamName] := v else
-        Params.Values[ParamName] := ParamDefValue;}
 
-      {if CellDataSet.ParamByName(ParamName).IsBlob then
-      begin
-        smxProcs.StrToStream(Value, DataStream);
-        CellDataSet.ParamByName(ParamName).LoadFromStream(DataStream);
-      end else
-        CellDataSet.ParamByName(ParamName).Value := Value;}
     end;
-end;
+end;}
 
-procedure TsmxActionLibAlgorithm.Execute;
+{procedure TsmxLibAction.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  AlgorithmLibrary := '';
+  AlgorithmProcName := '';
+end;}
+
+{procedure TsmxLibAction.Execute;
 begin
   if Assigned(LibProc) then
     LibProc(Self);
-end;
+end;}
 
-procedure TsmxActionLibAlgorithm.ProcExec(Sender: TObject);
+{procedure TsmxLibAction.ActionExecute(Sender: TObject);
 begin
   Execute;
-end;
+end;}
 
-procedure TsmxActionLibAlgorithm.SetLibraryManager(Value: TsmxCustomLibraryManager);
+{procedure TsmxLibAction.SetLibraryManager(Value: TsmxCustomLibraryManager);
 begin
   inherited SetLibraryManager(Value);
   if LibraryManager <> Value then
     FLibProc := nil;
-end;
+end;}
 
-function TsmxActionLibAlgorithm.GetLibProc: TsmxProcAlgExecute;
+{function TsmxLibAction.GetProcPointer: Pointer;
 begin
-  if not Assigned(FLibProc) and Assigned(LibraryManager)
-      and (FAlgLibrary <> '') and (FAlgProcName <> '') then
-    @FLibProc := LibraryManager.GetProcedure(FAlgLibrary, FAlgProcName);
-  Result := FLibProc;
+  if Assigned(LibraryManager) then
+    Result := LibraryManager.GetProcedure(AlgorithmLibrary, AlgorithmProcName) else
+    Result := nil;
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmLibrary(Value: String);
+procedure TsmxLibAction.SetAlgorithmLibrary(const Value: String);
 begin
-  if FAlgorithmLibrary <> Value then
-  begin
-    FAlgorithmLibrary := Value;
-    FLibProc := nil;
-  end;
+  FAlgorithmLibrary := Value;
 end;
 
-procedure TsmxActionLibAlgorithm.SetAlgoritmProcName(Value: String);
+procedure TsmxLibAction.SetAlgorithmProcName(const Value: String);
 begin
-  if FAlgorithmProcName <> Value then
-  begin
-    FAlgorithmProcName := Value;
-    FLibProc := nil;
-  end;
-end;
+  FAlgorithmProcName := Value;
+end;}
 
-procedure TsmxActionLibAlgorithm.Initialize(const ACfgDatabase: IsmxDatabase;
+{procedure TsmxLibAction.Initialize(const ACfgDatabase: IsmxDatabase;
   ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil);
 begin
-  inherited Initialize(ACfgDatabase, ACfgID, ASelectRequest);
+  //inherited Initialize(ACfgDatabase, ACfgID, ASelectRequest);
   Cfg := smxClassFuncs.NewCfg(Self, ACfgDatabase, ACfgID, ASelectRequest);
   try
-    if Cfg is TsmxLibAlgorithmCfg then
-      with TsmxLibAlgorithmCfg(Cfg) do
+    if Cfg is TsmxActionCfg then
+      with TsmxActionCfg(Cfg) do
       begin
         AlgorithmCaption := AlgDefCaption;
         AlgorithmHint := AlgDefHint;
@@ -2805,21 +3731,26 @@ begin
   finally
     Cfg.Free;
   end;
-end;
+end;}
 
-function TsmxActionLibAlgorithm.GetAlgorithmHint: String;
+{procedure TsmxLibAction.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
 begin
-  Result := FAction.Hint;
-end;
+  if Assigned(CellParent) then
+    Action.ActionList := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TCustomActionList then
+      Action.ActionList := TCustomActionList(Obj);
+  end;
+end;}
 
-procedure TsmxActionLibAlgorithm.SetAlgorithmHint(Value: String);
-begin
-  FAction.Hint := Value;
-end;
+{ TsmxActionList }
 
-{ TsmxAlgorithmList }
-
-procedure TsmxAlgorithmList.CreateChilds;
+{procedure TsmxActionList.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
   AlgorithmList.Count := Cfg.AlgorithmItems.Count;
@@ -2833,212 +3764,210 @@ begin
           raise EsmxCellError.CreateRes(@SCellBuildError);
       end else
         raise EsmxCellError.CreateRes(@SCellBuildError);
-end;
+end;}
 
-function TsmxAlgorithmList.GetCfg: TsmxAlgorithmListCfg;
+{function TsmxActionList.GetCfg: TsmxActionListCfg;
 begin
-  Result := TsmxAlgorithmListCfg(inherited Cfg);
-end;
+  Result := TsmxActionListCfg(inherited Cfg);
+end;}
 
-procedure TsmxAlgorithmList.InitChilds;
+{procedure TsmxActionList.InitChilds;
 var i: Integer;
 begin
   for i := 0 to Cfg.AlgorithmItems.Count - 1 do
     with Cfg.AlgorithmItems[i] do
     begin
-      Algorithms[i].CellEnable := AlgorithmEnable;
+      Algorithms[i].CellEnabled := AlgorithmEnabled;
       Algorithms[i].CellVisible := AlgorithmVisible;
       Algorithms[i].CellHotKey := AlgorithmHotKey;
       Algorithms[i].CellCaption := AlgorithmCaption;
       Algorithms[i].MenuPointID := AlgorithmMenuItemCfgID;
       Algorithms[i].ToolBoardID := AlgorithmToolBarCfgID;
     end;
-end;
-
-{ TsmxActionList }
-
-constructor TsmxActionList.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FActionList := TActionList.Create(Self);
-  //FActionList.Images := ImageList;
-  //InstallParent;
-end;
-
-destructor TsmxActionList.Destroy;
-begin
-  UnInstallParent;
-  FActionList.Free;
-  inherited Destroy;
-end;
-
-function TsmxActionList.GetInternalObject: TObject;
-begin
-  Result := FActionList;
-end;
-
-procedure TsmxActionList.Initialize(const ACfgDatabase: IsmxDatabase;
-  ACfgID: Integer; ASelectRequest: TsmxCustomRequest);
-var
-  Cfg: TsmxBaseCfg;
-  i: Integer;
-  Cell: TsmxBaseCell;
-begin
-  inherited Initialize(ACfgDatabase, ACfgID, ASelectRequest);
-  Cfg := smxClassFuncs.NewCfg(Self, ACfgDatabase, ACfgID, ASelectRequest);
-  try
-    if Cfg is TsmxAlgorithmListCfg then
-      with TsmxAlgorithmListCfg(Cfg) do
-      begin
-        ClearAlgorithms;
-        AlgorithmList.Count := AlgorithmItems.Count;
-        for i := 0 to AlgorithmItems.Count - 1 do
-          if AlgorithmItems[i].CfgID > 0 then
-          begin
-            Cell := smxClassFuncs.NewCell(Self, ACfgDatabase, AlgorithmItems[i].CfgID, ASelectRequest);
-            if Cell is TsmxCustomAlgorithm then
-            begin
-              Cell.Initialize(ACfgDatabase, AlgorithmItems[i].CfgID, ASelectRequest);
-              Algorithms[i] := Cell;
-            end else
-            begin
-              Cell.Free;
-              raise EsmxCellError.CreateResFmt(@SCellBuildError, [ACfgID]);
-            end;
-          end else
-            raise EsmxCellError.CreateResFmt(@SCellBuildError, [ACfgID]);
-      end
-    else
-      raise EsmxCellError.CreateResFmt(@SCellBuildError, [ACfgID]);
-  finally
-    Cfg.Free;
-  end;
-end;
-
-{procedure TsmxActionList.SetImageList(Value: TCustomImageList);
-begin
-  if Assigned(ImageList) then
-    FActionList.Images := nil;
-  inherited SetImageList(Value);
-  if Assigned(ImageList) then
-    FActionList.Images := ImageList;
 end;}
-
-procedure TsmxActionList.SetParentCell(Value: TsmxBaseCell);
-begin
-  inherited SetParentCell(Value);
-  FActionList.Images := ImageList;
-end;
 
 { TsmxMenuPoint }
 
-function TsmxMenuPoint.GetCfg: TsmxMenuItemCfg;
+{function TsmxMenuPoint.GetCfg: TsmxMenuItemCfg;
 begin
   Result := TsmxMenuItemCfg(inherited Cfg);
-end;
+end;}
 
 { TsmxMenuItem }
 
-constructor TsmxMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin 
+{constructor TsmxMenuItem.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FMenuItem := TMenuItem.Create(Self);
   FMenuItem.Caption := Cfg.ItemCaption;
   FMenuItem.ImageIndex := TImageIndex(Cfg.ItemImageIndex);
-end;
+end;}
 
 destructor TsmxMenuItem.Destroy;
 begin
-  FMenuItem.Free;
   inherited Destroy;
+  if Assigned(FMenuItem) then
+    FMenuItem.Free;
 end;
 
-procedure TsmxMenuItem.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
-var c: TObject; mi: TMenuItem;
+function TsmxMenuItem.GetCellCaption: String;
 begin
-  c := _TsmxBaseCell(Algorithm).GetInternalObject;
-  if c is TBasicAction then
-  begin
-    mi := TMenuItem.Create(Self);
-    mi.Action := TBasicAction(c);
-    FMenuItem.Add(mi);
-  end;
+  Result := MenuItem.Caption;
 end;
 
-procedure TsmxMenuItem.DelAlgorithm(Algorithm: TsmxCustomAlgorithm);
-var c: TObject; mi: TMenuItem; i: Integer;
+procedure TsmxMenuItem.SetCellCaption(const Value: String);
 begin
-  c := _TsmxBaseCell(Algorithm).GetInternalObject;
-  if c is TBasicAction then
-    for i := FMenuItem.Count - 1 downto 0 do
-    begin
-      mi := FMenuItem[i];
-      if mi.Action = c then
-      begin
-        FMenuItem.Remove(mi);
-        mi.Action := nil;
-        mi.Free;
-      end;
-    end;
+  MenuItem.Caption := Value;
 end;
 
-function TsmxMenuItem.GetInternalObject: TObject;
+function TsmxMenuItem.GetCellEnabled: Boolean;
 begin
-  Result := FMenuItem;
+  Result := MenuItem.Enabled;
 end;
 
-function TsmxMenuItem.GetCellEnable: Boolean;
+procedure TsmxMenuItem.SetCellEnabled(Value: Boolean);
 begin
-  Result := FMenuItem.Enabled;
+  MenuItem.Enabled := Value;
+end;
+
+function TsmxMenuItem.GetCellHint: String;
+begin
+  Result := MenuItem.Hint;
+end;
+
+procedure TsmxMenuItem.SetCellHint(const Value: String);
+begin
+  MenuItem.Hint := Value;
+end;
+
+function TsmxMenuItem.GetCellImageIndex: Integer;
+begin
+  Result := Integer(MenuItem.ImageIndex);
+end;
+
+procedure TsmxMenuItem.SetCellImageIndex(Value: Integer);
+begin
+  MenuItem.ImageIndex := TImageIndex(Value);
 end;
 
 function TsmxMenuItem.GetCellVisible: Boolean;
 begin
-  Result := FMenuItem.Visible;
-end;
-
-procedure TsmxMenuItem.SetCellEnable(Value: Boolean);
-begin
-  FMenuItem.Enabled := Value;
+  Result := MenuItem.Visible;
 end;
 
 procedure TsmxMenuItem.SetCellVisible(Value: Boolean);
 begin
-  FMenuItem.Visible := Value;
+  MenuItem.Visible := Value;
 end;
 
-procedure TsmxMenuItem.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+function TsmxMenuItem.GetIsChecked: Boolean;
 begin
-  if Assigned(ParentCell) then
+  Result := MenuItem.Checked;
+end;
+
+procedure TsmxMenuItem.SetIsChecked(Value: Boolean);
+begin
+  MenuItem.Checked := Value;
+end;
+
+function TsmxMenuItem.GetMenuItemHotKey: Integer;
+begin
+  Result := Integer(MenuItem.ShortCut);
+end;
+
+procedure TsmxMenuItem.SetMenuItemHotKey(Value: Integer);
+begin
+  MenuItem.ShortCut := TShortCut(Value);
+end;
+
+function TsmxMenuItem.GetMenuItemStyle: TsmxMenuItemStyle;
+begin
+  if MenuItem.Caption = '-' then
+    Result := misDivider else
+    Result := misPoint;
+end;
+
+procedure TsmxMenuItem.SetMenuItemStyle(Value: TsmxMenuItemStyle);
+begin
+  if Value = misDivider then
+    MenuItem.Caption := '-';
+end;
+
+function TsmxMenuItem.GetInternalObject: TObject;
+begin
+  Result := MenuItem;
+end;
+
+function TsmxMenuItem.GetMenuItem: TMenuItem;
+begin
+  if not Assigned(FMenuItem) then
+    FMenuItem := TMenuItem.Create(Self);
+  Result := FMenuItem;
+end;
+
+function TsmxMenuItem.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxMenuItem;
+end;
+
+procedure TsmxMenuItem.InternalInitialize;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxMenuItemCfg then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TMenuItem then
-      TMenuItem(c).Remove(FMenuItem) else
-    if c is TMainMenu then
-      TMainMenu(c).Items.Remove(FMenuItem);
+    IsChecked := TsmxMenuItemCfg(Cfg).IsChecked;
+    MenuItemHotKey := TsmxMenuItemCfg(Cfg).MenuItemHotKey;
+    MenuItemStyle := TsmxMenuItemCfg(Cfg).MenuItemStyle;
   end;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+end;
+
+procedure TsmxMenuItem.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  IsChecked := False;
+  MenuItemHotKey := 0;
+  MenuItemStyle := misPoint;
+end;
+
+procedure TsmxMenuItem.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TMenuItem then
-      TMenuItem(c).Add(FMenuItem) else
-    if c is TMainMenu then
-      TMainMenu(c).Items.Add(FMenuItem);
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TMenuItem then
+      TMenuItem(Obj).Remove(MenuItem) else
+    if Obj is TMainMenu then
+      TMainMenu(Obj).Items.Remove(MenuItem);
   end;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TMenuItem then
+      TMenuItem(Obj).Add(MenuItem) else
+    if Obj is TMainMenu then
+      TMainMenu(Obj).Items.Add(MenuItem);
+  end;
+end;
+
+procedure TsmxMenuItem.SetSlaveIndex(Value: Integer);
+begin
+  inherited SetSlaveIndex(Value);
+  MenuItem.MenuIndex := Value;
 end;
 
 { TsmxMasterMenu }
 
-procedure TsmxMasterMenu.CreateChilds;
+{procedure TsmxMasterMenu.CreateChilds;
 
   procedure AddItems(AUnit: TsmxHVisibleUnit);
   var i: Integer; c: TsmxBaseCell;
   begin
     with AUnit do
       if CfgID > 0 then
-      begin 
+      begin
         c := NewCell(Self, CfgDatabase, CfgID);
         if c is TsmxCustomMenuPoint then
           MenuPointList.Add(c) else
@@ -3053,9 +3982,9 @@ var i: Integer;
 begin
   for i := 0 to Cfg.MenuUnits.Root.Count - 1 do
     AddItems(Cfg.MenuUnits.Root[i]);
-end;
+end;}
 
-function TsmxMasterMenu.GetCfg: TsmxMainMenuCfg;
+{function TsmxMasterMenu.GetCfg: TsmxMainMenuCfg;
 begin
   Result := TsmxMainMenuCfg(inherited Cfg);
 end;
@@ -3080,7 +4009,7 @@ procedure TsmxMasterMenu.InitChilds;
       with AUnit do
       begin
         mi.CellAlign := UnitAlign;
-        mi.CellEnable := UnitEnable;
+        mi.CellEnabled := UnitEnabled;
         mi.CellHeight := UnitHeight;
         mi.CellLeft := UnitLeft;
         mi.CellTop := UnitTop;
@@ -3095,77 +4024,273 @@ var i: Integer;
 begin
   for i := 0 to Cfg.MenuUnits.Root.Count - 1 do
     InitItems(Cfg.MenuUnits.Root[i]);
-end;
+end;}
 
 { TsmxMainMenu }
 
-constructor TsmxMainMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxMainMenu.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
-  inherited Create(AOwner, ADatabase, ACfgID); 
+  inherited Create(AOwner, ADatabase, ACfgID);
   FMainMenu := TMainMenu.Create(Self);
   //FMainMenu.Images := ImageList;
   InstallParent;
-end;
+end;}
 
 destructor TsmxMainMenu.Destroy;
 begin
-  UnInstallParent;
-  FMainMenu.Free;
+  //UnInstallParent;
   inherited Destroy;
+  if Assigned(FMainMenu) then
+    FMainMenu.Free;
 end;
 
-function TsmxMainMenu.GetInternalObject: TObject;
+function TsmxMainMenu.GetCellEnabled: Boolean;
 begin
-  Result := FMainMenu;
+  Result := MainMenu.Items.Enabled;
 end;
 
-function TsmxMainMenu.GetCellEnable: Boolean;
+procedure TsmxMainMenu.SetCellEnabled(Value: Boolean);
+var
+  i: Integer;
 begin
-  Result := FMainMenu.Items.Enabled;
+  for i := 0 to MainMenu.Items.Count - 1 do
+    MainMenu.Items[i].Enabled := Value;
 end;
 
 function TsmxMainMenu.GetCellVisible: Boolean;
 begin
-  Result := FMainMenu.Items.Visible;
+  Result := MainMenu.Items.Visible;
 end;
 
-procedure TsmxMainMenu.SetCellEnable(Value: Boolean);
-var i: Integer;
+procedure TsmxMainMenu.SetCellVisible(Value: Boolean);
+var
+  i: Integer;
 begin
-  for i := 0 to FMainMenu.Items.Count - 1 do
-    FMainMenu.Items[i].Enabled := Value;
+  for i := 0 to MainMenu.Items.Count - 1 do
+    MainMenu.Items[i].Visible := Value;
+end;
+
+function TsmxMainMenu.GetInternalObject: TObject;
+begin
+  Result := MainMenu;
+end;
+
+function TsmxMainMenu.GetMainMenu: TMainMenu;
+begin
+  if not Assigned(FMainMenu) then
+    FMainMenu := TMainMenu.Create(Self);
+  Result := FMainMenu;
+end;
+
+function TsmxMainMenu.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxMenuItem;
+end;
+
+procedure TsmxMainMenu.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    MainMenu.WindowHandle := 0;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TCustomForm then
+      MainMenu.WindowHandle := TCustomForm(Obj).Handle;
+  end;
 end;
 
 procedure TsmxMainMenu.SetImageList(Value: TCustomImageList);
 begin
   if Assigned(ImageList) then
-    FMainMenu.Images := nil;
+    MainMenu.Images := nil;
   inherited SetImageList(Value);
   if Assigned(ImageList) then
   begin
-    FMainMenu.Images := ImageList;
-    if FMainMenu.Items.Count > 0 then
-      _TMenuItem(FMainMenu.Items[0]).MenuChanged(True);
+    MainMenu.Images := ImageList;
+    if MainMenu.Items.Count > 0 then
+      _TMenuItem(MainMenu.Items[0]).MenuChanged(True);
   end;
 end;
 
-procedure TsmxMainMenu.SetCellVisible(Value: Boolean);
-var i: Integer;
+{procedure TsmxMainMenu.SetMenuItemList(Value: TsmxCustomMenuItem);
+var
+  Obj: TObject;
 begin
-  for i := 0 to FMainMenu.Items.Count - 1 do
-    FMainMenu.Items[i].Visible := Value;
+  if Assigned(MenuItemList) then
+    MainMenu.Items.Clear;
+  inherited SetMenuItemList(Value);
+  if Assigned(MenuItemList) then
+  begin
+    Obj := _TsmxBaseCell(MenuItemList).GetInternalObject;
+    if Obj is TMenuItem then
+      MainMenu.Items.Add(TMenuItem(Obj));
+  end;
+end;}
+
+{ TsmxPopupMenu }
+
+destructor TsmxPopupMenu.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FPopupMenu) then
+    FPopupMenu.Free;
+end;
+
+function TsmxPopupMenu.GetInternalObject: TObject;
+begin
+  Result := PopupMenu;
+end;
+
+function TsmxPopupMenu.GetPopupMenu: TPopupMenu;
+begin
+  if not Assigned(FPopupMenu) then
+    FPopupMenu := TPopupMenu.Create(Self);
+  Result := FPopupMenu;
+end;
+
+function TsmxPopupMenu.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxMenuItem;
+end;
+
+procedure TsmxPopupMenu.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    PopupMenu.Images := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    PopupMenu.Images := Value;
+end;
+
+{ TsmxPopupList }
+
+function TsmxPopupList.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxPopupMenu;
+end;
+
+{ TsmxToolItem }
+
+destructor TsmxToolItem.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FToolButton) then
+    FToolButton.Free;
+end;
+
+function TsmxToolItem.GetCellCaption: String;
+begin
+  Result := String(ToolButton.Caption);
+end;
+
+procedure TsmxToolItem.SetCellCaption(const Value: String);
+begin
+  ToolButton.Caption := TCaption(Value);
+end;
+
+function TsmxToolItem.GetCellHint: String;
+begin
+  Result := ToolButton.Hint;
+end;
+
+procedure TsmxToolItem.SetCellHint(const Value: String);
+begin
+  ToolButton.Hint := Value;
+end;
+
+function TsmxToolItem.GetCellImageIndex: Integer;
+begin
+  Result := Integer(ToolButton.ImageIndex);
+end;
+
+procedure TsmxToolItem.SetCellImageIndex(Value: Integer);
+begin
+  ToolButton.ImageIndex := TImageIndex(Value);
+end;
+
+function TsmxToolItem.GetInternalObject: TObject;
+begin
+  Result := ToolButton;
+end;
+
+function TsmxToolItem.GetIsChecked: Boolean;
+begin
+  Result := ToolButton.Down;
+end;
+
+procedure TsmxToolItem.SetIsChecked(Value: Boolean);
+begin
+  ToolButton.Down := Value;
+end;
+
+function TsmxToolItem.GetToolButton: TToolButton;
+begin
+  if not Assigned(FToolButton) then
+    FToolButton := TToolButton.Create(Self);
+  Result := FToolButton;
+end;
+
+function TsmxToolItem.GetToolItemStyle: TsmxToolItemStyle;
+const
+  InOutStyle: array[TToolButtonStyle] of TsmxToolItemStyle =
+    (tisButton, tisCheck, tisButton, tisDivider, tisDivider);
+begin
+  Result := InOutStyle[ToolButton.Style];
+end;
+
+procedure TsmxToolItem.SetToolItemStyle(Value: TsmxToolItemStyle);
+const
+  OutInStyle: array[TsmxToolItemStyle] of TToolButtonStyle =
+    (tbsButton, tbsCheck, tbsDivider);
+begin
+  ToolButton.Style := OutInStyle[Value];
+end;
+
+procedure TsmxToolItem.InternalInitialize;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxToolItemCfg then
+  begin
+    IsChecked := TsmxToolItemCfg(Cfg).IsChecked;
+    ToolItemStyle := TsmxToolItemCfg(Cfg).ToolItemStyle;
+  end;
+end;
+
+procedure TsmxToolItem.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  IsChecked := False;
+  ToolItemStyle := tisButton;
+end;
+
+procedure TsmxToolItem.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    ToolButton.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      ToolButton.Parent := TWinControl(Obj);
+  end;
 end;
 
 { TsmxToolBoard }
 
-function TsmxToolBoard.GetCfg: TsmxToolBoardCfg;
+{function TsmxToolBoard.GetCfg: TsmxToolBoardCfg;
 begin
   Result := TsmxToolBoardCfg(inherited Cfg);
-end;
+end;}
 
 { TsmxToolBar }
 
-constructor TsmxToolBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxToolBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FToolBar := TToolBar.Create(Self);
@@ -3176,16 +4301,17 @@ begin
   FToolBar.ShowCaptions := Cfg.BarShowCaptions;
   FToolBar.ShowHint := Cfg.BarShowHint;
   //Initialize;
-end;
+end;}
 
 destructor TsmxToolBar.Destroy;
 begin
-  //UnInitialize; 
-  FToolBar.Free;
+  //UnInitialize;
   inherited Destroy;
+  if Assigned(FToolBar) then
+    FToolBar.Free;
 end;
 
-procedure TsmxToolBar.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
+{procedure TsmxToolBar.AddAlgorithm(Algorithm: TsmxCustomAlgorithm);
 var c: TObject; b: TToolButton;
 begin
   c := _TsmxBaseCell(Algorithm).GetInternalObject;
@@ -3213,19 +4339,19 @@ begin
         b.Free;
       end;
     end;
-end;
+end;}
 
 function TsmxToolBar.GetInternalObject: TObject;
 begin
-  Result := FToolBar;
+  Result := ToolBar;
 end;
 
-function TsmxToolBar.GetCellAlign: TAlign;
+{function TsmxToolBar.GetCellAlign: TAlign;
 begin
   Result := FToolBar.Align;
 end;
 
-function TsmxToolBar.GetCellEnable: Boolean;
+function TsmxToolBar.GetCellEnabled: Boolean;
 begin
   Result := FToolBar.Enabled;
 end;
@@ -3253,9 +4379,9 @@ end;
 function TsmxToolBar.GetCellWidth: Integer;
 begin
   Result := FToolBar.Width;
-end;
+end;}
 
-procedure TsmxToolBar.Prepare(Forcibly: Boolean = False);
+{procedure TsmxToolBar.Prepare(Forcibly: Boolean = False);
 var i, w: Integer;
 begin
   inherited Prepare(Forcibly);
@@ -3267,14 +4393,14 @@ begin
         w := w + Buttons[i].Width;
     Width := w;
   end;
-end;
+end;}
 
-procedure TsmxToolBar.SetCellAlign(Value: TAlign);
+{procedure TsmxToolBar.SetCellAlign(Value: TAlign);
 begin
   FToolBar.Align := Value;
 end;
 
-procedure TsmxToolBar.SetCellEnable(Value: Boolean);
+procedure TsmxToolBar.SetCellEnabled(Value: Boolean);
 begin
   FToolBar.Enabled := Value;
 end;
@@ -3282,30 +4408,6 @@ end;
 procedure TsmxToolBar.SetCellHeight(Value: Integer);
 begin
   FToolBar.Height := Value;
-end;
-
-procedure TsmxToolBar.SetImageList(Value: TCustomImageList);
-//var f: TCustomForm;
-begin
-  {f := GetParentForm(FToolBar);
-  if Assigned(f) then
-    FToolBar.Images := Value
-  else
-  begin
-    f := TForm.Create(nil);
-    try
-      FToolBar.Parent := f;
-      FToolBar.Images := Value;
-      FToolBar.Parent := nil;
-    finally
-      f.Free;
-    end;
-  end;}
-  if Assigned(ImageList) then
-    FToolBar.Images := nil;
-  inherited SetImageList(Value);
-  if Assigned(ImageList) then
-    FToolBar.Images := ImageList;
 end;
 
 procedure TsmxToolBar.SetCellLeft(Value: Integer);
@@ -3326,9 +4428,9 @@ end;
 procedure TsmxToolBar.SetCellWidth(Value: Integer);
 begin
   FToolBar.Width := Value;
-end;
+end;}
 
-procedure TsmxToolBar.SetParentCell(Value: TsmxBaseCell);
+{procedure TsmxToolBar.SetParentCell(Value: TsmxBaseCell);
 var c: TObject;
 begin
   if Assigned(ParentCell) then
@@ -3340,20 +4442,114 @@ begin
     if c is TWinControl then
       FToolBar.Parent := TWinControl(c);
   end;
+end;}
+
+function TsmxToolBar.GetIsFlat: Boolean;
+begin
+  Result := ToolBar.Flat;
 end;
 
-{procedure TsmxToolBar.Initialize;
-var f: TForm;
+procedure TsmxToolBar.SetIsFlat(Value: Boolean);
 begin
-  f := TForm.Create(nil);
-  try
-    FToolBar.Parent := f;
-    //FToolBar.Images := ImageList;
-    FToolBar.Parent := nil;
-  finally
-    f.Free;
+  ToolBar.Flat := Value;
+end;
+
+function TsmxToolBar.GetIsShowCaptions: Boolean;
+begin
+  Result := ToolBar.ShowCaptions;
+end;
+
+procedure TsmxToolBar.SetIsShowCaptions(Value: Boolean);
+begin
+  ToolBar.ShowCaptions := Value;
+end;
+
+function TsmxToolBar.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxToolItem;
+end;
+
+function TsmxToolBar.GetToolBar: TToolBar;
+begin
+  if not Assigned(FToolBar) then
+  begin
+    FToolBar := TToolBar.Create(Self);
+    FToolBar.AutoSize := True;
+    FToolBar.EdgeBorders := FToolBar.EdgeBorders - [ebTop];
   end;
-end;}
+  Result := FToolBar;
+end;
+
+procedure TsmxToolBar.InternalInitialize;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxToolBoardCfg then
+  begin
+    IsFlat := TsmxToolBoardCfg(Cfg).IsFlat;
+    IsShowCaptions := TsmxToolBoardCfg(Cfg).IsShowCaptions;
+  end;
+end;
+
+procedure TsmxToolBar.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  IsFlat := False;
+  IsShowCaptions := False;
+end;
+
+procedure TsmxToolBar.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    ToolBar.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      ToolBar.Parent := TWinControl(Obj);
+  end;
+end;
+
+procedure TsmxToolBar.SetImageList(Value: TCustomImageList);
+var
+  Control: TWinControl;
+begin
+  {Form := Forms.GetParentForm(ToolBar);
+  if Assigned(Form) then
+    ToolBar.Images := Value
+  else
+  begin
+    Form := TForm.Create(nil);
+    try
+      ToolBar.Parent := Form;
+      ToolBar.Images := Value;
+      ToolBar.Parent := nil;
+    finally
+      Form.Free;
+    end;
+  end;}
+  Control := nil;
+  try
+    if not Assigned(ToolBar.Parent) then
+    begin
+      Control := TForm.Create(Self);
+      ToolBar.Parent := Control;
+    end;
+    if Assigned(ImageList) then
+      ToolBar.Images := nil;
+    inherited SetImageList(Value);
+    if Assigned(ImageList) then
+      ToolBar.Images := ImageList;
+  finally
+    if Assigned(Control) then
+    begin
+      ToolBar.Parent := nil;
+      Control.Free;
+    end;
+  end;
+end;
 
 {procedure TsmxToolBar.UnInitialize;
 begin
@@ -3362,7 +4558,7 @@ end;}
 
 { TsmxControlBoard }
 
-procedure TsmxControlBoard.CreateChilds;
+{procedure TsmxControlBoard.CreateChilds;
 var i: Integer; c: TsmxBaseCell;
 begin
   ToolBoardList.Count := Cfg.BarUnits.Count;
@@ -3390,44 +4586,56 @@ begin
     with Cfg.BarUnits[i] do
     begin
       ToolBoards[i].CellAlign := UnitAlign;
-      ToolBoards[i].CellEnable := UnitEnable;
+      ToolBoards[i].CellEnabled := UnitEnabled;
       ToolBoards[i].CellHeight := UnitHeight;
       ToolBoards[i].CellLeft := UnitLeft;
       ToolBoards[i].CellTop := UnitTop;
       ToolBoards[i].CellVisible := UnitVisible;
       ToolBoards[i].CellWidth := UnitWidth;
     end;
-end;
+end;}
 
 { TsmxControlBar }
 
-constructor TsmxControlBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
+{constructor TsmxControlBar.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
 begin
   inherited Create(AOwner, ADatabase, ACfgID);
   FControlBar := TControlBar.Create(Self);
   FControlBar.AutoSize := True;
   FControlBar.BevelInner := bvNone;
   InstallParent;
-end;
+end;}
 
 destructor TsmxControlBar.Destroy;
 begin
-  UnInstallParent;
-  FControlBar.Free;
+  //UnInstallParent;
   inherited Destroy;
+  if Assigned(FControlBar) then
+    FControlBar.Free;
+end;
+
+function TsmxControlBar.GetControlBar: TControlBar;
+begin
+  if not Assigned(FControlBar) then
+  begin
+    FControlBar := TControlBar.Create(Self);
+    FControlBar.AutoSize := True;
+    FControlBar.BevelInner := bvNone;
+  end;
+  Result := FControlBar;
 end;
 
 function TsmxControlBar.GetInternalObject: TObject;
 begin
-  Result := FControlBar;
+  Result := ControlBar;
 end;
 
-function TsmxControlBar.GetCellAlign: TAlign;
+{function TsmxControlBar.GetCellAlign: TAlign;
 begin
   Result := FControlBar.Align;
 end;
 
-function TsmxControlBar.GetCellEnable: Boolean;
+function TsmxControlBar.GetCellEnabled: Boolean;
 begin
   Result := FControlBar.Enabled;
 end;
@@ -3462,7 +4670,7 @@ begin
   FControlBar.Align := Value;
 end;
 
-procedure TsmxControlBar.SetCellEnable(Value: Boolean);
+procedure TsmxControlBar.SetCellEnabled(Value: Boolean);
 begin
   FControlBar.Enabled := Value;
 end;
@@ -3490,158 +4698,401 @@ end;
 procedure TsmxControlBar.SetCellWidth(Value: Integer);
 begin
   FControlBar.Width := Value;
+end;}
+
+function TsmxControlBar.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxToolBar;
 end;
 
-procedure TsmxControlBar.SetParentCell(Value: TsmxBaseCell);
-var c: TObject;
+procedure TsmxControlBar.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
 begin
-  if Assigned(ParentCell) then
-    FControlBar.Parent := nil;
-  inherited SetParentCell(Value);
-  if Assigned(ParentCell) then
+  if Assigned(CellParent) then
+    ControlBar.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
   begin
-    c := _TsmxBaseCell(ParentCell).GetInternalObject;
-    if c is TWinControl then
-      FControlBar.Parent := TWinControl(c);
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      ControlBar.Parent := TWinControl(Obj);
   end;
+end;
+
+{ TsmxStatusPanel }
+
+destructor TsmxStatusPanel.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FStatusPanel) then
+    FStatusPanel.Free;
+end;
+
+function TsmxStatusPanel.GetCellCaption: String;
+begin
+  Result := StatusPanel.Text;
+end;
+
+procedure TsmxStatusPanel.SetCellCaption(const Value: String);
+begin
+  StatusPanel.Text := Value;
+end;
+
+function TsmxStatusPanel.GetCellWidth: Integer;
+begin
+  Result := StatusPanel.Width;
+end;
+
+procedure TsmxStatusPanel.SetCellWidth(Value: Integer);
+begin
+  StatusPanel.Width := Value;
+end;
+
+function TsmxStatusPanel.GetStatusItemAlignment: TAlignment;
+begin
+  Result := StatusPanel.Alignment;
+end;
+
+procedure TsmxStatusPanel.SetStatusItemAlignment(Value: TAlignment);
+begin
+  StatusPanel.Alignment := Value;
+end;
+
+function TsmxStatusPanel.GetStatusItemStyle: TsmxStatusItemStyle;
+const
+  InOutStyle: array[TStatusPanelStyle] of TsmxStatusItemStyle =
+    (sisText, sisDraw);
+begin
+  Result := InOutStyle[StatusPanel.Style];
+end;
+
+procedure TsmxStatusPanel.SetStatusItemStyle(Value: TsmxStatusItemStyle);
+const
+  OutInStyle: array[TsmxStatusItemStyle] of TStatusPanelStyle =
+    (psText, psOwnerDraw);
+begin
+  StatusPanel.Style := OutInStyle[Value];
+end;
+
+function TsmxStatusPanel.GetStatusPanel: TStatusPanel;
+begin
+  if not Assigned(FStatusPanel) then
+    FStatusPanel := TStatusPanel.Create(nil);
+  Result := FStatusPanel;
+end;
+
+procedure TsmxStatusPanel.InternalInitialize;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxStatusItemCfg then
+  begin
+    StatusItemAlignment := TsmxStatusItemCfg(Cfg).StatusItemAlignment;
+    StatusItemStyle := TsmxStatusItemCfg(Cfg).StatusItemStyle;
+    Form := smxClassFuncs.GetAccessoryForm(Self);
+    if Assigned(Form) then
+      OnDrawPanel := smxClassFuncs.GetEventForm(Form, TsmxStatusItemCfg(Cfg).DrawPanelAlgCfg);
+  end;
+end;
+
+procedure TsmxStatusPanel.ResetCellProps;
+begin
+  inherited ResetCellProps;
+  StatusItemAlignment := taLeftJustify;
+  StatusItemStyle := sisText;
+  OnDrawPanel := nil;
+end;
+
+procedure TsmxStatusPanel.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    StatusPanel.Collection := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TStatusPanels then
+      StatusPanel.Collection := TStatusPanels(Obj);
+  end;
+end;
+
+procedure TsmxStatusPanel.SetSlaveIndex(Value: Integer);
+begin
+  inherited SetSlaveIndex(Value);
+  StatusPanel.Index := Value;
+end;
+
+{ TsmxStatusBar }
+
+destructor TsmxStatusBar.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FStatusBar) then
+    FStatusBar.Free;
+end;
+
+function TsmxStatusBar.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxStatusPanel;
+end;
+
+function TsmxStatusBar.GetStatusBar: TStatusBar;
+begin
+  if not Assigned(FStatusBar) then
+  begin
+    FStatusBar := TStatusBar.Create(Self);
+    FStatusBar.OnDrawPanel := StatusBarDraw;
+  end;
+  Result := FStatusBar;
+end;
+
+procedure TsmxStatusBar.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    StatusBar.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    if Obj is TWinControl then
+      StatusBar.Parent := TWinControl(Obj);
+  end;
+end;
+
+procedure TsmxStatusBar.StatusBarDraw(StatusBar: TStatusBar; Panel: TStatusPanel;
+  const Rect: TRect);
+var
+  Slave: TsmxOwnerCell;
+begin
+  Slave := FindSlaveByInternalObject(Panel);
+  if Slave is TsmxCustomStatusItem then
+    TsmxCustomStatusItem(Slave).DrawPanel;
 end;
 
 { TsmxForm }
 
-procedure TsmxForm.CreateChilds;
-var c: TsmxBaseCell; i: Integer;
+destructor TsmxForm.Destroy;
 begin
-  PageManagerList.Count := Cfg.PageManagers.Count;
-  for i := 0 to Cfg.PageManagers.Count - 1 do
-    with Cfg.PageManagers[i] do
-      if CfgID > 0 then
-      begin
-        c := NewCell(Self, CfgDatabase, CfgID);
-        if c is TsmxCustomPageManager then
-          PageManagerList[i] := c else
-          raise EsmxCellError.CreateRes(@SCellBuildError);
-      end else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-  with Cfg.MainMenu do
-    if CfgID > 0 then
-    begin
-      c := NewCell(Self, CfgDatabase, CfgID);
-      if c is TsmxCustomMasterMenu then
-        MasterMenu := TsmxCustomMasterMenu(c) else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
-  with Cfg.AlgorithmList do
-    if CfgID > 0 then
-    begin
-      c := NewCell(Self, CfgDatabase, CfgID);
-      if c is TsmxCustomAlgorithmList then
-        AlgorithmList := TsmxCustomAlgorithmList(c) else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
-  with Cfg.ControlBar do
-    if CfgID > 0 then
-    begin
-      c := NewCell(Self, CfgDatabase, CfgID);
-      if c is TsmxCustomControlBoard then
-        ControlBoard := TsmxCustomControlBoard(c) else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
-  with Cfg.StateRequest do
-    if CfgID > 0 then
-    begin
-      c := NewCell(Self, CfgDatabase, CfgID);
-      if c is TsmxCustomRequest then
-        StateRequest := TsmxCustomRequest(c) else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;
-  {with Cfg.StatusBar do
-    if CfgID > 0 then
-    begin
-      c := NewCell(Self, CfgDatabase, CfgID);
-      if c is TsmxCustomStatusBoard then
-        StatusBoard := TsmxCustomStatusBoard(c) else
-        raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;}
+  inherited Destroy;
+  if Assigned(FForm) then
+    FForm.Free;
 end;
 
-function TsmxForm.GetCfg: TsmxFormCfg;
+procedure TsmxForm.Close;
 begin
-  Result := TsmxFormCfg(inherited Cfg);
+  Form.Close;
 end;
 
-procedure TsmxForm.InitChilds;
-var i: Integer;
+function TsmxForm.GetCellActive: Boolean;
 begin
-  for i := 0 to Cfg.PageManagers.Count - 1 do
-    with Cfg.PageManagers[i] do
+  Result := Form.Active;
+end;
+
+function TsmxForm.GetCellCaption: String;
+begin
+  Result := String(Form.Caption);
+end;
+
+function TsmxForm.GetCellHint: String;
+begin
+  Result := Form.Hint;
+end;
+
+function TsmxForm.GetCellImageIndex: Integer;
+begin
+  Result := FFormImageIndex;
+end;
+
+function TsmxForm.GetForm: TForm;
+begin
+  if not Assigned(FForm) then
+  begin
+    if IsApplicationForm then
+      Forms.Application.CreateForm(TForm, FForm)
+    else
+      FForm := TForm.Create(Self);
+  end;
+  Result := FForm;
+end;
+
+function TsmxForm.GetFormBorder: TsmxFormBorder;
+const
+  InOutBorder: array[TFormBorderStyle] of TsmxFormBorder =
+    (fbNone, fbDialog, fbSizeable, fbDialog, fbDialog, fbSizeable);
+begin
+  Result := InOutBorder[Form.BorderStyle];
+end;
+
+function TsmxForm.GetFormPosition: TsmxFormPosition;
+const
+  InOutPosition: array[TPosition] of TsmxFormPosition =
+    (fpDefault, fpDefault, fpDefault, fpDefault, fpDesktopCenter,
+     fpDesktopCenter, fpOwnerFormCenter, fpOwnerFormCenter);
+begin
+  Result := InOutPosition[Form.Position];
+end;
+
+function TsmxForm.GetInternalObject: TObject;
+begin
+  Result := Form;
+end;
+
+{function TsmxForm.GetIsMainForm: Boolean;
+begin
+  Result := Forms.Application.MainForm = Form;
+end;}
+
+function TsmxForm.GetIsMaximize: Boolean;
+begin
+  Result := Form.WindowState = wsMaximized;
+end;
+
+function TsmxForm.GetModalResult: TModalResult;
+begin
+  Result := Form.ModalResult;
+end;
+
+procedure TsmxForm.InternalInitialize;
+var
+  Cell: TsmxBaseCell;
+begin
+  inherited InternalInitialize;
+  if Cfg is TsmxFormCfg then
+  begin
+    FormBorder := TsmxFormCfg(Cfg).FormBorder;
+    FormPosition := TsmxFormCfg(Cfg).FormPosition;
+    IsMaximize := TsmxFormCfg(Cfg).IsMaximize;
+
+    if TsmxFormCfg(Cfg).AlgorithmListCfgID > 0 then
     begin
-      PageManagers[i].CellAlign := UnitAlign;
-      PageManagers[i].CellEnable := UnitEnable;
-      PageManagers[i].CellHeight := UnitHeight;
-      PageManagers[i].CellLeft := UnitLeft;
-      PageManagers[i].CellTop := UnitTop;
-      PageManagers[i].CellVisible := UnitVisible;
-      PageManagers[i].CellWidth := UnitWidth;
+      Cell := smxClassFuncs.NewCell(Self, TsmxFormCfg(Cfg).AlgorithmListCfgID, SelectRequest);
+      Cell.CellParent := Self;
+      Cell.Initialize;
+      AlgorithmList := TsmxCustomAlgorithmList(Cell);
     end;
-  if Assigned(MasterMenu) then
-    with Cfg.MainMenu do
+
+    if TsmxFormCfg(Cfg).PopupListCfgID > 0 then
     begin
-      MasterMenu.CellAlign := Align;
-      MasterMenu.CellEnable := Enable;
-      MasterMenu.CellVisible := Visible;
-      with PositionSize do
+      Cell := smxClassFuncs.NewCell(Self, TsmxFormCfg(Cfg).PopupListCfgID, SelectRequest);
+      Cell.CellParent := Self;
+      Cell.Initialize;
+      PopupList := TsmxCustomPopupList(Cell);
+    end;
+
+    if TsmxFormCfg(Cfg).RequestListCfgID > 0 then
+    begin
+      Cell := smxClassFuncs.NewCell(Self, TsmxFormCfg(Cfg).RequestListCfgID, SelectRequest);
+      Cell.CellParent := Self;
+      Cell.Initialize;
+      RequestList := TsmxCustomRequestList(Cell);
+    end;
+  end;
+end;
+
+procedure TsmxForm.SetCellActive(Value: Boolean);
+begin
+  //Windows.BringWindowToTop()
+  //Form.SetFocus
+  //Windows.GetDesktopWindow
+  if Value then
+    Windows.BringWindowToTop(Form.Handle)
+  else
+    Windows.SetForegroundWindow(Form.Handle);
+end;
+
+procedure TsmxForm.SetCellCaption(const Value: String);
+begin
+  Form.Caption := TCaption(Value);
+end;
+
+procedure TsmxForm.SetCellHint(const Value: String);
+begin
+  Form.Hint := Value;
+end;
+
+procedure TsmxForm.SetCellImageIndex(Value: Integer);
+begin
+  if FFormImageIndex > -1 then
+    Form.Icon := nil;
+  FFormImageIndex := Value;
+  if FFormImageIndex > -1 then
+    if Assigned(ImageList) then
+      ImageList.GetIcon(FFormImageIndex, Form.Icon);
+end;
+
+procedure TsmxForm.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    Form.Icon := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    if FFormImageIndex > -1 then
+      ImageList.GetIcon(FFormImageIndex, Form.Icon);
+end;
+
+procedure TsmxForm.SetFormBorder(Value: TsmxFormBorder);
+const
+  OutInBorder: array[TsmxFormBorder] of TFormBorderStyle =
+    (bsNone, bsDialog, bsSizeable);
+begin
+  Form.BorderStyle := OutInBorder[Value];
+end;
+
+procedure TsmxForm.SetFormPosition(Value: TsmxFormPosition);
+const
+  OutInPosition: array[TsmxFormPosition] of TPosition =
+    (poDefault, poDesktopCenter, poOwnerFormCenter);
+begin
+  Form.Position := OutInPosition[Value];
+end;
+
+{procedure TsmxForm.SetIsMainForm(Value: Boolean);
+begin
+  if IsMainForm <> Value then
+  begin
+    if not Assigned(Forms.Application.MainForm) then
+    begin
+      if Assigned(FForm) then
       begin
-        MasterMenu.CellHeight := Height;
-        MasterMenu.CellLeft := Left;
-        MasterMenu.CellTop := Top;
-        MasterMenu.CellWidth := Width;
+        FForm.Free;
+
       end;
+      Forms.Application.CreateForm();
     end;
-  if Assigned(ControlBoard) then
-    with Cfg.ControlBar do
-    begin
-      ControlBoard.CellAlign := Align;
-      ControlBoard.CellEnable := Enable;
-      ControlBoard.CellVisible := Visible;
-      with PositionSize do
-      begin
-        ControlBoard.CellHeight := Height;
-        ControlBoard.CellLeft := Left;
-        ControlBoard.CellTop := Top;
-        ControlBoard.CellWidth := Width;
-      end;
-    end;
-  if Assigned(AlgorithmList) then
-    with Cfg.AlgorithmList do
-    begin
-      AlgorithmList.IsCreateToolButton := IsCreateToolButton;
-      AlgorithmList.IsCreateMenuPoint := IsCreateMenuItem;
-    end;
-  if Assigned(StateRequest) then
-    with Cfg.StateRequest do
-    begin
-      StateRequest.DatabaseName := DatabaseName;
-      StateRequest.OperationMode := Operation;
-    end;
-  {if Assigned(StatusBoard) then
-    with Cfg.StatusBar do
-    begin
-      StatusBoard.CellAlign := Align;
-      StatusBoard.CellEnable := Enable;
-      StatusBoard.CellVisible := Visible;
-      with PositionSize do
-      begin
-        StatusBoard.CellHeight := Height;
-        StatusBoard.CellLeft := Left;
-        StatusBoard.CellTop := Top;
-        StatusBoard.CellWidth := Width;
-      end;
-    end;}
+  end;
+end;}
+
+procedure TsmxForm.SetIsMaximize(Value: Boolean);
+begin
+  if Value then
+    Form.WindowState := wsMaximized else
+    Form.WindowState := wsNormal;
+end;
+
+procedure TsmxForm.SetModalResult(Value: TModalResult);
+begin
+  Form.ModalResult := Value;
+end;
+
+procedure TsmxForm.Show;
+begin
+  Form.Show;
+end;
+
+function TsmxForm.ShowModal: TModalResult;
+begin
+  Result := TModalResult(Form.ShowModal);
 end;
 
 { TsmxStandardForm }
 
-constructor TsmxStandardForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
+{constructor TsmxStandardForm.Create(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID: Integer; AID: Integer = 0);
 begin
   inherited Create(AOwner, ADatabase, ACfgID, AID);
@@ -3657,9 +5108,9 @@ begin
   Initialize;
   //AddAlgorithms;
   PutState;
-end;
+end;}
 
-constructor TsmxStandardForm.CreateByIntfID(AOwner: TComponent; const ADatabase: IsmxDatabase;
+{constructor TsmxStandardForm.CreateByIntfID(AOwner: TComponent; const ADatabase: IsmxDatabase;
   ACfgID, AIntfID: Integer; AID: Integer = 0);
 begin
   inherited CreateByIntfID(AOwner, ADatabase, ACfgID, AIntfID, AID);
@@ -3675,38 +5126,38 @@ begin
   Initialize;
   //AddAlgorithms;
   PutState;
-end;
+end;}
 
-destructor TsmxStandardForm.Destroy;
+{destructor TsmxStandardForm.Destroy;
 begin
   //DelAlgorithms;
-  UnInitialize;
-  UnInstallParent;
+  //UnInitialize;
+  //UnInstallParent;
   //FormManager.RemoveForm(Self);
   //DelFormFromManagerLib(Self);
   SetFormManager(nil);
   FForm.Free;
   inherited Destroy;
-end;
+end;}
 
-procedure TsmxStandardForm.CloseForm;
+{procedure TsmxStandardForm.CloseForm;
 begin
   Form.OnClose := nil;
   Free;
-end;
+end;}
 
-procedure TsmxStandardForm.ProcClose(Sender: TObject; var Action: TCloseAction);
+{procedure TsmxStandardForm.ProcClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caNone;
-  CloseForm;
-end;
+  //CloseForm;
+end;}
 
-function TsmxStandardForm.GetFormModalResult:  TModalResult;
+{function TsmxStandardForm.GetFormModalResult:  TModalResult;
 begin
   Result := FForm.ModalResult;
-end;
+end;}
 
-function TsmxStandardForm.GetInternalObject: TObject;
+{function TsmxStandardForm.GetInternalObject: TObject;
 begin
   Result := FForm;
 end;
@@ -3716,7 +5167,7 @@ begin
   Result := FForm.Align;
 end;
 
-function TsmxStandardForm.GetCellEnable: Boolean;
+function TsmxStandardForm.GetCellEnabled: Boolean;
 begin
   Result := FForm.Enabled;
 end;
@@ -3744,28 +5195,28 @@ end;
 function TsmxStandardForm.GetCellWidth: Integer;
 begin
   Result := FForm.Width;
-end;
+end;}
 
-procedure TsmxStandardForm.SetFormManager(Value: TsmxCustomFormManager);
+{procedure TsmxStandardForm.SetFormManager(Value: TsmxCustomFormManager);
 begin
   if Assigned(FormManager) then
     FormManager.RemoveForm(Self);
   inherited SetFormManager(Value);
   if Assigned(FormManager) then
     FormManager.InsertForm(Self);
-end;
+end;}
 
-procedure TsmxStandardForm.SetFormModalResult(Value: TModalResult);
+{procedure TsmxStandardForm.SetFormModalResult(Value: TModalResult);
 begin
   FForm.ModalResult := Value;
-end;
+end;}
 
-procedure TsmxStandardForm.SetCellAlign(Value: TAlign);
+{procedure TsmxStandardForm.SetCellAlign(Value: TAlign);
 begin
   FForm.Align := Value;
 end;
 
-procedure TsmxStandardForm.SetCellEnable(Value: Boolean);
+procedure TsmxStandardForm.SetCellEnabled(Value: Boolean);
 begin
   FForm.Enabled := Value;
 end;
@@ -3773,19 +5224,19 @@ end;
 procedure TsmxStandardForm.SetCellHeight(Value: Integer);
 begin
   FForm.Height := Value;
-end;
+end;}
 
-procedure TsmxStandardForm.SetImageList(Value: TCustomImageList);
-begin
-  if Assigned(ImageList) then
+{procedure TsmxStandardForm.SetImageList(Value: TCustomImageList);
+begin}
+  {if Assigned(ImageList) then
     FForm.Icon := nil;
   inherited SetImageList(Value);
   if Assigned(ImageList) then
     if Cfg.FormImageIndex >= 0 then
-      ImageList.GetIcon(Cfg.FormImageIndex, FForm.Icon);
-end;
+      ImageList.GetIcon(Cfg.FormImageIndex, FForm.Icon);}
+{end;}
 
-procedure TsmxStandardForm.SetCellLeft(Value: Integer);
+{procedure TsmxStandardForm.SetCellLeft(Value: Integer);
 begin
   FForm.Left := Value;
 end;
@@ -3803,22 +5254,22 @@ end;
 procedure TsmxStandardForm.SetCellWidth(Value: Integer);
 begin
   FForm.Width := Value;
-end;
+end;}
 
-procedure TsmxStandardForm.ShowForm;
+{procedure TsmxStandardForm.ShowForm;
 begin
   Form.OnClose := ProcClose;
   Form.Show;
   Prepare;
-end;
+end;}
 
-function TsmxStandardForm.ShowModalForm: TModalResult;
+{function TsmxStandardForm.ShowModalForm: TModalResult;
 begin
   Prepare;
   Result := Form.ShowModal;
-end;
+end;}
 
-procedure TsmxStandardForm.Initialize;
+{procedure TsmxStandardForm.Initialize;
 var c: TObject;
 begin
   //if Cfg.FormImageIndex >= 0 then
@@ -3847,11 +5298,11 @@ begin
     //AlgorithmList.ControlBoard := nil;
     AlgorithmList.DelAlgorithmsTo(ControlBoard);
   FForm.Menu := nil;
-end;
+end;}
 
 { TsmxMasterForm }
 
-procedure TsmxMasterForm.CreateChilds;
+{procedure TsmxMasterForm.CreateChilds;
 var c: TsmxBaseCell; i: Integer;
 begin
   PageManagerList.Count := Cfg.PageManagers.Count;
@@ -3868,7 +5319,7 @@ begin
   with Cfg.MainMenu do
     if CfgID > 0 then
     begin
-      c := NewCell(Self, CfgDatabase, CfgID); 
+      c := NewCell(Self, CfgDatabase, CfgID);
       if c is TsmxCustomMasterMenu then
         MasterMenu := TsmxCustomMasterMenu(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
@@ -3897,14 +5348,14 @@ begin
         StateRequest := TsmxCustomRequest(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
     end;
-  {with Cfg.StatusBar do
+  with Cfg.StatusBar do
     if CfgID > 0 then
     begin
       c := NewCell(Self, CfgDatabase, CfgID);
       if c is TsmxCustomStatusBoard then
         StatusBoard := TsmxCustomStatusBoard(c) else
         raise EsmxCellError.CreateRes(@SCellBuildError);
-    end;}
+    end;
 end;
 
 function TsmxMasterForm.GetCfg: TsmxFormCfg;
@@ -3919,7 +5370,7 @@ begin
     with Cfg.PageManagers[i] do
     begin
       PageManagers[i].CellAlign := UnitAlign;
-      PageManagers[i].CellEnable := UnitEnable;
+      PageManagers[i].CellEnabled := UnitEnabled;
       PageManagers[i].CellHeight := UnitHeight;
       PageManagers[i].CellLeft := UnitLeft;
       PageManagers[i].CellTop := UnitTop;
@@ -3930,7 +5381,7 @@ begin
     with Cfg.MainMenu do
     begin
       MasterMenu.CellAlign := Align;
-      MasterMenu.CellEnable := Enable;
+      MasterMenu.CellEnabled := Enabled;
       MasterMenu.CellVisible := Visible;
       with PositionSize do
       begin
@@ -3944,7 +5395,7 @@ begin
     with Cfg.ControlBar do
     begin
       ControlBoard.CellAlign := Align;
-      ControlBoard.CellEnable := Enable;
+      ControlBoard.CellEnabled := Enabled;
       ControlBoard.CellVisible := Visible;
       with PositionSize do
       begin
@@ -3966,11 +5417,11 @@ begin
       StateRequest.DatabaseName := DatabaseName;
       StateRequest.OperationMode := Operation;
     end;
-  {if Assigned(StatusBoard) then
+  if Assigned(StatusBoard) then
     with Cfg.StatusBar do
     begin
       StatusBoard.CellAlign := Align;
-      StatusBoard.CellEnable := Enable;
+      StatusBoard.CellEnabled := Enabled;
       StatusBoard.CellVisible := Visible;
       with PositionSize do
       begin
@@ -3979,12 +5430,12 @@ begin
         StatusBoard.CellTop := Top;
         StatusBoard.CellWidth := Width;
       end;
-    end;}
-end;
+    end;
+end;}
 
 { TsmxMainForm }
 
-procedure TsmxMainForm.CloseForm;
+{procedure TsmxMainForm.CloseForm;
 begin
   if not Assigned(Form) then
     Exit;
@@ -3997,11 +5448,11 @@ end;
 procedure TsmxMainForm.ProcClose(Sender: TObject; var Action: TCloseAction);
 begin
   CloseForm;
-end;
+end;}
 
-procedure TsmxMainForm.ProcCloseQuery(Sender: TObject; var CanClose: Boolean);
+{procedure TsmxMainForm.ProcCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := Ask('Закрыть программу?' {SCloseProgMessage});
+  CanClose := Ask('Закрыть программу?' );
 end;
 
 function TsmxMainForm.GetInternalObject: TObject;
@@ -4016,7 +5467,7 @@ begin
     Result := alNone;
 end;
 
-function TsmxMainForm.GetCellEnable: Boolean;
+function TsmxMainForm.GetCellEnabled: Boolean;
 begin
   if Assigned(FForm) then
     Result := FForm.Enabled else
@@ -4098,7 +5549,7 @@ begin
     FForm.Align := Value;
 end;
 
-procedure TsmxMainForm.SetCellEnable(Value: Boolean);
+procedure TsmxMainForm.SetCellEnabled(Value: Boolean);
 begin
   if Assigned(FForm) then
     FForm.Enabled := Value;
@@ -4144,7 +5595,7 @@ procedure TsmxMainForm.SetCellWidth(Value: Integer);
 begin
   if Assigned(FForm) then
     FForm.Width := Value;
-end;
+end;}
 
 {procedure TsmxMainForm.SetForm(AForm: TForm);
 begin
@@ -4160,7 +5611,7 @@ begin
   end;
 end;}
 
-procedure TsmxMainForm.SetForm(Value: TForm);
+{procedure TsmxMainForm.SetForm(Value: TForm);
 begin
   if Assigned(FForm) then
     UnInitialize;
@@ -4193,12 +5644,12 @@ begin
   SetImageList(nil);
   UnInstallParent;
   FForm.Menu := nil;
-end;
+end;}
 
 initialization
-  RegisterClasses([TsmxRequest, TsmxDBColumn, TsmxDBGrid, TsmxActionLibAlgorithm,
-    TsmxActionList,TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet,
-    TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxToolBar, TsmxControlBar,
-    TsmxStandardForm, TsmxMainForm]);
+  RegisterClasses([TsmxRequest, TsmxColumn, TsmxDBGrid,
+    TsmxActionList, TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet,
+    TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList,
+    TsmxToolItem, TsmxToolBar, TsmxControlBar{, TsmxStandardForm}{, TsmxMainForm}]);
 
 end.

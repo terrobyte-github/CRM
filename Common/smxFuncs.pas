@@ -39,11 +39,11 @@ end;
 function StrToDateTimeEx(const AStr: String): TDateTime;
 begin
   if SysUtils.AnsiCompareText(AStr, 'Date') = 0 then
-    Result := Date else
+    Result := SysUtils.Date else
   if SysUtils.AnsiCompareText(AStr, 'Time') = 0 then
-    Result := Time else
+    Result := SysUtils.Time else
   if SysUtils.AnsiCompareText(AStr, 'Now') = 0 then
-    Result := Now else
+    Result := SysUtils.Now else
     Result := SysUtils.StrToDateDef(AStr, SysUtils.StrToDate('30.12.1899'));
 end;
 

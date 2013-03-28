@@ -76,7 +76,7 @@ type
     function GetConnected: Boolean;
     function GetDatabase: IsmxDatabase;
     function GetDatabaseManager: IsmxDatabaseManager;
-    function GetInternalRef: Integer;
+    function GetInternalRef: Pointer;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabase(const Value: IsmxDatabase);
     procedure SetDatabaseManager(const Value: IsmxDatabaseManager);
@@ -110,7 +110,7 @@ type
     function GetCfgID: Integer;
     function GetFormManager: IsmxFormManager;
     function GetID: Integer;
-    function GetInternalRef: Integer;
+    function GetInternalRef: Pointer;
     function GetModalResult: TModalResult;
     procedure SetCfgID(Value: Integer);
     procedure SetFormManager(const Value: IsmxFormManager);

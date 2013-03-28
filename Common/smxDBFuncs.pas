@@ -68,7 +68,12 @@ begin
   Result := False;
   AValues := ADefValues;
   Count := FindFieldBySense(ADataSet, ASense, Fields);
-  if Count > 0 then
+  if Count = 1 then
+  begin
+    AValues := Fields[0].Value;
+    Result := True;
+  end else
+  if Count > 1 then
   begin
     AValues := Variants.VarArrayCreate([0, Count - 1], varVariant);
     for i := 0 to Count - 1 do
@@ -85,7 +90,15 @@ var
 begin
   Result := False;
   Count := FindFieldBySense(ADataSet, ASense, Fields);
-  if Variants.VarIsArray(AValues) then
+  if not Variants.VarIsArray(AValues) then
+    if Count = 1 then
+    begin
+      ADataSet.Edit;
+      Fields[0].Value := AValues;
+      ADataSet.Post;
+      Result := True;
+    end
+  else
     if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
     begin
       ADataSet.Edit;
@@ -122,7 +135,12 @@ begin
   Result := False;
   AValues := ADefValues;
   Count := FindParamByLocation(ADataSet, ALocation, Params);
-  if Count > 0 then
+  if Count = 1 then
+  begin
+    AValues := Params[0].Value;
+    Result := True;
+  end else
+  if Count > 1 then
   begin
     AValues := Variants.VarArrayCreate([0, Count - 1], varVariant);
     for i := 0 to Count - 1 do
@@ -139,7 +157,13 @@ var
 begin
   Result := False;
   Count := FindParamByLocation(ADataSet, ALocation, Params);
-  if Variants.VarIsArray(AValues) then
+  if not Variants.VarIsArray(AValues) then
+    if Count = 1 then
+    begin
+      Params[0].Value := AValues;
+      Result := True;
+    end
+  else
     if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
     begin
       for i := 0 to Count - 1 do

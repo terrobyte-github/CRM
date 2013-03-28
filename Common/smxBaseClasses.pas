@@ -35,9 +35,9 @@ type
 
   TsmxComponentEvent = procedure(Component: TsmxComponent) of object;
 
-  { TsmxInterfacedComponent }
+  { TsmxInterfacedObject }
 
-  TsmxInterfacedComponent = class(TInterfacedObject, IsmxBaseInterface)
+  TsmxInterfacedObject = class(TInterfacedObject, IsmxBaseInterface)
   protected
     function GetDescription: String; virtual;
     function GetVersion: String; virtual;
@@ -46,18 +46,18 @@ type
     property Version: String read GetVersion;
   end;
 
-  TsmxInterfacedComponentClass = class of TsmxInterfacedComponent;
+  TsmxInterfacedObjectClass = class of TsmxInterfacedObject;
 
-  { TsmxInterfacedComponent2 }
+  { TsmxInterfacedPersistent }
 
-  TsmxInterfacedComponent2 = class(TPersistent, IInterface, IsmxBaseInterface)
+  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface)
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetDescription: String; virtual;
     function GetVersion: String; virtual;
-    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -68,7 +68,54 @@ type
     property Version: String read GetVersion;
   end;
 
+  TsmxInterfacedPersistentClass = class of TsmxInterfacedPersistent;
+
+  { TsmxInterfacedComponent }
+
+  {TsmxInterfacedComponent = class(TComponent, IInterface, IsmxBaseInterface)
+  protected
+    FRefCount: Integer;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+    function GetDescription: String; virtual;
+    function GetVersion: String; virtual;
+    //function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+  public
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+    class function NewInstance: TObject; override;
+
+    property Description: String read GetDescription;
+    property RefCount: Integer read FRefCount;
+    property Version: String read GetVersion;
+  end;
+
+  TsmxInterfacedComponentClass = class of TsmxInterfacedComponent;}
+
+  { TsmxFreeNotificationObject }
+
+  {TsmxFreeNotificationObject = class(TInterfacedObject, IsmxFreeNotification)
+  private
+    FFreeNotifies: TInterfaceList;
+    FOwner: IsmxOwnerNotification;
+    function GetFreeNotifies: TInterfaceList;
+  protected
+    procedure FreeNotification(const Sender: IsmxFreeNotification); virtual;
+
+    property FreeNotifies: TInterfaceList read GetFreeNotifies;
+  public
+    constructor Create(const Owner: IsmxOwnerNotification); virtual;
+    destructor Destroy; override;
+    function GetOwnerNotification: IsmxOwnerNotification;
+    procedure InsertFreeNotification(const Reciever: IsmxFreeNotification);
+    procedure RemoveFreeNotification(const Reciever: IsmxFreeNotification);
+  end;
+
+  TsmxFreeNotificationObjectClass = class of TsmxFreeNotificationObject;}
+
   { TsmxKitItem }
+
+  EsmxListError = class(EsmxBaseError);
 
   TsmxKit = class;
 
@@ -81,6 +128,7 @@ type
     procedure SetIndex(Value: Integer); virtual;
   public
     constructor Create(AKit: TsmxKit); virtual;
+    destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); virtual;
 
     property ItemIndex: Integer read GetIndex write SetIndex;
@@ -113,6 +161,8 @@ type
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
   end;
+
+  TsmxKitClass = class of TsmxKit;
 
   { TsmxHKitItem }
 
@@ -170,6 +220,8 @@ type
     property Root: TsmxHKitItem read GetRoot write SetRoot;
   end;
 
+  TsmxHKitClass = class of TsmxHKit;
+
 implementation
 
 uses
@@ -205,7 +257,92 @@ begin
   Result := cVersion;
 end;
 
+{ TsmxInterfacedObject }
+
+function TsmxInterfacedObject.GetDescription: String;
+begin
+  Result := ClassName;
+end;
+
+function TsmxInterfacedObject.GetVersion: String;
+begin
+  Result := cVersion;
+end;
+
+{ TsmxInterfacedPersistent }
+
+function TsmxInterfacedPersistent._AddRef: Integer;
+begin
+  Result := Windows.InterlockedIncrement(FRefCount);
+end;
+
+function TsmxInterfacedPersistent._Release: Integer;
+begin
+  Result := Windows.InterlockedDecrement(FRefCount);
+  if Result = 0 then
+    Destroy;
+end;
+
+procedure TsmxInterfacedPersistent.AfterConstruction;
+begin
+  Windows.InterlockedDecrement(FRefCount);
+end;
+
+procedure TsmxInterfacedPersistent.BeforeDestruction;
+begin
+  if RefCount <> 0 then
+    System.Error(reInvalidPtr);
+end;
+
+function TsmxInterfacedPersistent.GetDescription: String;
+begin
+  Result := ClassName;
+end;
+
+function TsmxInterfacedPersistent.GetVersion: String;
+begin
+  Result := cVersion;
+end;
+
+class function TsmxInterfacedPersistent.NewInstance: TObject;
+begin
+  Result := inherited NewInstance;
+  TsmxInterfacedPersistent(Result).FRefCount := 1;
+end;
+
+function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if GetInterface(IID, Obj) then
+    Result := S_OK else
+    Result := E_NOINTERFACE;
+end;
+
 { TsmxInterfacedComponent }
+
+{function TsmxInterfacedComponent._AddRef: Integer;
+begin
+  Result := Windows.InterlockedIncrement(FRefCount);
+end;
+
+function TsmxInterfacedComponent._Release: Integer;
+begin
+  Result := Windows.InterlockedDecrement(FRefCount);
+  if Result = 0 then
+    Destroy;
+end;
+
+procedure TsmxInterfacedComponent.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  Windows.InterlockedDecrement(FRefCount);
+end;
+
+procedure TsmxInterfacedComponent.BeforeDestruction;
+begin
+  inherited BeforeDestruction;
+  if RefCount <> 0 then
+    System.Error(reInvalidPtr);
+end;
 
 function TsmxInterfacedComponent.GetDescription: String;
 begin
@@ -217,59 +354,86 @@ begin
   Result := cVersion;
 end;
 
-{ TsmxInterfacedComponent2 }
-
-function TsmxInterfacedComponent2._AddRef: Integer;
-begin
-  Result := Windows.InterlockedIncrement(FRefCount);
-end;
-
-function TsmxInterfacedComponent2._Release: Integer;
-begin
-  Result := Windows.InterlockedDecrement(FRefCount);
-  if Result = 0 then
-    Destroy;
-end;
-
-procedure TsmxInterfacedComponent2.AfterConstruction;
-begin
-  Windows.InterlockedDecrement(FRefCount);
-end;
-
-procedure TsmxInterfacedComponent2.BeforeDestruction;
-begin
-  if RefCount <> 0 then
-    System.Error(reInvalidPtr);
-end;
-
-function TsmxInterfacedComponent2.GetDescription: String;
-begin
-  Result := ClassName;
-end;
-
-function TsmxInterfacedComponent2.GetVersion: String;
-begin
-  Result := cVersion;
-end;
-
-class function TsmxInterfacedComponent2.NewInstance: TObject;
+class function TsmxInterfacedComponent.NewInstance: TObject;
 begin
   Result := inherited NewInstance;
-  TsmxInterfacedComponent2(Result).FRefCount := 1;
-end;
+  TsmxInterfacedComponent(Result).FRefCount := 1;
+end;}
 
-function TsmxInterfacedComponent2.QueryInterface(const IID: TGUID; out Obj): HResult;
+{function TsmxInterfacedComponent.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
   if GetInterface(IID, Obj) then
-    Result := 0 else
+    Result := S_OK else
     Result := E_NOINTERFACE;
+end;}
+
+{ TsmxFreeNotificationObject }
+
+{constructor TsmxFreeNotificationObject.Create(const Owner: IsmxOwnerNotification);
+begin
+  FOwner := Owner;
 end;
+
+destructor TsmxFreeNotificationObject.Destroy;
+begin
+  if Assigned(FFreeNotifies) then
+    while FFreeNotifies.Count > 0 do
+      IsmxFreeNotification(FFreeNotifies[FFreeNotifies.Count - 1]).FreeNotification(Self as IsmxFreeNotification);
+  inherited Destroy;
+end;}
+
+(*procedure TsmxFreeNotificationObject.FreeNotification(const Sender: IsmxFreeNotification);
+begin
+  RemoveFreeNotification(Sender);
+  if Assigned(FOwner) then
+    FOwner.OwnerFreeNotification(Sender);
+  {if Assigned(Sender) then
+    if Assigned(Sender.GetOwnerNotification) then
+      Sender.GetOwnerNotification.OwnerFreeNotification(Sender);}
+end;*)
+
+{function TsmxFreeNotificationObject.GetFreeNotifies: TInterfaceList;
+begin
+  if not Assigned(FFreeNotifies) then
+    FFreeNotifies := TInterfaceList.Create;
+  Result := FFreeNotifies;
+end;
+
+function TsmxFreeNotificationObject.GetOwnerNotification: IsmxOwnerNotification;
+begin
+  Result := FOwner;
+end;
+
+procedure TsmxFreeNotificationObject.InsertFreeNotification(const Reciever: IsmxFreeNotification);
+begin
+  if Assigned(Reciever) then
+    if FreeNotifies.IndexOf(Reciever) < 0 then
+    begin
+      FreeNotifies.Add(Reciever);
+      Reciever.InsertFreeNotification(Self as IsmxFreeNotification);
+    end;
+end;
+
+procedure TsmxFreeNotificationObject.RemoveFreeNotification(const Reciever: IsmxFreeNotification);
+begin
+  if Assigned(Reciever) then
+  begin
+    FreeNotifies.Remove(Reciever);
+    Reciever.RemoveFreeNotification(Self as IsmxFreeNotification);
+  end;
+end;}
 
 { TsmxKitItem }
 
 constructor TsmxKitItem.Create(AKit: TsmxKit);
 begin
   FKit := AKit;
+end;
+
+destructor TsmxKitItem.Destroy;
+begin
+  SetKit(nil);
+  inherited Destroy;
 end;
 
 procedure TsmxKitItem.Assign(Source: TsmxKitItem);
@@ -345,16 +509,12 @@ var
   i: Integer;
 begin
   for i := KitList.Count - 1 downto 0 do
-  begin
     TsmxKitItem(KitList[i]).Free;
-    KitList.Delete(i);
-  end;
 end;
 
 procedure TsmxKit.Delete(Index: Integer);
 begin
   TsmxKitItem(KitList[Index]).Free;
-  KitList.Delete(Index);
 end;
 
 function TsmxKit.GetCount: Integer;
@@ -388,6 +548,7 @@ end;
 
 destructor TsmxHKitItem.Destroy;
 begin
+  SetParent(nil);
   if Assigned(FHKitItemList) then
   begin
     Clear;
@@ -418,16 +579,12 @@ var
   i: Integer;
 begin
   for i := HKitItemList.Count - 1 downto 0 do
-  begin
     TsmxHKitItem(HKitItemList[i]).Free;
-    HKitItemList.Delete(i);
-  end;
 end;
 
 procedure TsmxHKitItem.Delete(Index: Integer);
 begin
   TsmxHKitItem(HKitItemList[Index]).Free;
-  HKitItemList.Delete(Index);
 end;
 
 function TsmxHKitItem.GetCount: Integer;
@@ -527,6 +684,3 @@ begin
 end;
 
 end.
-
-
-

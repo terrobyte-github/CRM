@@ -3,6 +3,7 @@ object frmAddCell: TfrmAddCell
   Top = 143
   Width = 306
   Height = 207
+  BorderIcons = [biMinimize, biMaximize]
   Caption = #1044#1086#1073#1072#1074#1083#1077#1085#1080#1077
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

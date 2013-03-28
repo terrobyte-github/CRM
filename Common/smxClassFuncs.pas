@@ -3,11 +3,11 @@ unit smxClassFuncs;
 interface
 
 uses
-  Classes, smxClasses, smxTypes, smxBaseIntf, smxDBIntf;
+  Classes, smxBaseClasses, smxClasses, smxTypes, smxBaseIntf, smxDBIntf;
 
 function CfgIDToCfgClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfgClass;
 function CfgIDToCellClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCellClass;
-//function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedComponentClass;
+//function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; ACfgID: Integer;
@@ -25,6 +25,11 @@ function FindFilterOnForm(AForm: TsmxCustomForm; const AName: String;
 function FindColumnOnForm(AForm: TsmxCustomForm; const AName: String;
   var AValue: Variant): Boolean;
 function GetAccessoryForm(ACell: TsmxBaseCell): TsmxCustomForm;
+function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm;
+function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEvent;
+function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
+function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
+function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
 
 implementation
 
@@ -45,7 +50,7 @@ begin
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
-        TypeCfg.CfgID := smxFuncs.GetSingleValue(ForeignKey, 0);
+        TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
         TypeCfg.Receive;
         Result := TypeCfg.CfgClass;
@@ -69,7 +74,7 @@ begin
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
-        TypeCfg.CfgID := smxFuncs.GetSingleValue(ForeignKey, 0);
+        TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
         TypeCfg.Receive;
         Result := TypeCfg.CellClass;
@@ -79,21 +84,21 @@ begin
     end;
 end;
 
-{function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedComponentClass;
+{function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
 var
   TypeCfg: TsmxTypeCfg;
   ForeignKey: Variant;
 begin
   Result := nil;
   if not Assigned(ASelectRequest) then
-    ASelectRequest := smxClassProcs.GSelectReques;
+    ASelectRequest := smxClassProcs.gSelectRequest;
   if Assigned(ASelectRequest) then
     if smxDBFuncs.GetValueByKey(ASelectRequest.DataSet, ACfgID, ForeignKey,
         ASelectRequest.PerformanceMode, fsKey, fsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
-        TypeCfg.CfgID := smxFuncs.GetSingleValue(ForeignKey, 0);
+        TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
         TypeCfg.Receive;
         Result := TypeCfg.IntfClass;
@@ -139,18 +144,18 @@ begin
       ['nil', 'create'], ACfgID);
 end;
 
-{function NewIntf(AOwner: TComponent; ACfgID: Integer;
-  ASelectRequest: TsmxCustomRequest = nil): IsmxBaseInterface;
+{function NewIntf(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): IsmxBaseInterface;
 var
-  IntfClass: TsmxInterfacedComponentClass;
+  IntfClass: TsmxInterfacedPersistentClass;
 begin
   if not Assigned(ASelectRequest) then
-    ASelectRequest := smxClassProcs.GSelectReques;
+    ASelectRequest := smxClassProcs.gSelectRequest;
   IntfClass := CfgIDToIntfClass(ACfgID, ASelectRequest);
   if Assigned(IntfClass) then
-    Result := IntfClass.Create as IsmxBaseInterface;
+    Result := IntfClass.Create as IsmxBaseInterface
   else
-    raise EsmxCfgError.CreateByCfgID(@SCfgActionError, ['nil', ACfgID, 'create'], ACfgID);
+    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
+      ['nil', ACfgID, 'create'], ACfgID);
 end;}
 
 function NewForm(AOwner: TComponent; ACfgID: Integer;
@@ -198,17 +203,17 @@ end;
 function FindFilterOnSection(ASection: TsmxCustomSection; const AName: String;
   var AValue: Variant): Boolean;
 var
-  Filter: TsmxCustomFilter;
+  Cell: TsmxOwnerCell;
 begin
   Result := False;
   AValue := Variants.Null;
-  Filter := nil;
+  Cell := nil;
   if Assigned(ASection) then
     if Assigned(ASection.FilterDesk) then
-      Filter := ASection.FilterDesk.FindFilterByName(AName);
-  if Assigned(Filter) then
+      Cell := ASection.FilterDesk.FindSlaveByName(AName);
+  if Assigned(Cell) then
   begin
-    AValue := Filter.FilterValue;
+    AValue := TsmxCustomFilter(Cell).FilterValue;
     Result := True;
   end;
 end;
@@ -216,17 +221,17 @@ end;
 function FindColumnOnSection(ASection: TsmxCustomSection; const AName: String;
   var AValue: Variant): Boolean;
 var
-  Column: TsmxCustomColumn;
+  Cell: TsmxOwnerCell;
 begin
   Result := False;
   AValue := Variants.Null;
-  Column := nil;
+  Cell := nil;
   if Assigned(ASection) then
     if Assigned(ASection.Grid) then
-      Column := ASection.Grid.FindColumnByName(AName);
-  if Assigned(Column) then
+      Cell := ASection.Grid.FindSlaveByName(AName);
+  if Assigned(Cell) then
   begin
-    AValue := Column.ColumnValue;
+    AValue := TsmxCustomColumn(Cell).ColumnValue;
     Result := True;
   end;
 end;
@@ -241,7 +246,7 @@ begin
   AValue := Variants.Null;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection]);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], True);
     for i := 0 to List.Count - 1 do
       if FindFilterOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin
@@ -263,7 +268,7 @@ begin
   AValue := Variants.Null;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection]);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], True);
     for i := 0 to List.Count - 1 do
       if FindColumnOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin
@@ -276,19 +281,64 @@ begin
 end;
 
 function GetAccessoryForm(ACell: TsmxBaseCell): TsmxCustomForm;
-var
-  Cell: TsmxBaseCell;
+//var
+  //Cell: TsmxBaseCell;
 begin
   Result := nil;
-  if not Assigned(ACell) then
-    Exit;
-  Cell := ACell.CellParent;
-  while Assigned(Cell) and not Assigned(Result) do
+  //if not Assigned(ACell) then
+  //  Exit;
+  //Cell := ACell.CellParent;
+  while Assigned(ACell) and not Assigned(Result) do
   begin
-    if Cell is TsmxCustomForm then
-      Result := TsmxCustomForm(Cell);
-    Cell := Cell.CellParent;
+    ACell := ACell.CellParent;
+    if ACell is TsmxCustomForm then
+      Result := TsmxCustomForm(ACell);
+    //Cell := Cell.CellParent;
   end;
+end;
+
+function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm;
+begin
+  Result := nil;
+  if Assigned(AForm) then
+    if Assigned(AForm.AlgorithmList) then
+      Result := TsmxCustomAlgorithm(AForm.AlgorithmList.FindSlaveByCfgID(ACfgID));
+end;
+
+function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEvent;
+var
+  Algorithm: TsmxCustomAlgorithm;
+begin
+  Algorithm := GetAlgorithmForm(AForm, ACfgID);
+  if Assigned(Algorithm) then
+    Result := Algorithm.OnExecute else
+    Result := nil;
+end;
+
+function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
+begin
+  Result := nil;
+  if Assigned(AForm) then
+    if Assigned(AForm.RequestList) then
+      Result := TsmxCustomRequest(AForm.RequestList.FindSlaveByCfgID(ACfgID));
+end;
+
+function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
+var
+  Request: TsmxCustomRequest;
+begin
+  Request := GetRequestForm(AForm, ACfgID);
+  if Assigned(Request) then
+    Result := Request.DataSet else
+    Result := nil;
+end;
+
+function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
+begin
+  Result := nil;
+  if Assigned(AForm) then
+    if Assigned(AForm.PopupList) then
+      Result := TsmxCustomPopupMenu(AForm.PopupList.FindSlaveByCfgID(ACfgID));
 end;
 
 end.
