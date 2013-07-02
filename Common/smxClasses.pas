@@ -726,7 +726,7 @@ type
     FCurDataSetIntf: IsmxDataSet;
     FDatabaseIntf: IsmxDatabase;
     FDatabaseName: String;
-    FDataSetIntf: IsmxDataSet;
+    //FDataSetIntf: IsmxDataSet;
     FDeletePerformance: TsmxPerformanceMode;
     FDeleteRequestIntf: IsmxDataSet;
     FIsManualRefreshParams: Boolean;
@@ -755,6 +755,7 @@ type
     procedure DoPrepare; virtual;
     procedure DoRefreshParams; virtual;
     procedure DoUpdate; virtual;
+    function GetDataSet: IsmxDataSet; virtual;
     procedure InternalDelete; virtual;
     procedure InternalExecute; virtual;
     procedure InternalInsert; virtual;
@@ -765,7 +766,7 @@ type
     procedure SetDatabase(const Value: IsmxDatabase); virtual;
     procedure SetDatabaseManager(const Value: IsmxDatabaseManager); override;
     procedure SetDatabaseName(const Value: String); virtual;
-    procedure SetDataSet(const Value: IsmxDataSet); virtual;
+    //procedure SetDataSet(const Value: IsmxDataSet); virtual;
     procedure SetIsManualRefreshParams(Value: Boolean); virtual;
     procedure SetModifyPerformance(Modify: TsmxModifyRequest; Value: TsmxPerformanceMode); virtual;
     procedure SetModifyRequest(Modify: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
@@ -788,7 +789,7 @@ type
     property CellOwner: TsmxCustomRequestList read GetCellOwner write SetCellOwner;
     property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
     property DatabaseName: String read FDatabaseName write SetDatabaseName;
-    property DataSet: IsmxDataSet read FDataSetIntf write SetDataSet;
+    property DataSet: IsmxDataSet read GetDataSet;//FDataSetIntf write SetDataSet;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
     property ModifyPerformances[Modify: TsmxModifyRequest]: TsmxPerformanceMode read GetModifyPerformance write SetModifyPerformance;
     property ModifyRequests[Modify: TsmxModifyRequest]: IsmxDataSet read GetModifyRequest write SetModifyRequest;
@@ -3430,7 +3431,7 @@ begin
   if Source is TsmxCustomRequest then
   begin
     DatabaseName := TsmxCustomRequest(Source).DatabaseName;
-    DataSet := TsmxCustomRequest(Source).DataSet;
+    //DataSet := TsmxCustomRequest(Source).DataSet;
     ModifyPerformances[mrDelete] := TsmxCustomRequest(Source).ModifyPerformances[mrDelete];
     ModifyPerformances[mrInsert] := TsmxCustomRequest(Source).ModifyPerformances[mrInsert];
     ModifyPerformances[mrUpdate] := TsmxCustomRequest(Source).ModifyPerformances[mrUpdate];
@@ -3483,6 +3484,13 @@ procedure TsmxCustomRequest.Execute;
 begin
   FCurDataSetIntf := DataSet;
   FCurPerformanceMode := FPerformanceMode;
+  InternalPrepare;
+  DoPrepare;
+  if not FIsManualRefreshParams then
+  begin
+    InternalRefreshParams;
+    DoRefreshParams;
+  end;
   InternalExecute;
   DoExecute;
 end;
@@ -3527,11 +3535,11 @@ begin
       FCurDataSetIntf.Database := FDatabaseIntf;
     if not FCurDataSetIntf.Prepared then
       FCurDataSetIntf.Prepared := True;
-    if (FOperationMode = omAutomatic) and (FCurDataSetIntf = DataSet) then
+    {if (FOperationMode = omAutomatic) and (FCurDataSetIntf = DataSet) then
     begin
       RefreshParams;
       Execute;
-    end;
+    end;}
   end;
 end;
 
@@ -3541,6 +3549,18 @@ begin
   FCurPerformanceMode := FPerformanceMode;
   InternalPrepare;
   DoPrepare;
+  if FOperationMode = omAutomatic then
+  begin
+    //RefreshParams;
+    if not FIsManualRefreshParams then
+    begin
+      InternalRefreshParams;
+      DoRefreshParams;
+    end;
+    //Execute;
+    InternalExecute;
+    DoExecute;
+  end;
 end;
 
 procedure TsmxCustomRequest.DoRefreshParams;
@@ -3562,11 +3582,11 @@ procedure TsmxCustomRequest.RefreshParams;
 begin
   FCurDataSetIntf := DataSet;
   FCurPerformanceMode := FPerformanceMode;
-  if not FIsManualRefreshParams then
-  begin
+  //if not FIsManualRefreshParams then
+  //begin
     InternalRefreshParams;
     DoRefreshParams;
-  end;
+  //end;
 end;
 
 procedure TsmxCustomRequest.DoUpdate;
@@ -3605,10 +3625,15 @@ begin
   inherited CellOwner := Value;
 end;
 
-procedure TsmxCustomRequest.SetDataSet(const Value: IsmxDataSet);
+function TsmxCustomRequest.GetDataSet: IsmxDataSet;
+begin
+  Result := nil;
+end;
+
+{procedure TsmxCustomRequest.SetDataSet(const Value: IsmxDataSet);
 begin
   FDataSetIntf := Value;
-end;
+end;}
 
 function TsmxCustomRequest.GetModifyPerformance(Modify: TsmxModifyRequest): TsmxPerformanceMode;
 begin

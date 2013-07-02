@@ -90,7 +90,7 @@ type
   TsmxRequest = class(TsmxCustomRequest)
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetDataSet: IsmxDataSet; virtual;
+    //function GetDataSet: IsmxDataSet; virtual;
     procedure InitializeDataSet; virtual;
     procedure InternalInitialize; override;
     procedure InternalRefreshParams; override;
@@ -1328,10 +1328,10 @@ begin
   Result := TsmxRequestCfg;
 end;
 
-function TsmxRequest.GetDataSet: IsmxDataSet;
+{function TsmxRequest.GetDataSet: IsmxDataSet;
 begin
   Result := nil;
-end;
+end;}
 
 procedure TsmxRequest.InitializeDataSet;
 var
@@ -1368,7 +1368,7 @@ begin
           Size := TsmxRequestCfg(Cfg).Params[i].Size;
         end;
     end;
-    DataSet := DataSetIntf;
+    //DataSet := DataSetIntf;
   end;
 end;
 
@@ -1537,7 +1537,7 @@ procedure TsmxRequest.ResetCellProps;
 begin
   inherited ResetCellProps;
   DatabaseName := '';
-  DataSet := nil;
+  //DataSet := nil;
   ModifyPerformances[mrDelete] := pmOpen;
   ModifyPerformances[mrInsert] := pmOpen;
   ModifyPerformances[mrUpdate] := pmOpen;
