@@ -8,7 +8,7 @@ uses
 type
   TsmxFuncNewDatabase = function: IsmxDatabase;
 
-  TsmxFuncNewDataSet = function(ADataSetType: TsmxDataSetType): IsmxDataSet;
+  TsmxFuncNewDataSet = function(DataSetType: TsmxDataSetType): IsmxDataSet;
 
   TsmxParamArray = array of IsmxParam;
 

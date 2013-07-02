@@ -3,145 +3,253 @@ unit smxMain;
 interface
 
 procedure Initialize;
-function CreateMainForm: Boolean;
-//procedure SaveProgVers;
-//function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
-//procedure DisconnectDatabase;
-//procedure LoadCell;
-//procedure LoadImage;
+procedure Finalize;
+//function CreateMainForm: Boolean;
 function LogIn: Boolean;
 
 implementation
 
 uses
-  Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, Graphics,
-  IniFiles, smxClasses, smxFormManager, smxDBManager, smxLibManager, smxCallBack,
-  smxCommonStorage, smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf,  
-  smxConsts;
+  Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, ComObj,
+  Graphics, IniFiles, StrUtils, Variants, smxBaseClasses, smxClasses,
+  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf, smxConsts,
+  smxManagerClasses, smxManagerIntf, smxDBClasses, smxPConsts, smxClassProcs,
+  smxDBTypes, smxDBFuncs, smxLibTypes, smxLogIn;
+
+{$I ..\Resource\smxConf.inc}
 
 type
-  { _TCustomImageList }
+  { _TsmxBaseCell }
 
-  _TCustomImageList = class(TCustomImageList)
+  _TsmxBaseCell = class(TsmxBaseCell)
   end;
 
 var
-  _MainForm: TForm = nil;
-  _ImgList: TImageList = nil;
-  _DBConnection: TsmxDBConnection = nil;
+  gCallBackManager: TsmxCallBackManager = nil;
+  gStorageManager: TsmxStorageManager = nil;
+  gLibraryManager: TsmxLibraryManager = nil;
+  gDatabaseManager: TsmxDatabaseManager = nil;
+  gFormManager: TsmxFormManager = nil;
+  gImageListManager: TsmxImageListManager = nil;
+  gMainConnection: TsmxConnection = nil;
+  gMainForm: TsmxCustomForm = nil;
 
-procedure SaveProgInfo;
-var s: String; VersM, VersL: Cardinal;
+procedure CreateGlobalObjects;
 begin
-  s := Application.ExeName;
-  ComStorage['CRMExe'] := s;
-  ComStorage['CRMPath'] := ExtractFilePath(s);
-  GetFileFullVersion(s, VersM, VersL);
-  ComStorage['ProgVersMajor'] := LongRec(VersM).Hi;
-  ComStorage['ProgVersMinor'] := LongRec(VersM).Lo;
-  ComStorage['ProgVersRelease'] := LongRec(VersL).Hi;
-  ComStorage['ProgVersBuild'] := LongRec(VersL).Lo;
-  ComStorage['ProgVers'] :=
-    IntToStr(LongRec(VersM).Hi) + '.' +
-    IntToStr(LongRec(VersM).Lo) + '.' +
-    IntToStr(LongRec(VersL).Hi) + '.' +
-    IntToStr(LongRec(VersL).Lo);
+  gCallBackManager := TsmxCallBackManager.Create(nil);
+  gStorageManager := TsmxStorageManager.Create(nil);
+  gLibraryManager := TsmxLibraryManager.Create(nil);
+  gDatabaseManager := TsmxDatabaseManager.Create(nil);
+  gFormManager := TsmxFormManager.Create(nil);
+  gImageListManager := TsmxImageListManager.Create(nil);
+  gMainConnection := TsmxConnection.Create(nil);
 end;
 
-procedure AssignCallBackParams;
+procedure DestroyGlobalObjects;
 begin
-  CallBack[0] := Integer(Application.Handle);
-  CallBack[1] := Integer(ComStorage);
-  CallBack[2] := Integer(LibManager);
-  CallBack[3] := Integer(DBManager);
-  CallBack[4] := Integer(FrmManager);
-  CallBack[5] := Integer(_ImgList);
+  gMainConnection.Free;
+  gImageListManager.Free;
+  gFormManager.Free;
+  gDatabaseManager.Free;
+  gLibraryManager.Free;
+  gStorageManager.Free;
+  gCallBackManager.Free;
 end;
 
-procedure LoadCell;
+procedure AssignGlobalObjects;
+var
+  s: String;
+  VersM, VersL: Cardinal;
+  {rs: TResourceStream;
+  FuncNewResource: TsmxFuncNewResource;}
 begin
-  LibManager.CallLibrary('cCells.dll');
-end;
+  gCallBackManager[smxPConsts.cApplicationHandle] := Forms.Application.Handle;
+  gCallBackManager[smxPConsts.cStorageManager] := Integer(gStorageManager as IsmxStorageManager);
+  gCallBackManager[smxPConsts.cLibraryManager] := Integer(gLibraryManager as IsmxLibraryManager);
+  gCallBackManager[smxPConsts.cDatabaseManager] := Integer(gDatabaseManager as IsmxDatabaseManager);
+  gCallBackManager[smxPConsts.cFormManager] := Integer(gFormManager as IsmxFormManager);
+  gCallBackManager[smxPConsts.cImageListManager] := Integer(gImageListManager as IsmxImageListManager);
+  gCallBackManager[smxPConsts.cMainConnection] := Integer(gMainConnection as IsmxConnection);
 
-procedure LoadImage;
-var rs: TResourceStream; FuncNewResource: TsmxFuncNewResource;
-begin
-  @FuncNewResource := LibManager.GetProcedure('rImages.dll', 'NewResource');
+  s := ParamStr(0);
+  gStorageManager[smxPConsts.cProgExeName] := s;
+  gStorageManager[smxPConsts.cProgExePath] := SysUtils.ExtractFilePath(s);
+  smxProcs.GetFileFullVersion(s, VersM, VersL);
+  gStorageManager[smxPConsts.cProgVersionMajor] := LongRec(VersM).Hi;
+  gStorageManager[smxPConsts.cProgVersionMinor] := LongRec(VersM).Lo;
+  gStorageManager[smxPConsts.cProgVersionRelease] := LongRec(VersL).Hi;
+  gStorageManager[smxPConsts.cProgVersionBuild] := LongRec(VersL).Lo;
+  gStorageManager[smxPConsts.cProgVersion] :=
+    SysUtils.Format('%d.%d.%d.%d',
+      [LongRec(VersM).Hi, LongRec(VersM).Lo, LongRec(VersL).Hi, LongRec(VersL).Lo]);
+
+  gLibraryManager.CallBackManager := gCallBackManager as IsmxCallBackManager;
+  gLibraryManager.CheckHandle := HInstance;
+  gLibraryManager.IsCheckComp := gStorageManager[smxPConsts.cLibrarySectionName + '.' + smxPConsts.cLibraryCheckComp];
+  gLibraryManager.LibPath := gStorageManager[smxPConsts.cProgExePath] +
+    gStorageManager[smxPConsts.cPathSectionName + '.' + smxPConsts.cPathLib];
+  gLibraryManager.LibInfoProcName :=
+    gStorageManager[smxPConsts.cLibrarySectionName + '.' + smxPConsts.cLibraryLibInfoProcName];
+
+  {@FuncNewResource := gLibraryManager.GetProcedure(
+    Variants.VarToStr(gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageLibraryName]),
+    Variants.VarToStr(gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageFuncName]));
   if Assigned(FuncNewResource) then
   begin
-    rs := FuncNewResource('pic');
+    rs := FuncNewResource(gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageResourceName]);
     try
-      //_TCustomImageList(_ImgList).ReadData(rs);
-      LoadImagesFromStream(_ImgList, rs);
+      smxProcs.LoadImagesFromStream(gImageList, rs);
+    finally
+      rs.Free;
+    end;
+  end;}
+  gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
+  gImageListManager.DelimiterName :=
+    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiterName];
+end;
+
+procedure LoadClassLibraries;
+var
+  sr: TSearchRec;
+  li: TsmxLibInfo;
+begin
+  if SysUtils.FindFirst(
+      gStorageManager[smxPConsts.cProgExePath] +
+        gStorageManager[smxPConsts.cPathSectionName + '.' + smxPConsts.cPathLib] +
+        '*.dll',
+      faAnyFile, sr) = 0 then
+    try
+      repeat
+        if gLibraryManager.GetLibraryInfo(sr.Name, li) then
+          if ltCellClass in li.LibTypes then
+            gLibraryManager.AddLibrary(sr.Name);
+      until SysUtils.FindNext(sr) <> 0;
+    finally
+      SysUtils.FindClose(sr);
+    end;
+end;
+
+{procedure LoadImages;
+var
+  rs: TResourceStream;
+  FuncNewResource: TsmxFuncNewResource;
+begin
+  @FuncNewResource := gLibraryManager.GetProcedure(
+    gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageLibraryName],
+    gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageFuncName]);
+  if Assigned(FuncNewResource) then
+  begin
+    rs := FuncNewResource(gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageResourceName]);
+    try
+      smxProcs.LoadImagesFromStream(_ImageList, rs);
     finally
       rs.Free;
     end;
   end;
-end;
+end;}
 
 procedure LoadCfg;
-var f: TIniFile; sl, sl2: TStringList; i, j: Integer;
+var
+  f: TIniFile;
+  sl, sl2: TStringList;
+  i, j: Integer;
+  h: Integer;
+  s: String;
 begin
-  if FileExists(ComStorage['CRMPath'] + SFileConfigurationName) then
+  s := SysUtils.ExtractFilePath(ParamStr(0)) + smxPConsts.cConfigurationFileName;
+  if not SysUtils.FileExists(s) then
   begin
-    f := TIniFile.Create(ComStorage['CRMPath'] + SFileConfigurationName);
+    h := SysUtils.FileCreate(s);
     try
-      sl := TStringList.Create;
+      SysUtils.FileWrite(h, cIni, Length(cIni));
+    finally
+      SysUtils.FileClose(h);
+    end;
+  end;
+  f := TIniFile.Create(s);
+  try
+    sl := TStringList.Create;
+    try
+      sl2 := TStringList.Create;
       try
-        sl2 := TStringList.Create;
-        try
-          f.ReadSections(sl);
-          for i := 0 to sl.Count - 1 do
-          begin
-            f.ReadSectionValues(sl[i], sl2);
-            for j := 0 to sl2.Count - 1 do
-              ComStorage[sl.Strings[i] + '.' + sl2.Names[j]] := sl2.Values[sl2.Names[j]]; //sl2.ValueFromIndex[j];
-          end;
-        finally
-          sl2.Free;
+        f.ReadSections(sl);
+        for i := 0 to sl.Count - 1 do
+        begin
+          f.ReadSectionValues(sl[i], sl2);
+          for j := 0 to sl2.Count - 1 do
+            gStorageManager[sl.Strings[i] + '.' + sl2.Names[j]] := sl2.Values[sl2.Names[j]];
         end;
       finally
-        sl.Free;
+        sl2.Free;
       end;
     finally
-      f.Free;
+      sl.Free;
     end;
+  finally
+    f.Free;
   end;
 end;
 
-procedure SaveVariables;
-var s: String;
+procedure CreateMainObjects;
+var
+  CellClass: TsmxBaseCellClass;
 begin
-  s := ComStorage['CRMPath'];
-  SetEnvironmentVariable(PChar('CRM'), PChar(s));
-  s := ';' + s + ComStorage['Path.Lib'];
-  SetEnvironmentVariable(PChar('Path'), PChar(GetEnvironmentVariable('Path') + s));
-  {s := GetEnvironmentVariable('Path'); inf(s);
-  s2 := ExtractFileDir(Application.ExeName); inf(s2);
-  SetEnvironmentVariable(PChar('CRM'), PChar(s2)); inf('setvar');
-  if s <> '' then
-    s := s + ';' + s2 else
-    s := s2;
-  s2 := ComStorage['LibPath'];
-  if s2 <> '' then
-    s := s + '\' + s2;
-  SetEnvironmentVariable(PChar('Path'), PChar(s));}
+  if gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName] <> '' then
+    CellClass := TsmxBaseCellClass(Classes.FindClass(
+      gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName]))
+  else
+    CellClass := nil;
+  if Assigned(CellClass) then
+    if CellClass.InheritsFrom(TsmxCustomRequest) then
+      smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.Create(nil));
+end;
+
+procedure DestroyMainObjects;
+begin
+  if Assigned(smxClassProcs.gSelectRequest) then
+    SysUtils.FreeAndNil(smxClassProcs.gSelectRequest);
+end;
+
+procedure AssignMainObjects;
+begin
+  if Assigned(smxClassProcs.gSelectRequest) then
+  begin
+    _TsmxBaseCell(smxClassProcs.gSelectRequest).Cfg.XMLText :=
+      Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestXMLText]);
+    smxClassProcs.gSelectRequest.IsRecieveCfg := False;
+    smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
+    smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
+    smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+    smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
+    smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
+    smxClassProcs.gSelectRequest.Database := gMainConnection.Database;
+    smxClassProcs.gSelectRequest.Initialize;
+    smxClassProcs.gSelectRequest.Prepare;
+    //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+    //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
+  end;
 end;
 
 procedure Initialize;
 begin
-  SaveProgInfo;
-  AssignCallBackParams;
   LoadCfg;
-  SaveVariables;
-  LibManager.LibPath := ComStorage['Path.Lib'];
-  LibManager.ProcLibInfoName := ComStorage['LibManager.ProcLibInfo'];
-  LibManager.CheckComp := ComStorage['LibManager.CheckComp'];
-  LoadCell;
-  LoadImage;
+  //SaveProgInfo;
+  AssignGlobalObjects;
+  LoadClassLibraries;
+  CreateMainObjects;
+  //LibManager.LibPath := ComStorage['Path.Lib'];
+  //LibManager.ProcLibInfoName := ComStorage['LibManager.ProcLibInfo'];
+  //LibManager.CheckComp := ComStorage['LibManager.CheckComp'];
+  //LoadCell;
+  //LoadImages;
 end;
 
-function CreateMainForm: Boolean;
+procedure Finalize;
+begin
+  DestroyMainObjects;
+end;
+
+{function CreateMainForm: Boolean;
 var f: TsmxCustomForm; IntfID: Integer; c: TsmxBaseCell;
 begin
   //IntfID := ComStorage['IntfID'];
@@ -170,9 +278,9 @@ begin
     //raise EsmxCellError.CreateRes(@SCellBuildError);
     Result := False;
   end;
-end;
+end;}
 
-function CheckIntf(const ADatabase: IsmxDatabase): Boolean;
+{function CheckIntf(const ADatabase: IsmxDatabase): Boolean;
 var c: TsmxBaseCell; IntfID, IntfName: Variant;
 begin
   Result := False;
@@ -200,41 +308,9 @@ begin
   finally
     c.Free;
   end;
-end;
+end;}
 
-function CheckUser(const ADatabase: IsmxDatabase): Boolean;
-var c: TsmxBaseCell; UserID, UserName: Variant;
-begin
-  Result := False;
-  c := NewCell(nil, ADatabase, 1000236);
-  try
-    if c is TsmxCustomRequest then
-    begin
-      with TsmxCustomRequest(c) do
-      begin
-        Database := ADatabase;
-        CommonStorage := ComStorage;
-      end;
-      if GetRequestKeyAndValue(TsmxCustomRequest(c), UserID, UserName) then
-      begin
-        if UserID = -1 then
-          Inf(UserName) else
-        if UserID > 0 then
-        begin
-          ComStorage['UserID'] := UserID;
-          ComStorage['@UsedrID'] := UserID;
-          ComStorage['UserName'] := UserName;
-          ComStorage['@UserName'] := UserName;
-          Result := CheckIntf(ADatabase);
-        end;
-      end;
-    end;
-  finally
-    c.Free;
-  end;
-end;
-
-function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
+{function ConnectDatabase(AProjectName: String; ALogin: String = ''; APassword: String = ''): Boolean;
 var pm: TsmxProjectManager; pr: TsmxProjectItem;
 begin
   Result := False;
@@ -283,7 +359,7 @@ begin
   finally
     pm.Free;
   end;
-end;
+end;}
 
 {procedure DisconnectDatabase;
 begin
@@ -296,164 +372,232 @@ end;}
 
 function LogIn: Boolean;
 
-  {procedure ProcOnChange(Sender: TObject);
-  var c: TControl; p: TsmxProjectItem;
+  function ConnectDatabase(Connection: TsmxProjectConnection; UserName, Password: String): Boolean;
+  var
+    Database: IsmxDatabase;
+    FuncNewDatabase: TsmxFuncNewDatabase;
+    IntfClass: TsmxInterfacedPersistentClass;
   begin
-    if Sender is TComboBox then
-      with TComboBox(Sender) do
+    Result := False;
+    Database := nil;
+    case Connection.Generation of
+      gmFunction:
       begin
-        p := TsmxProjectItem(Items.Objects[ItemIndex]);
-        c := Parent.FindChildControl('Login');
-        if c is TEdit then
-          with TEdit(c) do
-          begin
-            if Assigned(p) then
-            begin
-              Enabled := not p.WindowsAuthorization;
-              if Enabled then
-                Color := clWindow else
-                Color := clBtnFace;
-            end else
-            begin
-              Enabled := True;
-              Color := clWindow;
-            end;
-          end;
-        c := Parent.FindChildControl('Password');
-        if c is TEdit then
-          with TEdit(c) do
-          begin
-            if Assigned(p) then
-            begin
-              Enabled := not p.WindowsAuthorization;
-              if Enabled then
-                Color := clWindow else
-                Color := clBtnFace;
-            end else
-            begin
-              Enabled := True;
-              Color := clWindow;
-            end;
-          end;
+        @FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
+        if Assigned(FuncNewDatabase) then
+          Database := FuncNewDatabase;
       end;
-  end;}
-
-//var f: TForm; l, l2, l3: TLabel; cb: TComboBox; e, e2: TEdit; b, b2: TButton;
-  //pm: TsmxProjectManager; i: Integer; m: TMethod;
-begin
-  {Result := False;
-  f := TForm.Create(nil);
-  try
-    pm := TsmxProjectManager.Create(nil);
-    try
-      pm.FileName := SFileProjectName;
-      pm.ReadProjects;
-      with f do
+      gmCOM:
       begin
-        Height := 160;
-        Width := 310;
-        Caption := 'Вход в программу';
-        Position := poScreenCenter;
-        BorderIcons := [biSystemMenu];
-        BorderStyle := bsSingle;
-        l := TLabel.Create(f);
-        with l do
+        if gLibraryManager.AddLibrary(Connection.LibraryName) <> -1 then
         begin
-          Parent := f;
-          Left := 10;
-          Top := 5;
-          Caption := 'Проект:';
+          ComObj.RegisterComServer(Connection.LibraryName);
+          Database := ComObj.CreateComObject(
+            ComObj.ProgIDToClassID(Connection.FuncOrClassNameOrProgID)) as IsmxDatabase;
         end;
-        cb := TComboBox.Create(f);
-        with cb do
-        begin
-          Parent := f;
-          Left := 10;
-          Top := 21;
-          Width := 200;
-          Style := csDropDownList;
-          m.Data := cb;
-          m.Code := @ProcOnChange;
-          OnChange := TNotifyEvent(m);
-          Clear;
-          for i := 0 to pm.ProjectList.Count - 1 do
-            AddItem(pm.ProjectList[i].ProjectName, pm.ProjectList[i]);
-          if Items.Count > 0 then
-            ItemIndex := 0;
-        end;
-        l2 := TLabel.Create(f);
-        with l2 do
-        begin
-          Parent := f;
-          Left := 10;
-          Top := 47;
-          Caption := 'Логин:';
-        end;
-        e := TEdit.Create(f);
-        with e do
-        begin
-          Parent := f;
-          Left := 10;
-          Top := 63;
-          Width := 200;
-          Name := 'Login';
-          Text := '';
-        end;
-        l3 := TLabel.Create(f);
-        with l3 do
-        begin
-          Parent := f;
-          Left := 10;
-          Top := 89;
-          Caption := 'Пароль:';
-        end;
-        e2 := TEdit.Create(f);
-        with e2 do
-        begin
-          Parent := f;
-          Left := 10;
-          Top := 105;
-          Width := 200;
-          PasswordChar := '*';
-          Name := 'Password';
-          Text := '';
-        end;
-        b := TButton.Create(f);
-        with b do
-        begin
-          Parent := f;
-          Left := 220;
-          Top := 63;
-          Caption := 'Ввод';
-          ModalResult := mrOk;
-        end;
-        b2 := TButton.Create(f);
-        with b2 do
-        begin
-          Parent := f;
-          Left := 220;
-          Top := 105;
-          Caption := 'Отмена';
-          ModalResult := mrCancel;
-        end;
-        ProcOnChange(cb);
-        if ShowModal = mrOk then
-          if cb.ItemIndex >= 0 then
-            Result := ConnectDatabase(cb.Items[cb.ItemIndex], e.Text, e2.Text);
       end;
-    finally
-      pm.Free;
+      gmClass:
+      begin
+        if gLibraryManager.AddLibrary(Connection.LibraryName) <> -1 then
+        begin
+          IntfClass := TsmxInterfacedPersistentClass(Classes.FindClass(Connection.FuncOrClassNameOrProgID));
+          if Assigned(IntfClass) then
+            Database := IntfClass.Create as IsmxDatabase;
+        end;
+      end;
     end;
-  finally
-    f.Free;
-  end;}
-  Result := ConnectDatabase('CRM2');
+    if Assigned(Database) then
+    begin
+      Database.DatabaseName := Connection.DatabaseName;
+      Database.DriverName := Connection.DriverName;
+      Database.Params.Text :=
+        SysUtils.StringReplace(
+          SysUtils.StringReplace(
+            Connection.Params,
+            gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroUserName],
+            StrUtils.IfThen(Connection.IsUseUser, Connection.UserName, UserName),
+            [rfReplaceAll, rfIgnoreCase]),
+          gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
+          StrUtils.IfThen(Connection.IsUseUser, Connection.Password, Password),
+          [rfReplaceAll, rfIgnoreCase]);
+      gMainConnection.Database := Database;
+      gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+      gMainConnection.Connect;
+      Result := gMainConnection.Connected;
+    end;
+  end;
+
+  function CheckUser(UserName, Password: String; var UserID: Integer): Boolean;
+  var
+    Cell: TsmxBaseCell;
+    Value: Variant;
+  begin
+    Result := True; //False;
+    UserID := -1;
+    {if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCheckUserCfgID], 0) > 0 then
+    begin
+      Cell := smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCheckUserCfgID],
+        smxClassProcs.gSelectRequest);
+      try
+        if Cell is TsmxCustomRequest then
+        begin
+          TsmxCustomRequest(Cell).Initialize;
+          //TsmxCustomRequest(Cell).DatabaseName := gMainConnection.Database.DatabaseName;
+          //TsmxCustomRequest(Cell).DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+          TsmxCustomRequest(Cell).Database := gMainConnection.Database;
+          TsmxCustomRequest(Cell).IsManualRefreshParams := True;
+          if smxDBFuncs.GetValueByKey(
+              TsmxCustomRequest(Cell).DataSet,
+              Variants.VarArrayOf([UserName, Password]),
+              Value,
+              TsmxCustomRequest(Cell).PerformanceMode,
+              fsValue,
+              fsKey) then
+          begin
+            UserID := Value;
+            Result := True;
+          end;
+        end;
+      finally
+        Cell.Free;
+      end;
+    end;}
+  end;
+
+  function CheckIntf(UserID: Integer; var IntfID: Integer; var IntfName: String): Boolean;
+  var
+    Cell: TsmxBaseCell;
+    Value: Variant;
+  begin
+    Result := True; //False;
+    IntfID := -1;
+    IntfName := '';
+    {if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCheckIntfCfgID], 0) > 0 then
+    begin
+      Cell := smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCheckIntfCfgID],
+        smxClassProcs.gSelectRequest);
+      try
+        if Cell is TsmxCustomRequest then
+        begin
+          TsmxCustomRequest(Cell).Initialize;
+          //TsmxCustomRequest(Cell).DatabaseName := gMainConnection.Database.DatabaseName;
+          //TsmxCustomRequest(Cell).DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+          TsmxCustomRequest(Cell).Database := gMainConnection.Database;
+          TsmxCustomRequest(Cell).IsManualRefreshParams := True;
+          if smxDBFuncs.GetValueByKey(TsmxCustomRequest(Cell).DataSet, UserID, Value,
+              TsmxCustomRequest(Cell).PerformanceMode, fsForeignKey, fsValue) then
+          begin
+            IntfID := smxFuncs.GetSingleValue(Value, -1, 0);
+            IntfName := smxFuncs.GetSingleValue(Value, '', 1);
+            Result := True;
+          end;
+        end;
+      finally
+        Cell.Free;
+      end;
+    end;}
+  end;
+
+  function CreateMainForm(IsConf: Boolean; IntfID: Integer): Boolean;
+  var
+    CfgID: Integer;
+  begin
+    Result := False;
+    if IsConf then
+      CfgID := SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitConfFormCfgID], 0) else
+      CfgID := SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitMainFormCfgID], 0);
+    if CfgID > 0 then
+    begin
+      Forms.Application.ShowMainForm := False;
+      gMainForm := smxClassFuncs.NewForm(nil, CfgID, smxClassProcs.gSelectRequest);
+      gMainForm.StorageManager := gStorageManager as IsmxStorageManager;
+      gMainForm.LibraryManager := gLibraryManager as IsmxLibraryManager;
+      gMainForm.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+      gMainForm.FormManager := gFormManager as IsmxFormManager;
+      gMainForm.ImageListManager := gImageListManager as IsmxImageListManager;
+      gMainForm.Initialize;
+      gMainForm.IntfID := IntfID;
+      Result := True;
+    end;
+  end;
+
+  procedure SaveDefValues(const UserName, ProjectName: String);
+  var
+    f: TIniFile;
+  begin
+    f := TIniFile.Create(gStorageManager[smxPConsts.cProgExePath] + smxPConsts.cConfigurationFileName);
+    try
+      f.WriteString(smxPConsts.cDefValueSectionName,
+        smxPConsts.cDefValueUserName,
+        UserName);
+      f.WriteString(smxPConsts.cDefValueSectionName,
+        smxPConsts.cDefValueProjectName,
+        ProjectName);
+    finally
+      f.Free;
+    end;
+  end;
+
+var
+  Connection: TsmxProjectConnection;
+  UserName, Password: String;
+  IsConf: Boolean;
+  UserID: Integer;
+  IntfID: Integer;
+  IntfName: String;
+begin
+  Result := False;
+  UserName := gStorageManager[smxPConsts.cDefValueSectionName + '.' + smxPConsts.cDefValueUserName];
+  Connection.ProjectName := gStorageManager[smxPConsts.cDefValueSectionName + '.' + smxPConsts.cDefValueProjectName];
+  if smxLogIn.ShowLogIn(
+      gStorageManager[smxPConsts.cProgExePath] +
+        gStorageManager[smxPConsts.cPathSectionName + '.' + smxPConsts.cPathCfg] +
+        gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectFileName],
+      gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroUserName],
+      gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
+      Connection, UserName, Password, IsConf) then
+  begin
+    SaveDefValues(UserName, Connection.ProjectName);
+    gStorageManager[smxPConsts.cDefValueSectionName + '.' + smxPConsts.cDefValueUserName] := UserName;
+    gStorageManager[smxPConsts.cDefValueSectionName + '.' + smxPConsts.cDefValueProjectName] := Connection.ProjectName;
+    if ConnectDatabase(Connection, UserName, Password) then
+    begin
+      gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamDatabaseName] := Connection.DatabaseName;
+      AssignMainObjects;
+      if CheckUser(StrUtils.IfThen(Connection.IsUseUser, Connection.UserName, UserName),
+          Password, UserID) then
+      begin
+        gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamUserName] :=
+          StrUtils.IfThen(Connection.IsUseUser, Connection.UserName, UserName);
+        gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamUserID] := UserID;
+        if CheckIntf(UserID, IntfID, IntfName) then
+        begin
+          gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamIntfName] := IntfName;
+          gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamIntfID] := IntfID;
+          if CreateMainForm(IsConf, IntfID) then
+          begin
+            gMainForm.Show;
+            Result := True;
+          end else
+            smxFuncs.Inf('Невозможно создать главную форму.');
+        end else
+          smxFuncs.Inf('Интерфейс пользователя неопределен.');
+      end else
+        smxFuncs.Inf('Пользователь неопределен.');
+    end else
+      smxFuncs.Inf('Невозможно подключиться к БД.');
+  end;    
 end;
 
 initialization
-  _ImgList := TImageList.Create(nil);
+  CreateGlobalObjects;
 
 finalization
-  _ImgList.Free;
+  DestroyGlobalObjects;
 
 end.
+

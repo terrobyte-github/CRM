@@ -86,7 +86,7 @@ ProductName=
 ProductVersion=1.0
 Comments=
 [Excluded Packages]
-c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland SOAP Components
+c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland Soap Components
 [HistoryLists\hlDebugSourcePath]
 Count=3
 Item0=$(DELPHI)\Source\RXLib\Src
@@ -96,14 +96,15 @@ Item2=$(DELPHI)\Source
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=7
-Item0=$(DELPHI)\Lib\Debug;C:\Work\DELPHI~1\JCL198~1.253\JCL-19~1.253\lib\d6\debug
-Item1=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src;C:\Program Files\Borland\Delphi7\Source\ehlib
-Item2=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src
-Item3=$(DELPHI)\Lib\Debug;..\..\temp
-Item4=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source
-Item5=$(DELPHI)\Lib\Debug
-Item6=$(DELPHI)\Lib\Debug;C:\work\Units
+Count=8
+Item0=$(DELPHI)\Lib\Debug
+Item1=..\dcp
+Item2=$(DELPHI)\Lib\Debug;C:\Work\DELPHI~1\JCL198~1.253\JCL-19~1.253\lib\d6\debug
+Item3=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src;C:\Program Files\Borland\Delphi7\Source\ehlib
+Item4=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src
+Item5=$(DELPHI)\Lib\Debug;..\..\temp
+Item6=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source
+Item7=$(DELPHI)\Lib\Debug;C:\work\Units
 [HistoryLists\hlUnitOutputDirectory]
 Count=6
 Item0=..\..\tmp
@@ -114,8 +115,8 @@ Item4=C:\Works\temp
 Item5=..\dcu
 [HistoryLists\hlOutputDirectorry]
 Count=8
-Item0=$(CRM)\lib
-Item1=$(CRM)\bin
+Item0=$(CRM)\bin
+Item1=$(CRM)\lib
 Item2=..\..\bin
 Item3=..\..\..\bin
 Item4=..\Bin
@@ -127,9 +128,11 @@ Count=2
 Item0=$(CRM)\bin
 Item1=..\..\bin
 [HistoryLists\hlDCPOutput]
-Count=5
+Count=7
 Item0=..\..\tmp
-Item1=.\
-Item2=\
-Item3=..\..\dcp
-Item4=..\..\bin
+Item1=..\dcp
+Item2=.
+Item3=.\
+Item4=\
+Item5=..\..\dcp
+Item6=..\..\bin

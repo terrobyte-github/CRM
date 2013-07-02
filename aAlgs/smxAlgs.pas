@@ -10,7 +10,7 @@ type
 
   EsmxAlgorithmError = class(Exception);
 
-procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
+{procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure OpenFormByEventID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure OpenFormByProblemID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure CloseForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
@@ -21,11 +21,11 @@ procedure UnSelectRecord(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure ChangeFilterValue(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure ChangeStateForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure SelectAndPerformRequestA(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure SelectAndPerformRequestF(Algorithm: TsmxCustomAlgorithm; Params: Variant);
+procedure SelectAndPerformRequestF(Algorithm: TsmxCustomAlgorithm; Params: Variant);}
 
 implementation
 
-uses
+{uses
   Windows, Controls, Variants, smxClassFuncs, smxLibFuncs, smxConsts, smxDBIntf,
   smxTypes, smxClassProcs, smxFuncs;
 
@@ -519,6 +519,6 @@ begin
   except
     raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
   end;
-end;
+end;}
 
 end.

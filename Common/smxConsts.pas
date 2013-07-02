@@ -3,13 +3,12 @@ unit smxConsts;
 interface
 
 const
-  cFileConfigurationName = '..\Cfg\conf.ini';
   cDefIntValue = -99;
   cRootNodeName = 'Root';
   cCellNodeName = 'Cell';
   cFontNodeName = 'Font';
+  cKitNodeName = 'Kit';
   cItemNodeName = 'Item';
-  cSlaveNodeName = 'Slave';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =
@@ -17,7 +16,7 @@ const
     ' encoding="' + cXMLDocEncoding + '"?>' +
     '<' + cRootNodeName + '>' +
     '</' + cRootNodeName + '>';
-  cSuffixFilterText = 'Text';  
+  cSuffixFilterText = 'Text';
 
 resourcestring
   rsActionError = 'A ClassName %s %s error';

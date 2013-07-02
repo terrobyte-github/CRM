@@ -1,4 +1,4 @@
-unit smxWheelDBGrid;
+unit smxStdCtrls;
 
 interface
 

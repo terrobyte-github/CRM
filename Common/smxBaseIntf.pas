@@ -4,8 +4,8 @@ interface
 
 const
   IID_IsmxBaseInterface: TGUID = '{6785BD02-C530-4E8D-9001-A814F06B5045}';
-  IID_IsmxFreeNotification: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
-  IID_IsmxOwnerNotification: TGUID = '{2557DE80-5DF0-4474-B686-D340690E6E54}';
+  //IID_IsmxFreeNotification: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+
 type
   { IsmxBaseInterface }
 
@@ -23,7 +23,6 @@ type
   (*IsmxFreeNotification = interface;
 
   IsmxOwnerNotification = interface(IInterface)
-    ['{2557DE80-5DF0-4474-B686-D340690E6E54}']
     function GetReference: Pointer;
     procedure OwnerFreeNotification(const Sender: IsmxFreeNotification);
   end;

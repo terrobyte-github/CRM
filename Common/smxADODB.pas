@@ -2,7 +2,7 @@ unit smxADODB;
 
 interface
 
-uses
+(*uses
   Classes, DB, ADODB, smxDBIntf, smxBaseClasses, smxTypes;
 
 type
@@ -198,11 +198,11 @@ type
   end;
 
 function NewADODatabase: IsmxDatabase;
-//function NewADODataSet: IsmxDataSet;
+//function NewADODataSet: IsmxDataSet;*)
 
 implementation
 
-uses
+(*uses
   StrUtils, {ActiveX,} smxConsts, smxField, smxProcs, smxFuncs;
 
 const
@@ -918,7 +918,7 @@ begin
   FSQL.Assign(Value);
 
   //TADOStoredProc(FADODataSet).ProcedureName := FSQL.Text;
-end;
+end;*)
 
 //initialization
   //CoInitialize(nil);

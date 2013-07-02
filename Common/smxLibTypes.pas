@@ -9,7 +9,10 @@ type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;
 
   TsmxVersion = record
-    Major, Minor, Release, Build: Word;
+    Major,
+    Minor,
+    Release,
+    Build: Word;
   end;
 
   TsmxLibType = (ltAlgorithm, ltCellClass, ltDatabaseIntf, ltResource);
@@ -29,7 +32,7 @@ type
 
   TsmxProcLibInfo = procedure(var ALibInfo: TsmxLibInfo);
 
-  TsmxResourceType = (rtImageList);
+  TsmxResourceType = (rtImageList, rtStringList, rtBinaryData);
 
 implementation
 

@@ -4,7 +4,7 @@ unit smxCoADODatabase;
 
 interface
 
-uses
+(*uses
   Windows, ActiveX, Classes, ComObj, smxCoDatabase;
 
 const
@@ -16,11 +16,11 @@ type
     procedure Initialize; override;
   end;
 
-function DatabaseCLSID: TGUID;
+function DatabaseCLSID: TGUID;*)
 
 implementation
 
-uses
+(*uses
   ComServ, smxADODB;
 
 function DatabaseCLSID: TGUID;
@@ -36,6 +36,6 @@ end;
 
 initialization
   TComObjectFactory.Create(ComServer, TsmxCoADODatabase, CLSID_ADODatabase,
-    'ADODatabase', '', ciMultiInstance, tmApartment);
+    'ADODatabase', '', ciMultiInstance, tmApartment);*)
 
 end.

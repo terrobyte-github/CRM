@@ -32,7 +32,7 @@ requires
 contains
   smxCells in '..\Common\smxCells.pas',
   smxCfgs in '..\Common\smxCfgs.pas',
-  smxFilterCells in '..\Common\smxFilterCells.pas',
-  smxWheelDBGrid in '..\Common\smxWheelDBGrid.pas';
+  smxExtCells in '..\Common\smxExtCells.pas',
+  smxStdCtrls in '..\Common\smxStdCtrls.pas';
 
 end.

@@ -22,12 +22,12 @@ type
     property OriginMessage: String read FOriginMessage write FOriginMessage;
   end;
 
-  TsmxComponent = class(TComponent)
+  TsmxComponent = class(TComponent, IsmxBaseInterface)
   protected
+    function GetDescription: String; virtual;
     function GetVersion: String; virtual;
   public
-    class function GetDescription: String; virtual;
-
+    property Description: String read GetDescription;
     property Version: String read GetVersion;
   end;
 
@@ -222,10 +222,48 @@ type
 
   TsmxHKitClass = class of TsmxHKit;
 
+  { TsmxParam }
+
+  TsmxParams = class;
+
+  TsmxParam = class(TsmxKitItem)
+  private
+    FParamName: String;
+    FParamValue: Variant;
+    function GetKit: TsmxParams;
+    procedure SetKit(Value: TsmxParams);
+  protected
+    function GetParamValue: Variant; virtual;
+    procedure SetParamName(const Value: String); virtual;
+    procedure SetParamValue(const Value: Variant); virtual;
+  public
+    procedure Assign(Source: TsmxKitItem); override;
+
+    property Kit: TsmxParams read GetKit write SetKit;
+    property ParamName: String read FParamName write SetParamName;
+    property ParamValue: Variant read GetParamValue write SetParamValue;
+  end;
+
+  { TsmxParams }
+
+  TsmxParams = class(TsmxKit)
+  private
+    function GetItem(Index: Integer): TsmxParam;
+    procedure SetItem(Index: Integer; Value: TsmxParam);
+    //function GetValue(const Name: String): Variant;
+    //procedure SetValue(const Name: String; const Value: Variant);
+  public
+    function Add: TsmxParam;
+    function FindByName(const Name: String): TsmxParam;
+
+    property Items[Index: Integer]: TsmxParam read GetItem write SetItem; default;
+    //property Values[const Name: String]: Variant read GetValue write SetValue;
+  end;
+
 implementation
 
 uses
-  Windows, smxConsts;
+  Windows, Variants, smxConsts;
 
 {$I ..\Resource\smxVers.inc}
 
@@ -247,7 +285,7 @@ end;
 
 { TsmxComponent }
 
-class function TsmxComponent.GetDescription: String;
+function TsmxComponent.GetDescription: String;
 begin
   Result := ClassName;
 end;
@@ -682,5 +720,104 @@ procedure TsmxHKit.SetRoot(Value: TsmxHKitItem);
 begin
   Root.Assign(Value);
 end;
+
+{ TsmxParam }
+
+procedure TsmxParam.Assign(Source: TsmxKitItem);
+begin
+  if Source is TsmxParam then
+  begin
+    ParamName := TsmxParam(Source).ParamName;
+    ParamValue := TsmxParam(Source).ParamValue;
+  end else
+    inherited Assign(Source);
+end;
+
+function TsmxParam.GetKit: TsmxParams;
+begin
+  Result := TsmxParams(inherited Kit);
+end;
+
+procedure TsmxParam.SetKit(Value: TsmxParams);
+begin
+  inherited Kit := Value;
+end;
+
+function TsmxParam.GetParamValue: Variant;
+begin
+  if Variants.VarIsClear(FParamValue) then
+    FParamValue := Variants.Null;
+  Result := FParamValue;
+end;
+
+procedure TsmxParam.SetParamValue(const Value: Variant);
+begin
+  FParamValue := Value;
+end;
+
+procedure TsmxParam.SetParamName(const Value: String);
+begin
+  FParamName := Value;
+end;
+
+{ TsmxParams }
+
+function TsmxParams.Add: TsmxParam;
+begin
+  Result := TsmxParam(inherited Add);
+end;
+
+function TsmxParams.FindByName(const Name: String): TsmxParam;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if SysUtils.AnsiCompareText(Items[i].ParamName, Name) = 0 then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxParams.GetItem(Index: Integer): TsmxParam;
+begin
+  Result := TsmxParam(inherited Items[Index]);
+end;
+
+procedure TsmxParams.SetItem(Index: Integer; Value: TsmxParam);
+begin
+  inherited Items[Index] := Value;
+end;
+
+{function TsmxParams.GetValue(const Name: String): Variant;
+var
+  Param: TsmxParam;
+begin
+  Param := FindByName(Name);
+  if Assigned(Param) then
+    Result := Param.ParamValue
+  else
+    with Add do
+    begin
+      ParamName := Name;
+      Result := ParamValue;
+    end;
+end;
+
+procedure TsmxParams.SetValue(const Name: String; const Value: Variant);
+var
+  Param: TsmxParam;
+begin
+  Param := FindByName(Name);
+  if Assigned(Param) then
+    Param.ParamValue := Value
+  else
+    with Add do
+    begin
+      ParamName := Name;
+      ParamValue := Value;
+    end;
+end;}
 
 end.

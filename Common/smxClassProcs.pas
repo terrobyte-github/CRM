@@ -3,10 +3,10 @@ unit smxClassProcs;
 interface
 
 uses
-  Classes, smxClasses, smxDBIntf;
+  Classes, ImgList, smxClasses, smxDBIntf, smxManagerIntf;
 
-procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
-procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
+{procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
+procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);}
 procedure AllCells(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);
 procedure AllParents(ACell: TsmxBaseCell; AList: TList;
@@ -20,7 +20,7 @@ implementation
 uses
   Variants;
 
-procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
+{procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 var
   i: Integer;
 begin
@@ -61,7 +61,7 @@ begin
     AValue[0] := v1;
     AValue[1] := v2;
   end;
-end;
+end;}
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);

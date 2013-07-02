@@ -3,7 +3,7 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, XMLIntf, smxTypes, smxConsts;
+  Classes, Windows, TypInfo, XMLIntf, smxTypes, smxConsts;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -15,11 +15,13 @@ function StrToVar(const AValue: String): Variant;
 function NewXML(const AEncoding: String = 'UTF-8'): IXMLDocument;
 function FormatXMLText(const AText: String): String;
 function UnFormatXMLText(const AText: String): String;
-function NewResource(const AName: String): TResourceStream;
+//function NewResource(const AName: String): TResourceStream;
 function GetSingleValue(const AValues: Variant; const ADefValue: Variant;
   AIndex: Integer = 0): Variant;
 function DefCellFont: TsmxCellFont;
 function DefCellText: TsmxCellText;
+function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
+function StrToSet(PTI: PTypeInfo; const Value: String): Byte;
 
 implementation
 
@@ -106,11 +108,11 @@ begin
   end;
 end;
 
-function NewResource(const AName: String): TResourceStream;
+{function NewResource(const AName: String): TResourceStream;
 begin
   Result := TResourceStream.Create(HInstance, AName, RT_RCDATA);
-  Result.Position := 0;
-end;
+  //Result.Position := 0;
+end;}
 
 function GetSingleValue(const AValues: Variant; const ADefValue: Variant;
   AIndex: Integer = 0): Variant;
@@ -137,10 +139,72 @@ begin
   with Result do
   begin
     Caption := '';
-    Align := taLeftJustify;
+    Alignment := taLeftJustify;
     Color := Integer(Graphics.clWindow);
     Font := DefCellFont;
   end;
+end;
+
+function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
+var
+  i: Integer;
+  s: TIntegerSet;
+begin
+  Result := '';
+  Integer(s) := Value;
+  with TypInfo.GetTypeData(PTI)^ do
+    for i := MinValue to MaxValue do
+      if i in s then
+        Result := Result + TypInfo.GetEnumName(PTI, i) + ',';
+  if Result <> '' then
+    Delete(Result, Length(Result), 1);
+  if Brackets then
+    Result := '[' + Result + ']';
+end;
+
+function ByteToInt(Value: Byte): Integer;
+begin
+  Result := Value;
+end;
+
+function StrToSet(PTI: PTypeInfo; const Value: String): Byte;
+
+  function NextWord(var P: PChar): String;
+  var
+    i: Integer;
+  begin
+    i := 0;
+    while not(P[i] in [',', ' ', #0, ']']) do
+      Inc(i);
+    SetString(Result, P, i);
+    while P[i] in [',', ' ', ']'] do
+      Inc(i);
+    Inc(P, i);
+  end;
+
+var
+  P: PChar;
+  EnumName: String;
+  EnumValue: Longint;
+  SetValue: Integer;
+begin
+  Result := 0;
+  SetValue := 0;
+  if Value = '' then
+    Exit;
+  P := PChar(Value);
+  // skip leading bracket and whitespace
+  while P^ in ['[', ' '] do
+    Inc(P);
+  EnumName := NextWord(P);
+  while EnumName <> '' do
+  begin
+    EnumValue := TypInfo.GetEnumValue(PTI, EnumName);
+    if EnumValue >= 0 then
+      Include(TIntegerSet(SetValue), EnumValue);
+    EnumName := NextWord(P);
+  end;
+  Result := SetValue;
 end;
 
 end.

@@ -3,21 +3,22 @@ program CRM;
 uses
   Forms,
   smxMain in 'smxMain.pas',
-  smxFormManager in '..\Common\smxFormManager.pas',
-  smxDBManager in '..\Common\smxDBManager.pas',
-  smxLibManager in '..\Common\smxLibManager.pas',
-  smxLibTypes in '..\Common\smxLibTypes.pas',
-  smxCallBack in '..\Common\smxCallBack.pas',
-  smxProcs in '..\Common\smxProcs.pas',
-  smxCommonStorage in '..\Common\smxCommonStorage.pas';
+  smxPConsts in 'smxPConsts.pas',
+  smxLogIn in 'smxLogIn.pas' {fLogIn},
+  smxProjects in 'smxProjects.pas' {fProjects},
+  smxPassword in 'smxPassword.pas' {fPassword};
 
 {$R *.res}
 
 begin
   Application.Initialize;
-
-  Initialize;
-  if LogIn and CreateMainForm then
-    Application.Run else
-    Application.Terminate;
+  smxMain.Initialize;
+  try
+    if smxMain.LogIn {and smxMain.CreateMainForm} then
+      Application.Run
+    {else
+      Application.Terminate};
+  finally
+    smxMain.Finalize;
+  end;
 end.

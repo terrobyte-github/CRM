@@ -26,7 +26,7 @@ package smxClassesRTL;
 {$IMPLICITBUILD OFF}
 
 requires
-  smxBaseClassesRTL;
+  smxBaseRTL;
 
 contains
   smxClasses in '..\Common\smxClasses.pas',
@@ -35,3 +35,5 @@ contains
   smxClassProcs in '..\Common\smxClassProcs.pas';
 
 end.
+
+

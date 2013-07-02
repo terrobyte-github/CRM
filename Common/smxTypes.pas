@@ -15,7 +15,7 @@ type
 
   TsmxCellText = record
     Caption: String;
-    Align: TAlignment;
+    Alignment: TAlignment;
     Color: Integer;
     Font: TsmxCellFont;
   end;
@@ -55,25 +55,25 @@ type
     ImageIndex: Integer;
   end;}
 
-  TsmxGenerationMode = (gmFunction, gmCOM);
+  TsmxGenerationMode = (gmFunction, gmCOM, gmClass);
 
   TsmxProjectConnection = record
     ProjectName: ShortString;
     Generation: TsmxGenerationMode;
     LibraryName: ShortString;
-    FunctionNameOrProgID: ShortString;
-    WindowsAuthorization: Boolean;
+    FuncOrClassNameOrProgID: ShortString;
+    IsWindowsAuthorization: Boolean;
     DatabaseName: ShortString;
     DriverName: ShortString;
-    LoginPrompt: Boolean;
     Params: ShortString;
+    IsUseUser: Boolean;
     UserName: ShortString;
     Password: ShortString;
   end;
 
   TsmxFuncDatabaseCLSID = function: TGUID;
 
-  TsmxFuncNewResource = function(Name: String; Stream: TResourceStream): Boolean;
+  //TsmxFuncNewResource = function(Name: String): TResourceStream;
 
   {TsmxModifySetting = record
     InsertCfgID,
@@ -81,7 +81,7 @@ type
     DeleteCfgID: Integer;
   end;}
 
-  TsmxChangeMode = (cmReplace, cmAdd);
+  TsmxChangeMode = (cmReplace, cmAdd{, cmUnique});
 
   TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
 
@@ -89,7 +89,7 @@ type
 
   TsmxFilterOptions = set of TsmxFilterOption;
 
-  TsmxFormPosition = (fpDefault, fpDesktopCenter, fpOwnerFormCenter);
+  TsmxFormPosition = (fpDesigned, fpDesktopCenter, fpOwnerFormCenter);
 
   TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
 

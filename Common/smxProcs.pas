@@ -3,7 +3,7 @@ unit smxProcs;
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxTypes;
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxTypes;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
@@ -13,11 +13,13 @@ procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
 procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
 procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
 procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);
+procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
+procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 
 implementation
 
 uses
-  Windows, Graphics, SysUtils, CommCtrl, smxFuncs, smxConsts;
+  Windows, Graphics, SysUtils, CommCtrl, Variants, TypInfo, smxFuncs, smxConsts;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var
@@ -90,7 +92,7 @@ begin
   AFont.Color := ANode.Attributes['Color'];
   AFont.Name := ANode.Attributes['Name'];
   AFont.Size := ANode.Attributes['Size'];
-  AFont.Style := TFontStyles(Byte(ANode.Attributes['Style']));
+  AFont.Style := TFontStyles(smxFuncs.StrToSet(TypeInfo(TFontStyle), ANode.Attributes['Style']));
 end;
 
 procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
@@ -102,7 +104,7 @@ begin
   ANode.Attributes['Color'] := AFont.Color;
   ANode.Attributes['Name'] := AFont.Name;
   ANode.Attributes['Size'] := AFont.Size;
-  ANode.Attributes['Style'] := Byte(AFont.Style);
+  ANode.Attributes['Style'] := smxFuncs.SetToStr(TypeInfo(TFontStyle), Byte(AFont.Style), True);
 end;
 
 procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
@@ -111,7 +113,7 @@ begin
   if not Assigned(ANode) then
     Exit;
   AText.Caption := ANode.Attributes['Caption'];
-  AText.Align := ANode.Attributes['Align'];
+  AText.Alignment := TAlignment(TypInfo.GetEnumValue(TypeInfo(TAlignment), ANode.Attributes['Alignment']));
   AText.Color := ANode.Attributes['Color'];
   ReadFont(ANode.ChildNodes.FindNode(smxConsts.cFontNodeName), AText.Font);
 end;
@@ -123,9 +125,52 @@ begin
   if not Assigned(ANode) then
     Exit;
   ANode.Attributes['Caption'] := AText.Caption;
-  ANode.Attributes['Align'] := AText.Align;
+  ANode.Attributes['Alignemnt'] := TypInfo.GetEnumName(TypeInfo(TAlignment), Integer(AText.Alignment));
   ANode.Attributes['Color'] := AText.Color;
   WriteFont(ANode.AddChild(smxConsts.cFontNodeName), AText.Font);
+end;
+
+procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
+var
+  i: Integer;
+begin
+  if not Assigned(AParams) then
+    Exit;
+  AParams.Clear;
+  if Variants.VarIsArray(AValue) and (Variants.VarArrayHighBound(AValue, 1) = 1) then
+    if Variants.VarIsArray(AValue[0]) and Variants.VarIsArray(AValue[1]) and
+        (Variants.VarArrayHighBound(AValue[0], 1) = Variants.VarArrayHighBound(AValue[1], 1)) then
+    begin
+      for i := 0 to Variants.VarArrayHighBound(AValue[0], 1) do
+        with AParams.Add do
+        begin
+          ParamName := AValue[0][i];
+          ParamValue := AValue[1][i];
+        end;
+    end;
+end;
+
+procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
+var
+  i: Integer;
+  v1, v2: Variant;
+begin
+  if not Assigned(AParams) then
+    Exit;
+  AValue := Variants.Null;
+  if AParams.Count > 0 then
+  begin
+    AValue := Variants.VarArrayCreate([0, 1], varVariant);
+    v1 := Variants.VarArrayCreate([0, AParams.Count - 1], varVariant);
+    v2 := Variants.VarArrayCreate([0, AParams.Count - 1], varVariant);
+    for i := 0 to AParams.Count - 1 do
+    begin
+      v1[i] := AParams.Items[i].ParamName;
+      v2[i] := AParams.Items[i].ParamValue;
+    end;
+    AValue[0] := v1;
+    AValue[1] := v2;
+  end;
 end;
 
 end.

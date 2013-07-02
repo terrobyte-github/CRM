@@ -61,6 +61,7 @@ type
     function GetFieldIndex: Integer;
     function GetFieldSense: TsmxFieldSense;
     function GetInternalRef: Pointer;
+    function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
     function IsBlob: Boolean;
@@ -68,19 +69,23 @@ type
     procedure LoadFromStream(Stream: TStream);
     procedure SaveToStream(Stream: TStream);
     procedure SetDisplayFormat(const Value: String);
+    procedure SetFieldIndex(Value: Integer);
     procedure SetFieldName(const Value: String);
     procedure SetFieldSense(Value: TsmxFieldSense);
     procedure SetInternalRef(Value: Pointer);
+    procedure SetPrecision(Value: Integer);
+    procedure SetSize(Value: Integer);
     procedure SetValue(const Value: Variant);
 
     property DataSet: IsmxDataSet read GetDataSet;
     property DataType: TsmxDataType read GetDataType;
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FieldName: String read GetFieldName write SetFieldName;
-    property FieldIndex: Integer read GetFieldIndex;
+    property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
     property InternalRef: Pointer read GetInternalRef write SetInternalRef;
-    property Size: Integer read GetSize;
+    property Precision: Integer read GetPrecision write SetPrecision;
+    property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
   end;
 
@@ -117,6 +122,7 @@ type
     //procedure SetDefValue(const Value: Variant);
     procedure SetInternalRef(Value: Pointer);
     procedure SetNumericScale(Value: Integer);
+    procedure SetParamIndex(Value: Integer);
     procedure SetParamLocation(Value: TsmxParamLocation);
     procedure SetParamName(const Value: String);
     procedure SetParamType(Value: TsmxParamType);
@@ -130,7 +136,7 @@ type
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
     property ParamName: String read GetParamName write SetParamName;
-    property ParamIndex: Integer read GetParamIndex;
+    property ParamIndex: Integer read GetParamIndex write SetParamIndex;
     property ParamType: TsmxParamType read GetParamType write SetParamType;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
@@ -144,8 +150,10 @@ type
   IsmxDataSet = interface(IsmxBaseInterface)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
-    function AddField(const FieldName: String): IsmxField;
-    function AddParam(const ParamName: String): IsmxParam;
+    //function AddField(const FieldName: String): IsmxField;
+    //function AddParam(const ParamName: String): IsmxParam;
+    function AddField(DataType: TsmxDataType): IsmxField;
+    function AddParam(DataType: TsmxDataType): IsmxParam;
     procedure AssignDataSet(const Source: IsmxDataSet);
     function Bof: Boolean;
     procedure Cancel;
