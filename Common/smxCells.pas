@@ -34,7 +34,6 @@ type
     function GetAlgorithmVisible: Boolean; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
     function GetInternalObject: TObject; override;
-    function GetProcudure: Pointer; virtual;
     procedure InitializeEvent; virtual;
     procedure InternalInitialize; override;
     procedure InternalRefreshParams; override;
@@ -56,7 +55,7 @@ type
     destructor Destroy; override;
     //procedure Execute(Same: Boolean = False); override;
     //procedure RefreshParams; override;
-   // function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): TsmxParam; override;
+    // function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): TsmxParam; override;
   end;
 
   { TsmxActionList }
@@ -1070,20 +1069,20 @@ begin
   Result := Action;
 end;
 
-function TsmxAction.GetProcudure: Pointer;
+{function TsmxAction.GetProcPointer: Pointer;
 begin
   Result := nil;
-end;
+end;}
 
 procedure TsmxAction.InitializeEvent;
 var
-  Proc: Pointer;
+  //Proc: Pointer;
   Method: TMethod;
 begin
-  Proc := GetProcudure;
-  if Assigned(Proc) then
+  //Proc := GetProcudure;
+  if Assigned(ProcPointer) then
   begin
-    Method.Code := Proc;
+    Method.Code := ProcPointer;
     Method.Data := Self;
     OnExecute := TsmxComponentEvent(Method);
   end;
@@ -1336,18 +1335,18 @@ end;}
 procedure TsmxRequest.InitializeDataSet;
 var
   i: Integer;
-  DataSetIntf: IsmxDataSet;
+  //DataSetIntf: IsmxDataSet;
 begin
-  DataSetIntf := GetDataSet;
-  if Assigned(DataSetIntf) {and Assigned(Database)} then
+  //DataSetIntf := GetDataSet;
+  if Assigned(DataSet{Intf}) {and Assigned(Database)} then
   begin
     //DataSetIntf.Database := Database;
     if Cfg is TsmxRequestCfg then
     begin
-      DataSetIntf.SQL.Text := TsmxRequestCfg(Cfg).SQLText;
-      DataSetIntf.ClearFields;
+      DataSet{Intf}.SQL.Text := TsmxRequestCfg(Cfg).SQLText;
+      DataSet{Intf}.ClearFields;
       for i := 0 to TsmxRequestCfg(Cfg).Fields.Count - 1 do
-        with DataSetIntf.AddField(TsmxRequestCfg(Cfg).Fields[i].DataType) do
+        with DataSet{Intf}.AddField(TsmxRequestCfg(Cfg).Fields[i].DataType) do
         begin
           FieldName := TsmxRequestCfg(Cfg).Fields[i].FieldName;
           DisplayFormat := TsmxRequestCfg(Cfg).Fields[i].DisplayFormat;
@@ -1355,9 +1354,9 @@ begin
           Precision := TsmxRequestCfg(Cfg).Fields[i].Precision;
           Size := TsmxRequestCfg(Cfg).Fields[i].Size;
         end;
-      DataSetIntf.ClearParams;
+      DataSet{Intf}.ClearParams;
       for i := 0 to TsmxRequestCfg(Cfg).Params.Count - 1 do
-        with DataSetIntf.AddParam(TsmxRequestCfg(Cfg).Params[i].DataType) do
+        with DataSet{Intf}.AddParam(TsmxRequestCfg(Cfg).Params[i].DataType) do
         begin
           ParamName := TsmxRequestCfg(Cfg).Params[i].ParamName;
           ParamLocation := TsmxRequestCfg(Cfg).Params[i].ParamLocation;

@@ -42,9 +42,10 @@ type
   private
     FAlgorithmLibrary: String;
     FAlgorithmProcName: String;
+    FProcPointer: Pointer;
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetProcudure: Pointer; override;
+    function GetProcPointer: Pointer; override;
     procedure InternalInitialize; override;
     procedure ResetCellProps; override;
     procedure SetAlgorithmLibrary(const Value: String); virtual;
@@ -575,11 +576,12 @@ begin
   Result := TsmxLibAlgorithmCfg;
 end;
 
-function TsmxLibAction.GetProcudure: Pointer;
+function TsmxLibAction.GetProcPointer: Pointer;
 begin
-  if Assigned(LibraryManager) then
-    Result := LibraryManager.GetProcedure(AlgorithmLibrary, AlgorithmProcName) else
-    Result := nil;
+  if not Assigned(FProcPointer) then
+    if Assigned(LibraryManager) then
+      FProcPointer := LibraryManager.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
+  Result := FProcPointer;
 end;
 
 procedure TsmxLibAction.InternalInitialize;
@@ -612,12 +614,20 @@ end;
 
 procedure TsmxLibAction.SetAlgorithmLibrary(const Value: String);
 begin
-  FAlgorithmLibrary := Value;
+  if FAlgorithmLibrary <> Value then
+  begin
+    FAlgorithmLibrary := Value;
+    FProcPointer := nil;
+  end;
 end;
 
 procedure TsmxLibAction.SetAlgorithmProcName(const Value: String);
 begin
-  FAlgorithmProcName := Value;
+  if FAlgorithmProcName <> Value then
+  begin
+    FAlgorithmProcName := Value;
+    FProcPointer := nil;
+  end;
 end;
 
 {procedure TsmxLibAction.Initialize(const ACfgDatabase: IsmxDatabase;

@@ -669,6 +669,7 @@ type
     function GetAlgorithmHotKey: Integer; virtual;
     function GetAlgorithmImageIndex: Integer; virtual;
     function GetAlgorithmVisible: Boolean; virtual;
+    function GetProcPointer: Pointer; virtual;
     procedure InternalExecute; virtual;
     procedure InternalRefreshParams; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -697,6 +698,7 @@ type
     property AlgorithmVisible: Boolean read GetAlgorithmVisible write SetAlgorithmVisible;
     property CellOwner: TsmxCustomAlgorithmList read GetCellOwner write SetCellOwner;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
+    property ProcPointer: Pointer read GetProcPointer;
 
     property OnExecute: TsmxComponentEvent read FOnExecute write FOnExecute;
     property OnRefreshParams: TsmxComponentEvent read FOnRefreshParams write FOnRefreshParams;
@@ -3269,6 +3271,11 @@ end;
 
 procedure TsmxCustomAlgorithm.Execute;
 begin
+  if not FIsManualRefreshParams then
+  begin
+    InternalRefreshParams;
+    DoRefreshParams;
+  end;
   InternalExecute;
   DoExecute;
 end;
@@ -3289,11 +3296,11 @@ end;
 
 procedure TsmxCustomAlgorithm.RefreshParams;
 begin
-  if not FIsManualRefreshParams then
-  begin
+  {if not FIsManualRefreshParams then
+  begin}
     InternalRefreshParams;
     DoRefreshParams;
-  end;
+  {end;}
 end;
 
 function TsmxCustomAlgorithm.GetAlgorithmCaption: String;
@@ -3370,6 +3377,11 @@ end;
 procedure TsmxCustomAlgorithm.SetCellOwner(Value: TsmxCustomAlgorithmList);
 begin
   inherited CellOwner := Value;
+end;
+
+function TsmxCustomAlgorithm.GetProcPointer: Pointer;
+begin
+  Result := nil;
 end;
 
 procedure TsmxCustomAlgorithm.Notification(AComponent: TComponent; Operation: TOperation);
