@@ -1,0 +1,55 @@
+package smxBaseRTL;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vcl,
+  xmlrtl,
+  dbrtl,
+  vcldb;
+
+contains
+  smxBaseClasses in '..\Common\smxBaseClasses.pas',
+  smxConsts in '..\Common\smxConsts.pas',
+  smxDBIntf in '..\Common\smxDBIntf.pas',
+  smxDBTypes in '..\Common\smxDBTypes.pas',
+  smxFuncs in '..\Common\smxFuncs.pas',
+  smxProcs in '..\Common\smxProcs.pas',
+  smxTypes in '..\Common\smxTypes.pas',
+  smxDBFuncs in '..\Common\smxDBFuncs.pas',
+  smxBaseIntf in '..\Common\smxBaseIntf.pas',
+  smxDBClasses in '..\Common\smxDBClasses.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxLibProcs in '..\Common\smxLibProcs.pas',
+  smxLibFuncs in '..\Common\smxLibFuncs.pas',
+  smxManagerIntf in '..\Common\smxManagerIntf.pas',
+  smxManagerClasses in '..\Common\smxManagerClasses.pas';
+
+end.
+
+
+
