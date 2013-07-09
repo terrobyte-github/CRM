@@ -97,10 +97,10 @@ end;
 
 procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
 begin
-  ANode.ChildNodes.Clear;
-  ANode.AttributeNodes.Clear;
   if not Assigned(ANode) then
     Exit;
+  ANode.ChildNodes.Clear;
+  ANode.AttributeNodes.Clear;
   ANode.Attributes['Color'] := AFont.Color;
   ANode.Attributes['Name'] := AFont.Name;
   ANode.Attributes['Size'] := AFont.Size;
@@ -120,12 +120,12 @@ end;
 
 procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);
 begin
-  ANode.ChildNodes.Clear;
-  ANode.AttributeNodes.Clear;
   if not Assigned(ANode) then
     Exit;
+  ANode.ChildNodes.Clear;
+  ANode.AttributeNodes.Clear;
   ANode.Attributes['Caption'] := AText.Caption;
-  ANode.Attributes['Alignemnt'] := TypInfo.GetEnumName(TypeInfo(TAlignment), Integer(AText.Alignment));
+  ANode.Attributes['Alignment'] := TypInfo.GetEnumName(TypeInfo(TAlignment), Integer(AText.Alignment));
   ANode.Attributes['Color'] := AText.Color;
   WriteFont(ANode.AddChild(smxConsts.cFontNodeName), AText.Font);
 end;

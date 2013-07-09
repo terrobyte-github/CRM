@@ -8,7 +8,7 @@ uses
 {procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);}
 procedure AllCells(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);
+  AClassList: array of TsmxBaseCellClass; AIsOnlyActive: Boolean = False);
 procedure AllParents(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass);
 
@@ -64,7 +64,7 @@ begin
 end;}
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass; AIsActive: Boolean = False);
+  AClassList: array of TsmxBaseCellClass; AIsOnlyActive: Boolean = False);
 
   function IsClass(ACurCell: TsmxBaseCell): Boolean;
   var
@@ -87,7 +87,7 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList;
   var
     i: Integer;
   begin
-    if (AIsEmpty or IsClass(ACurCell)) and (not AIsActive or IsActive(ACurCell)) then
+    if (AIsEmpty or IsClass(ACurCell)) and (not AIsOnlyActive or IsActive(ACurCell)) then
       AList.Add(ACurCell);
     for i := 0 to ACurCell.CellCount - 1 do
       AddChilds(ACurCell.Cells[i], AIsEmpty);

@@ -295,7 +295,7 @@ type
     procedure SetUpdateReqCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
@@ -408,6 +408,7 @@ type
     FGridOptions: TsmxGridOptions;
     //FPressDoubleAlgCfgID: Integer;
     //FPressHeaderAlgCfgID: Integer;
+    FPrepareAlgCfgID: Integer;
     FRefreshAlgCfgID: Integer;
     FRequestCfgID: Integer;
   protected
@@ -416,10 +417,12 @@ type
     procedure SetGridOptions(Value: TsmxGridOptions); virtual;
     //procedure SetPressDoubleAlgCfgID(Value: Integer); virtual;
     //procedure SetPressHeaderAlgCfgID(Value: Integer); virtual;
+    procedure SetPrepareAlgCfgID(Value: Integer); virtual;
     procedure SetRefreshAlgCfgID(Value: Integer); virtual;
     procedure SetRequestCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -436,8 +439,9 @@ type
     property ChangeRowAlgCfgID: Integer read FChangeRowAlgCfgID write SetChangeRowAlgCfgID;
     property DoubleSnapAlgCfgID;
     property GridOptions: TsmxGridOptions read FGridOptions write SetGridOptions;
-    property IsSetAlgorithmEvents default True;
+    property IsSetAlgorithmEvents;
     property PopupMenuCfgID;
+    property PrepareAlgCfgID: Integer read FPrepareAlgCfgID write SetPrepareAlgCfgID;
     property RefreshAlgCfgID: Integer read FRefreshAlgCfgID write SetRefreshAlgCfgID;
     property RequestCfgID: Integer read FRequestCfgID write SetRequestCfgID;
     property SlaveCells;
@@ -583,7 +587,7 @@ type
 
   { TsmxRequestSectionCfg }
 
-  TsmxRequestSectionCfg = class(TsmxControlCellCfg)
+  {TsmxRequestSectionCfg = class(TsmxControlCellCfg)
   private
     FFilterDesk: TsmxControlKitItem;
     FGrid: TsmxControlKitItem;
@@ -613,22 +617,23 @@ type
     property Grid: TsmxControlKitItem read GetGrid write SetGrid;
     property PopupMenuCfgID;
     property SnapAlgCfgID;
-  end;
+  end;}
 
-  { TsmxControlSectionCfg }
+  { TsmxSectionCfg }
 
-  TsmxControlSectionCfg = class(TsmxControlCellCfg)
-  private
+  TsmxSectionCfg = class(TsmxControlCellCfg)
+  {private
     FControl: TsmxControlKitItem;
     function GetControl: TsmxControlKitItem;
   protected
     procedure ReadCell(const Node: IXMLNode); override;
     procedure SetControl(Value: TsmxControlKitItem); virtual;
-    procedure WriteCell(const Node: IXMLNode); override;
+    procedure WriteCell(const Node: IXMLNode); override;}
   public
-    destructor Destroy; override;
+    constructor Create(AOwner: TComponent); override;
+    {destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
-    procedure Clear; override;
+    procedure Clear; override;}
   published
     property CfgAlign;
     property CfgAnchors;
@@ -639,15 +644,18 @@ type
     property CfgTop;
     property CfgVisible;
     property CfgWidth;
-    property Control: TsmxControlKitItem read GetControl write SetControl;
+    //property Control: TsmxControlKitItem read GetControl write SetControl;
     property DoubleSnapAlgCfgID;
     property PopupMenuCfgID;
+    property SlaveCells;
     property SnapAlgCfgID;
   end;
 
   { TsmxPageCfg }
 
   TsmxPageCfg = class(TsmxActionCellCfg)
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property CfgActive;
     property CfgCaption;
@@ -668,16 +676,19 @@ type
 
   TsmxPageManagerCfg = class(TsmxControlCellCfg)
   private
+    FActivePageIndex: Integer;
     FChangePageAlgCfgID: Integer;
     FIsMultiLine: Boolean;
     FPageManagerStyle: TsmxPageManagerStyle;
   protected
     procedure ReadCell(const Node: IXMLNode); override;
+    procedure SetActivePageIndex(Value: Integer); virtual;
     procedure SetChangePageAlgCfgID(Value: Integer); virtual;
     procedure SetIsMultiLine(Value: Boolean); virtual;
     procedure SetPageManagerStyle(Value: TsmxPageManagerStyle); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -690,6 +701,7 @@ type
     property CfgTop;
     property CfgVisible;
     property CfgWidth;
+    property ActivePageIndex: Integer read FActivePageIndex write SetActivePageIndex;
     property ChangePageAlgCfgID: Integer read FChangePageAlgCfgID write SetChangePageAlgCfgID;
     property ImageListName;
     property IsMultiLine: Boolean read FIsMultiLine write SetIsMultiLine;
@@ -712,6 +724,7 @@ type
     procedure SetMenuItemStyle(Value: TsmxMenuItemStyle); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -721,7 +734,7 @@ type
     property CfgImageIndex;
     property CfgVisible;
     property IsChecked: Boolean read FIsChecked write SetIsChecked;
-    property IsSetAlgorithmEvents default True;
+    property IsSetAlgorithmEvents;
     property MenuItemHotKey: Integer read FMenuItemHotKey write SetMenuItemHotKey;
     property MenuItemStyle: TsmxMenuItemStyle read FMenuItemStyle write SetMenuItemStyle;
     property SlaveCells;
@@ -777,7 +790,8 @@ type
     //procedure ReadCell(const Node: IXMLNode); override;
     //procedure SetMenuItemCfgID(Value: Integer); virtual;
     //procedure WriteCell(const Node: IXMLNode); override;
-  //public
+  public
+    constructor Create(AOwner: TComponent); override;
     //procedure Assign(Source: TPersistent); override;
     //procedure Clear; override;
 
@@ -792,6 +806,8 @@ type
   { TsmxPopupMenuCfg }
 
   TsmxPopupMenuCfg = class(TsmxControlCellCfg)
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property ImageListName;
     property SlaveCells;
@@ -800,6 +816,8 @@ type
   { TsmxPopupListCfg }
 
   TsmxPopupListCfg = class(TsmxOwnerCellCfg)
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property SlaveCells;
   end;
@@ -816,6 +834,7 @@ type
     procedure SetToolItemStyle(Value: TsmxToolItemStyle); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -830,7 +849,7 @@ type
     property CfgVisible;
     property CfgWidth;
     property IsChecked: Boolean read FIsChecked write SetIsChecked;
-    property IsSetAlgorithmEvents default True;
+    property IsSetAlgorithmEvents;
     property PopupMenuCfgID;
     property SnapAlgCfgID;
     property ToolItemStyle: TsmxToolItemStyle read FToolItemStyle write SetToolItemStyle;
@@ -848,6 +867,7 @@ type
     procedure SetIsShowCaptions(Value: Boolean); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -872,6 +892,8 @@ type
   { TsmxControlBoardCfg }
 
   TsmxControlBoardCfg = class(TsmxControlCellCfg)
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property CfgAlign;
     property CfgAnchors;
@@ -917,6 +939,8 @@ type
   { TsmxStatusBoardCfg }
 
   TsmxStatusBoardCfg = class(TsmxControlCellCfg)
+  public
+    constructor Create(AOwner: TComponent); override;
   published
     property CfgAlign;
     property CfgAnchors;
@@ -955,6 +979,7 @@ type
     procedure SetRequestListCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
@@ -978,7 +1003,7 @@ type
     property ImageListName;
     //property IsMainForm: Boolean read FIsMainForm write SetIsMainForm;
     property IsMaximize: Boolean read FIsMaximize write SetIsMaximize;
-    property IsSetAlgorithmEvents default True;
+    property IsSetAlgorithmEvents;
     property PopupListCfgID: Integer read FPopupListCfgID write SetPopupListCfgID;
     property PopupMenuCfgID;
     property RequestListCfgID: Integer read FRequestListCfgID write SetRequestListCfgID;
@@ -1273,6 +1298,7 @@ begin
     FAlgorithmParams := TsmxParamKit.Create;
     FAlgorithmParams.KitNodeName := 'Params';
     FAlgorithmParams.ItemNodeName := 'Param';
+    FAlgorithmParams.IsWriteEmpty := True;
   end;
   Result := FAlgorithmParams;
 end;
@@ -1283,8 +1309,8 @@ begin
 end;
 
 procedure TsmxAlgorithmCfg.ReadCell(const Node: IXMLNode);
-var
-  n: IXMLNode;
+//var
+  //n: IXMLNode;
   //i: Integer;
 begin
   inherited ReadCell(Node);
@@ -1308,9 +1334,9 @@ begin
         end;
   end;}
 
-  n := Node.ChildNodes.FindNode('Params');
-  if Assigned(n) and (n.ChildNodes.Count > 0) then
-    AlgorithmParams.Read(n);
+  //n := Node.ChildNodes.FindNode('Params');
+  //if Assigned(n) and (n.ChildNodes.Count > 0) then
+    AlgorithmParams.Read(Node);
   {begin
     for i := 0 to n.ChildNodes.Count - 1 do
       if n.ChildNodes[i].NodeName = 'Param' then
@@ -1326,8 +1352,8 @@ begin
 end;
 
 procedure TsmxAlgorithmCfg.WriteCell(const Node: IXMLNode);
-var
-  n: IXMLNode;
+//var
+  //n: IXMLNode;
   //i: Integer;
 begin
   inherited WriteCell(Node);
@@ -1347,8 +1373,8 @@ begin
       Attributes['CfgID'] := AlgorithmCells[i].CfgID;
     end;}
 
-  n := Node.AddChild('Params');
-  AlgorithmParams.Write(n);
+  //n := Node.AddChild('Params');
+  AlgorithmParams.Write(Node);
   {for i := 0 to AlgorithmParams.Count - 1 do
     with n.AddChild('Param') do
     begin
@@ -1718,16 +1744,14 @@ end;
 
 { TsmxRequestCfg }
 
-constructor TsmxRequestCfg.Create(AOwner: TComponent);
+{constructor TsmxRequestCfg.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Fields.KitNodeName := 'Fields';
   Fields.ItemNodeName := 'Field';
-  Fields.IsWriteEmpty := True;
   Params.KitNodeName := 'Params';
   Params.ItemNodeName := 'Param';
-  Params.IsWriteEmpty := True;
-end;
+end;}
 
 destructor TsmxRequestCfg.Destroy;
 begin
@@ -1792,7 +1816,12 @@ end;
 function TsmxRequestCfg.GetFields: TsmxRequestFieldKit;
 begin
   if not Assigned(FFields) then
+  begin
     FFields := TsmxRequestFieldKit.Create;
+    FFields.KitNodeName := 'Fields';
+    FFields.ItemNodeName := 'Field';
+    FFields.IsWriteEmpty := True;
+  end;
   Result := FFields;
 end;
 
@@ -1804,7 +1833,12 @@ end;
 function TsmxRequestCfg.GetParams: TsmxRequestParamKit;
 begin
   if not Assigned(FParams) then
+  begin
     FParams := TsmxRequestParamKit.Create;
+    FParams.KitNodeName := 'Params';
+    FParams.ItemNodeName := 'Param';
+    FParams.IsWriteEmpty := True;
+  end;
   Result := FParams;
 end;
 
@@ -2034,14 +2068,14 @@ procedure TsmxRequestKitItem.Read(const Node: IXMLNode);
 begin
   inherited Read(Node);
   DatabaseName := Node.Attributes['DatabaseName'];
-  OperationMode := Node.Attributes['OperationMode'];
+  OperationMode := TsmxOperationMode(TypInfo.GetEnumValue(TypeInfo(TsmxOperationMode), Node.Attributes['OperationMode']));
 end;
 
 procedure TsmxRequestKitItem.Write(const Node: IXMLNode);
 begin
   inherited Write(Node);
   Node.Attributes['DatabaseName'] := DatabaseName;
-  Node.Attributes['OperationMode'] := OperationMode;
+  Node.Attributes['OperationMode'] := TypInfo.GetEnumName(TypeInfo(TsmxOperationMode), Integer(OperationMode));
 end;
 
 { TsmxRequestKit }
@@ -2249,6 +2283,15 @@ end;
 
 { TsmxGridCfg }
 
+constructor TsmxGridCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'Columns';
+  SlaveCells.ItemNodeName := 'Column';
+  SlaveCells.IsWriteEmpty := True;
+  IsSetAlgorithmEvents := True;
+end;
+
 procedure TsmxGridCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
@@ -2258,6 +2301,7 @@ begin
     GridOptions := TsmxGridCfg(Source).GridOptions;
     //PressDoubleAlgCfgID := TsmxGridCfg(Source).PressDoubleAlgCfgID;
     //PressHeaderAlgCfgID := TsmxGridCfg(Source).PressHeaderAlgCfgID;
+    PrepareAlgCfgID := TsmxGridCfg(Source).PrepareAlgCfgID;
     RefreshAlgCfgID := TsmxGridCfg(Source).RefreshAlgCfgID;
     RequestCfgID := TsmxGridCfg(Source).RequestCfgID;
   end;
@@ -2270,6 +2314,7 @@ begin
   GridOptions := [];
   //PressDoubleAlgCfgID := 0;
   //PressHeaderAlgCfgID := 0;
+  PrepareAlgCfgID := 0;
   RefreshAlgCfgID := 0;
   RequestCfgID := 0;
 end;
@@ -2283,6 +2328,7 @@ begin
   ChangeRowAlgCfgID := Node.Attributes['ChangeRowAlgCfgID'];
   //PressDoubleAlgCfgID := Node.Attributes['PressDoubleAlgCfgID'];
   //PressHeaderAlgCfgID := Node.Attributes['PressHeaderAlgCfgID'];
+  PrepareAlgCfgID := Node.Attributes['PrepareAlgCfgID'];
   RefreshAlgCfgID := Node.Attributes['RefreshAlgCfgID'];
 end;
 
@@ -2295,6 +2341,7 @@ begin
   Node.Attributes['ChangeRowAlgCfgID'] := ChangeRowAlgCfgID;
   //Node.Attributes['PressDoubleAlgCfgID'] := PressDoubleAlgCfgID;
   //Node.Attributes['PressHeaderAlgCfgID'] := PressHeaderAlgCfgID;
+  Node.Attributes['PrepareAlgCfgID'] := PrepareAlgCfgID;
   Node.Attributes['RefreshAlgCfgID'] := RefreshAlgCfgID;
 end;
 
@@ -2318,9 +2365,14 @@ begin
   FPressHeaderAlgCfgID := Value;
 end;}
 
+procedure TsmxGridCfg.SetPrepareAlgCfgID(Value: Integer);
+begin
+  FPrepareAlgCfgID := Value;
+end;
+
 procedure TsmxGridCfg.SetRefreshAlgCfgID(Value: Integer);
 begin
-
+  FRefreshAlgCfgID := Value;
 end;
 
 procedure TsmxGridCfg.SetRequestCfgID(Value: Integer);
@@ -2678,7 +2730,7 @@ end;
 
 { TsmxRequestSectionCfg }
 
-destructor TsmxRequestSectionCfg.Destroy;
+{destructor TsmxRequestSectionCfg.Destroy;
 begin
   if Assigned(FFilterDesk) then
     FFilterDesk.Free;
@@ -2728,9 +2780,9 @@ end;
 procedure TsmxRequestSectionCfg.SetGrid(Value: TsmxControlKitItem);
 begin
   Grid.Assign(Value);
-end;
+end;}
 
-procedure TsmxRequestSectionCfg.ReadCell(const Node: IXMLNode);
+(*procedure TsmxRequestSectionCfg.ReadCell(const Node: IXMLNode);
 var
   n: IXMLNode;
 begin
@@ -2810,39 +2862,47 @@ begin
     n.Attributes['Width'] := ItemWidth;
     n.Attributes['PopupMenuCfgID'] := PopupMenuCfgID;
   end;}
+end;*)
+
+{ TsmxSectionCfg }
+
+constructor TsmxSectionCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'Controls';
+  SlaveCells.ItemNodeName := 'Control';
+  SlaveCells.IsWriteEmpty := True;
 end;
 
-{ TsmxControlSectionCfg }
-
-destructor TsmxControlSectionCfg.Destroy;
+{destructor TsmxSectionCfg.Destroy;
 begin
   if Assigned(FControl) then
     FControl.Free;
   inherited Destroy;
 end;
 
-procedure TsmxControlSectionCfg.Assign(Source: TPersistent);
+procedure TsmxSectionCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
-  if Source is TsmxControlSectionCfg then
-    Control := TsmxControlSectionCfg(Source).Control;
+  if Source is TsmxSectionCfg then
+    Control := TsmxSectionCfg(Source).Control;
 end;
 
-procedure TsmxControlSectionCfg.Clear;
+procedure TsmxSectionCfg.Clear;
 begin
   inherited Clear;
   if Assigned(FControl) then
     FControl.Clear;
 end;
 
-function TsmxControlSectionCfg.GetControl: TsmxControlKitItem;
+function TsmxSectionCfg.GetControl: TsmxControlKitItem;
 begin
   if not Assigned(FControl) then
     FControl := TsmxControlKitItem.Create(nil);
   Result := FControl;
 end;
 
-procedure TsmxControlSectionCfg.ReadCell(const Node: IXMLNode);
+procedure TsmxSectionCfg.ReadCell(const Node: IXMLNode);
 var
   n: IXMLNode;
 begin
@@ -2852,7 +2912,7 @@ begin
     Control.Read(n);
 end;
 
-procedure TsmxControlSectionCfg.WriteCell(const Node: IXMLNode);
+procedure TsmxSectionCfg.WriteCell(const Node: IXMLNode);
 var
   n: IXMLNode;
 begin
@@ -2861,12 +2921,20 @@ begin
   Control.Write(n);
 end;
 
-procedure TsmxControlSectionCfg.SetControl(Value: TsmxControlKitItem);
+procedure TsmxSectionCfg.SetControl(Value: TsmxControlKitItem);
 begin
   Control.Assign(Value);
-end;
+end;}
 
 { TsmxPageCfg }
+
+constructor TsmxPageCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'Sections';
+  SlaveCells.ItemNodeName := 'Section';
+  SlaveCells.IsWriteEmpty := True;
+end;
 
 {procedure TsmxPageCfg.Clear;
 begin
@@ -2949,11 +3017,20 @@ end;}
 
 { TsmxPageManagerCfg }
 
+constructor TsmxPageManagerCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'Pages';
+  SlaveCells.ItemNodeName := 'Page';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
 procedure TsmxPageManagerCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
   if Source is TsmxPageManagerCfg then
   begin
+    ActivePageIndex := TsmxPageManagerCfg(Source).ActivePageIndex;
     ChangePageAlgCfgID := TsmxPageManagerCfg(Source).ChangePageAlgCfgID;
     IsMultiLine := TsmxPageManagerCfg(Source).IsMultiLine;
     PageManagerStyle := TsmxPageManagerCfg(Source).PageManagerStyle;
@@ -2963,6 +3040,7 @@ end;
 procedure TsmxPageManagerCfg.Clear;
 begin
   inherited Clear;
+  ActivePageIndex := -1;
   ChangePageAlgCfgID := 0;
   IsMultiLine := False;
   PageManagerStyle := pmsTab;
@@ -2971,6 +3049,7 @@ end;
 procedure TsmxPageManagerCfg.ReadCell(const Node: IXMLNode);
 begin
   inherited ReadCell(Node);
+  ActivePageIndex := Node.Attributes['ActivePageIndex'];
   ChangePageAlgCfgID := Node.Attributes['ChangePageAlgCfgID'];
   IsMultiLine := Node.Attributes['MultiLine']; //SysUtils.StrToBool(Node.Attributes['MultiLine']);
   PageManagerStyle := TsmxPageManagerStyle(TypInfo.GetEnumValue(TypeInfo(TsmxPageManagerStyle), Node.Attributes['PagesStyle']));
@@ -2979,9 +3058,15 @@ end;
 procedure TsmxPageManagerCfg.WriteCell(const Node: IXMLNode);
 begin
   inherited WriteCell(Node);
+  Node.Attributes['ActivePageIndex'] := ActivePageIndex;
   Node.Attributes['ChangePageAlgCfgID'] := ChangePageAlgCfgID;
   Node.Attributes['MultiLine'] := SysUtils.BoolToStr(IsMultiLine, True);
   Node.Attributes['PagesStyle'] := TypInfo.GetEnumName(TypeInfo(TsmxPageManagerStyle), Integer(PageManagerStyle));
+end;
+
+procedure TsmxPageManagerCfg.SetActivePageIndex(Value: Integer);
+begin
+  FActivePageIndex := Value;
 end;
 
 procedure TsmxPageManagerCfg.SetChangePageAlgCfgID(Value: Integer);
@@ -3000,6 +3085,15 @@ begin
 end;
 
 { TsmxMenuItemCfg }
+
+constructor TsmxMenuItemCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'MenuItems';
+  SlaveCells.ItemNodeName := 'MenuItem';
+  SlaveCells.IsWriteEmpty := True;
+  IsSetAlgorithmEvents := True;
+end;
 
 procedure TsmxMenuItemCfg.Assign(Source: TPersistent);
 begin
@@ -3051,7 +3145,43 @@ begin
   FMenuItemStyle := Value;
 end;
 
+{ TsmxMainMenuCfg }
+
+constructor TsmxMainMenuCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'MenuItems';
+  SlaveCells.ItemNodeName := 'MenuItem';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
+{ TsmxPopupMenuCfg }
+
+constructor TsmxPopupMenuCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'MenuItems';
+  SlaveCells.ItemNodeName := 'MenuItem';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
+{ TsmxPopupListCfg }
+
+constructor TsmxPopupListCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'PopupMenus';
+  SlaveCells.ItemNodeName := 'PopupMenu';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
 { TsmxToolItemCfg }
+
+constructor TsmxToolItemCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  IsSetAlgorithmEvents := True;
+end;
 
 procedure TsmxToolItemCfg.Assign(Source: TPersistent);
 begin
@@ -3259,6 +3389,14 @@ end;}
 
 { TsmxToolBoardCfg }
 
+constructor TsmxToolBoardCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'ToolItems';
+  SlaveCells.ItemNodeName := 'ToolItem';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
 procedure TsmxToolBoardCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
@@ -3301,6 +3439,14 @@ begin
 end;
 
 { TsmxControlBoardCfg }
+
+constructor TsmxControlBoardCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'ToolBoards';
+  SlaveCells.ItemNodeName := 'ToolBoard';
+  SlaveCells.IsWriteEmpty := True;
+end;
 
 {procedure TsmxControlBoardCfg.Clear;
 begin
@@ -3420,7 +3566,23 @@ begin
   FStatusItemStyle := Value;
 end;
 
+{ TsmxStatusBoardCfg }
+
+constructor TsmxStatusBoardCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'StatusItems';
+  SlaveCells.ItemNodeName := 'StatusItem';
+  SlaveCells.IsWriteEmpty := True;
+end;
+
 { TsmxFormCfg }
+
+constructor TsmxFormCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  IsSetAlgorithmEvents := True;
+end;
 
 procedure TsmxFormCfg.Assign(Source: TPersistent);
 begin
@@ -4035,9 +4197,11 @@ begin
 {end;}
 
 initialization
-  RegisterClasses([TsmxRequestCfg, TsmxColumnCfg, TsmxGridCfg,
-    TsmxAlgorithmListCfg,TsmxFilterCfg, TsmxFilterDeskCfg, TsmxRequestSectionCfg,
-    TsmxControlSectionCfg, TsmxPageCfg, TsmxPageManagerCfg, TsmxMenuItemCfg,
-    TsmxMainMenuCfg, TsmxToolBoardCfg, TsmxControlBoardCfg, TsmxFormCfg]);
+  Classes.RegisterClasses([TsmxAlgorithmCfg, TsmxAlgorithmListCfg,
+    TsmxRequestCfg, TsmxRequestListCfg, TsmxColumnCfg, TsmxGridCfg,
+    TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg, TsmxPageCfg,
+    TsmxPageManagerCfg, TsmxMenuItemCfg, TsmxMainMenuCfg, TsmxPopupMenuCfg,
+    TsmxPopupListCfg, TsmxToolItemCfg, TsmxToolBoardCfg, TsmxControlBoardCfg,
+    TsmxStatusItemCfg, TsmxStatusBoardCfg, TsmxFormCfg]);
 
 end.

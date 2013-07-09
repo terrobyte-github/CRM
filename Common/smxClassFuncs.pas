@@ -204,13 +204,19 @@ function FindFilterOnSection(ASection: TsmxCustomSection; const AName: String;
   var AValue: Variant): Boolean;
 var
   Cell: TsmxOwnerCell;
+  i: Integer;
 begin
   Result := False;
   AValue := Variants.Null;
   Cell := nil;
   if Assigned(ASection) then
-    if Assigned(ASection.FilterDesk) then
-      Cell := ASection.FilterDesk.FindSlaveByName(AName);
+    for i := 0 to ASection.SlaveCount - 1 do
+      if ASection.Slaves[i] is TsmxCustomFilterDesk then
+      begin
+        Cell := ASection.Slaves[i].FindSlaveByName(AName);
+        if Assigned(Cell) then
+          Break;
+      end;
   if Assigned(Cell) then
   begin
     AValue := TsmxCustomFilter(Cell).FilterValue;
@@ -222,13 +228,21 @@ function FindColumnOnSection(ASection: TsmxCustomSection; const AName: String;
   var AValue: Variant): Boolean;
 var
   Cell: TsmxOwnerCell;
+  i: Integer;
 begin
   Result := False;
   AValue := Variants.Null;
   Cell := nil;
   if Assigned(ASection) then
-    if Assigned(ASection.Grid) then
-      Cell := ASection.Grid.FindSlaveByName(AName);
+    for i := 0 to ASection.SlaveCount - 1 do
+      if ASection.Slaves[i] is TsmxCustomGrid then
+      begin
+        Cell := ASection.Slaves[i].FindSlaveByName(AName);
+        if Assigned(Cell) then
+          Break;
+      end;
+    //if Assigned(ASection.Grid) then
+      //Cell := ASection.Grid.FindSlaveByName(AName);
   if Assigned(Cell) then
   begin
     AValue := TsmxCustomColumn(Cell).ColumnValue;
@@ -288,11 +302,14 @@ begin
   //if not Assigned(ACell) then
   //  Exit;
   //Cell := ACell.CellParent;
-  while Assigned(ACell) and not Assigned(Result) do
+  while Assigned(ACell) {and not Assigned(Result)} do
   begin
-    ACell := ACell.CellParent;
     if ACell is TsmxCustomForm then
+    begin
       Result := TsmxCustomForm(ACell);
+      Break;
+    end;
+    ACell := ACell.CellParent;
     //Cell := Cell.CellParent;
   end;
 end;
