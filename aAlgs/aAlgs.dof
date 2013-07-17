@@ -52,7 +52,7 @@ DebugSourceDirs=
 UsePackages=1
 [Parameters]
 RunParams=
-HostApplication=
+HostApplication=c:\CRM\Bin\CRM.exe
 Launcher=
 UseLauncher=0
 DebugCWD=

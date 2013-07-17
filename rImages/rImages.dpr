@@ -10,9 +10,9 @@ uses
 {$R ..\Resource\pic.res}
 
 exports
-  LibInfo{,
+  smxLibProcs.LibInfo{,
   NewResource};
 
 begin
-  FillInfo(1, 0, nil, [ltResource]);
+  smxLibProcs.FillInfo(1, 0, nil, [ltResource]);
 end.

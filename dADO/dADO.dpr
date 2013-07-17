@@ -2,21 +2,22 @@ library dADO;
 
 uses
   ComServ,
-  smxCoADODatabase in 'smxCoADODatabase.pas',
-  smxCoDatabase in '..\Common\smxCoDatabase.pas',
+  smxLibProcs,
+  smxLibTypes,
   smxADODB in '..\Common\smxADODB.pas';
 
 exports
-  DllGetClassObject,
-  DllCanUnloadNow,
-  DllRegisterServer,
-  DllUnregisterServer{,
-  LibInfo,
-  NewADODatabase,
-  DatabaseCLSID};
+  ComServ.DllGetClassObject,
+  ComServ.DllCanUnloadNow,
+  ComServ.DllRegisterServer,
+  ComServ.DllUnregisterServer{,
+  smxLibProcs.LibInfo,
+  smxADODB.NewDatabase,
+  smxADODB.NewDataSet,
+  smxADODB.DatabaseCLSID};
 
 {$R *.RES}
 
 begin
-  //FillInfo(1, 0, nil, [ltDatabaseIntf]);
+  //smxLibProcs.FillInfo(1, 0, nil, [ltDatabaseIntf]);
 end.

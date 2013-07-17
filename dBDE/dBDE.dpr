@@ -7,14 +7,14 @@ uses
   smxBDEDB in '..\Common\smxBDEDB.pas';
 
 exports
-  DllGetClassObject,
-  DllCanUnloadNow,
-  DllRegisterServer,
-  DllUnregisterServer,
-  LibInfo,
-  NewDatabase,
-  NewDataSet,
-  DatabaseCLSID;
+  ComServ.DllGetClassObject,
+  ComServ.DllCanUnloadNow,
+  ComServ.DllRegisterServer,
+  ComServ.DllUnregisterServer,
+  smxLibProcs.LibInfo,
+  smxBDEDB.NewDatabase,
+  smxBDEDB.NewDataSet,
+  smxBDEDB.DatabaseCLSID;
 
 {$R *.RES}
 

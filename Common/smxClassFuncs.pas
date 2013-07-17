@@ -139,6 +139,11 @@ begin
     Result := CellClass.Create(AOwner);
     Result.CfgID := ACfgID;
     Result.SelectRequest := ASelectRequest;
+    Result.StorageManager := smxClassProcs.gStorageManagerIntf;
+    Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
+    Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
+    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellActionError,
       ['nil', 'create'], ACfgID);
@@ -173,6 +178,11 @@ begin
       Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID);
     Result.CfgID := ACfgID;
     Result.SelectRequest := ASelectRequest;
+    Result.StorageManager := smxClassProcs.gStorageManagerIntf;
+    Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
+    Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
+    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellActionError,
       ['nil', 'create'], ACfgID);

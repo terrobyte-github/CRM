@@ -38,20 +38,30 @@ procedure CreateGlobalObjects;
 begin
   gCallBackManager := TsmxCallBackManager.Create(nil);
   gStorageManager := TsmxStorageManager.Create(nil);
+  smxClassProcs.gStorageManagerIntf := gStorageManager as IsmxStorageManager;
   gLibraryManager := TsmxLibraryManager.Create(nil);
+  smxClassProcs.gLibraryManagerIntf := gLibraryManager as IsmxLibraryManager;
   gDatabaseManager := TsmxDatabaseManager.Create(nil);
+  smxClassProcs.gDatabaseManagerIntf := gDatabaseManager as IsmxDatabaseManager;
   gFormManager := TsmxFormManager.Create(nil);
+  smxClassProcs.gFormManagerIntf := gFormManager as IsmxFormManager;
   gImageListManager := TsmxImageListManager.Create(nil);
+  smxClassProcs.gImageListManagerIntf := gImageListManager as IsmxImageListManager;
   gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyGlobalObjects;
 begin
   gMainConnection.Free;
+  smxClassProcs.gImageListManagerIntf := nil;
   gImageListManager.Free;
+  smxClassProcs.gFormManagerIntf := nil;
   gFormManager.Free;
+  smxClassProcs.gDatabaseManagerIntf := nil;
   gDatabaseManager.Free;
+  smxClassProcs.gLibraryManagerIntf := nil;
   gLibraryManager.Free;
+  smxClassProcs.gStorageManagerIntf := nil;
   gStorageManager.Free;
   gCallBackManager.Free;
 end;
@@ -63,13 +73,13 @@ var
   {rs: TResourceStream;
   FuncNewResource: TsmxFuncNewResource;}
 begin
-  gCallBackManager[smxPConsts.cApplicationHandle] := Forms.Application.Handle;
-  gCallBackManager[smxPConsts.cStorageManager] := Integer(gStorageManager as IsmxStorageManager);
-  gCallBackManager[smxPConsts.cLibraryManager] := Integer(gLibraryManager as IsmxLibraryManager);
-  gCallBackManager[smxPConsts.cDatabaseManager] := Integer(gDatabaseManager as IsmxDatabaseManager);
-  gCallBackManager[smxPConsts.cFormManager] := Integer(gFormManager as IsmxFormManager);
-  gCallBackManager[smxPConsts.cImageListManager] := Integer(gImageListManager as IsmxImageListManager);
-  gCallBackManager[smxPConsts.cMainConnection] := Integer(gMainConnection as IsmxConnection);
+  gCallBackManager[smxConsts.cApplicationHandle] := Forms.Application.Handle;
+  gCallBackManager[smxConsts.cStorageManager] := Integer(gStorageManager as IsmxStorageManager);
+  gCallBackManager[smxConsts.cLibraryManager] := Integer(gLibraryManager as IsmxLibraryManager);
+  gCallBackManager[smxConsts.cDatabaseManager] := Integer(gDatabaseManager as IsmxDatabaseManager);
+  gCallBackManager[smxConsts.cFormManager] := Integer(gFormManager as IsmxFormManager);
+  gCallBackManager[smxConsts.cImageListManager] := Integer(gImageListManager as IsmxImageListManager);
+  //gCallBackManager[smxConsts.cMainConnection] := Integer(gMainConnection as IsmxConnection);
 
   s := ParamStr(0);
   gStorageManager[smxPConsts.cProgExeName] := s;
@@ -514,11 +524,11 @@ function LogIn: Boolean;
     begin
       Forms.Application.ShowMainForm := False;
       gMainForm := smxClassFuncs.NewForm(nil, CfgID, smxClassProcs.gSelectRequest);
-      gMainForm.StorageManager := gStorageManager as IsmxStorageManager;
+      {gMainForm.StorageManager := gStorageManager as IsmxStorageManager;
       gMainForm.LibraryManager := gLibraryManager as IsmxLibraryManager;
       gMainForm.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
       gMainForm.FormManager := gFormManager as IsmxFormManager;
-      gMainForm.ImageListManager := gImageListManager as IsmxImageListManager;
+      gMainForm.ImageListManager := gImageListManager as IsmxImageListManager;}
       gMainForm.Initialize;
       gMainForm.IntfID := IntfID;
       Result := True;

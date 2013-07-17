@@ -13,8 +13,8 @@ uses
 {$R *.res}
 
 exports
-  LibInfo;
+  smxLibProcs.LibInfo;
 
 begin
-  FillInfo(1, 0, InitLib, [ltCellClass]);
+  smxLibProcs.FillInfo(1, 0, smxLibProcs.InitLib, [ltCellClass]);
 end.

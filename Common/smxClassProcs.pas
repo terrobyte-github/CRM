@@ -11,9 +11,15 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass; AIsOnlyActive: Boolean = False);
 procedure AllParents(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass);
+//procedure PrepareForm(AForm: TsmxCustomForm);
 
 var
   gSelectRequest: TsmxCustomRequest = nil;
+  gStorageManagerIntf: IsmxStorageManager = nil;
+  gLibraryManagerIntf: IsmxLibraryManager = nil;
+  gDatabaseManagerIntf: IsmxDatabaseManager = nil;
+  gFormManagerIntf: IsmxFormManager = nil;
+  gImageListManagerIntf: IsmxImageListManager = nil;
 
 implementation
 
@@ -132,5 +138,22 @@ begin
     Cell := Cell.CellParent;
   end;
 end;
+
+{procedure PrepareForm(AForm: TsmxCustomForm);
+var
+  List: TList;
+  i: Integer;
+begin
+  if not Assigned(AForm) then
+    Exit;
+  List := TList.Create;
+  try
+    AllCells(AForm, List, [TsmxCustomGrid], True);
+    for i := 0 to List.Count - 1 do
+      TsmxCustomGrid(List[i]).Prepare;
+  finally
+    List.Free;
+  end;
+end;}
 
 end.

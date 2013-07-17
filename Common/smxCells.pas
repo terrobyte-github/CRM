@@ -25,7 +25,9 @@ type
     FAction: TAction;
     function GetAction: TAction;
     procedure ActionExecute(Sender: TObject);
+    function GetParamValue(const ParamName: String): Variant;
   protected
+    procedure DoRefreshParams; override;
     function GetAlgorithmCaption: String; override;
     function GetAlgorithmEnabled: Boolean; override;
     function GetAlgorithmHint: String; override;
@@ -80,6 +82,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function GetAlgorithmParamValue(CfgID: Integer; const ParamName: String;
+      var ParamValue: Variant): Boolean; override;
     //procedure Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
     //  ASelectRequest: TsmxCustomRequest = nil); override;
 
@@ -90,7 +94,15 @@ type
   { TsmxRequest }
 
   TsmxRequest = class(TsmxCustomRequest)
+  private
+    function GetParamValue(const ParamName: String): Variant;
   protected
+    procedure DoDelete; override;
+    procedure DoExecute; override;
+    procedure DoInsert; override;
+    procedure DoPrepare; override;
+    procedure DoRefreshParams; override;
+    procedure DoUpdate; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
     //function GetDataSet: IsmxDataSet; virtual;
     //procedure InitializeDataSet; virtual;
@@ -109,6 +121,8 @@ type
     procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); override;
   public
     constructor Create(AOwner: TComponent); override;
+    function GetRequestParamValue(CfgID: Integer; const ParamName: String;
+      var ParamValue: Variant): Boolean; override;
 
     //property IsAltSlaveClass default True;
     //property IsOwnerIsParent default True;
@@ -121,6 +135,7 @@ type
     FColumn: TColumn;
     function GetColumn: TColumn;
   protected
+    procedure DoSnapHeader; override;
     function GetCellVisible: Boolean; override;
     function GetCellWidth: Integer; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
@@ -172,6 +187,9 @@ type
     //procedure DBGridDblClick(Sender: TObject);
     procedure DBGridTitleClick(Column: TColumn);
   protected
+    procedure DoChangeRow; override;
+    procedure DoPrepare; override;
+    procedure DoRefresh; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellAnchors: TAnchors; override;
     //function GetCellCursor: TCursor; override;
@@ -231,6 +249,7 @@ type
     function GetHeader: TLabel;
     function GetPanel: TPanel;
   protected
+    procedure DoChangeFilter; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellAnchors: TAnchors; override;
     //function GetCellCursor: TCursor; override;
@@ -293,6 +312,8 @@ type
     function GetPanel: TPanel;
     procedure RefreshValueParams(DataSet: IsmxDataSet);
   protected
+    procedure DoApply; override;
+    procedure DoPrepare; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellAnchors: TAnchors; override;
     //function GetCellCursor: TCursor; override;
@@ -466,6 +487,7 @@ type
     function GetPageControl: TPageControl;
     procedure PageControlChange(Sender: TObject);
   protected
+    procedure DoChangePage; override;
     //function GetActivePage: TsmxCustomPage; override;
     function GetActivePageIndex: Integer; override;
     //function GetCellAlign: TAlign; override;
@@ -809,6 +831,7 @@ type
     FStatusPanel: TStatusPanel;
     function GetStatusPanel: TStatusPanel;
   protected
+    procedure DoDrawPanel; override;
     function GetCellCaption: String; override;
     function GetCellWidth: Integer; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
@@ -856,8 +879,10 @@ type
     function GetForm: TForm;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
-    procedure PrepareForm;
+    //procedure PrepareForm;
   protected
+    procedure DoClose; override;
+    procedure DoShow; override;
     function GetCellActive: Boolean; override;
     function GetCellCaption: String; override;
     function GetCellHint: String; override;
@@ -869,7 +894,10 @@ type
     //function GetIsMainForm: Boolean; override;
     function GetIsMaximize: Boolean; override;
     function GetModalResult: TModalResult; override;
+    procedure InternalClose; override;
     //procedure InternalInitialize; override;
+    procedure InternalShow; override;
+    function InternalShowModal: TModalResult; override;
     //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure ResetCellProps; override;
     procedure SetCellActive(Value: Boolean); override;
@@ -888,9 +916,9 @@ type
     property IsMainForm: Boolean read FIsMainForm;
   public
     destructor Destroy; override;
-    procedure Close; override;
-    procedure Show; override;
-    function ShowModal: TModalResult; override;
+    //procedure Close; override;
+    //procedure Show; override;
+    //function ShowModal: TModalResult; override;
   end;
 
   { TsmxStandardForm }
@@ -1026,6 +1054,19 @@ begin
   Execute;
 end;
 
+procedure TsmxAction.DoRefreshParams;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnRefreshParams) then
+  begin
+    if Cfg is TsmxAlgorithmCfg then
+      AlgCfgID := TsmxAlgorithmCfg(Cfg).RefreshParamsCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnRefreshParams, AlgCfgID);
+  end;
+end;
+
 function TsmxAction.GetAction: TAction;
 begin
   if not Assigned(FAction) then
@@ -1106,6 +1147,19 @@ begin
   Result := Action;
 end;
 
+function TsmxAction.GetParamValue(const ParamName: String): Variant;
+var
+  Param: TsmxParamKitItem;
+begin
+  Result := Variants.Null;
+  if Cfg is TsmxAlgorithmCfg then
+  begin
+    Param := TsmxAlgorithmCfg(Cfg).AlgorithmParams.FindByName(ParamName);
+    if Assigned(Param) then
+      Result := Param.ParamValue;
+  end;
+end;
+
 function TsmxAction.GetProcPointer: Pointer;
 begin
   Result := nil;
@@ -1174,6 +1228,13 @@ begin
         begin
           Value := Variants.Null; //AlgorithmParams[i].ParamValue;
         end;}
+        plConst .. plInOutput:
+        begin
+          AlgorithmParams[i].ParamValue := GetParamValue(AlgorithmParams[i].ParamName);
+          if Assigned(CellOwner) then
+            if CellOwner.GetAlgorithmParamValue(CfgID, AlgorithmParams[i].ParamName, Value) then
+              AlgorithmParams[i].ParamValue := Value;
+        end;
         plFilterDesk:
         begin
           if ActionCell is TsmxCustomFilterDesk then
@@ -1290,7 +1351,7 @@ begin
         ParamLocation := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamLocation;
         ParamType := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamType;
         ParamName := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamName;
-        ParamValue := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].Value;
+        ParamValue := TsmxAlgorithmCfg(Cfg).AlgorithmParams[i].ParamValue;
       end;
     if Assigned(GetProcPointer()) then
     begin
@@ -1342,6 +1403,41 @@ begin
   Result := FActionList;
 end;
 
+function TsmxActionList.GetAlgorithmParamValue(CfgID: Integer;
+  const ParamName: String; var ParamValue: Variant): Boolean;
+var
+  //i: Integer;
+  Param: TsmxParamKitItem;
+  Item: TsmxOwnerKitItem;
+begin
+  Result := inherited GetAlgorithmParamValue(CfgID, ParamName, ParamValue);
+  if Cfg is TsmxAlgorithmListCfg then
+  begin
+    Item := TsmxAlgorithmListCfg(Cfg).SlaveCells.FindByCfgID(CfgID);
+    if Item is TsmxAlgorithmKitItem then
+    begin
+      Param := TsmxAlgorithmKitItem(Item).ItemParams.FindByName(ParamName);
+      if Assigned(Param) then
+      begin
+        ParamValue := Param.ParamValue;
+        Result := True;
+      end;
+    end;
+  end;
+
+    {if Algorithm.SlaveIndex < TsmxAlgorithmListCfg(Cfg).SlaveCells.Count then
+      for i := 0 to Algorithm.AlgorithmParams.Count - 1 do
+        Algorithm.AlgorithmParams[i].ParamValue :=
+          TsmxAlgorithmListCfg(Cfg).SlaveCells[Algorithm.SlaveIndex].ItemParams[i].ParamValue;}
+
+  {for i := 0 to TsmxAlgorithmKitItem(Item).ItemParams.Count - 1 do
+  begin
+    Param := TsmxCustomAlgorithm(Slave).AlgorithmParams.FindByName(TsmxAlgorithmKitItem(Item).ItemParams.Items[i].ParamName);
+    if Assigned(Param) then
+      Param.ParamValue := TsmxAlgorithmKitItem(Item).ItemParams.Items[i].ParamValue;
+  end;}
+end;
+
 {function TsmxActionList.GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass;
 begin
   if Cfg is TsmxAlgorithmListCfg then
@@ -1382,16 +1478,110 @@ begin
 end;}
 
 procedure TsmxActionList.SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem);
+var
+  i: Integer;
+  Param: TsmxParamKitItem;
 begin
   inherited SetSlaveCellProps(Slave, Item);
   if (Slave is TsmxCustomAlgorithm) and (Item is TsmxAlgorithmKitItem) then
   begin
     TsmxCustomAlgorithm(Slave).AlgorithmEnabled := TsmxAlgorithmKitItem(Item).ItemEnabled;
     TsmxCustomAlgorithm(Slave).AlgorithmVisible := TsmxAlgorithmKitItem(Item).ItemVisible;
+    for i := 0 to TsmxCustomAlgorithm(Slave).AlgorithmParams.Count - 1 do
+    begin
+      Param := TsmxAlgorithmKitItem(Item).ItemParams.FindByName(TsmxCustomAlgorithm(Slave).AlgorithmParams[i].ParamName);
+      if Assigned(Param) then
+        TsmxCustomAlgorithm(Slave).AlgorithmParams[i].ParamValue := Param.ParamValue;
+    end;
+
+    {for i := 0 to TsmxAlgorithmKitItem(Item).ItemParams.Count - 1 do
+    begin
+      Param := TsmxCustomAlgorithm(Slave).AlgorithmParams.FindByName(TsmxAlgorithmKitItem(Item).ItemParams.Items[i].ParamName);
+      if Assigned(Param) then
+        Param.ParamValue := TsmxAlgorithmKitItem(Item).ItemParams.Items[i].ParamValue;
+    end;}
   end;
 end;
 
 { TsmxRequest }
+
+procedure TsmxRequest.DoDelete;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnDelete) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).DeleteAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnDelete, AlgCfgID);
+  end;
+end;
+
+procedure TsmxRequest.DoExecute;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnExecute) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).ExecuteAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnExecute, AlgCfgID);
+  end;
+end;
+
+procedure TsmxRequest.DoInsert;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnInsert) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).InsertAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnInsert, AlgCfgID);
+  end;
+end;
+
+procedure TsmxRequest.DoPrepare;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnPrepare) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).PrepareAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnPrepare, AlgCfgID);
+  end;
+end;
+
+procedure TsmxRequest.DoRefreshParams;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnRefreshParams) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).RefreshParamsAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnRefreshParams, AlgCfgID);
+  end;
+end;
+
+procedure TsmxRequest.DoUpdate;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnUpdate) then
+  begin
+    if Cfg is TsmxRequestCfg then
+      AlgCfgID := TsmxRequestCfg(Cfg).UpdateAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnUpdate, AlgCfgID);
+  end;
+end;
 
 function TsmxRequest.GetCfgClass: TsmxBaseCfgClass;
 begin
@@ -1497,6 +1687,19 @@ begin
     //raise EsmxCellError.CreateFmt(@rsCellActionError, [ClassName, 'initialize']);
 end;*)
 
+function TsmxRequest.GetParamValue(const ParamName: String): Variant;
+var
+  Param: TsmxParamKitItem;
+begin
+  Result := Variants.Null;
+  if Cfg is TsmxRequestCfg then
+  begin
+    Param := TsmxRequestCfg(Cfg).Params.FindByName(ParamName);
+    if Assigned(Param) then
+      Result := Param.ParamValue;
+  end;
+end;
+
 procedure TsmxRequest.InternalRefreshParams;
 var
   i, j: integer;
@@ -1519,6 +1722,13 @@ begin
         begin
           Value := Variants.Null; //FCurDataSetIntf.Params[i].Value;
         end;}
+        plConst .. plInOutput:
+        begin
+          CurDataSet.Params[i].Value := GetParamValue(CurDataSet.Params[i].ParamName);
+          if Assigned(CellOwner) then
+            if CellOwner.GetRequestParamValue(CfgID, CurDataSet.Params[i].ParamName, Value) then
+              CurDataSet.Params[i].Value := Value;
+        end;
         plFilterDesk:
         begin
           {smxClassProcs.AllParents(Self, List, [TsmxCustomSection]);
@@ -1661,7 +1871,7 @@ begin
           ParamName := TsmxRequestCfg(Cfg).Params[i].ParamName;
           ParamLocation := TsmxRequestCfg(Cfg).Params[i].ParamLocation;
           ParamType := TsmxRequestCfg(Cfg).Params[i].ParamType;
-          Value := TsmxRequestCfg(Cfg).Params[i].Value;
+          Value := TsmxRequestCfg(Cfg).Params[i].ParamValue;
           NumericScale := TsmxRequestCfg(Cfg).Params[i].NumericScale;
           Precision := TsmxRequestCfg(Cfg).Params[i].Precision;
           Size := TsmxRequestCfg(Cfg).Params[i].Size;
@@ -1697,18 +1907,51 @@ begin
   Result := TsmxRequestListCfg;
 end;
 
+function TsmxRequestList.GetRequestParamValue(CfgID: Integer;
+  const ParamName: String; var ParamValue: Variant): Boolean;
+var
+  //i: Integer;
+  Param: TsmxParamKitItem;
+  Item: TsmxOwnerKitItem;
+begin
+  Result := inherited GetRequestParamValue(CfgID, ParamName, ParamValue);
+  if Cfg is TsmxRequestListCfg then
+  begin
+    Item := TsmxRequestListCfg(Cfg).SlaveCells.FindByCfgID(CfgID);
+    if Item is TsmxRequestKitItem then
+    begin
+      Param := TsmxRequestKitItem(Item).ItemParams.FindByName(ParamName);
+      if Assigned(Param) then
+      begin
+        ParamValue := Param.ParamValue;
+        Result := True;
+      end;
+    end;
+  end;
+end;
+
 function TsmxRequestList.GetSlaveClass: TsmxOwnerCellClass;
 begin
   Result := TsmxRequest;
 end;
 
 procedure TsmxRequestList.SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem);
+var
+  i: Integer;
+  Param: TsmxParamKitItem;
 begin
   inherited SetSlaveCellProps(Slave, Item);
   if (Slave is TsmxCustomRequest) and (Item is TsmxRequestKitItem) then
   begin
     TsmxCustomRequest(Slave).DatabaseName := TsmxRequestKitItem(Item).DatabaseName;
     TsmxCustomRequest(Slave).OperationMode := TsmxRequestKitItem(Item).OperationMode;
+    if Assigned(TsmxCustomRequest(Slave).DataSet) then
+      for i := 0 to TsmxCustomRequest(Slave).DataSet.ParamCount - 1 do
+      begin
+        Param := TsmxRequestKitItem(Item).ItemParams.FindByName(TsmxCustomRequest(Slave).DataSet.Params[i].ParamName);
+        if Assigned(Param) then
+          TsmxCustomRequest(Slave).DataSet.Params[i].Value := Param.ParamValue;
+      end;
   end;
 end;
 
@@ -1719,6 +1962,19 @@ begin
   inherited Destroy;
   if Assigned(FColumn) then
     FColumn.Free;
+end;
+
+procedure TsmxColumn.DoSnapHeader;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnSnapHeader) then
+  begin
+    if Cfg is TsmxColumnCfg then
+      AlgCfgID := TsmxColumnCfg(Cfg).SnapAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnSnapHeader, AlgCfgID);
+  end;
 end;
 
 function TsmxColumn.GetCellVisible: Boolean;
@@ -1971,6 +2227,45 @@ begin
   begin
     FDBGrid.DataSource.Free;
     FDBGrid.Free;
+  end;
+end;
+
+procedure TsmxDBGrid.DoChangeRow;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnChangeRow) then
+  begin
+    if Cfg is TsmxGridCfg then
+      AlgCfgID := TsmxGridCfg(Cfg).ChangeRowAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnChangeRow, AlgCfgID);
+  end;
+end;
+
+procedure TsmxDBGrid.DoPrepare;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnPrepare) then
+  begin
+    if Cfg is TsmxGridCfg then
+      AlgCfgID := TsmxGridCfg(Cfg).PrepareAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnPrepare, AlgCfgID);
+  end;
+end;
+
+procedure TsmxDBGrid.DoRefresh;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnRefresh) then
+  begin
+    if Cfg is TsmxGridCfg then
+      AlgCfgID := TsmxGridCfg(Cfg).RefreshAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnRefresh, AlgCfgID);
   end;
 end;
 
@@ -2393,6 +2688,19 @@ begin
     FPanel.Free;
 end;
 
+procedure TsmxPanelFilter.DoChangeFilter;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnChangeFilter) then
+  begin
+    if Cfg is TsmxFilterCfg then
+      AlgCfgID := TsmxFilterCfg(Cfg).ChangeFilterAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnChangeFilter, AlgCfgID);
+  end;
+end;
+
 {function TsmxPanelFilter.GetCellAlign: TAlign;
 begin
   Result := Panel.Align;
@@ -2759,6 +3067,32 @@ begin
   inherited Destroy;
   if Assigned(FPanel) then
     FPanel.Free;
+end;
+
+procedure TsmxPanelFilterDesk.DoApply;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnApply) then
+  begin
+    if Cfg is TsmxFilterDeskCfg then
+      AlgCfgID := TsmxFilterDeskCfg(Cfg).ApplyAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnApply, AlgCfgID);
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.DoPrepare;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnPrepare) then
+  begin
+    if Cfg is TsmxFilterDeskCfg then
+      AlgCfgID := TsmxFilterDeskCfg(Cfg).PrepareAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnPrepare, AlgCfgID);
+  end;
 end;
 
 {function TsmxPanelFilterDesk.GetCellAlign: TAlign;
@@ -3662,6 +3996,19 @@ begin
   //end;
   //if Assigned(FWinControl) then
     //FWinControl.Free;
+end;
+
+procedure TsmxPageControl.DoChangePage;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnChangePage) then
+  begin
+    if Cfg is TsmxPageManagerCfg then
+      AlgCfgID := TsmxPageManagerCfg(Cfg).ChangePageAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnChangePage, AlgCfgID);
+  end;
 end;
 
 {function TsmxPageControl.GetActivePage: TsmxCustomPage;
@@ -5212,6 +5559,19 @@ begin
     FStatusPanel.Free;
 end;
 
+procedure TsmxStatusPanel.DoDrawPanel;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnDrawPanel) then
+  begin
+    if Cfg is TsmxStatusItemCfg then
+      AlgCfgID := TsmxStatusItemCfg(Cfg).DrawPanelAlgCfg else
+      AlgCfgID := 0;
+    DoEvent(OnDrawPanel, AlgCfgID);
+  end;
+end;
+
 function TsmxStatusPanel.GetCellCaption: String;
 begin
   Result := StatusPanel.Text;
@@ -5397,19 +5757,65 @@ begin
   {end;}
 end;
 
-procedure TsmxForm.Close;
+{procedure TsmxForm.Close;
+begin
+  Form.OnClose := nil;
+  Form.Close;
+  Form.OnClose := FormClose;
+end;}
+
+procedure TsmxForm.DoClose;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnClose) then
+  begin
+    if Cfg is TsmxFormCfg then
+      AlgCfgID := TsmxFormCfg(Cfg).CloseAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnClose, AlgCfgID);
+  end;
+end;
+
+procedure TsmxForm.InternalClose;
 begin
   Form.OnClose := nil;
   Form.Close;
   Form.OnClose := FormClose;
 end;
 
+procedure TsmxForm.DoShow;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnShow) then
+  begin
+    if Cfg is TsmxFormCfg then
+      AlgCfgID := TsmxFormCfg(Cfg).ShowAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnShow, AlgCfgID);
+  end;
+end;
+
+procedure TsmxForm.InternalShow;
+begin
+  Form.Show;
+end;
+
+function TsmxForm.InternalShowModal: TModalResult;
+begin
+  Result := TModalResult(Form.ShowModal);
+end;
+
 procedure TsmxForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if not FIsMainForm then
   begin
-    Action := caNone;
-    Free;
+    if not (fsModal in (Form.FormState)) then
+    begin
+      Action := caNone;
+      Free;
+    end;
   end;
 end;
 
@@ -5617,7 +6023,7 @@ begin
     FForm := nil;
 end;}
 
-procedure TsmxForm.PrepareForm;
+{procedure TsmxForm.PrepareForm;
 var
   List: TList;
   i: Integer;
@@ -5630,7 +6036,7 @@ begin
   finally
     List.Free;
   end;
-end;
+end;}
 
 procedure TsmxForm.ResetCellProps;
 begin
@@ -5639,6 +6045,8 @@ begin
   FormPosition := fpDesigned;
   IsMaximize := False;
   AlgorithmList := nil;
+  OnClose := nil;
+  OnShow := nil;
   PopupList := nil;
   RequestList := nil;
 end;
@@ -5685,6 +6093,9 @@ begin
       Cell.Initialize;
       RequestList := TsmxCustomRequestList(Cell);
     end;}
+
+    OnClose := smxClassFuncs.GetEventForm(Self, TsmxFormCfg(Cfg).CloseAlgCfgID);
+    OnShow := smxClassFuncs.GetEventForm(Self, TsmxFormCfg(Cfg).ShowAlgCfgID);
   end;
   inherited SetCellProps;
   {if Cfg is TsmxFormCfg then
@@ -5721,7 +6132,7 @@ begin
   end;
 end;}
 
-procedure TsmxForm.Show;
+{procedure TsmxForm.Show;
 begin
   Form.Show;
   PrepareForm;
@@ -5731,7 +6142,7 @@ function TsmxForm.ShowModal: TModalResult;
 begin
   PrepareForm;
   Result := TModalResult(Form.ShowModal);
-end;
+end;}
 
 { TsmxStandardForm }
 

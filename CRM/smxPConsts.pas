@@ -3,6 +3,7 @@ unit smxPConsts;
 interface
 
 const
+  { Program }
   cProgExeName = 'ProgExeName';
   cProgExePath = 'ProgExePath';
   cProgVersionMajor = 'ProgVersionMajor';
@@ -11,14 +12,7 @@ const
   cProgVersionBuild = 'ProgVersionBuild';
   cProgVersion = 'ProgVersion';
 
-  cApplicationHandle = 0;
-  cStorageManager = 1;
-  cLibraryManager = 2;
-  cDatabaseManager = 3;
-  cFormManager = 4;
-  cImageListManager = 5;
-  cMainConnection = 6;
-
+  { Ini }
   cConfigurationFileName = '..\Cfg\conf.ini';
   cInitSectionName = 'Init';
   cInitRequestClassName = 'RequestClassName';

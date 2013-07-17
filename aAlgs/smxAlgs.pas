@@ -3,15 +3,16 @@ unit smxAlgs;
 interface
 
 uses
-  SysUtils, smxClasses;
+  smxBaseClasses;
 
-type
-  { EsmxAlgorithmError }
+//type
+  //{ EsmxAlgorithmError }
 
-  EsmxAlgorithmError = class(Exception);
+  //EsmxAlgorithmError = class(Exception);
 
-{procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure OpenFormByEventID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
+procedure PrepareForm(Component: TsmxComponent);
+procedure OpenModalForm(Component: TsmxComponent);
+{procedure OpenFormByEventID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure OpenFormByProblemID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure CloseForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 procedure RefreshForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
@@ -25,11 +26,77 @@ procedure SelectAndPerformRequestF(Algorithm: TsmxCustomAlgorithm; Params: Varia
 
 implementation
 
-{uses
-  Windows, Controls, Variants, smxClassFuncs, smxLibFuncs, smxConsts, smxDBIntf,
-  smxTypes, smxClassProcs, smxFuncs;
+uses
+  {Windows, Controls, Variants, smxClassFuncs, smxLibFuncs, smxConsts, smxDBIntf,
+  smxTypes, smxClassProcs, smxFuncs}
+  Classes, Controls, SysUtils, smxClasses, smxClassProcs, smxClassFuncs;
 
-function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
+procedure PrepareForm(Component: TsmxComponent);
+var
+  List: TList;
+  i: Integer;
+begin
+  if Component is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Component).ActionCell is TsmxCustomForm then
+    begin
+      List := TList.Create;
+      try
+        smxClassProcs.AllCells(TsmxCustomForm(TsmxCustomAlgorithm(Component).ActionCell),
+          List, [TsmxCustomGrid], True);
+        for i := 0 to List.Count - 1 do
+          TsmxCustomGrid(List[i]).Prepare;
+      finally
+        List.Free;
+      end;
+    end;
+end;
+
+procedure OpenModalForm(Component: TsmxComponent);
+var
+  Param: TsmxParam;
+  CfgID, ID: Integer;
+  RefreshGrid: Boolean;
+  AccessoryForm, Form: TsmxCustomForm;
+begin
+  if Component is TsmxCustomAlgorithm then
+  begin
+    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('CfgID');
+    if Assigned(Param) then
+      CfgID := Param.ParamValue else
+      CfgID := 0;
+    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('ID');
+    if Assigned(Param) then
+      ID := Param.ParamValue else
+      ID := 0;
+    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('RefreshGrid');
+    if Assigned(Param) then
+      RefreshGrid := Param.ParamValue else //SysUtils.StrToBool(Param.ParamValue) else
+      RefreshGrid := False;
+    if CfgID > 0 then
+    begin
+      AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Component));
+      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+      try
+        Form.CellParent := AccessoryForm;
+        {Form.StorageManager := smxLibFuncs.GetStorageManager;
+        Form.LibraryManager := smxLibFuncs.GetLibraryManager;
+        Form.DatabaseManager := smxLibFuncs.GetDatabaseManager;
+        Form.FormManager := smxLibFuncs.GetFormManager;
+        Form.ImageListManager := smxLibFuncs.GetImageListManager;}
+        Form.Initialize;
+        Form.IntfID := AccessoryForm.IntfID;
+        if Form.ShowModal = mrOk then
+          if TsmxCustomAlgorithm(Component).ActionCell is TsmxCustomGrid then
+            if RefreshGrid then
+              TsmxCustomGrid(TsmxCustomAlgorithm(Component).ActionCell).Refresh;
+      finally
+        Form.Free;
+      end;
+    end;
+  end;
+end;
+
+{function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
 var
   res: Integer;
   msg: String;
@@ -68,9 +135,17 @@ begin
       Database.RollbackTransaction;
     end;
   end;
-end;
+end;}
 
-procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
+{procedure OpenForm(Component: TsmxComponent);
+begin
+  if Component is TsmxCustomAlgorithm then
+  begin
+    nil;
+  end;
+end;}
+
+{procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
 var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
   c: TsmxBaseCell; f: TsmxCustomForm;
 begin
@@ -522,3 +597,4 @@ begin
 end;}
 
 end.
+

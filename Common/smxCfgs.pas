@@ -23,11 +23,8 @@ type
 
   TsmxParamKitItem = class(TsmxSimpleKitItem)
   private
-    FDataType: TsmxDataType;
-    FParamLocation: TsmxParamLocation;
     FParamName: String;
-    FParamType: TsmxParamType;
-    FValue: Variant;
+    FParamValue: Variant;
     function GetKit: TsmxParamKit;
     procedure SetKit(Value: TsmxParamKit);
   public
@@ -36,12 +33,9 @@ type
     procedure Read(const Node: IXMLNode); override;
     procedure Write(const Node: IXMLNode); override;
 
-    property DataType: TsmxDataType read FDataType write FDataType;
     property Kit: TsmxParamKit read GetKit write SetKit;
-    property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
     property ParamName: String read FParamName write FParamName;
-    property ParamType: TsmxParamType read FParamType write FParamType;
-    property Value: Variant read FValue write FValue;
+    property ParamValue: Variant read FParamValue write FParamValue;
   end;
 
   { TsmxParamKit }
@@ -53,8 +47,45 @@ type
   public
     constructor Create; override;
     function Add: TsmxParamKitItem;
+    function FindByName(const ParamName: String): TsmxParamKitItem;
 
     property Items[Index: Integer]: TsmxParamKitItem read GetItem write SetItem; default;
+  end;
+
+  { TsmxAlgorithmParamKitItem }
+
+  TsmxAlgorithmParamKit = class;
+
+  TsmxAlgorithmParamKitItem = class(TsmxParamKitItem)
+  private
+    FDataType: TsmxDataType;
+    FParamLocation: TsmxParamLocation;
+    FParamType: TsmxParamType;
+    function GetKit: TsmxAlgorithmParamKit;
+    procedure SetKit(Value: TsmxAlgorithmParamKit);
+  public
+    procedure Assign(Source: TsmxKitItem); override;
+    procedure Clear; override;
+    procedure Read(const Node: IXMLNode); override;
+    procedure Write(const Node: IXMLNode); override;
+
+    property DataType: TsmxDataType read FDataType write FDataType;
+    property Kit: TsmxAlgorithmParamKit read GetKit write SetKit;
+    property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
+    property ParamType: TsmxParamType read FParamType write FParamType;
+  end;
+
+  { TsmxAlgorithmParamKit }
+
+  TsmxAlgorithmParamKit = class(TsmxParamKit)
+  private
+    function GetItem(Index: Integer): TsmxAlgorithmParamKitItem;
+    procedure SetItem(Index: Integer; Value: TsmxAlgorithmParamKitItem);
+  public
+    constructor Create; override;
+    function Add: TsmxAlgorithmParamKitItem;
+
+    property Items[Index: Integer]: TsmxAlgorithmParamKitItem read GetItem write SetItem; default;
   end;
 
   { TsmxAlgorithmCfg }
@@ -66,12 +97,12 @@ type
     FAlgorithmHint: String;
     FAlgorithmHotKey: Integer;
     FAlgorithmImageIndex: Integer;
-    FAlgorithmParams: TsmxParamKit;
+    FAlgorithmParams: TsmxAlgorithmParamKit;
     FRefreshParamsCfgID: Integer;
     FAlgorithmEnabled: Boolean;
     FAlgorithmVisible: Boolean;
     //function GetAlgorithmCells: TsmxOwnerKit;
-    function GetAlgorithmParams: TsmxParamKit;
+    function GetAlgorithmParams: TsmxAlgorithmParamKit;
   protected
     procedure ReadCell(const Node: IXMLNode); override;
     procedure SetAlgorithmCaption(const Value: String); virtual;
@@ -80,7 +111,7 @@ type
     procedure SetAlgorithmHint(const Value: String); virtual;
     procedure SetAlgorithmHotKey(Value: Integer); virtual;
     procedure SetAlgorithmImageIndex(Value: Integer); virtual;
-    procedure SetAlgorithmParams(Value: TsmxParamKit); virtual;
+    procedure SetAlgorithmParams(Value: TsmxAlgorithmParamKit); virtual;
     procedure SetAlgorithmVisible(Value: Boolean); virtual;
     procedure SetRefreshParamsCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
@@ -96,7 +127,7 @@ type
     property AlgorithmHint: String read FAlgorithmHint write SetAlgorithmHint;
     property AlgorithmHotKey: Integer read FAlgorithmHotKey write SetAlgorithmHotKey;
     property AlgorithmImageIndex: Integer read FAlgorithmImageIndex write SetAlgorithmImageIndex;
-    property AlgorithmParams: TsmxParamKit read GetAlgorithmParams write SetAlgorithmParams;
+    property AlgorithmParams: TsmxAlgorithmParamKit read GetAlgorithmParams write SetAlgorithmParams;
     property AlgorithmVisible: Boolean read FAlgorithmVisible write SetAlgorithmVisible;
     property RefreshParamsCfgID: Integer read FRefreshParamsCfgID write SetRefreshParamsCfgID;
   end;
@@ -127,16 +158,21 @@ type
   TsmxAlgorithmKitItem = class(TsmxOwnerKitItem)
   private
     FItemEnabled: Boolean;
+    FItemParams: TsmxParamKit;
     FItemVisible: Boolean;
+    function GetItemParams: TsmxParamKit;
     function GetKit: TsmxAlgorithmKit;
+    procedure SetItemParams(Value: TsmxParamKit);
     procedure SetKit(Value: TsmxAlgorithmKit);
   public
+    destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); override;
     procedure Clear; override;
     procedure Read(const Node: IXMLNode); override;
     procedure Write(const Node: IXMLNode); override;
 
     property ItemEnabled: Boolean read FItemEnabled write FItemEnabled;
+    property ItemParams: TsmxParamKit read GetItemParams write SetItemParams;
     property ItemVisible: Boolean read FItemVisible write FItemVisible;
     property Kit: TsmxAlgorithmKit read GetKit write SetKit;
   end;
@@ -218,7 +254,7 @@ type
 
   TsmxRequestParamKit = class;
 
-  TsmxRequestParamKitItem = class(TsmxParamKitItem)
+  TsmxRequestParamKitItem = class(TsmxAlgorithmParamKitItem)
   private
     FNumericScale: Integer;
     FPrecision: Integer;
@@ -239,7 +275,7 @@ type
 
   { TsmxRequestParamKit }
 
-  TsmxRequestParamKit = class(TsmxParamKit)
+  TsmxRequestParamKit = class(TsmxAlgorithmParamKit)
   private
     function GetItem(Index: Integer): TsmxRequestParamKitItem;
     procedure SetItem(Index: Integer; Value: TsmxRequestParamKitItem);
@@ -327,16 +363,21 @@ type
   TsmxRequestKitItem = class(TsmxOwnerKitItem)
   private
     FDatabaseName: String;
+    FItemParams: TsmxParamKit;
     FOperationMode: TsmxOperationMode;
+    function GetItemParams: TsmxParamKit;
     function GetKit: TsmxRequestKit;
+    procedure SetItemParams(Value: TsmxParamKit);
     procedure SetKit(Value: TsmxRequestKit);
   public
+    destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); override;
     procedure Clear; override;
     procedure Read(const Node: IXMLNode); override;
     procedure Write(const Node: IXMLNode); override;
 
     property DatabaseName: String read FDatabaseName write FDatabaseName;
+    property ItemParams: TsmxParamKit read GetItemParams write SetItemParams;
     property Kit: TsmxRequestKit read GetKit write SetKit;
     property OperationMode: TsmxOperationMode read FOperationMode write FOperationMode;
   end;
@@ -962,21 +1003,25 @@ type
   TsmxFormCfg = class(TsmxActionCellCfg)
   private
     FAlgorithmListCfgID: Integer;
+    FCloseAlgCfgID: Integer;
     FFormBorder: TsmxFormBorder;
     FFormPosition: TsmxFormPosition;
     //FIsMainForm: Boolean;
     FIsMaximize: Boolean;
     FPopupListCfgID: Integer;
     FRequestListCfgID: Integer;
+    FShowAlgCfgID: Integer;
   protected
     procedure ReadCell(const Node: IXMLNode); override;
     procedure SetAlgorithmListCfgID(Value: Integer); virtual;
+    procedure SetCloseAlgCfgID(Value: Integer); virtual;
     procedure SetFormBorder(Value: TsmxFormBorder); virtual;
     procedure SetFormPosition(Value: TsmxFormPosition); virtual;
     //procedure SetIsMainForm(Value: Boolean); virtual;
     procedure SetIsMaximize(Value: Boolean); virtual;
     procedure SetPopupListCfgID(Value: Integer); virtual;
     procedure SetRequestListCfgID(Value: Integer); virtual;
+    procedure SetShowAlgCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -997,6 +1042,7 @@ type
     property CfgTop;
     property CfgVisible;
     property CfgWidth;
+    property CloseAlgCfgID: Integer read FCloseAlgCfgID write SetCloseAlgCfgID;
     property DoubleSnapAlgCfgID;
     property FormBorder: TsmxFormBorder read FFormBorder write SetFormBorder;
     property FormPosition: TsmxFormPosition read FFormPosition write SetFormPosition;
@@ -1007,6 +1053,7 @@ type
     property PopupListCfgID: Integer read FPopupListCfgID write SetPopupListCfgID;
     property PopupMenuCfgID;
     property RequestListCfgID: Integer read FRequestListCfgID write SetRequestListCfgID;
+    property ShowAlgCfgID: Integer read FShowAlgCfgID write SetShowAlgCfgID;
     property SlaveCells;
     property SnapAlgCfgID;
   end;
@@ -1166,22 +1213,16 @@ begin
   inherited Assign(Source);
   if Source is TsmxParamKitItem then
   begin
-    DataType := TsmxParamKitItem(Source).DataType;
-    ParamLocation := TsmxParamKitItem(Source).ParamLocation;
     ParamName := TsmxParamKitItem(Source).ParamName;
-    ParamType := TsmxParamKitItem(Source).ParamType;
-    Value := TsmxParamKitItem(Source).Value;
+    ParamValue := TsmxParamKitItem(Source).ParamValue;
   end;
 end;
 
 procedure TsmxParamKitItem.Clear;
 begin
   inherited Clear;
-  DataType := ftUnknown;
-  ParamLocation := plConst;
   ParamName := '';
-  ParamType := ptUnknown;
-  Value := Variants.Null;
+  ParamValue := Variants.Null;
 end;
 
 function TsmxParamKitItem.GetKit: TsmxParamKit;
@@ -1197,21 +1238,15 @@ end;
 procedure TsmxParamKitItem.Read(const Node: IXMLNode);
 begin
   inherited Read(Node);
-  DataType := TsmxDataType(TypInfo.GetEnumValue(TypeInfo(TsmxDataType), Node.Attributes['DataType']));
-  ParamLocation := TsmxParamLocation(TypInfo.GetEnumValue(TypeInfo(TsmxParamLocation), Node.Attributes['ParamLocation']));
   ParamName := Node.Attributes['ParamName'];
-  ParamType := TsmxParamType(TypInfo.GetEnumValue(TypeInfo(TsmxParamType), Node.Attributes['ParamType']));
-  Value := smxFuncs.StrToVar(Node.Attributes['Value']);
+  ParamValue := smxFuncs.StrToVar(Node.Attributes['ParamValue']);
 end;
 
 procedure TsmxParamKitItem.Write(const Node: IXMLNode);
 begin
   inherited Write(Node);
-  Node.Attributes['DataType'] := TypInfo.GetEnumName(TypeInfo(TsmxDataType), Integer(DataType));
-  Node.Attributes['ParamLocation'] := TypInfo.GetEnumName(TypeInfo(TsmxParamLocation), Integer(ParamLocation));
   Node.Attributes['ParamName'] := ParamName;
-  Node.Attributes['ParamType'] := TypInfo.GetEnumName(TypeInfo(TsmxParamType), Integer(ParamType));
-  Node.Attributes['Value'] := Variants.VarToStr(Value);
+  Node.Attributes['ParamValue'] := Variants.VarToStr(ParamValue);
 end;
 
 { TsmxParamKit }
@@ -1226,12 +1261,94 @@ begin
   Result := TsmxParamKitItem(inherited Add);
 end;
 
+function TsmxParamKit.FindByName(const ParamName: String): TsmxParamKitItem;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if SysUtils.AnsiCompareText(Items[i].ParamName, ParamName) = 0 then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
 function TsmxParamKit.GetItem(Index: Integer): TsmxParamKitItem;
 begin
   Result := TsmxParamKitItem(inherited Items[Index]);
 end;
 
 procedure TsmxParamKit.SetItem(Index: Integer; Value: TsmxParamKitItem);
+begin
+  inherited Items[Index] := Value;
+end;
+
+{ TsmxAlgorithmParamKitItem }
+
+procedure TsmxAlgorithmParamKitItem.Assign(Source: TsmxKitItem);
+begin
+  inherited Assign(Source);
+  if Source is TsmxAlgorithmParamKitItem then
+  begin
+    DataType := TsmxAlgorithmParamKitItem(Source).DataType;
+    ParamLocation := TsmxAlgorithmParamKitItem(Source).ParamLocation;
+    ParamType := TsmxAlgorithmParamKitItem(Source).ParamType;
+  end;
+end;
+
+procedure TsmxAlgorithmParamKitItem.Clear;
+begin
+  inherited Clear;
+  DataType := ftUnknown;
+  ParamLocation := plConst;
+  ParamType := ptUnknown;
+end;
+
+function TsmxAlgorithmParamKitItem.GetKit: TsmxAlgorithmParamKit;
+begin
+  Result := TsmxAlgorithmParamKit(inherited Kit);
+end;
+
+procedure TsmxAlgorithmParamKitItem.SetKit(Value: TsmxAlgorithmParamKit);
+begin
+  inherited Kit := Value;
+end;
+
+procedure TsmxAlgorithmParamKitItem.Read(const Node: IXMLNode);
+begin
+  inherited Read(Node);
+  DataType := TsmxDataType(TypInfo.GetEnumValue(TypeInfo(TsmxDataType), Node.Attributes['DataType']));
+  ParamLocation := TsmxParamLocation(TypInfo.GetEnumValue(TypeInfo(TsmxParamLocation), Node.Attributes['ParamLocation']));
+  ParamType := TsmxParamType(TypInfo.GetEnumValue(TypeInfo(TsmxParamType), Node.Attributes['ParamType']));
+end;
+
+procedure TsmxAlgorithmParamKitItem.Write(const Node: IXMLNode);
+begin
+  inherited Write(Node);
+  Node.Attributes['DataType'] := TypInfo.GetEnumName(TypeInfo(TsmxDataType), Integer(DataType));
+  Node.Attributes['ParamLocation'] := TypInfo.GetEnumName(TypeInfo(TsmxParamLocation), Integer(ParamLocation));
+  Node.Attributes['ParamType'] := TypInfo.GetEnumName(TypeInfo(TsmxParamType), Integer(ParamType));
+end;
+
+{ TsmxAlgorithmParamKit }
+
+constructor TsmxAlgorithmParamKit.Create;
+begin
+  Create(TsmxAlgorithmParamKitItem);
+end;
+
+function TsmxAlgorithmParamKit.Add: TsmxAlgorithmParamKitItem;
+begin
+  Result := TsmxAlgorithmParamKitItem(inherited Add);
+end;
+
+function TsmxAlgorithmParamKit.GetItem(Index: Integer): TsmxAlgorithmParamKitItem;
+begin
+  Result := TsmxAlgorithmParamKitItem(inherited Items[Index]);
+end;
+
+procedure TsmxAlgorithmParamKit.SetItem(Index: Integer; Value: TsmxAlgorithmParamKitItem);
 begin
   inherited Items[Index] := Value;
 end;
@@ -1291,11 +1408,11 @@ begin
   AlgorithmCells.Assign(Value);
 end;}
 
-function TsmxAlgorithmCfg.GetAlgorithmParams: TsmxParamKit;
+function TsmxAlgorithmCfg.GetAlgorithmParams: TsmxAlgorithmParamKit;
 begin
   if not Assigned(FAlgorithmParams) then
   begin
-    FAlgorithmParams := TsmxParamKit.Create;
+    FAlgorithmParams := TsmxAlgorithmParamKit.Create;
     FAlgorithmParams.KitNodeName := 'Params';
     FAlgorithmParams.ItemNodeName := 'Param';
     FAlgorithmParams.IsWriteEmpty := True;
@@ -1303,7 +1420,7 @@ begin
   Result := FAlgorithmParams;
 end;
 
-procedure TsmxAlgorithmCfg.SetAlgorithmParams(Value: TsmxParamKit);
+procedure TsmxAlgorithmCfg.SetAlgorithmParams(Value: TsmxAlgorithmParamKit);
 begin
   AlgorithmParams.Assign(Value);
 end;
@@ -1466,12 +1583,20 @@ end;}
 
 { TsmxAlgorithmKitItem }
 
+destructor TsmxAlgorithmKitItem.Destroy;
+begin
+  if Assigned(FItemParams) then
+    FItemParams.Free;
+  inherited Destroy;
+end;
+
 procedure TsmxAlgorithmKitItem.Assign(Source: TsmxKitItem);
 begin
   inherited Assign(Source);
   if Source is TsmxAlgorithmKitItem then
   begin
     ItemEnabled := TsmxAlgorithmKitItem(Source).ItemEnabled;
+    ItemParams := TsmxAlgorithmKitItem(Source).ItemParams;
     ItemVisible := TsmxAlgorithmKitItem(Source).ItemVisible;
   end;
 end;
@@ -1480,7 +1605,26 @@ procedure TsmxAlgorithmKitItem.Clear;
 begin
   inherited Clear;
   ItemEnabled := False;
+  if Assigned(FItemParams) then
+    FItemParams.Clear;
   ItemVisible := False;
+end;
+
+function TsmxAlgorithmKitItem.GetItemParams: TsmxParamKit;
+begin
+  if not Assigned(FItemParams) then
+  begin
+    FItemParams := TsmxParamKit.Create;
+    FItemParams.KitNodeName := 'Params';
+    FItemParams.ItemNodeName := 'Param';
+    //FItemParams.IsWriteEmpty := True;
+  end;
+  Result := FItemParams;
+end;
+
+procedure TsmxAlgorithmKitItem.SetItemParams(Value: TsmxParamKit);
+begin
+  ItemParams.Assign(Value);
 end;
 
 function TsmxAlgorithmKitItem.GetKit: TsmxAlgorithmKit;
@@ -1494,17 +1638,43 @@ begin
 end;
 
 procedure TsmxAlgorithmKitItem.Read(const Node: IXMLNode);
+//var
+  //i: Integer;
+  //n: IXMLNode;
 begin
   inherited Read(Node);
   ItemEnabled := Node.Attributes['ItemEnabled']; //SysUtils.StrToBool(Node.Attributes['ItemEnabled']);
   ItemVisible := Node.Attributes['ItemVisible']; //SysUtils.StrToBool(Node.Attributes['ItemVisible']);
+  ItemParams.Read(Node);
+
+  {n := Node.ChildNodes.FindNode('Params');
+  if Assigned(n) then
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'Param' then
+        with ItemParams.Add do
+        begin
+          ParamName := n.ChildNodes[i].Attributes['ParamName'];
+          ParamValue := smxFuncs.StrToVar(n.ChildNodes[i].Attributes['ParamValue']);
+        end;}
 end;
 
 procedure TsmxAlgorithmKitItem.Write(const Node: IXMLNode);
+//var
+  //n: IXMLNode;
+  //i: Integer;
 begin
   inherited Write(Node);
   Node.Attributes['ItemEnabled'] := SysUtils.BoolToStr(ItemEnabled, True);
   Node.Attributes['ItemVisible'] := SysUtils.BoolToStr(ItemVisible, True);
+  ItemParams.Write(Node);
+
+  {n := Node.AddChild('Params');
+  for i := 0 to ItemParams.Count - 1 do
+    with n.AddChild('Param') do
+    begin
+      Attributes['ParamName'] := ItemParams[i].ParamName;
+      Attributes['ParamValue'] := Variants.VarToStr(ItemParams[i].ParamValue);
+    end;}
 end;
 
 { TsmxAlgorithmKit }
@@ -2037,12 +2207,20 @@ end;
 
 { TsmxRequestKitItem }
 
+destructor TsmxRequestKitItem.Destroy;
+begin
+  if Assigned(FItemParams) then
+    FItemParams.Free;
+  inherited Destroy;
+end;
+
 procedure TsmxRequestKitItem.Assign(Source: TsmxKitItem);
 begin
   inherited Assign(Source);
   if Source is TsmxRequestKitItem then
   begin
     DatabaseName := TsmxRequestKitItem(Source).DatabaseName;
+    ItemParams := TsmxRequestKitItem(Source).ItemParams;
     OperationMode := TsmxRequestKitItem(Source).OperationMode;
   end;
 end;
@@ -2051,7 +2229,26 @@ procedure TsmxRequestKitItem.Clear;
 begin
   inherited Clear;
   DatabaseName := '';
+  if Assigned(FItemParams) then
+    FItemParams.Clear;
   OperationMode := omManual;
+end;
+
+function TsmxRequestKitItem.GetItemParams: TsmxParamKit;
+begin
+  if not Assigned(FItemParams) then
+  begin
+    FItemParams := TsmxParamKit.Create;
+    FItemParams.KitNodeName := 'Params';
+    FItemParams.ItemNodeName := 'Param';
+    //FItemParams.IsWriteEmpty := True;
+  end;
+  Result := FItemParams;
+end;
+
+procedure TsmxRequestKitItem.SetItemParams(Value: TsmxParamKit);
+begin
+  ItemParams.Assign(Value);
 end;
 
 function TsmxRequestKitItem.GetKit: TsmxRequestKit;
@@ -2069,6 +2266,7 @@ begin
   inherited Read(Node);
   DatabaseName := Node.Attributes['DatabaseName'];
   OperationMode := TsmxOperationMode(TypInfo.GetEnumValue(TypeInfo(TsmxOperationMode), Node.Attributes['OperationMode']));
+  ItemParams.Read(Node);
 end;
 
 procedure TsmxRequestKitItem.Write(const Node: IXMLNode);
@@ -2076,6 +2274,7 @@ begin
   inherited Write(Node);
   Node.Attributes['DatabaseName'] := DatabaseName;
   Node.Attributes['OperationMode'] := TypInfo.GetEnumName(TypeInfo(TsmxOperationMode), Integer(OperationMode));
+  ItemParams.Write(Node);
 end;
 
 { TsmxRequestKit }
@@ -3590,12 +3789,14 @@ begin
   if Source is TsmxFormCfg then
   begin
     AlgorithmListCfgID := TsmxFormCfg(Source).AlgorithmListCfgID;
+    CloseAlgCfgID := TsmxFormCfg(Source).CloseAlgCfgID;
     FormBorder := TsmxFormCfg(Source).FormBorder;
     FormPosition := TsmxFormCfg(Source).FormPosition;
     //IsMainForm := TsmxFormCfg(Source).IsMainForm;
     IsMaximize := TsmxFormCfg(Source).IsMaximize;
     PopupListCfgID := TsmxFormCfg(Source).PopupListCfgID;
     RequestListCfgID := TsmxFormCfg(Source).RequestListCfgID;
+    ShowAlgCfgID := TsmxFormCfg(Source).ShowAlgCfgID;
   end;
 end;
 
@@ -3603,12 +3804,14 @@ procedure TsmxFormCfg.Clear;
 begin
   inherited Clear;
   AlgorithmListCfgID := 0;
+  CloseAlgCfgID := 0;
   FormBorder := fbNone;
   FormPosition := fpDesigned;
   //IsMainForm := False;
   IsMaximize := False;
   PopupListCfgID := 0;
   RequestListCfgID := 0;
+  ShowAlgCfgID := 0;
 end;
 
 procedure TsmxFormCfg.ReadCell(const Node: IXMLNode);
@@ -3621,6 +3824,9 @@ begin
   IsMaximize := Node.Attributes['IsMaximize']; //SysUtils.StrToBool(Node.Attributes['IsMaximize']);
   PopupListCfgID := Node.Attributes['PopupListCfgID'];
   RequestListCfgID := Node.Attributes['RequestListCfgID'];
+
+  CloseAlgCfgID := Node.Attributes['CloseAlgCfgID'];
+  ShowAlgCfgID := Node.Attributes['ShowAlgCfgID'];
 end;
 
 procedure TsmxFormCfg.WriteCell(const Node: IXMLNode);
@@ -3633,11 +3839,19 @@ begin
   Node.Attributes['IsMaximize'] := SysUtils.BoolToStr(IsMaximize, True);
   Node.Attributes['PopupListCfgID'] := PopupListCfgID;
   Node.Attributes['RequestListCfgID'] := RequestListCfgID;
+
+  Node.Attributes['CloseAlgCfgID'] := CloseAlgCfgID;
+  Node.Attributes['ShowAlgCfgID'] := ShowAlgCfgID;
 end;
 
 procedure TsmxFormCfg.SetAlgorithmListCfgID(Value: Integer);
 begin
   FAlgorithmListCfgID := Value;
+end;
+
+procedure TsmxFormCfg.SetCloseAlgCfgID(Value: Integer);
+begin
+  FCloseAlgCfgID := Value;
 end;
 
 procedure TsmxFormCfg.SetFormBorder(Value: TsmxFormBorder);
@@ -3668,6 +3882,11 @@ end;
 procedure TsmxFormCfg.SetRequestListCfgID(Value: Integer);
 begin
   FRequestListCfgID := Value;
+end;
+
+procedure TsmxFormCfg.SetShowAlgCfgID(Value: Integer);
+begin
+  FShowAlgCfgID := Value;
 end;
 
 { TsmxStateKitItem }

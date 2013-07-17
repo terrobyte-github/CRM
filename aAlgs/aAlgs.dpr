@@ -1,14 +1,17 @@
 library aAlgs;
 
 uses
-  Forms,
+  smxLibProcs,
+  smxLibTypes,
   smxAlgs in 'smxAlgs.pas';
 
 {$R *.res}
 
-{exports
-  LibInfo,
-  OpenForm,
+exports
+  smxLibProcs.LibInfo,
+  smxAlgs.PrepareForm,
+  smxAlgs.OpenModalForm;
+  {OpenForm,
   OpenFormByEventID,
   OpenFormByProblemID,
   CloseForm,
@@ -22,5 +25,5 @@ uses
   SelectAndPerformRequestF;}
 
 begin
-  //FillInfo(1, 0, InitLib);
+  smxLibProcs.FillInfo(1, 0, smxLibProcs.InitLib);
 end.

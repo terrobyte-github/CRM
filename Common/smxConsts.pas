@@ -3,7 +3,7 @@ unit smxConsts;
 interface
 
 const
-  cDefIntValue = -99;
+  { XML }
   cRootNodeName = 'Root';
   cCellNodeName = 'Cell';
   cFontNodeName = 'Font';
@@ -17,6 +17,15 @@ const
     '<' + cRootNodeName + '>' +
     '</' + cRootNodeName + '>';
   cSuffixFilterText = 'Text';
+
+  { Global objects }
+  cApplicationHandle = 0;
+  cStorageManager = 1;
+  cLibraryManager = 2;
+  cDatabaseManager = 3;
+  cFormManager = 4;
+  cImageListManager = 5;
+  //cMainConnection = 6;
 
 resourcestring
   rsActionError = 'A ClassName %s %s error';

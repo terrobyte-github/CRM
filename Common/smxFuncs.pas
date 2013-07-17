@@ -55,9 +55,9 @@ var
 begin
   case AType and $F0 of
     MB_ICONWARNING: s := 'Внимание';
-    MB_ICONINFORMATION: s := 'К информации';
+    MB_ICONINFORMATION: s := 'Информация';
     MB_ICONQUESTION: s := 'Подтверждение';
-    else s := 'Ошибка!';
+    else s := 'Ошибка';
   end;
   Result := Forms.Application.MessageBox(PChar(AMsg), PChar(s), AType);
 end;

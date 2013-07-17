@@ -254,7 +254,7 @@ type
     //procedure SetValue(const Name: String; const Value: Variant);
   public
     function Add: TsmxParam;
-    function FindByName(const Name: String): TsmxParam;
+    function FindByName(const ParamName: String): TsmxParam;
 
     property Items[Index: Integer]: TsmxParam read GetItem write SetItem; default;
     //property Values[const Name: String]: Variant read GetValue write SetValue;
@@ -767,13 +767,13 @@ begin
   Result := TsmxParam(inherited Add);
 end;
 
-function TsmxParams.FindByName(const Name: String): TsmxParam;
+function TsmxParams.FindByName(const ParamName: String): TsmxParam;
 var
   i: Integer;
 begin
   Result := nil;
   for i := 0 to Count - 1 do
-    if SysUtils.AnsiCompareText(Items[i].ParamName, Name) = 0 then
+    if SysUtils.AnsiCompareText(Items[i].ParamName, ParamName) = 0 then
     begin
       Result := Items[i];
       Break;

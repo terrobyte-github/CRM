@@ -115,8 +115,8 @@ Item4=C:\Works\temp
 Item5=..\dcu
 [HistoryLists\hlOutputDirectorry]
 Count=8
-Item0=$(CRM)\lib
-Item1=$(CRM)\bin
+Item0=$(CRM)\bin
+Item1=$(CRM)\lib
 Item2=..\..\bin
 Item3=..\..\..\bin
 Item4=..\Bin
