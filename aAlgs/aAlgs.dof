@@ -42,10 +42,10 @@ ImageBase=4194304
 ExeDescription=
 [Directories]
 OutputDir=$(CRM)\lib
-UnitOutputDir=..\..\tmp
+UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=
+SearchPath=..\dcp
 Packages=smxClassesRTL
 Conditionals=
 DebugSourceDirs=
@@ -86,7 +86,7 @@ ProductName=
 ProductVersion=1.0
 Comments=
 [Excluded Packages]
-c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland Soap Components
+c:\program files\borland\delphi6\Bin\dclsoap60.bpl=Borland SOAP Components
 [HistoryLists\hlDebugSourcePath]
 Count=3
 Item0=$(DELPHI)\Source\RXLib\Src
@@ -97,8 +97,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=8
-Item0=$(DELPHI)\Lib\Debug
-Item1=..\dcp
+Item0=..\dcp
+Item1=$(DELPHI)\Lib\Debug
 Item2=$(DELPHI)\Lib\Debug;C:\Work\DELPHI~1\JCL198~1.253\JCL-19~1.253\lib\d6\debug
 Item3=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src;C:\Program Files\Borland\Delphi7\Source\ehlib
 Item4=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src
@@ -129,8 +129,8 @@ Item0=$(CRM)\bin
 Item1=..\..\bin
 [HistoryLists\hlDCPOutput]
 Count=7
-Item0=..\..\tmp
-Item1=..\dcp
+Item0=..\dcp
+Item1=..\..\tmp
 Item2=.
 Item3=.\
 Item4=\

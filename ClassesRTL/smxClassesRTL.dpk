@@ -29,7 +29,7 @@ requires
   smxBaseRTL;
 
 contains
-  smxClasses in '..\Common\smxClasses.pas',
+  smxClasses in 'smxClasses.pas',
   smxClassFuncs in '..\Common\smxClassFuncs.pas',
   smxClassTypes in '..\Common\smxClassTypes.pas',
   smxClassProcs in '..\Common\smxClassProcs.pas';

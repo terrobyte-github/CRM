@@ -4,7 +4,7 @@ uses
   ComServ,
   smxLibProcs,
   smxLibTypes,
-  smxBDEDB in '..\Common\smxBDEDB.pas';
+  smxBDEDB in 'smxBDEDB.pas';
 
 exports
   ComServ.DllGetClassObject,

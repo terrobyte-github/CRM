@@ -4,14 +4,14 @@ uses
   ComServ,
   smxLibProcs,
   smxLibTypes,
-  smxADODB in '..\Common\smxADODB.pas';
+  smxADODB in 'smxADODB.pas';
 
 exports
   ComServ.DllGetClassObject,
   ComServ.DllCanUnloadNow,
   ComServ.DllRegisterServer,
-  ComServ.DllUnregisterServer{,
-  smxLibProcs.LibInfo,
+  ComServ.DllUnregisterServer,
+  smxLibProcs.LibInfo{,
   smxADODB.NewDatabase,
   smxADODB.NewDataSet,
   smxADODB.DatabaseCLSID};
@@ -19,5 +19,5 @@ exports
 {$R *.RES}
 
 begin
-  //smxLibProcs.FillInfo(1, 0, nil, [ltDatabaseIntf]);
+  smxLibProcs.FillInfo(1, 0, nil, [ltDatabaseIntf]);
 end.

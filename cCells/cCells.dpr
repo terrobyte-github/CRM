@@ -5,10 +5,10 @@ uses
   Classes,
   smxLibProcs,
   smxLibTypes,
-  smxCfgs in '..\Common\smxCfgs.pas',
-  smxCells in '..\Common\smxCells.pas',
-  smxExtCells in '..\Common\smxExtCells.pas',
-  smxStdCtrls in '..\Common\smxStdCtrls.pas';
+  smxCfgs in 'smxCfgs.pas',
+  smxCells in 'smxCells.pas',
+  smxExtCells in 'smxExtCells.pas',
+  smxStdCtrls in 'smxStdCtrls.pas';
 
 {$R *.res}
 

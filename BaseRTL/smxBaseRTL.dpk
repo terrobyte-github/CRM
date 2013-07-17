@@ -33,7 +33,7 @@ requires
   vcldb;
 
 contains
-  smxBaseClasses in '..\Common\smxBaseClasses.pas',
+  smxBaseClasses in 'smxBaseClasses.pas',
   smxConsts in '..\Common\smxConsts.pas',
   smxDBIntf in '..\Common\smxDBIntf.pas',
   smxDBTypes in '..\Common\smxDBTypes.pas',
@@ -42,12 +42,12 @@ contains
   smxTypes in '..\Common\smxTypes.pas',
   smxDBFuncs in '..\Common\smxDBFuncs.pas',
   smxBaseIntf in '..\Common\smxBaseIntf.pas',
-  smxDBClasses in '..\Common\smxDBClasses.pas',
+  smxDBClasses in 'smxDBClasses.pas',
   smxLibTypes in '..\Common\smxLibTypes.pas',
   smxLibProcs in '..\Common\smxLibProcs.pas',
   smxLibFuncs in '..\Common\smxLibFuncs.pas',
   smxManagerIntf in '..\Common\smxManagerIntf.pas',
-  smxManagerClasses in '..\Common\smxManagerClasses.pas';
+  smxManagerClasses in 'smxManagerClasses.pas';
 
 end.
 
