@@ -1,17 +1,14 @@
 library rImages;
 
 uses
-  Classes,
   smxLibProcs,
-  smxLibTypes,
-  smxFuncs;
+  smxLibTypes;
 
 {$R *.res}
 {$R ..\Resource\pic.res}
 
 exports
-  smxLibProcs.LibInfo{,
-  NewResource};
+  smxLibProcs.LibInfo;
 
 begin
   smxLibProcs.FillInfo(1, 0, nil, [ltResource]);

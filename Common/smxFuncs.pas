@@ -3,7 +3,7 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, TypInfo, XMLIntf, smxTypes, smxConsts;
+  Classes, Windows, TypInfo, XMLIntf, smxTypes;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -22,11 +22,15 @@ function DefCellFont: TsmxCellFont;
 function DefCellText: TsmxCellText;
 function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
 function StrToSet(PTI: PTypeInfo; const Value: String): Byte;
+function GetValueFieldName(const AFieldName: String): String;
+function GetTextFieldName(const AFieldName: String): String;
+function IsTextFieldName(const AFieldName: String): Boolean;
 
 implementation
 
 uses
-  Controls, Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc;
+  Controls, Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc,
+  smxConsts;
 
 function HotKeyToStr(AKey: Integer): String;
 begin
@@ -205,6 +209,38 @@ begin
     EnumName := NextWord(P);
   end;
   Result := SetValue;
+end;
+
+function GetValueFieldName(const AFieldName: String): String;
+begin
+  Result := '';
+  if AFieldName = '' then
+    Exit;
+  if IsTextFieldName(AFieldName) then
+    Result := Copy(AFieldName, 1, Pos(smxConsts.cSuffixTextFieldName, AFieldName) - 1) else
+    Result := AFieldName;
+end;
+
+function GetTextFieldName(const AFieldName: String): String;
+begin
+  Result := '';
+  if AFieldName = '' then
+    Exit;
+  if IsTextFieldName(AFieldName) then
+    Result := AFieldName else
+    Result := AFieldName + smxConsts.cSuffixTextFieldName;
+end;
+
+function IsTextFieldName(const AFieldName: String): Boolean;
+var
+  NameLength, SuffixLength: Integer;
+begin
+  Result := False;
+  NameLength := Length(AFieldName);
+  SuffixLength := Length(smxConsts.cSuffixTextFieldName);
+  if NameLength > SuffixLength then
+    Result := SysUtils.AnsiCompareText(Copy(AFieldName, NameLength - SuffixLength + 1, SuffixLength),
+      smxConsts.cSuffixTextFieldName) = 0;
 end;
 
 end.

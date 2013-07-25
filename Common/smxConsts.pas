@@ -16,7 +16,7 @@ const
     ' encoding="' + cXMLDocEncoding + '"?>' +
     '<' + cRootNodeName + '>' +
     '</' + cRootNodeName + '>';
-  cSuffixFilterText = 'Text';
+  cSuffixTextFieldName = 'Text';
 
   { Global objects }
   cApplicationHandle = 0;

@@ -33,7 +33,7 @@ type
 
   TsmxComponentClass = class of TsmxComponent;
 
-  TsmxComponentEvent = procedure(Component: TsmxComponent) of object;
+  TsmxComponentEvent = procedure(Sender: TsmxComponent) of object;
 
   { TsmxInterfacedObject }
 

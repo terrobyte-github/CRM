@@ -134,6 +134,9 @@ type
   private
     FColumn: TColumn;
     function GetColumn: TColumn;
+    //function GetFieldValue(const FieldName: String; var Value: Variant): Boolean;
+    //function SetFieldValue(const FieldName: String; const Value: Variant): Boolean;
+    function IsOwnerDrawHeader: Boolean;
   protected
     procedure DoSnapHeader; override;
     function GetCellVisible: Boolean; override;
@@ -144,7 +147,7 @@ type
     function GetColumnColor: TColor; override;
     function GetColumnFont: TFont; override;
     function GetColumnValue: Variant; override;
-    function GetFieldName: String; override;
+    //function GetFieldName: String; override;
     function GetHeaderAlignment: TAlignment; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
@@ -161,12 +164,13 @@ type
     procedure SetColumnColor(Value: TColor); override;
     procedure SetColumnFont(Value: TFont); override;
     procedure SetColumnValue(const Value: Variant); override;
-    procedure SetFieldName(const Value: String); override;
+    //procedure SetFieldName(const Value: String); override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
     procedure SetHeaderCaption(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
     procedure SetSlaveIndex(Value: Integer); override;
+    procedure SetSlaveName(const Value: String); override;
 
     property Column: TColumn read GetColumn;
   public
@@ -186,6 +190,7 @@ type
     procedure DBGridDataChange(Sender: TObject; Field: TField);
     //procedure DBGridDblClick(Sender: TObject);
     procedure DBGridTitleClick(Column: TColumn);
+    procedure DrawHeaderDefault;
   protected
     procedure DoChangeRow; override;
     procedure DoPrepare; override;
@@ -201,6 +206,11 @@ type
     //function GetCellWidth: Integer; override;
     function GetCellHint: String; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
+    function GetFocusedRowIndex: Integer; override;
+    function GetFocusedColIndex: Integer; override;
+    function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
+    function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
+    function GetRowCount: Integer; override;
     function GetInternalObject: TObject; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure InternalInitialize; override;
@@ -219,7 +229,11 @@ type
     //procedure SetCellVisible(Value: Boolean); override;
     //procedure SetCellWidth(Value: Integer); override;
     procedure SetCellHint(const Value: String); override;
+    procedure SetFocusedColIndex(Value: Integer); override;
+    procedure SetFocusedRowIndex(Value: Integer); override;
+    procedure SetGridCaption(ColIndex, RowIndex: Integer; const Value: String); override;
     procedure SetGridOptions(Value: TsmxGridOptions); override;
+    procedure SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant); override;
     procedure SetRequest(Value: TsmxCustomRequest); override;
 
     //property DataSource: TDataSource read GetDataSource;
@@ -1237,9 +1251,9 @@ begin
         end;
         plFilterDesk:
         begin
-          if ActionCell is TsmxCustomFilterDesk then
+          if CellAction is TsmxCustomFilterDesk then
           begin
-            Cell := TsmxCustomFilterDesk(ActionCell).FindSlaveByName(AlgorithmParams[i].ParamName);
+            Cell := TsmxCustomFilterDesk(CellAction).FindSlaveByName(AlgorithmParams[i].ParamName);
             if Assigned(Cell) then
               AlgorithmParams[i].ParamValue := TsmxCustomFilter(Cell).FilterValue;
           end else
@@ -1248,9 +1262,9 @@ begin
         end;
         plGrid:
         begin
-          if ActionCell is TsmxCustomGrid then
+          if CellAction is TsmxCustomGrid then
           begin
-            Cell := TsmxCustomGrid(ActionCell).FindSlaveByName(AlgorithmParams[i].ParamName);
+            Cell := TsmxCustomGrid(CellAction).FindSlaveByName(AlgorithmParams[i].ParamName);
             if Assigned(Cell) then
               AlgorithmParams[i].ParamValue := TsmxCustomColumn(Cell).ColumnValue;
           end else
@@ -1277,12 +1291,12 @@ begin
               Break;
             end;
         end;
-        plStorageParams:
+        plStorageParam:
         begin
           if Assigned(StorageManager) then
             AlgorithmParams[i].ParamValue := StorageManager.Values[AlgorithmParams[i].ParamName];
         end;
-        plParentParams:
+        plParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
@@ -1736,9 +1750,9 @@ begin
             smxClassFuncs.FindFilterOnSection(TsmxCustomSection(List[0]),
               FCurDataSetIntf.Params[i].ParamName, Value);}
           //Cell := nil;
-          if RequestCell is TsmxCustomFilterDesk then
+          if CellRequest is TsmxCustomFilterDesk then
           begin
-            Cell := TsmxCustomFilterDesk(RequestCell).FindSlaveByName(CurDataSet.Params[i].ParamName);
+            Cell := TsmxCustomFilterDesk(CellRequest).FindSlaveByName(CurDataSet.Params[i].ParamName);
             if Assigned(Cell) then
               CurDataSet.Params[i].Value := TsmxCustomFilter(Cell).FilterValue;
           end else
@@ -1754,13 +1768,13 @@ begin
                 if smxClassFuncs.FindColumnOnSection(TsmxCustomPage(List[0]).Slaves[j],
                     FCurDataSetIntf.Params[i].ParamName, Value) then
                   Break;}
-          if RequestCell is TsmxCustomGrid then
+          if CellRequest is TsmxCustomGrid then
           begin
-            if RequestCell.CellParent is TsmxCustomSection then
-              if RequestCell.CellParent.CellParent is TsmxCustomPage then
-                with TsmxCustomPage(RequestCell.CellParent.CellParent) do
+            if CellRequest.CellParent is TsmxCustomSection then
+              if CellRequest.CellParent.CellParent is TsmxCustomPage then
+                with TsmxCustomPage(CellRequest.CellParent.CellParent) do
                   for j := 0 to SlaveCount - 1 do
-                    if RequestCell.CellParent <> Slaves[j] then
+                    if CellRequest.CellParent <> Slaves[j] then
                       if smxClassFuncs.FindColumnOnSection(Slaves[j], CurDataSet.Params[i].ParamName, Value) then
                       begin
                         CurDataSet.Params[i].Value := Value;
@@ -1790,12 +1804,12 @@ begin
               Break;
             end;
         end;
-        plStorageParams:
+        plStorageParam:
         begin
           if Assigned(StorageManager) then
             CurDataSet.Params[i].Value := StorageManager.Values[CurDataSet.Params[i].ParamName];
         end;
-        plParentParams:
+        plParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
@@ -2020,16 +2034,28 @@ begin
 end;
 
 function TsmxColumn.GetColumnCaption: String;
+//var
+  //Val: Variant;
 begin
-  if Assigned(Column.Field) then
-    Result := Variants.VarToStr(Column.Field.Value) else
-    Result := '';
+  //Result := Variants.VarToStr(GetFieldValue(smxFuncs.GetTextFieldName(SlaveName)));
+  //GetFieldValue(smxFuncs.GetTextFieldName(SlaveName), Val);
+  //Result := Variants.VarToStr(Val);
+  Result := '';
+  if Assigned(CellOwner) then
+    if CellOwner.FocusedRowIndex <> -1 then
+      Result := CellOwner.GridCaptions[SlaveIndex, CellOwner.FocusedRowIndex];
 end;
 
 procedure TsmxColumn.SetColumnCaption(const Value: String);
+//var
+  //Val: Variant;
 begin
-  if Assigned(Column.Field) then
-    Column.Field.Value := smxFuncs.StrToVar(Value);
+  //SetFieldValue(smxFuncs.GetTextFieldName(SlaveName), smxFuncs.StrToVar(Value));
+  //Val := Variants.VarToStr(Value);
+  //SetFieldValue(smxFuncs.GetTextFieldName(SlaveName), Val);
+  if Assigned(CellOwner) then
+    if CellOwner.FocusedRowIndex <> -1 then
+      CellOwner.GridCaptions[SlaveIndex, CellOwner.FocusedRowIndex] := Value;
 end;
 
 function TsmxColumn.GetColumnColor: TColor;
@@ -2054,18 +2080,24 @@ end;
 
 function TsmxColumn.GetColumnValue: Variant;
 begin
-  if Assigned(Column.Field) then
-    Result := Column.Field.Value else
-    Result := Variants.Null;
+  //if not GetFieldValue(smxFuncs.GetValueFieldName(SlaveName), Result) then
+  //GetFieldValue(SlaveName, Result);
+  //Result := GetFieldValue(smxFuncs.GetValueFieldName(SlaveName));
+  Result := Variants.Null;
+  if Assigned(CellOwner) then
+    if CellOwner.FocusedRowIndex <> -1 then
+      Result := CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex];
 end;
 
 procedure TsmxColumn.SetColumnValue(const Value: Variant);
 begin
-  if Assigned(Column.Field) then
-    Column.Field.Value := Value;
+  //SetFieldValue({smxFuncs.GetValueFieldName(}SlaveName{)}, Value);
+  if Assigned(CellOwner) then
+    if CellOwner.FocusedRowIndex <> -1 then
+      CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex] := Value;
 end;
 
-function TsmxColumn.GetFieldName: String;
+{function TsmxColumn.GetFieldName: String;
 begin
   Result := Column.FieldName;
 end;
@@ -2073,7 +2105,46 @@ end;
 procedure TsmxColumn.SetFieldName(const Value: String);
 begin
   Column.FieldName := Value;
-end;
+end;}
+
+{function TsmxColumn.GetFieldValue(const FieldName: String; var Value: Variant): Boolean;
+var
+  Field: IsmxField;
+begin
+  Result := False;
+  Value := Variants.Null;
+  if Assigned(CellOwner) then
+    if Assigned(CellOwner.Request) then
+      if Assigned(CellOwner.Request.DataSet) then
+      begin
+        Field := CellOwner.Request.DataSet.FindField(FieldName);
+        if Assigned(Field) then
+        begin
+          Value := Field.Value;
+          Result := True;
+        end;
+      end;
+end;}
+
+{function TsmxColumn.SetFieldValue(const FieldName: String; const Value: Variant): Boolean;
+var
+  Field: IsmxField;
+begin
+  Result := False;
+  if Assigned(CellOwner) then
+    if Assigned(CellOwner.Request) then
+      if Assigned(CellOwner.Request.DataSet) then
+      begin
+        Field := CellOwner.Request.DataSet.FindField(FieldName);
+        if Assigned(Field) then
+        begin
+          CellOwner.Request.DataSet.Edit;
+          Field.Value := Value;
+          CellOwner.Request.DataSet.Post;
+          Result := True;
+        end;
+      end;
+end;}
 
 function TsmxColumn.GetHeaderAlignment: TAlignment;
 begin
@@ -2102,7 +2173,8 @@ end;
 
 procedure TsmxColumn.SetHeaderColor(Value: TColor);
 begin
-  Column.Title.Color := Value;
+  if IsOwnerDrawHeader then
+    Column.Title.Color := Value;
 end;
 
 function TsmxColumn.GetHeaderFont: TFont;
@@ -2112,7 +2184,8 @@ end;
 
 procedure TsmxColumn.SetHeaderFont(Value: TFont);
 begin
-  Column.Title.Font := Value;
+  if IsOwnerDrawHeader then  // м.б. предется мудрить с установкой св-тв шрифта
+    Column.Title.Font := Value;
 end;
 
 function TsmxColumn.GetInternalObject: TObject;
@@ -2148,6 +2221,14 @@ begin
   end;
 end;}
 
+function TsmxColumn.IsOwnerDrawHeader: Boolean;
+begin
+  if Assigned(CellOwner) then
+    Result := goOwnerDrawHeader in CellOwner.GridOptions
+  else
+    Result := True;
+end;
+
 procedure TsmxColumn.ResetCellProps;
 begin
   inherited ResetCellProps;
@@ -2158,7 +2239,7 @@ begin
   ColumnFont.Name := '';
   ColumnFont.Size := 0;
   ColumnFont.Style := [];
-  FieldName := '';
+  //FieldName := '';
   HeaderAlignment := taLeftJustify;
   HeaderCaption := '';
   HeaderColor := Graphics.clBlack;
@@ -2198,7 +2279,7 @@ begin
     ColumnFont.Name := TsmxColumnCfg(Cfg).ColumnText.Font.Name;
     ColumnFont.Size := TsmxColumnCfg(Cfg).ColumnText.Font.Size;
     ColumnFont.Style := TsmxColumnCfg(Cfg).ColumnText.Font.Style;
-    FieldName := TsmxColumnCfg(Cfg).ColumnFieldName;
+    //FieldName := TsmxColumnCfg(Cfg).ColumnFieldName;
     HeaderAlignment := TsmxColumnCfg(Cfg).ColumnHeader.Alignment;
     HeaderCaption := TsmxColumnCfg(Cfg).ColumnHeader.Caption;
     HeaderColor := TColor(TsmxColumnCfg(Cfg).ColumnHeader.Color);
@@ -2216,6 +2297,12 @@ procedure TsmxColumn.SetSlaveIndex(Value: Integer);
 begin
   inherited SetSlaveIndex(Value);
   Column.Index := Value;
+end;
+
+procedure TsmxColumn.SetSlaveName(const Value: String);
+begin
+  inherited SetSlaveName(Value);
+  Column.FieldName := Value;
 end;
 
 { TsmxDBGrid }
@@ -2267,6 +2354,89 @@ begin
       AlgCfgID := 0;
     DoEvent(OnRefresh, AlgCfgID);
   end;
+end;
+
+procedure TsmxDBGrid.DrawHeaderDefault;
+var
+  i: Integer;
+begin
+  for i := 0 to SlaveCount - 1 do
+  begin
+    Slaves[i].HeaderColor := Graphics.clBtnFace;
+    Slaves[i].HeaderFont := DBGrid.TitleFont;
+  end;
+end;
+
+function TsmxDBGrid.GetFocusedColIndex: Integer;
+begin
+  Result := DBGrid.SelectedIndex;
+end;
+
+procedure TsmxDBGrid.SetFocusedColIndex(Value: Integer);
+begin
+  DBGrid.SelectedIndex := Value;
+end;
+
+function TsmxDBGrid.GetFocusedRowIndex: Integer;
+begin
+  Result := -1;
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+      Result := Request.DataSet.RecordNo;
+end;
+
+procedure TsmxDBGrid.SetFocusedRowIndex(Value: Integer);
+begin
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+       Request.DataSet.RecordNo := Value;
+end;
+
+function TsmxDBGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
+begin
+  Result := Variants.VarToStr(GetGridValue(ColIndex, RowIndex));
+end;
+
+procedure TsmxDBGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
+begin
+  SetGridValue(ColIndex, RowIndex, smxFuncs.StrToVar(Value));
+end;
+
+function TsmxDBGrid.GetGridValue(ColIndex, RowIndex: Integer): Variant;
+var
+  OldRecordNo: Integer;
+begin
+  Result := Variants.Null;
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+    begin
+      OldRecordNo := Request.DataSet.RecordNo;
+      try
+        Request.DataSet.RecordNo := RowIndex;
+        Result := Request.DataSet.FieldByName(Slaves[ColIndex].SlaveName).Value;
+      finally
+        Request.DataSet.RecordNo := OldRecordNo;
+      end;
+    end;
+end;
+
+procedure TsmxDBGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
+var
+  OldRecordNo: Integer;
+begin
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+    begin
+      OldRecordNo := Request.DataSet.RecordNo;
+      try
+        Request.DataSet.RecordNo := RowIndex;
+        Request.DataSet.Edit;
+        Request.DataSet.FieldByName(Slaves[ColIndex].SlaveName).Value := Value;
+        Request.DataSet.Post;
+      finally
+        Request.DataSet.RecordNo := OldRecordNo;
+      end;
+    end;
 end;
 
 {procedure TsmxDBGrid.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
@@ -2589,6 +2759,11 @@ begin
   if goRowSelect in Value then
     DBGrid.Options := DBGrid.Options + [dgRowSelect] else
     DBGrid.Options := DBGrid.Options - [dgRowSelect];
+  if goShowHeader in Value then
+    DBGrid.Options := DBGrid.Options + [dgTitles, dgIndicator] else
+    DBGrid.Options := DBGrid.Options - [dgTitles, dgIndicator];
+  if not (goOwnerDrawHeader in Value) then
+    DrawHeaderDefault;
 end;
 
 procedure TsmxDBGrid.SetRequest(Value: TsmxCustomRequest);
@@ -2870,6 +3045,14 @@ begin
     FPanel.BevelOuter := bvNone;
   end;
   Result := FPanel;
+end;
+
+function TsmxDBGrid.GetRowCount: Integer;
+begin
+  Result := 0;
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+      Result := Request.DataSet.RecordCount;
 end;
 
 {procedure TsmxPanelFilter.InternalInitialize;
@@ -3262,7 +3445,7 @@ begin
             DataSet.ParamByName(Slaves[i].SlaveName).Value :=
               Slaves[i].FilterValue;
           if foApplyText in Slaves[i].FilterOptions then
-            DataSet.ParamByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value :=
+            DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value :=
               smxFuncs.StrToVar(Slaves[i].FilterCaption);
         end;
         Request.Update;
@@ -3317,7 +3500,7 @@ begin
                   DataSet.FieldByName(Slaves[i].SlaveName).Value;
               if foPrepareText in Slaves[i].FilterOptions then
                 Slaves[i].FilterCaption :=
-                  Variants.VarToStr(DataSet.FieldByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value);
+                  Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
             end;
             pmExecute:
             begin
@@ -3326,7 +3509,7 @@ begin
                   DataSet.ParamByName(Slaves[i].SlaveName).Value;
               if foPrepareText in Slaves[i].FilterOptions then
                 Slaves[i].FilterCaption :=
-                  Variants.VarToStr(DataSet.ParamByName(Slaves[i].SlaveName + smxConsts.cSuffixFilterText).Value);
+                  Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
             end;
           end;
         end;
@@ -3347,12 +3530,12 @@ begin
   try
     for i := 0 to DataSet.ParamCount - 1 do
       case DataSet.Params[i].ParamLocation of
-        plStorageParams:
+        plStorageParam:
         begin
           if Assigned(StorageManager) then
             DataSet.Params[i].Value := StorageManager.Values[DataSet.Params[i].ParamName];
         end;
-        plParentParams:
+        plParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do

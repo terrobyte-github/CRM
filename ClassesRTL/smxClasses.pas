@@ -312,6 +312,7 @@ type
   private
     FCellOwner: TsmxOwnerCell;
     FIsAltSlaveClass: Boolean;
+    //FIsCreateSlaveWithOwner: Boolean;
     FIsOwnerIsParent: Boolean;
     FSlaveList: TList;
     FSlaveName: String;
@@ -330,6 +331,7 @@ type
     procedure ResetCellProps; override;
     procedure SetCellProps; override;
     procedure SetIsAltSlaveClass(Value: Boolean); virtual;
+    //procedure SetIsCreateSlaveWithOwner(Value: Boolean); virtual;
     procedure SetIsOwnerIsParent(Value: Boolean); virtual;
     procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); virtual;
     procedure SetSlaveIndex(Value: Integer); virtual;
@@ -341,6 +343,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     function AddSlave: TsmxOwnerCell;
+    function AddSlaveAsClass(SlaveClass: TsmxOwnerCellClass): TsmxOwnerCell;
     procedure ClearSlaves;
     procedure DeleteSlave(Index: Integer);
     function FindSlaveByCfgID(CfgID: Integer): TsmxOwnerCell;
@@ -348,6 +351,7 @@ type
 
     property CellOwner: TsmxOwnerCell read FCellOwner write SetCellOwner;
     property IsAltSlaveClass: Boolean read FIsAltSlaveClass write SetIsAltSlaveClass;
+    //property IsCreateSlaveWithOwner: Boolean read FIsCreateSlaveWithOwner write SetIsCreateSlaveWithOwner;
     property IsOwnerIsParent: Boolean read FIsOwnerIsParent write SetIsOwnerIsParent;
     property SlaveClass: TsmxOwnerCellClass read GetSlaveClass;
     property SlaveCount: Integer read GetSlaveCount;
@@ -475,6 +479,8 @@ type
 
   TsmxCustomPopupMenu = class;
 
+  TsmxControlCellClass = class of TsmxControlCell;
+
   TsmxControlCell = class(TsmxOwnerCell)
   private
     FOnBackup: TsmxComponentEvent;
@@ -526,6 +532,7 @@ type
   public
     //constructor Create(AOwner: TComponent); override;
     function AddSlave: TsmxControlCell;
+    function AddSlaveAsClass(SlaveClass: TsmxControlCellClass): TsmxControlCell;
     procedure Assign(Source: TPersistent); override;
     procedure Backup;
     procedure DoubleSnap;
@@ -599,10 +606,12 @@ type
     function GetCellImageIndex: Integer; virtual;
     function GetCfgClass: TsmxBaseCfgClass; override;
     //procedure InternalInitialize; override;
-    //procedure InternalSnap; override;
+    procedure InternalSnap; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure ResetCellProps; override;
     procedure SetAlgorithm(Value: TsmxCustomAlgorithm); virtual;
+    procedure SetAlgorithmEvents(Alg: TsmxCustomAlgorithm); virtual;
+    procedure SetAlgorithmProps(Alg: TsmxCustomAlgorithm); virtual;
     procedure SetCellCaption(const Value: String); virtual;
     procedure SetCellHint(const Value: String); virtual;
     procedure SetCellImageIndex(Value: Integer); virtual;
@@ -661,7 +670,8 @@ type
   TsmxCustomAlgorithm = class(TsmxOwnerCell)
   private
     FAlgorithmParams: TsmxAlgorithmParams;
-    FActionCell: TsmxBaseCell;
+    FCellAction: TsmxBaseCell;
+    FCellEvent: TsmxBaseCell;
     FIsManualRefreshParams: Boolean;
     FOnExecute: TsmxComponentEvent;
     FOnRefreshParams: TsmxComponentEvent;
@@ -681,7 +691,6 @@ type
     procedure InternalExecute; virtual;
     procedure InternalRefreshParams; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure SetActionCell(Value: TsmxBaseCell); virtual;
     procedure SetAlgorithmCaption(const Value: String); virtual;
     procedure SetAlgorithmEnabled(Value: Boolean); virtual;
     procedure SetAlgorithmHint(const Value: String); virtual;
@@ -689,6 +698,8 @@ type
     procedure SetAlgorithmImageIndex(Value: Integer); virtual;
     procedure SetAlgorithmParams(Value: TsmxAlgorithmParams); virtual;
     procedure SetAlgorithmVisible(Value: Boolean); virtual;
+    procedure SetCellAction(Value: TsmxBaseCell); virtual;
+    procedure SetCellEvent(Value: TsmxBaseCell); virtual;
     procedure SetIsManualRefreshParams(Value: Boolean); virtual;
   public
     destructor Destroy; override;
@@ -696,7 +707,6 @@ type
     procedure Execute;
     procedure RefreshParams;
 
-    property ActionCell: TsmxBaseCell read FActionCell write SetActionCell;
     property AlgorithmCaption: String read GetAlgorithmCaption write SetAlgorithmCaption;
     property AlgorithmEnabled: Boolean read GetAlgorithmEnabled write SetAlgorithmEnabled;
     property AlgorithmHint: String read GetAlgorithmHint write SetAlgorithmHint;
@@ -704,6 +714,8 @@ type
     property AlgorithmImageIndex: Integer read GetAlgorithmImageIndex write SetAlgorithmImageIndex;
     property AlgorithmParams: TsmxAlgorithmParams read GetAlgorithmParams write SetAlgorithmParams;
     property AlgorithmVisible: Boolean read GetAlgorithmVisible write SetAlgorithmVisible;
+    property CellAction: TsmxBaseCell read FCellAction write SetCellAction;
+    property CellEvent: TsmxBaseCell read FCellEvent write SetCellEvent;
     property CellOwner: TsmxCustomAlgorithmList read GetCellOwner write SetCellOwner;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
     //property ProcPointer: Pointer read GetProcPointer;
@@ -735,6 +747,7 @@ type
 
   TsmxCustomRequest = class(TsmxOwnerCell)
   private
+    FCellRequest: TsmxBaseCell;
     FCurPerformanceMode: TsmxPerformanceMode;
     FCurDataSetIntf: IsmxDataSet;
     FDatabaseIntf: IsmxDatabase;
@@ -753,7 +766,6 @@ type
     FOnUpdate: TsmxComponentEvent;
     FOperationMode: TsmxOperationMode;
     FPerformanceMode: TsmxPerformanceMode;
-    FRequestCell: TsmxBaseCell;
     FUpdatePerformance: TsmxPerformanceMode;
     FUpdateRequestIntf: IsmxDataSet;
     function GetModifyPerformance(Modify: TsmxModifyRequest): TsmxPerformanceMode;
@@ -776,6 +788,7 @@ type
     procedure InternalRefreshParams; virtual;
     procedure InternalUpdate; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure SetCellRequest(Value: TsmxBaseCell); virtual;
     procedure SetDatabase(const Value: IsmxDatabase); virtual;
     procedure SetDatabaseManager(const Value: IsmxDatabaseManager); override;
     procedure SetDatabaseName(const Value: String); virtual;
@@ -785,7 +798,6 @@ type
     procedure SetModifyRequest(Modify: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
     procedure SetOperationMode(Value: TsmxOperationMode); virtual;
     procedure SetPerformanceMode(Value: TsmxPerformanceMode); virtual;
-    procedure SetRequestCell(Value: TsmxBaseCell); virtual;
 
     property CurDataSet: IsmxDataSet read FCurDataSetIntf write FCurDataSetIntf;
     property CurPerformanceMode: TsmxPerformanceMode read FCurPerformanceMode write FCurPerformanceMode;
@@ -800,6 +812,7 @@ type
     procedure Update;
 
     property CellOwner: TsmxCustomRequestList read GetCellOwner write SetCellOwner;
+    property CellRequest: TsmxBaseCell read FCellRequest write SetCellRequest;
     property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
     property DatabaseName: String read FDatabaseName write SetDatabaseName;
     property DataSet: IsmxDataSet read GetDataSet;//FDataSetIntf write SetDataSet;
@@ -808,7 +821,6 @@ type
     property ModifyRequests[Modify: TsmxModifyRequest]: IsmxDataSet read GetModifyRequest write SetModifyRequest;
     property OperationMode: TsmxOperationMode read FOperationMode write SetOperationMode {default omManual};
     property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write SetPerformanceMode;
-    property RequestCell: TsmxBaseCell read FRequestCell write SetRequestCell;
 
     property OnDelete: TsmxComponentEvent read FOnExecute write FOnExecute;
     property OnExecute: TsmxComponentEvent read FOnExecute write FOnExecute;
@@ -850,7 +862,7 @@ type
     function GetColumnColor: TColor; virtual;
     function GetColumnFont: TFont; virtual;
     function GetColumnValue: Variant; virtual;
-    function GetFieldName: String; virtual;
+    //function GetFieldName: String; virtual;
     function GetHeaderAlignment: TAlignment; virtual;
     function GetHeaderColor: TColor; virtual;
     function GetHeaderFont: TFont; virtual;
@@ -861,7 +873,7 @@ type
     procedure SetColumnColor(Value: TColor); virtual;
     procedure SetColumnFont(Value: TFont); virtual;
     procedure SetColumnValue(const Value: Variant); virtual;
-    procedure SetFieldName(const Value: String); virtual;
+    //procedure SetFieldName(const Value: String); virtual;
     procedure SetHeaderAlignment(Value: TAlignment); virtual;
     procedure SetHeaderCaption(const Value: String); virtual;
     procedure SetHeaderColor(Value: TColor); virtual;
@@ -876,7 +888,7 @@ type
     property ColumnColor: TColor read GetColumnColor write SetColumnColor;
     property ColumnFont: TFont read GetColumnFont write SetColumnFont;
     property ColumnValue: Variant read GetColumnValue write SetColumnValue;
-    property FieldName: String read GetFieldName write SetFieldName;
+    //property FieldName: String read GetFieldName write SetFieldName;
     property HeaderAlignment: TAlignment read GetHeaderAlignment write SetHeaderAlignment;
     property HeaderCaption: String read GetHeaderCaption write SetHeaderCaption;
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor;
@@ -900,13 +912,23 @@ type
     procedure DoChangeRow; virtual;
     procedure DoPrepare; virtual;
     procedure DoRefresh; virtual;
+    function GetFocusedRowIndex: Integer; virtual;
+    function GetFocusedColIndex: Integer; virtual;
+    function GetGridCaption(ColIndex, RowIndex: Integer): String; virtual;
+    function GetGridValue(ColIndex, RowIndex: Integer): Variant; virtual;
     function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetRowCount: Integer; virtual;
     procedure InternalChangeRow; virtual;
     procedure InternalPrepare; virtual;
     procedure InternalRefresh; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure SetFocusedColIndex(Value: Integer); virtual;
+    procedure SetFocusedRowIndex(Value: Integer); virtual;
+    procedure SetGridCaption(ColIndex, RowIndex: Integer; const Value: String); virtual;
+    procedure SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant); virtual;
     procedure SetGridOptions(Value: TsmxGridOptions); virtual;
     procedure SetRequest(Value: TsmxCustomRequest); virtual;
+    procedure SetRowCount(Value: Integer); virtual;
   public
     function AddSlave: TsmxCustomColumn;
     procedure Assign(Source: TPersistent); override;
@@ -914,8 +936,13 @@ type
     procedure Prepare;
     procedure Refresh;
 
+    property FocusedColIndex: Integer read GetFocusedColIndex write SetFocusedColIndex;
+    property FocusedRowIndex: Integer read GetFocusedRowIndex write SetFocusedRowIndex;
+    property GridCaptions[ColIndex, RowIndex: Integer]: String read GetGridCaption write SetGridCaption;
+    property GridValues[ColIndex, RowIndex: Integer]: Variant read GetGridValue write SetGridValue;
     property GridOptions: TsmxGridOptions read FGridOptions write SetGridOptions;
     property Request: TsmxCustomRequest read FRequest write SetRequest;
+    property RowCount: Integer read GetRowCount write SetRowCount;
     property Slaves[Index: Integer]: TsmxCustomColumn read GetSlave write SetSlave; default;
 
     property OnChangeRow: TsmxComponentEvent read FOnChangeRow write FOnChangeRow;
@@ -1662,7 +1689,8 @@ begin
     end;
     if Assigned(Algorithm) and (@Event = @Algorithm.OnExecute) then
     begin
-      Algorithm.ActionCell := Self;
+      Algorithm.CellEvent := Self;
+      Algorithm.RefreshParams;
       Event(Algorithm);
     end else
       Event(Self);
@@ -1675,8 +1703,8 @@ var
 begin
   if Assigned(FOnInitialize) then
   begin
-    if FCfg is TsmxCellCfg then
-      AlgCfgID := TsmxCellCfg(FCfg).InitializeAlgCfgID else
+    if Cfg is TsmxCellCfg then
+      AlgCfgID := TsmxCellCfg(Cfg).InitializeAlgCfgID else
       AlgCfgID := 0;
     DoEvent(FOnInitialize, AlgCfgID);
   end;
@@ -2296,10 +2324,24 @@ begin
 end;
 
 function TsmxOwnerCell.AddSlave: TsmxOwnerCell;
+//var
+  //Obj: TComponent;
 begin
+  {if FIsCreateSlaveWithOwner then
+    Obj := Self else
+    Obj := nil;}
   if FIsAltSlaveClass then
     Result := GetAltSlaveClass(SlaveList.Count).Create(nil) else
     Result := SlaveClass.Create(nil);
+  Result.FCellOwner := Self;
+  if FIsOwnerIsParent then
+    Result.CellParent := Self;
+  SlaveList.Add(Result);
+end;
+
+function TsmxOwnerCell.AddSlaveAsClass(SlaveClass: TsmxOwnerCellClass): TsmxOwnerCell;
+begin
+  Result := SlaveClass.Create(nil);
   Result.FCellOwner := Self;
   if FIsOwnerIsParent then
     Result.CellParent := Self;
@@ -2476,6 +2518,11 @@ procedure TsmxOwnerCell.SetIsAltSlaveClass(Value: Boolean);
 begin
   FIsAltSlaveClass := Value;
 end;
+
+{procedure TsmxOwnerCell.SetIsCreateSlaveWithOwner(Value: Boolean);
+begin
+  FIsCreateSlaveWithOwner := Value;
+end;}
 
 procedure TsmxOwnerCell.SetIsOwnerIsParent(Value: Boolean);
 begin
@@ -2800,6 +2847,11 @@ begin
   Result := TsmxControlCell(inherited AddSlave);
 end;
 
+function TsmxControlCell.AddSlaveAsClass(SlaveClass: TsmxControlCellClass): TsmxControlCell;
+begin
+  Result := TsmxControlCell(inherited AddSlaveAsClass(SlaveClass));
+end;
+
 procedure TsmxControlCell.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
@@ -2834,8 +2886,8 @@ var
 begin
   if Assigned(FOnBackup) then
   begin
-    if FCfg is TsmxControlCellCfg then
-      AlgCfgID := TsmxControlCellCfg(FCfg).BackupAlgCfgID else
+    if Cfg is TsmxControlCellCfg then
+      AlgCfgID := TsmxControlCellCfg(Cfg).BackupAlgCfgID else
       AlgCfgID := 0;
     DoEvent(FOnBackup, AlgCfgID);
   end;
@@ -2859,8 +2911,8 @@ var
 begin
   if Assigned(FOnDoubleSnap) then
   begin
-    if FCfg is TsmxControlCellCfg then
-      AlgCfgID := TsmxControlCellCfg(FCfg).DoubleSnapAlgCfgID else
+    if Cfg is TsmxControlCellCfg then
+      AlgCfgID := TsmxControlCellCfg(Cfg).DoubleSnapAlgCfgID else
       AlgCfgID := 0;
     DoEvent(FOnDoubleSnap, AlgCfgID);
   end;
@@ -2884,8 +2936,8 @@ var
 begin
   if Assigned(FOnRestore) then
   begin
-    if FCfg is TsmxControlCellCfg then
-      AlgCfgID := TsmxControlCellCfg(FCfg).RestoreAlgCfgID else
+    if Cfg is TsmxControlCellCfg then
+      AlgCfgID := TsmxControlCellCfg(Cfg).RestoreAlgCfgID else
       AlgCfgID := 0;
     DoEvent(FOnRestore, AlgCfgID);
   end;
@@ -2909,8 +2961,8 @@ var
 begin
   if Assigned(FOnSnap) then
   begin
-    if FCfg is TsmxControlCellCfg then
-      AlgCfgID := TsmxControlCellCfg(FCfg).SnapAlgCfgID else
+    if Cfg is TsmxControlCellCfg then
+      AlgCfgID := TsmxControlCellCfg(Cfg).SnapAlgCfgID else
       AlgCfgID := 0;
     DoEvent(FOnSnap, AlgCfgID);
   end;
@@ -3349,11 +3401,11 @@ begin
   end;
 end;}
 
-{procedure TsmxActionCell.InternalSnap;
+procedure TsmxActionCell.InternalSnap;
 begin
   if Assigned(FAlgorithm) then
-    FAlgorithm.ActionCell := Self;
-end;}
+    FAlgorithm.CellAction := Self;
+end;
 
 procedure TsmxActionCell.Notification(AComponent: TComponent; Operation: TOperation);
 begin
@@ -3379,14 +3431,26 @@ begin
   if Assigned(FAlgorithm) then
   begin
     if FIsSetAlgorithmProps then
-    begin
-      CellCaption := FAlgorithm.AlgorithmCaption;
-      CellHint := FAlgorithm.AlgorithmHint;
-      CellImageIndex := FAlgorithm.AlgorithmImageIndex;
-    end;
+      SetAlgorithmProps(FAlgorithm);
     if FIsSetAlgorithmEvents then
-      OnSnap := FAlgorithm.OnExecute;
+      SetAlgorithmEvents(FAlgorithm);
     FAlgorithm.FreeNotification(Self);
+  end;
+end;
+
+procedure TsmxActionCell.SetAlgorithmEvents(Alg: TsmxCustomAlgorithm);
+begin
+  if Assigned(Alg) then
+    OnSnap := Alg.OnExecute;
+end;
+
+procedure TsmxActionCell.SetAlgorithmProps(Alg: TsmxCustomAlgorithm);
+begin
+  if Assigned(Alg) then
+  begin
+    CellCaption := Alg.AlgorithmCaption;
+    CellHint := Alg.AlgorithmHint;
+    CellImageIndex := Alg.AlgorithmImageIndex;
   end;
 end;
 
@@ -3411,12 +3475,22 @@ end;
 
 procedure TsmxActionCell.SetIsSetAlgorithmEvents(Value: Boolean);
 begin
-  FIsSetAlgorithmEvents := Value;
+  if FIsSetAlgorithmEvents <> Value then
+  begin
+    FIsSetAlgorithmEvents := Value;
+    if Value then
+      SetAlgorithmEvents(FAlgorithm);
+  end;
 end;
 
 procedure TsmxActionCell.SetIsSetAlgorithmProps(Value: Boolean);
 begin
-  FIsSetAlgorithmProps := Value;
+  if FIsSetAlgorithmProps <> Value then
+  begin
+    FIsSetAlgorithmProps := Value;
+    if Value then
+      SetAlgorithmProps(FAlgorithm);
+  end;
 end;
 
 { TsmxCustomSection }
@@ -3641,15 +3715,27 @@ end;}
 procedure TsmxCustomAlgorithm.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (AComponent = ActionCell) and (Operation = opRemove) then
-    ActionCell := nil;
+  if Operation = opRemove then
+  begin
+    if AComponent = CellAction then
+      CellAction := nil else
+    if AComponent = CellEvent then
+      CellEvent := nil;
+  end;
 end;
 
-procedure TsmxCustomAlgorithm.SetActionCell(Value: TsmxBaseCell);
+procedure TsmxCustomAlgorithm.SetCellAction(Value: TsmxBaseCell);
 begin
-  FActionCell := Value;
-  if Assigned(FActionCell) then
-    FActionCell.FreeNotification(Self);
+  FCellAction := Value;
+  if Assigned(FCellAction) then
+    FCellAction.FreeNotification(Self);
+end;
+
+procedure TsmxCustomAlgorithm.SetCellEvent(Value: TsmxBaseCell);
+begin
+  FCellEvent := Value;
+  if Assigned(FCellEvent) then
+    FCellEvent.FreeNotification(Self);
 end;
 
 procedure TsmxCustomAlgorithm.SetIsManualRefreshParams(Value: Boolean);
@@ -3949,8 +4035,8 @@ end;
 procedure TsmxCustomRequest.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (AComponent = RequestCell) and (Operation = opRemove) then
-    RequestCell := nil;
+  if (AComponent = CellRequest) and (Operation = opRemove) then
+    CellRequest := nil;
 end;
 
 procedure TsmxCustomRequest.PerformRequest;
@@ -3969,6 +4055,13 @@ begin
           [ClassName, 'execute'], CfgID, E.Message);
     end;
   end;
+end;
+
+procedure TsmxCustomRequest.SetCellRequest(Value: TsmxBaseCell);
+begin
+  FCellRequest := Value;
+  if Assigned(FCellRequest) then
+    FCellRequest.FreeNotification(Self);
 end;
 
 procedure TsmxCustomRequest.SetDatabase(const Value: IsmxDatabase);
@@ -4021,13 +4114,6 @@ begin
   FPerformanceMode := Value;
 end;
 
-procedure TsmxCustomRequest.SetRequestCell(Value: TsmxBaseCell);
-begin
-  FRequestCell := Value;
-  if Assigned(FRequestCell) then
-    FRequestCell.FreeNotification(Self);
-end;
-
 { TsmxCustomRequestList }
 
 function TsmxCustomRequestList.AddSlave: TsmxCustomRequest;
@@ -4069,7 +4155,7 @@ begin
     ColumnFont := TsmxCustomColumn(Source).ColumnFont;
     ColumnCaption := TsmxCustomColumn(Source).ColumnCaption;
     ColumnValue := TsmxCustomColumn(Source).ColumnValue;
-    FieldName := TsmxCustomColumn(Source).FieldName;
+    //FieldName := TsmxCustomColumn(Source).FieldName;
     HeaderAlignment := TsmxCustomColumn(Source).HeaderAlignment;
     HeaderColor := TsmxCustomColumn(Source).HeaderColor;
     HeaderFont := TsmxCustomColumn(Source).HeaderFont;
@@ -4148,14 +4234,14 @@ procedure TsmxCustomColumn.SetColumnValue(const Value: Variant);
 begin
 end;
 
-function TsmxCustomColumn.GetFieldName: String;
+{function TsmxCustomColumn.GetFieldName: String;
 begin
   Result := '';
 end;
 
 procedure TsmxCustomColumn.SetFieldName(const Value: String);
 begin
-end;
+end;}
 
 function TsmxCustomColumn.GetHeaderAlignment: TAlignment;
 begin
@@ -4232,7 +4318,7 @@ end;
 procedure TsmxCustomGrid.InternalPrepare;
 begin
   if Assigned(FRequest) then
-    FRequest.RequestCell := Self;
+    FRequest.CellRequest := Self;
 end;
 
 procedure TsmxCustomGrid.Prepare;
@@ -4250,13 +4336,58 @@ end;
 procedure TsmxCustomGrid.InternalRefresh;
 begin
   if Assigned(FRequest) then
-    FRequest.RequestCell := Self;
+    FRequest.CellRequest := Self;
 end;
 
 procedure TsmxCustomGrid.Refresh;
 begin
   InternalRefresh;
   DoRefresh;
+end;
+
+function TsmxCustomGrid.GetFocusedColIndex: Integer;
+begin
+  Result := -1;
+end;
+
+procedure TsmxCustomGrid.SetFocusedColIndex(Value: Integer);
+begin
+end;
+
+function TsmxCustomGrid.GetFocusedRowIndex: Integer;
+begin
+  Result := -1;
+end;
+
+procedure TsmxCustomGrid.SetFocusedRowIndex(Value: Integer);
+begin
+end;
+
+function TsmxCustomGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
+begin
+  Result := '';
+end;
+
+procedure TsmxCustomGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
+begin
+end;
+
+function TsmxCustomGrid.GetGridValue(ColIndex, RowIndex: Integer): Variant;
+begin
+  Result := Variants.Null;
+end;
+
+procedure TsmxCustomGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
+begin
+end;
+
+function TsmxCustomGrid.GetRowCount: Integer;
+begin
+  Result := 0;
+end;
+
+procedure TsmxCustomGrid.SetRowCount(Value: Integer);
+begin
 end;
 
 function TsmxCustomGrid.GetSlave(Index: Integer): TsmxCustomColumn;
@@ -4320,7 +4451,7 @@ end;
 procedure TsmxCustomFilterDesk.InternalApply;
 begin
   if Assigned(FRequest) then
-    FRequest.RequestCell := Self;
+    FRequest.CellRequest := Self;
 end;
 
 procedure TsmxCustomFilterDesk.Apply;
@@ -4338,7 +4469,7 @@ end;
 procedure TsmxCustomFilterDesk.InternalPrepare;
 begin
   if Assigned(FRequest) then
-    FRequest.RequestCell := Self;
+    FRequest.CellRequest := Self;
 end;
 
 procedure TsmxCustomFilterDesk.Prepare;

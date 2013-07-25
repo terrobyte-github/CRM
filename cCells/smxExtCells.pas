@@ -13,8 +13,8 @@ unit smxExtCells;
 interface
 
 uses
-  Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, Graphics, XMLIntf,
-  smxBaseClasses, smxClasses, smxCfgs, smxCells, smxDBIntf, smxTypes;
+  Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, Graphics,
+  XMLIntf, smxBaseClasses, smxClasses, smxCfgs, smxCells, smxDBIntf, smxTypes;
 
 type
   { TsmxLibAlgorithmCfg }
@@ -517,11 +517,11 @@ implementation
 uses
   Variants, Forms, SysUtils, TypInfo, smxFuncs, smxClassFuncs, smxDBTypes;
 
-(*type
+type
   { _TsmxBaseCell }
 
   _TsmxBaseCell = class(TsmxBaseCell)
-  end;*)
+  end;
 
 { TsmxLibAlgorithmCfg }
 
@@ -1161,7 +1161,7 @@ procedure TsmxEditFilter.SetFilterValue(const Value: Variant);
 begin
   //if VarIsEmpty(Value) or VarIsNull(Value) then
     //FEdit.Text := '' else
-    FEdit.Text := Variants.VarToStr(Value);
+    Edit.Text := Variants.VarToStr(Value);
 end;
 
 {function TsmxEditFilter.GetFilter: TObject;

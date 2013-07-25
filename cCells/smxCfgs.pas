@@ -432,7 +432,7 @@ type
   published
     property CfgVisible;
     property CfgWidth;
-    property ColumnFieldName: String read FColumnFieldName write SetColumnFieldName;
+    //property ColumnFieldName: String read FColumnFieldName write SetColumnFieldName;
     property ColumnHeader: TsmxCellText read FColumnHeader write SetColumnHeader;
     //property ColumnName: String read FColumnName write SetColumnName;
     property ColumnText: TsmxCellText read FColumnText write SetColumnText;
@@ -2345,7 +2345,7 @@ begin
   inherited Assign(Source);
   if Source is TsmxColumnCfg then
   begin
-    ColumnFieldName := TsmxColumnCfg(Source).ColumnFieldName;
+    //ColumnFieldName := TsmxColumnCfg(Source).ColumnFieldName;
     ColumnHeader := TsmxColumnCfg(Source).ColumnHeader;
     ColumnText := TsmxColumnCfg(Source).ColumnText;
     SnapHeaderAlgCfgID := TsmxColumnCfg(Source).SnapHeaderAlgCfgID;
@@ -2357,7 +2357,7 @@ var
   DefText: TsmxCellText;
 begin
   inherited Clear;
-  ColumnFieldName := '';
+  //ColumnFieldName := '';
   DefText := smxFuncs.DefCellText;
   DefText.Color := Integer(Graphics.clBtnFace);
   ColumnHeader := DefText;
@@ -2371,7 +2371,7 @@ var
   Text: TsmxCellText;
 begin
   inherited ReadCell(Node);
-  ColumnFieldName := Node.Attributes['FieldName'];
+  //ColumnFieldName := Node.Attributes['FieldName'];
   SnapHeaderAlgCfgID := Node.Attributes['SnapHeaderAlgCfgID'];
 
   n := Node.ChildNodes.FindNode('Column');
@@ -2423,7 +2423,7 @@ var
   n{, n2}: IXMLNode;
 begin
   inherited WriteCell(Node);
-  Node.Attributes['FieldName'] := ColumnFieldName;
+  //Node.Attributes['FieldName'] := ColumnFieldName;
   Node.Attributes['SnapHeaderAlgCfgID'] := SnapHeaderAlgCfgID;
 
   n := Node.AddChild('Column');

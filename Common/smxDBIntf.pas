@@ -94,8 +94,8 @@ type
   TsmxParamType = TParamType;
 
   TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
-    plForeignKey, plInput, plOutput, plInOutput, plStorageParams,
-    plParentParams, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
+    plForeignKey, plInput, plOutput, plInOutput, plStorageParam,
+    plParentParam, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
 
   IsmxParam = interface(IsmxBaseInterface)
     ['{564458C3-CD9E-402C-800A-06C6065CCF1B}']

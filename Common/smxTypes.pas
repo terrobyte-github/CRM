@@ -30,7 +30,8 @@ type
     DatabaseName: String;
   end;}
 
-  TsmxGridOption = (goColLines, goRowLines, goRowSelect);
+  TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
+    goOwnerDrawHeader);
 
   TsmxGridOptions = set of TsmxGridOption;
 
