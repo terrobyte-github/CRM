@@ -152,6 +152,7 @@ type
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
     function GetHeaderCaption: String; override;
+    function GetIsEditing: Boolean; override;
     function GetInternalObject: TObject; override;
     //procedure InternalInitialize; override;
     procedure ResetCellProps; override;
@@ -169,6 +170,7 @@ type
     procedure SetHeaderCaption(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
+    procedure SetIsEditing(Value: Boolean); override;
     procedure SetSlaveIndex(Value: Integer); override;
     procedure SetSlaveName(const Value: String); override;
 
@@ -191,7 +193,10 @@ type
     //procedure DBGridDblClick(Sender: TObject);
     procedure DBGridTitleClick(Column: TColumn);
     procedure DrawHeaderDefault;
+    procedure DBGridMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
   protected
+    procedure DoApply; override;
     procedure DoChangeRow; override;
     procedure DoPrepare; override;
     procedure DoRefresh; override;
@@ -206,13 +211,14 @@ type
     //function GetCellWidth: Integer; override;
     function GetCellHint: String; override;
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetFocusedRowIndex: Integer; override;
     function GetFocusedColIndex: Integer; override;
+    function GetFocusedRowIndex: Integer; override;
     function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
     function GetRowCount: Integer; override;
     function GetInternalObject: TObject; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
+    //procedure InternalApply; override;
     //procedure InternalInitialize; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
@@ -328,6 +334,7 @@ type
   protected
     procedure DoApply; override;
     procedure DoPrepare; override;
+    procedure DoRefresh; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellAnchors: TAnchors; override;
     //function GetCellCursor: TCursor; override;
@@ -346,6 +353,7 @@ type
     procedure InternalApply; override;
     //procedure InternalInitialize; override;
     procedure InternalPrepare; override;
+    procedure InternalRefresh; override;
     procedure ResetCellProps; override;
     //procedure SetCellAlign(Value: TAlign); override;
     //procedure SetCellAnchors(Value: TAnchors); override;
@@ -892,7 +900,7 @@ type
     FIsMainForm: Boolean;
     function GetForm: TForm;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormDestroy(Sender: TObject);
+    //procedure FormDestroy(Sender: TObject);
     //procedure PrepareForm;
   protected
     procedure DoClose; override;
@@ -1028,7 +1036,7 @@ implementation
 uses
   SysUtils, Variants, ToolWin, Messages, {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,} smxFuncs,
-  smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs;
+  smxDBFuncs, smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs;
 
 type
   { _TsmxBaseCell }
@@ -1043,8 +1051,8 @@ type
 
   { _TWinControl }
 
-  _TWinControl = class(TWinControl)
-  end;
+  {_TWinControl = class(TWinControl)
+  end;}
 
 { TsmxAction }
 
@@ -1275,7 +1283,7 @@ begin
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
           for j := 0 to List.Count - 1 do
-            if FindFilterOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
             begin
               AlgorithmParams[i].ParamValue := Value;
               Break;
@@ -1285,7 +1293,7 @@ begin
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm]);
           for j := 0 to List.Count - 1 do
-            if FindColumnOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
             begin
               AlgorithmParams[i].ParamValue := Value;
               Break;
@@ -2083,18 +2091,27 @@ begin
   //if not GetFieldValue(smxFuncs.GetValueFieldName(SlaveName), Result) then
   //GetFieldValue(SlaveName, Result);
   //Result := GetFieldValue(smxFuncs.GetValueFieldName(SlaveName));
-  Result := Variants.Null;
+
+  {Result := Variants.Null;
   if Assigned(CellOwner) then
     if CellOwner.FocusedRowIndex <> -1 then
-      Result := CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex];
+      Result := CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex];}
+  if Assigned(Column.Field) then
+    Result := Column.Field.Value else
+    Result := Variants.Null;
 end;
 
 procedure TsmxColumn.SetColumnValue(const Value: Variant);
 begin
   //SetFieldValue({smxFuncs.GetValueFieldName(}SlaveName{)}, Value);
-  if Assigned(CellOwner) then
+
+  {if Assigned(CellOwner) then
     if CellOwner.FocusedRowIndex <> -1 then
-      CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex] := Value;
+      CellOwner.GridValues[SlaveIndex, CellOwner.FocusedRowIndex] := Value;}
+  if Assigned(Column.Field) then
+  begin
+
+  end;
 end;
 
 {function TsmxColumn.GetFieldName: String;
@@ -2193,6 +2210,16 @@ begin
   Result := Column;
 end;
 
+function TsmxColumn.GetIsEditing: Boolean;
+begin
+  Result := not Column.ReadOnly;
+end;
+
+procedure TsmxColumn.SetIsEditing(Value: Boolean);
+begin
+  Column.ReadOnly := not Value;
+end;
+
 {procedure TsmxColumn.InternalInitialize;
 var
   Form: TsmxCustomForm;
@@ -2247,6 +2274,7 @@ begin
   HeaderFont.Name := '';
   HeaderFont.Size := 0;
   HeaderFont.Style := [];
+  IsEditing := False;
   OnSnapHeader := nil;
 end;
 
@@ -2287,6 +2315,7 @@ begin
     HeaderFont.Name := TsmxColumnCfg(Cfg).ColumnHeader.Font.Name;
     HeaderFont.Size := TsmxColumnCfg(Cfg).ColumnHeader.Font.Size;
     HeaderFont.Style := TsmxColumnCfg(Cfg).ColumnHeader.Font.Style;
+    IsEditing := TsmxColumnCfg(Cfg).IsEditing;
     Form := smxClassFuncs.GetAccessoryForm(Self);
     if Assigned(Form) then
       OnSnapHeader := smxClassFuncs.GetEventForm(Form, TsmxColumnCfg(Cfg).SnapHeaderAlgCfgID);
@@ -2317,6 +2346,19 @@ begin
   end;
 end;
 
+procedure TsmxDBGrid.DoApply;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnApply) then
+  begin
+    if Cfg is TsmxGridCfg then
+      AlgCfgID := TsmxGridCfg(Cfg).ApplyAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnApply, AlgCfgID);
+  end;
+end;
+
 procedure TsmxDBGrid.DoChangeRow;
 var
   AlgCfgID: Integer;
@@ -2343,6 +2385,25 @@ begin
   end;
 end;
 
+procedure TsmxDBGrid.InternalPrepare;
+var
+  OldIsManualRefreshParams: Boolean;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    if Assigned(Request.DataSet) then
+      Request.DataSet.Close;
+    OldIsManualRefreshParams := Request.IsManualRefreshParams;
+    try
+      Request.IsManualRefreshParams := False;
+      Request.Prepare;
+    finally
+      Request.IsManualRefreshParams := OldIsManualRefreshParams;
+    end;
+  end;
+end;
+
 procedure TsmxDBGrid.DoRefresh;
 var
   AlgCfgID: Integer;
@@ -2353,6 +2414,23 @@ begin
       AlgCfgID := TsmxGridCfg(Cfg).RefreshAlgCfgID else
       AlgCfgID := 0;
     DoEvent(OnRefresh, AlgCfgID);
+  end;
+end;
+
+procedure TsmxDBGrid.InternalRefresh;
+var
+  OldIsManualRefreshParams: Boolean;
+begin
+  inherited InternalRefresh;
+  if Assigned(Request) then
+  begin
+    OldIsManualRefreshParams := Request.IsManualRefreshParams;
+    try
+      Request.IsManualRefreshParams := False;
+      Request.Execute;
+    finally
+      Request.IsManualRefreshParams := OldIsManualRefreshParams;
+    end;
   end;
 end;
 
@@ -2379,17 +2457,22 @@ end;
 
 function TsmxDBGrid.GetFocusedRowIndex: Integer;
 begin
-  Result := -1;
+  if Assigned(DBGrid.DataSource.DataSet) then
+    Result := DBGrid.DataSource.DataSet.RecNo else
+    Result := -1;
+  {Result := -1;
   if Assigned(Request) then
     if Assigned(Request.DataSet) then
-      Result := Request.DataSet.RecordNo;
+      Result := Request.DataSet.RecordNo;}
 end;
 
 procedure TsmxDBGrid.SetFocusedRowIndex(Value: Integer);
 begin
-  if Assigned(Request) then
+  if Assigned(DBGrid.DataSource.DataSet) then
+    DBGrid.DataSource.DataSet.RecNo := Value;
+  {if Assigned(Request) then
     if Assigned(Request.DataSet) then
-       Request.DataSet.RecordNo := Value;
+       Request.DataSet.RecordNo := Value;}
 end;
 
 function TsmxDBGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
@@ -2404,39 +2487,93 @@ end;
 
 function TsmxDBGrid.GetGridValue(ColIndex, RowIndex: Integer): Variant;
 var
-  OldRecordNo: Integer;
+  //CurRecordNo: Integer;
+  //RecordNo: Integer;
+  //b: Boolean;
+  Field: IsmxField;
+  Bookmark: TBookmark;
 begin
   Result := Variants.Null;
   if Assigned(Request) then
     if Assigned(Request.DataSet) then
-    begin
-      OldRecordNo := Request.DataSet.RecordNo;
-      try
-        Request.DataSet.RecordNo := RowIndex;
-        Result := Request.DataSet.FieldByName(Slaves[ColIndex].SlaveName).Value;
-      finally
-        Request.DataSet.RecordNo := OldRecordNo;
+      if Request.DataSet.Active then
+      begin
+        //Request.DataSet.DisableControls;
+        //Bookmark := Request.DataSet.GetBookmark;
+        Bookmark := nil;
+        if Assigned(DBGrid.DataSource.DataSet) then
+        begin
+          DBGrid.DataSource.DataSet.DisableControls;
+          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+        end;
+        //b := False;
+        //CurRecordNo := Request.DataSet.RecordNo;
+        try
+          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          begin
+            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            if Assigned(Field) then
+              Result := Field.Value;
+          end;
+          //Request.DataSet.GotoBookmark(Bookmark);
+          if Assigned(DBGrid.DataSource.DataSet) then
+            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+        finally
+          //Request.DataSet.RecordNo := CurRecordNo;
+
+          //Request.DataSet.FreeBookmark(Bookmark);
+          //Request.DataSet.EnalbleControls;
+          if Assigned(DBGrid.DataSource.DataSet) then
+          begin
+            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+            DBGrid.DataSource.DataSet.DisableControls;
+          end;
+        end;
       end;
-    end;
 end;
 
 procedure TsmxDBGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
 var
-  OldRecordNo: Integer;
+  //OldRecordNo: Integer;
+  Field: IsmxField;
+  Bookmark: TBookmark;
 begin
   if Assigned(Request) then
     if Assigned(Request.DataSet) then
-    begin
-      OldRecordNo := Request.DataSet.RecordNo;
-      try
-        Request.DataSet.RecordNo := RowIndex;
-        Request.DataSet.Edit;
-        Request.DataSet.FieldByName(Slaves[ColIndex].SlaveName).Value := Value;
-        Request.DataSet.Post;
-      finally
-        Request.DataSet.RecordNo := OldRecordNo;
+      if Request.DataSet.Active then
+      begin
+        //OldRecordNo := Request.DataSet.RecordNo;
+        Bookmark := nil;
+        if Assigned(DBGrid.DataSource.DataSet) then
+        begin
+          DBGrid.DataSource.DataSet.DisableControls;
+          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+        end;
+        try
+          //Request.DataSet.RecordNo := RowIndex;
+          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          begin
+            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            if Assigned(Field) then
+            begin
+              Request.DataSet.Edit;
+              Field.Value := Value;
+              Request.DataSet.Post;
+            end;
+          end;
+          if Assigned(DBGrid.DataSource.DataSet) then
+            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+        finally
+          //Request.DataSet.RecordNo := OldRecordNo;
+          if Assigned(DBGrid.DataSource.DataSet) then
+          begin
+            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+            DBGrid.DataSource.DataSet.EnableControls;
+          end;
+          //Request.DataSet.FreeBookmark(Bookmark);
+          //Request.DataSet.EnalbleControls;
+        end;
       end;
-    end;
 end;
 
 {procedure TsmxDBGrid.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
@@ -2598,12 +2735,13 @@ begin
   if not Assigned(FDBGrid) then
   begin
     FDBGrid := TsmxWheelDBGrid.Create(nil);
-    FDBGrid.Options := FDBGrid.Options - [dgEditing];
+    //FDBGrid.Options := FDBGrid.Options - [dgEditing];
     FDBGrid.OnDblClick := ControlDblClick;
     FDBGrid.OnTitleClick := DBGridTitleClick;
     FDBGrid.OnCellClick := DBGridCellClick;
     FDBGrid.DataSource := TDataSource.Create(nil);
     FDBGrid.DataSource.OnDataChange := DBGridDataChange;
+    FDBGrid.OnMouseWheelUp := DBGridMouseWheelUp;
   end;
   Result := FDBGrid;
 end;
@@ -2667,48 +2805,15 @@ begin
   end;
 end;}
 
-procedure TsmxDBGrid.InternalPrepare;
-var
-  OldIsManualRefreshParams: Boolean;
-begin
-  inherited InternalPrepare;
-  if Assigned(Request) then
-  begin
-    OldIsManualRefreshParams := Request.IsManualRefreshParams;
-    try
-      Request.IsManualRefreshParams := False;
-      Request.Prepare;
-    finally
-      Request.IsManualRefreshParams := OldIsManualRefreshParams;
-    end;
-  end;
-end;
-
-procedure TsmxDBGrid.InternalRefresh;
-var
-  OldIsManualRefreshParams: Boolean;
-begin
-  inherited InternalRefresh;
-  if Assigned(Request) then
-  begin
-    OldIsManualRefreshParams := Request.IsManualRefreshParams;
-    try
-      Request.IsManualRefreshParams := False;
-      Request.Execute;
-    finally
-      Request.IsManualRefreshParams := OldIsManualRefreshParams;
-    end;
-  end;
-end;
-
 procedure TsmxDBGrid.ResetCellProps;
 begin
   inherited ResetCellProps;
   GridOptions := [];
-  Request := nil;
+  OnApply := nil;
   OnChangeRow := nil;
   OnPrepare := nil;
   OnRefresh := nil;
+  Request := nil;
 end;
 
 procedure TsmxDBGrid.SetCellParent(Value: TsmxBaseCell);
@@ -2738,6 +2843,7 @@ begin
     if Assigned(Form) then
     begin
       Request := smxClassFuncs.GetRequestForm(Form, TsmxGridCfg(Cfg).RequestCfgID);
+      OnApply := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).ApplyAlgCfgID);
       OnChangeRow := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).ChangeRowAlgCfgID);
       //OnPressDouble := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).PressDoubleAlgCfgID);
       //OnPressHeader := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).PressHeaderAlgCfgID);
@@ -2762,6 +2868,9 @@ begin
   if goShowHeader in Value then
     DBGrid.Options := DBGrid.Options + [dgTitles, dgIndicator] else
     DBGrid.Options := DBGrid.Options - [dgTitles, dgIndicator];
+  if goEditing in Value then
+    DBGrid.Options := DBGrid.Options + [dgEditing] else
+    DBGrid.Options := DBGrid.Options - [dgEditing];  
   if not (goOwnerDrawHeader in Value) then
     DrawHeaderDefault;
 end;
@@ -3236,6 +3345,13 @@ begin
     end;
 end;}
 
+procedure TsmxDBGrid.DBGridMouseWheelUp(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  if CellVisible then
+    inf('DBGridMouseWheelUp');
+end;
+
 { TsmxPanelFilterDesk }
 
 constructor TsmxPanelFilterDesk.Create(AOwner: TComponent);
@@ -3265,6 +3381,39 @@ begin
   end;
 end;
 
+procedure TsmxPanelFilterDesk.InternalApply;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalApply;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.ModifyRequests[mrUpdate];
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        for i := 0 to SlaveCount - 1 do
+        begin
+          if foApplyValue in Slaves[i].FilterOptions then
+            DataSet.ParamByName(Slaves[i].SlaveName).Value :=
+              Slaves[i].FilterValue;
+          if foApplyText in Slaves[i].FilterOptions then
+            DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value :=
+              smxFuncs.StrToVar(Slaves[i].FilterCaption);
+        end;
+        Request.Update;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
 procedure TsmxPanelFilterDesk.DoPrepare;
 var
   AlgCfgID: Integer;
@@ -3275,6 +3424,115 @@ begin
       AlgCfgID := TsmxFilterDeskCfg(Cfg).PrepareAlgCfgID else
       AlgCfgID := 0;
     DoEvent(OnPrepare, AlgCfgID);
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.InternalPrepare;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.DataSet;
+    if Assigned(DataSet) then
+    begin
+      DataSet.Close;
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        Request.Prepare;
+        if DataSet.Active then
+          for i := 0 to SlaveCount - 1 do
+          begin
+            case Request.PerformanceMode of
+              pmOpen:
+              begin
+                if foPrepareValue in Slaves[i].FilterOptions then
+                  Slaves[i].FilterValue :=
+                    DataSet.FieldByName(Slaves[i].SlaveName).Value;
+                if foPrepareText in Slaves[i].FilterOptions then
+                  Slaves[i].FilterCaption :=
+                    Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
+              end;
+              pmExecute:
+              begin
+                if foPrepareValue in Slaves[i].FilterOptions then
+                  Slaves[i].FilterValue :=
+                    DataSet.ParamByName(Slaves[i].SlaveName).Value;
+                if foPrepareText in Slaves[i].FilterOptions then
+                  Slaves[i].FilterCaption :=
+                    Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
+              end;
+            end;
+          end;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.DoRefresh;
+var
+  AlgCfgID: Integer;
+begin
+  if Assigned(OnRefresh) then
+  begin
+    if Cfg is TsmxFilterDeskCfg then
+      AlgCfgID := TsmxFilterDeskCfg(Cfg).RefreshAlgCfgID else
+      AlgCfgID := 0;
+    DoEvent(OnRefresh, AlgCfgID);
+  end;
+end;
+
+procedure TsmxPanelFilterDesk.InternalRefresh;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.DataSet;
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        Request.Execute;
+        for i := 0 to SlaveCount - 1 do
+        begin
+          case Request.PerformanceMode of
+            pmOpen:
+            begin
+              if foPrepareValue in Slaves[i].FilterOptions then
+                Slaves[i].FilterValue :=
+                  DataSet.FieldByName(Slaves[i].SlaveName).Value;
+              if foPrepareText in Slaves[i].FilterOptions then
+                Slaves[i].FilterCaption :=
+                  Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
+            end;
+            pmExecute:
+            begin
+              if foPrepareValue in Slaves[i].FilterOptions then
+                Slaves[i].FilterValue :=
+                  DataSet.ParamByName(Slaves[i].SlaveName).Value;
+              if foPrepareText in Slaves[i].FilterOptions then
+                Slaves[i].FilterCaption :=
+                  Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
+            end;
+          end;
+        end;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
   end;
 end;
 
@@ -3423,39 +3681,6 @@ begin
   Result := TsmxPanelFilter;
 end;
 
-procedure TsmxPanelFilterDesk.InternalApply;
-var
-  DataSet: IsmxDataSet;
-  OldIsManualRefreshParams: Boolean;
-  i: Integer;
-begin
-  inherited InternalApply;
-  if Assigned(Request) then
-  begin
-    DataSet := Request.ModifyRequests[mrUpdate];
-    if Assigned(DataSet) then
-    begin
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := True;
-        RefreshValueParams(DataSet);
-        for i := 0 to SlaveCount - 1 do
-        begin
-          if foApplyValue in Slaves[i].FilterOptions then
-            DataSet.ParamByName(Slaves[i].SlaveName).Value :=
-              Slaves[i].FilterValue;
-          if foApplyText in Slaves[i].FilterOptions then
-            DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value :=
-              smxFuncs.StrToVar(Slaves[i].FilterCaption);
-        end;
-        Request.Update;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
-  end;
-end;
-
 {procedure TsmxPanelFilterDesk.InternalInitialize;
 var
   Form: TsmxCustomForm;
@@ -3472,53 +3697,6 @@ begin
     end;
   end;
 end;}
-
-procedure TsmxPanelFilterDesk.InternalPrepare;
-var
-  DataSet: IsmxDataSet;
-  OldIsManualRefreshParams: Boolean;
-  i: Integer;
-begin
-  inherited InternalPrepare;
-  if Assigned(Request) then
-  begin
-    DataSet := Request.DataSet;
-    if Assigned(DataSet) then
-    begin
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := True;
-        RefreshValueParams(DataSet);
-        Request.Execute;
-        for i := 0 to SlaveCount - 1 do
-        begin
-          case Request.PerformanceMode of
-            pmOpen:
-            begin
-              if foPrepareValue in Slaves[i].FilterOptions then
-                Slaves[i].FilterValue :=
-                  DataSet.FieldByName(Slaves[i].SlaveName).Value;
-              if foPrepareText in Slaves[i].FilterOptions then
-                Slaves[i].FilterCaption :=
-                  Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
-            end;
-            pmExecute:
-            begin
-              if foPrepareValue in Slaves[i].FilterOptions then
-                Slaves[i].FilterValue :=
-                  DataSet.ParamByName(Slaves[i].SlaveName).Value;
-              if foPrepareText in Slaves[i].FilterOptions then
-                Slaves[i].FilterCaption :=
-                  Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].SlaveName)).Value);
-            end;
-          end;
-        end;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
-  end;
-end;
 
 procedure TsmxPanelFilterDesk.RefreshValueParams(DataSet: IsmxDataSet);
 var
@@ -3558,6 +3736,7 @@ begin
   inherited ResetCellProps;
   OnApply := nil;
   OnPrepare := nil;
+  OnRefresh := nil;
   Request := nil;
 end;
 
@@ -3589,6 +3768,7 @@ begin
       Request := smxClassFuncs.GetRequestForm(Form, TsmxFilterDeskCfg(Cfg).RequestCfgID);
       OnApply := smxClassFuncs.GetEventForm(Form, TsmxFilterDeskCfg(Cfg).ApplyAlgCfgID);
       OnPrepare := smxClassFuncs.GetEventForm(Form, TsmxFilterDeskCfg(Cfg).PrepareAlgCfgID);
+      OnRefresh := smxClassFuncs.GetEventForm(Form, TsmxFilterDeskCfg(Cfg).RefreshAlgCfgID);
     end;
   end;
 end;
@@ -5950,7 +6130,7 @@ end;}
 procedure TsmxForm.DoClose;
 var
   AlgCfgID: Integer;
-begin
+begin                  
   if Assigned(OnClose) then
   begin
     if Cfg is TsmxFormCfg then
@@ -5964,7 +6144,13 @@ procedure TsmxForm.InternalClose;
 begin
   Form.OnClose := nil;
   Form.Close;
-  Form.OnClose := FormClose;
+  {if not FIsMainForm then
+  begin
+    if not (fsModal in (Form.FormState)) and FIsCloseUser then
+      Free;
+  end else
+    FForm := nil;}
+  //Form.OnClose := FormClose;
 end;
 
 procedure TsmxForm.DoShow;
@@ -5982,16 +6168,19 @@ end;
 
 procedure TsmxForm.InternalShow;
 begin
+  Form.OnClose := FormClose;
   Form.Show;
 end;
 
 function TsmxForm.InternalShowModal: TModalResult;
 begin
+  Form.OnClose := FormClose;
   Result := TModalResult(Form.ShowModal);
 end;
 
 procedure TsmxForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DoClose;
   if not FIsMainForm then
   begin
     if not (fsModal in (Form.FormState)) then
@@ -5999,17 +6188,21 @@ begin
       Action := caNone;
       Free;
     end;
+  end else
+  begin
+    FForm := nil;
+    Free;
   end;
 end;
 
-procedure TsmxForm.FormDestroy(Sender: TObject);
+{procedure TsmxForm.FormDestroy(Sender: TObject);
 begin
   if FIsMainForm then
   begin
     FForm := nil;
     Free;
   end;
-end;
+end;}
 
 function TsmxForm.GetCellActive: Boolean;
 begin
@@ -6058,10 +6251,10 @@ end;
 
 procedure TsmxForm.SetCellImageIndex(Value: Integer);
 begin
-  if FFormImageIndex > -1 then
+  if FFormImageIndex <> -1 then
     Form.Icon := nil;
   FFormImageIndex := Value;
-  if FFormImageIndex > -1 then
+  if FFormImageIndex <> -1 then
     if Assigned(ImageList) then
       ImageList.GetIcon(FFormImageIndex, Form.Icon);
 end;
@@ -6084,8 +6277,9 @@ begin
         FIsMainForm := True;
       end else
         FForm := TForm.Create(nil);
-      FForm.OnClose := FormClose;
-      FForm.OnDestroy := FormDestroy;
+      //FForm.OnClose := FormClose;
+      //FForm.OnDestroy := FormDestroy;
+
       //FIsMainForm := Forms.Application.MainForm = FForm;
       //if FIsMainForm then
         //FForm.FreeNotification(Self);
@@ -6276,7 +6470,7 @@ begin
       Cell.Initialize;
       RequestList := TsmxCustomRequestList(Cell);
     end;}
-
+    
     OnClose := smxClassFuncs.GetEventForm(Self, TsmxFormCfg(Cfg).CloseAlgCfgID);
     OnShow := smxClassFuncs.GetEventForm(Self, TsmxFormCfg(Cfg).ShowAlgCfgID);
   end;
@@ -6295,7 +6489,7 @@ begin
     Form.Icon := nil;
   inherited SetImageList(Value);
   if Assigned(ImageList) and Assigned(Form) then
-    if FFormImageIndex > -1 then
+    if FFormImageIndex <> -1 then
       ImageList.GetIcon(FFormImageIndex, Form.Icon);
 end;
 

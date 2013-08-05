@@ -481,7 +481,7 @@ begin
   if Assigned(Source) then
     Name := Source.ClassName else
     Name := 'nil';
-  raise EsmxBaseError.CreateResFmt(@smxConsts.rsAssignError, [Name, ClassName]);
+  raise EsmxListError.CreateResFmt(@smxConsts.rsAssignError, [Name, ClassName]);
 end;
 
 function TsmxKitItem.GetIndex: Integer;

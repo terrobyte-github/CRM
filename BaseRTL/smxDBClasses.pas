@@ -337,11 +337,16 @@ type
     procedure Close;
     procedure Delete;
     procedure DeleteField(const Field: IsmxField); override;
+    //procedure DisableControls;
     procedure Edit;
+    //procedure EnalbleControls;
     function Eof: Boolean;
     function FieldByName(const FieldName: String): IsmxField;
     function FindField(const FieldName: String): IsmxField;
     procedure First;
+    //procedure FreeBookmark(Bookmark: Pointer);
+    //function GetBookmark: Pointer;
+    //procedure GotoBookmark(Bookmark: Pointer);
     function IsEmpty: Boolean;
     procedure Last;
     function Locate(const KeyFields: String; const KeyValues: Variant;
@@ -1333,6 +1338,16 @@ begin
   TDataSet(GetInternalRef).Open;
 end;
 
+{procedure TsmxDataSet.DisableControls;
+begin
+  TDataSet(GetInternalRef).DisableControls;
+end;
+
+procedure TsmxDataSet.EnalbleControls;
+begin
+  TDataSet(GetInternalRef).EnableControls;
+end;}
+
 procedure TsmxDataSet.Edit;
 begin
   TDataSet(GetInternalRef).Edit;
@@ -1365,6 +1380,22 @@ procedure TsmxDataSet.Last;
 begin
   TDataSet(GetInternalRef).Last;
 end;
+
+{procedure TsmxDataSet.FreeBookmark(Bookmark: Pointer);
+begin
+  TDataSet(GetInternalRef).FreeBookmark(Bookmark);
+end;
+
+function TsmxDataSet.GetBookmark: Pointer;
+begin
+  Result := TDataSet(GetInternalRef).GetBookmark;
+end;
+
+procedure TsmxDataSet.GotoBookmark(Bookmark: Pointer);
+begin
+  TDataSet(GetInternalRef).GotoBookmark(Bookmark);
+end;}
+
 
 function TsmxDataSet.GetActive: Boolean;
 begin

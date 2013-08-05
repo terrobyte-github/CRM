@@ -32,6 +32,7 @@ function SetCurrentValue(const ADataSet: IsmxDataSet; const AValues: Variant;
   APerformance: TsmxPerformanceMode; AValueSense: TsmxBaseSense = fsValue): Boolean;
 function IsBlobType(ADataType: TsmxDataType; ALength: Integer = 0): Boolean;
 function DataTypeToVarType(ADataType: TsmxDataType): Integer;
+function SetNumberOfRecord(const ADataSet: IsmxDataSet; ARecordNo: Integer): Boolean;
 
 implementation
 
@@ -277,6 +278,42 @@ const
     varOleStr, varOleStr, varVariant, varUnknown, varDispatch, varOleStr, varOleStr, varOleStr);
 begin
   Result := VarTypeMap[ADataType];
+end;
+
+function SetNumberOfRecord(const ADataSet: IsmxDataSet; ARecordNo: Integer): Boolean;
+var
+  CurRecordNo: Integer;
+  RecordNo: Integer;
+begin
+  Result := False;
+  if not Assigned(ADataSet) then
+    Exit;
+  if ADataSet.Active then
+  begin
+    CurRecordNo := ADataSet.RecordNo;
+    if (CurRecordNo = -1) and (ADataSet.RecordCount <> 0) then
+    begin
+      RecordNo := 1;
+      ADataSet.First;
+      while not ADataSet.Eof do
+      begin
+        if RecordNo = ARecordNo then
+        begin
+          Result := True;
+          Break;
+        end;
+        Inc(RecordNo);
+        ADataSet.Next;
+      end;
+    end else
+    begin
+      if ADataSet.RecordCount > ARecordNo then
+      begin
+        ADataSet.RecordNo := ARecordNo;
+        Result := True;
+      end;
+    end;
+  end;
 end;
 
 end.

@@ -9,10 +9,10 @@ procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast:
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
 procedure StreamToStr(AStream: TStream; var AStr: String);
 procedure StrToStream(const AStr: String; AStream: TStream);
-procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
+{procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
 procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
 procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
-procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);
+procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);}
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 
@@ -84,7 +84,7 @@ begin
   end;
 end;
 
-procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
+{procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
 begin
   AFont := smxFuncs.DefCellFont;
   if not Assigned(ANode) then
@@ -128,7 +128,7 @@ begin
   ANode.Attributes['Alignment'] := TypInfo.GetEnumName(TypeInfo(TAlignment), Integer(AText.Alignment));
   ANode.Attributes['Color'] := AText.Color;
   WriteFont(ANode.AddChild(smxConsts.cFontNodeName), AText.Font);
-end;
+end;}
 
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 var

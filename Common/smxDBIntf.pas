@@ -163,14 +163,18 @@ type
     procedure Delete;
     procedure DeleteParam(const Param: IsmxParam);
     procedure DeleteField(const Field: IsmxField);
+    //procedure DisableControls;
     procedure Edit;
+    //procedure EnalbleControls;
     function Eof: Boolean;
     procedure Execute;
     function FieldByName(const FieldName: String): IsmxField;
     function FindField(const FieldName: String): IsmxField;
     function FindParam(const ParamName: String): IsmxParam;
     procedure First;
+    //procedure FreeBookmark(Bookmark: Pointer);
     function GetActive: Boolean;
+    //function GetBookmark: Pointer;
     function GetDatabase: IsmxDatabase;
     function GetDataSetType: TsmxDataSetType;
     function GetField(Index: Integer): IsmxField;
@@ -182,6 +186,7 @@ type
     function GetRecordNo: Integer;
     function GetRecordCount: Integer;
     function GetSQL: TStrings;
+    //procedure GotoBookmark(Bookmark: Pointer);
     function IsEmpty: Boolean;
     procedure Last;
     function Locate(const KeyFields: String; const KeyValues: Variant;

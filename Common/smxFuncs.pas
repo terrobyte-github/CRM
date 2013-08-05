@@ -3,7 +3,7 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, TypInfo, XMLIntf, smxTypes;
+  Classes, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -18,13 +18,18 @@ function UnFormatXMLText(const AText: String): String;
 //function NewResource(const AName: String): TResourceStream;
 function GetSingleValue(const AValues: Variant; const ADefValue: Variant;
   AIndex: Integer = 0): Variant;
-function DefCellFont: TsmxCellFont;
-function DefCellText: TsmxCellText;
+//function DefCellFont: TsmxCellFont;
+//function DefCellText: TsmxCellText;
 function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
 function StrToSet(PTI: PTypeInfo; const Value: String): Byte;
 function GetValueFieldName(const AFieldName: String): String;
 function GetTextFieldName(const AFieldName: String): String;
 function IsTextFieldName(const AFieldName: String): Boolean;
+function GetParamValue(AParams: TsmxParams; const AParamName: String; const ADefValue: Variant): Variant;
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Integer): Integer; overload;
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String; overload;
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended; overload;
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime; overload;
 
 implementation
 
@@ -127,7 +132,7 @@ begin
       Result := AValues[AIndex];
 end;
 
-function DefCellFont: TsmxCellFont;
+{function DefCellFont: TsmxCellFont;
 begin
   with Result do
   begin
@@ -147,7 +152,7 @@ begin
     Color := Integer(Graphics.clWindow);
     Font := DefCellFont;
   end;
-end;
+end;}
 
 function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
 var
@@ -241,6 +246,39 @@ begin
   if NameLength > SuffixLength then
     Result := SysUtils.AnsiCompareText(Copy(AFieldName, NameLength - SuffixLength + 1, SuffixLength),
       smxConsts.cSuffixTextFieldName) = 0;
+end;
+
+function GetParamValue(AParams: TsmxParams; const AParamName: String; const ADefValue: Variant): Variant;
+var
+  Param: TsmxParam;
+begin
+  Result := ADefValue;
+  if Assigned(AParams) then
+  begin
+    Param := AParams.FindByName(AParamName);
+    if Assigned(Param) then
+      Result := Param.ParamValue;
+  end;
+end;
+
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Integer): Integer;
+begin
+  Result := SysUtils.StrToIntDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+end;
+
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String;
+begin
+  Result := Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ADefValue);
+end;
+
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended;
+begin
+  Result := SysUtils.StrToFloatDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+end;
+
+function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime;
+begin
+  Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
 end;
 
 end.

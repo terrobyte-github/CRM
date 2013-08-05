@@ -5,90 +5,142 @@ interface
 uses
   smxBaseClasses;
 
-//type
-  //{ EsmxAlgorithmError }
-
-  //EsmxAlgorithmError = class(Exception);
-
-procedure PrepareForm(Component: TsmxComponent);
-procedure OpenModalForm(Component: TsmxComponent);
-{procedure OpenFormByEventID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure OpenFormByProblemID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure CloseForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure RefreshForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure ApplyForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure SelectRecord(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure UnSelectRecord(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure ChangeFilterValue(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure ChangeStateForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure SelectAndPerformRequestA(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-procedure SelectAndPerformRequestF(Algorithm: TsmxCustomAlgorithm; Params: Variant);}
+procedure ApplyForm(Sender: TsmxComponent);
+procedure PrepareForm(Sender: TsmxComponent);
+procedure RefreshForm(Sender: TsmxComponent);
+procedure ShowModalForm(Sender: TsmxComponent);
+procedure CloseModalForm(Sender: TsmxComponent);
+procedure GetCfgPropsGrid(Sender: TsmxComponent);
+procedure SetCfgPropsGrid(Sender: TsmxComponent);
+//procedure GetTypeKindNameGrid(Sender: TsmxComponent);
+procedure CloseOkForm(Sender: TsmxComponent);
+procedure CloseCancelForm(Sender: TsmxComponent);
+procedure ShowMessageForm(Sender: TsmxComponent);
+procedure ChangeRowPropsGrid(Sender: TsmxComponent);
+procedure ClickColumnPropsGrid(Sender: TsmxComponent);
 
 implementation
 
 uses
-  {Windows, Controls, Variants, smxClassFuncs, smxLibFuncs, smxConsts, smxDBIntf,
-  smxTypes, smxClassProcs, smxFuncs}
-  Classes, Controls, SysUtils, smxClasses, smxClassProcs, smxClassFuncs;
+  Classes, Controls, SysUtils, TypInfo, Variants, smxClasses, smxFuncs,
+  smxClassProcs, smxClassFuncs, Dialogs;
 
-procedure PrepareForm(Component: TsmxComponent);
+var
+  Cfg: TsmxBaseCfg = nil;
+
+procedure ApplyForm(Sender: TsmxComponent);
 var
   List: TList;
   i: Integer;
 begin
-  if Component is TsmxCustomAlgorithm then
-    if TsmxCustomAlgorithm(Component).ActionCell is TsmxCustomForm then
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomForm then
     begin
       List := TList.Create;
       try
-        smxClassProcs.AllCells(TsmxCustomForm(TsmxCustomAlgorithm(Component).ActionCell),
-          List, [TsmxCustomGrid], True);
+        smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
+          List, [TsmxCustomGrid, TsmxCustomFilterDesk]);
         for i := 0 to List.Count - 1 do
-          TsmxCustomGrid(List[i]).Prepare;
+          if TObject(List[i]) is TsmxCustomGrid then
+            TsmxCustomGrid(List[i]).Apply else
+          if TObject(List[i]) is TsmxCustomFilterDesk then
+            TsmxCustomFilterDesk(List[i]).Apply;
       finally
         List.Free;
       end;
     end;
 end;
 
-procedure OpenModalForm(Component: TsmxComponent);
+procedure PrepareForm(Sender: TsmxComponent);
 var
-  Param: TsmxParam;
-  CfgID, ID: Integer;
-  RefreshGrid: Boolean;
-  AccessoryForm, Form: TsmxCustomForm;
+  List: TList;
+  i: Integer;
 begin
-  if Component is TsmxCustomAlgorithm then
-  begin
-    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('CfgID');
-    if Assigned(Param) then
-      CfgID := Param.ParamValue else
-      CfgID := 0;
-    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('ID');
-    if Assigned(Param) then
-      ID := Param.ParamValue else
-      ID := 0;
-    Param := TsmxCustomAlgorithm(Component).AlgorithmParams.FindByName('RefreshGrid');
-    if Assigned(Param) then
-      RefreshGrid := Param.ParamValue else //SysUtils.StrToBool(Param.ParamValue) else
-      RefreshGrid := False;
-    if CfgID > 0 then
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomForm then
     begin
-      AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Component));
+      List := TList.Create;
+      try
+        smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
+          List, [TsmxCustomGrid, TsmxCustomFilterDesk],
+          TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).CellVisible);
+        for i := 0 to List.Count - 1 do
+          if TObject(List[i]) is TsmxCustomGrid then
+            TsmxCustomGrid(List[i]).Prepare else
+          if TObject(List[i]) is TsmxCustomFilterDesk then
+            TsmxCustomFilterDesk(List[i]).Prepare;
+      finally
+        List.Free;
+      end;
+    end;
+end;
+
+procedure RefreshForm(Sender: TsmxComponent);
+var
+  List: TList;
+  i: Integer;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomForm then
+    begin
+      List := TList.Create;
+      try
+        smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
+          List, [TsmxCustomGrid, TsmxCustomFilterDesk], True);
+        for i := 0 to List.Count - 1 do
+          if TObject(List[i]) is TsmxCustomGrid then
+            TsmxCustomGrid(List[i]).Refresh else
+          if TObject(List[i]) is TsmxCustomFilterDesk then
+            TsmxCustomFilterDesk(List[i]).Refresh;
+      finally
+        List.Free;
+      end;
+    end;
+end;
+
+procedure ShowModalForm(Sender: TsmxComponent);
+
+  {procedure ExecuteAlg(Form: TsmxCustomForm; AlgCfgID: Integer);
+  var
+    Alg: TsmxCustomAlgorithm;
+  begin
+    Alg := smxClassFuncs.GetAlgorithmForm(Form, AlgCfgID);
+    if Assigned(Alg) then
+    begin
+      Alg.RefreshParams;
+      Alg.Execute;
+    end;
+  end;}
+
+var
+  CfgID, ID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+  //OkAlgCfgID, CancelAlgCfgID: Integer;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    //OkAlgCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'OkAlgCfgID', 0);
+    //CancelAlgCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'CancelAlgCfgID', 0);
+    if CfgID <> 0 then
+    begin
+      AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
       Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
       try
         Form.CellParent := AccessoryForm;
-        {Form.StorageManager := smxLibFuncs.GetStorageManager;
-        Form.LibraryManager := smxLibFuncs.GetLibraryManager;
-        Form.DatabaseManager := smxLibFuncs.GetDatabaseManager;
-        Form.FormManager := smxLibFuncs.GetFormManager;
-        Form.ImageListManager := smxLibFuncs.GetImageListManager;}
         Form.Initialize;
         Form.IntfID := AccessoryForm.IntfID;
-        if Form.ShowModal = mrOk then
-          if TsmxCustomAlgorithm(Component).ActionCell is TsmxCustomGrid then
-            if RefreshGrid then
-              TsmxCustomGrid(TsmxCustomAlgorithm(Component).ActionCell).Refresh;
+        Form.ShowModal;
+        {if Form.ShowModal = mrOk then
+        begin
+          if OkAlgCfgID <> 0 then
+            ExecuteAlg(Form, OkAlgCfgID);
+        end else
+        begin
+          if CancelAlgCfgID <> 0 then
+            ExecuteAlg(Form, CancelAlgCfgID);
+        end;}
       finally
         Form.Free;
       end;
@@ -96,505 +148,338 @@ begin
   end;
 end;
 
-{function PerformRequest(ARequest: TsmxCustomRequest; ASame: Boolean = False): Boolean;
+procedure CloseModalForm(Sender: TsmxComponent);
 var
-  res: Integer;
-  msg: String;
+  List: TList;
+  i: Integer;
 begin
-  Result := False;
-  if not Assigned(ARequest) then
-    Exit;
-  if not Assigned(ARequest.Database) or not Assigned(ARequest.CellDataSet) then
-    Exit;
-  with ARequest do
-  begin
-    if not Database.InTransaction then
-      Database.StartTransaction;
-    try
-      res := 1; msg := '';
-      Perform;//(ASame);
-      case CellDataSet.DataSetType of
-        dstQuery:
-        begin
-          res := GetFieldSenseValueDef(ARequest, fsResult, 1);
-          msg := GetFieldSenseValueDef(ARequest, fsMessage, '');
-        end;
-        dstStoredProc:
-        begin
-          res := GetParamLocationValueDef(ARequest, plResult, 1);
-          msg := GetParamLocationValueDef(ARequest, plMessage, '');
-        end;
-      end;
-      if res = 0 then
-        Database.CommitTransaction else
-        Database.RollbackTransaction;
-      if msg <> '' then
-        Inf(msg);
-      Result := res = 0;
-    except
-      Database.RollbackTransaction;
-    end;
-  end;
-end;}
-
-{procedure OpenForm(Component: TsmxComponent);
-begin
-  if Component is TsmxCustomAlgorithm then
-  begin
-    nil;
-  end;
-end;}
-
-{procedure OpenForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
-  c: TsmxBaseCell; f: TsmxCustomForm;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, 'FormID', 0);
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-    finally
-      ap.Free;
-    end;
-    if FormCfgID > 0 then
-    begin
-      c := Algorithm.RootCell;
-      //f := FrmManagerLib.FindByComboID(FormCfgID, FormID);
-      f := GetFormByComboIDLib(FormCfgID, FormID);
-      if Assigned(f) then
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomForm then
+      if TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).ModalResult = mrOk then
       begin
-        f.ShowForm;
-      end else
-      begin
-        //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        with f do
-        begin
-          //if IsCellLib(c, 'TsmxCustomForm') then
-          if c is TsmxCustomForm then
-            ParentForm := TsmxCustomForm(c);
-          CommonStorage := ComStorageLib;
-          LibraryManager := LibManagerLib;
-          DatabaseManager := DBManagerLib;
-          FormManager := FrmManagerLib;
-          ImageList := ImgListLib;
-          ShowForm;
-        end;
-      end;
-    end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
-end;
-
-procedure OpenFormByEventID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
-  c: TsmxBaseCell; f: TsmxCustomForm;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, '@EventID', 0);
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-    finally
-      ap.Free;
-    end;
-    if (FormCfgID > 0) and (FormID > 0) then
-    begin
-      c := Algorithm.RootCell;
-      //f := FrmManagerLib.FindByComboID(FormCfgID, FormID);
-      f := GetFormByComboIDLib(FormCfgID, FormID);
-      if Assigned(f) then
-      begin
-        f.ShowForm;
-      end else
-      begin
-        //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        with f do
-        begin
-          //if IsCellLib(c, 'TsmxCustomForm') then
-          if c is TsmxCustomForm then
-            ParentForm := TsmxCustomForm(c);
-          CommonStorage := ComStorageLib;
-          LibraryManager := LibManagerLib;
-          DatabaseManager := DBManagerLib;
-          FormManager := FrmManagerLib;
-          ImageList := ImgListLib;
-          ShowForm;
-        end;
-      end;
-    end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
-end;
-
-procedure OpenFormByProblemID(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
-  c: TsmxBaseCell; f: TsmxCustomForm;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, '@ProblemID', 0);
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-    finally
-      ap.Free;
-    end;
-    if (FormCfgID > 0) and (FormID > 0) then
-    begin
-      c := Algorithm.RootCell;
-      //f := FrmManagerLib.FindByComboID(FormCfgID, FormID);
-      f := GetFormByComboIDLib(FormCfgID, FormID);
-      if Assigned(f) then
-      begin
-        f.ShowForm;
-      end else
-      begin
-        //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        with f do
-        begin
-          //if IsCellLib(c, 'TsmxCustomForm') then
-          if c is TsmxCustomForm then
-            ParentForm := TsmxCustomForm(c);
-          CommonStorage := ComStorageLib;
-          LibraryManager := LibManagerLib;
-          DatabaseManager := DBManagerLib;
-          FormManager := FrmManagerLib;
-          ImageList := ImgListLib;
-          ShowForm;
-        end;
-      end;
-    end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
-end;
-
-procedure CloseForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var c: TsmxBaseCell;
-begin
-  c := Algorithm.RootCell;
-  //if IsCellLib(c, 'TsmxCustomForm') then
-  if c is TsmxCustomForm then
-    TsmxCustomForm(c).CloseForm;
-end;
-
-procedure RefreshForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var c: TsmxBaseCell;
-begin
-  c := Algorithm.RootCell;
-  //if IsCellLib(c, 'TsmxCustomForm') then
-  if c is TsmxCustomForm then
-    TsmxCustomForm(c).Prepare(True);
-end;
-
-procedure ApplyForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var c: TsmxBaseCell;
-begin
-  c := Algorithm.RootCell;
-  //if IsCellLib(c, 'TsmxCustomForm') then
-  if c is TsmxCustomForm then
-    TsmxCustomForm(c).Apply;
-end;
-
-procedure SelectRecord(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var c: TsmxBaseCell;
-begin
-  c := Algorithm.RootCell;
-  //if IsCellLib(c, 'TsmxCustomForm') then
-  if c is TsmxCustomForm then
-    TsmxCustomForm(c).FormModalResult := mrOk;
-end;
-
-procedure UnSelectRecord(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var c: TsmxBaseCell;
-begin
-  c := Algorithm.RootCell;
-  //if IsCellLib(c, 'TsmxCustomForm') then
-  if c is TsmxCustomForm then
-    TsmxCustomForm(c).FormModalResult := mrCancel;
-end;
-
-procedure ChangeFilterValue(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName: String; FormCfgID, FormID, IntfID: Integer; ap: TsmxParams;
-  c: TsmxBaseCell; flt: TsmxCustomFilter; r: TsmxCustomRequest; fld: IsmxField;
-  f: TsmxCustomForm;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, 'FormID', 0);
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-    finally
-      ap.Free;
-    end;
-    if FormCfgID > 0 then
-    begin
-      c := Algorithm.ParentCell;
-      if c is TsmxCustomFilter then
-        flt := TsmxCustomFilter(c) else
-        flt := nil;
-      c := Algorithm.RootCell;
-      //if IsCellLib(flt, 'TsmxCustomFilter') then
-      if Assigned(flt) then
-      begin
-        //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
+        List := TList.Create;
         try
-          //if IsCellLib(c, 'TsmxCustomForm') then
-          if c is TsmxCustomForm then
-            f.ParentForm := TsmxCustomForm(c);
-          f.CommonStorage := ComStorageLib;
-          f.LibraryManager := LibManagerLib;
-          f.DatabaseManager := DBManagerLib;
-          f.FormManager := FrmManagerLib;
-          f.ImageList := ImgListLib;
-          if f.ShowModalForm = mrOk then
-          begin
-            r := nil;
-            if Assigned(f.PageManagers[0]) then
-              if Assigned(f.PageManagers[0].ActivePage) then
-                if Assigned(f.PageManagers[0].ActivePage.Sections[0]) then
-                  r := f.PageManagers[0].ActivePage.Sections[0].Request;
-            if Assigned(r) then
-            begin
-              fld := r.FindFieldSense(fsKey);
-              if Assigned(fld) then
-                flt.FilterValue := fld.Value;
-              fld := r.FindFieldSense(fsValue);
-              if Assigned(fld) then
-                flt.FilterText := fld.Value;
-            end;
-          end;
+          smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
+            List, [TsmxCustomGrid, TsmxCustomFilterDesk]);
+          for i := 0 to List.Count - 1 do
+            if TObject(List[i]) is TsmxCustomGrid then
+              TsmxCustomGrid(List[i]).Apply else
+            if TObject(List[i]) is TsmxCustomFilterDesk then
+              TsmxCustomFilterDesk(List[i]).Apply;
         finally
-          f.Free;
+          List.Free;
         end;
       end;
-    end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
 end;
 
-procedure ChangeStateForm(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName, RequestDBName: String; RequestCfgID: Integer; FormRefresh: Boolean;
-  ap: TsmxParams; c, r: TsmxBaseCell;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
-      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
-    finally
-      ap.Free;
-    end;
-    if RequestCfgID > 0 then
-    begin
-      c := Algorithm.RootCell;
-      //if IsCellLib(c, 'TsmxCustomForm') then
-      if c is TsmxCustomForm then
-      begin
-        //r := NewCellLib(FindDatabaseByNameLib(CfgDBName), RequestCfgID);
-        r := NewCell(nil, GetDatabaseByNameLib(CfgDBName), RequestCfgID);
-        try
-          //if not IsCellLib(r, 'TsmxCustomRequest') then
-          if not (r is TsmxCustomRequest) then
-            raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-          with TsmxCustomRequest(r) do
-          begin
-            ParentCell := c;
-            //DatabaseName := RequestDBName;
-            Database := GetDatabaseByNameLib(RequestDBName);
-          end;
-          if PerformRequest(TsmxCustomRequest(r)) then
-            TsmxCustomForm(c).Prepare(FormRefresh);
-        finally
-          r.Free;
-        end;
-      end;
-    end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
-end;
+procedure GetCfgPropsGrid(Sender: TsmxComponent);
 
-procedure SelectAndPerformRequestA(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName, RequestDBName: String; FormCfgID, FormID, RequestCfgID, IntfID: Integer;
-  FormRefresh: Boolean; ap: TsmxParams; c, r: TsmxBaseCell; f: TsmxCustomForm;
-  r2: TsmxCustomRequest; fld: IsmxField; prm: TsmxParam;
-begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, 'FormID', 0);
-      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
-    finally
-      ap.Free;
-    end;
-    if (FormCfgID > 0) and (RequestCfgID > 0) then
+  function GetParentObj(ParentPropName: String): TObject;
+  var
+    List: TStrings;
+    i: Integer;
+  begin
+    Result := nil;
+    if Assigned(Cfg) and (ParentPropName <> '') then
     begin
-      c := Algorithm.RootCell;
-      //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-      f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
+      List := TStringList.Create;
       try
-        //if IsCellLib(c, 'TsmxCustomForm') then
-        if c is TsmxCustomForm then
-          f.ParentForm := TsmxCustomForm(c);
-        f.CommonStorage := ComStorageLib;
-        f.LibraryManager := LibManagerLib;
-        f.DatabaseManager := DBManagerLib;
-        f.FormManager := FrmManagerLib;
-        f.ImageList := ImgListLib;
-        if f.ShowModalForm = mrOk then
-        begin
-          r2 := nil;
-          if Assigned(f.PageManagers[0]) then
-            if Assigned(f.PageManagers[0].ActivePage) then
-              if Assigned(f.PageManagers[0].ActivePage.Sections[0]) then
-                r2 := f.PageManagers[0].ActivePage.Sections[0].Request;
-          if Assigned(r2) then
-          begin
-            prm := Algorithm.FindParamLocation(plInput);
-            while Assigned(prm) do
-            begin
-              fld := r2.CellDataSet.FindField(prm.ParamName);
-              if Assigned(fld) then
-                prm.ParamValue := fld.Value;
-              prm := Algorithm.FindParamLocation(plInput, prm.ItemIndex + 1);
-            end;
-          end;
-          //r := NewCellLib(FindDatabaseByNameLib(CfgDBName), RequestCfgID);
-          r := NewCell(nil, GetDatabaseByNameLib(CfgDBName), RequestCfgID);
-          try
-            //if not IsCellLib(r, 'TsmxCustomRequest') then
-            if not (r is TsmxCustomRequest) then
-              raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-            with TsmxCustomRequest(r) do
-            begin
-              ParentCell := Algorithm;
-              Database := GetDatabaseByNameLib(RequestDBName);
-            end;
-            if PerformRequest(TsmxCustomRequest(r)) then
-              //if IsCellLib(c, 'TsmxCustomForm') then
-              if c is TsmxCustomForm then
-                TsmxCustomForm(c).Prepare(FormRefresh);
-          finally
-            r.Free;
-          end;
-        end;
+        List.Delimiter := '.';
+        List.DelimitedText := ParentPropName;
+        Result := Cfg;
+        for i := 0 to List.Count - 1 do
+          Result := TypInfo.GetObjectProp(Result, List[i]);
       finally
-        f.Free;
+        List.Free;
       end;
     end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
+  end;
+
+var
+  CfgID, CfgType: Integer;
+  //Cfg: TsmxBaseCfg;
+  PropList: PPropList;
+  Count: Integer;
+  Grid: TsmxCustomGrid;
+  //PropNameColumn, PropValueColumn: String;
+  i{, j}: Integer;
+  //s: String;
+  TypeData: PTypeData;
+  ParentPropKit: Integer;
+  ParentPropName, ParentPropValue: String;
+  TypeInfo: PTypeInfo;
+  Obj: TObject;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
+    begin
+      Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
+      CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+      CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
+      ParentPropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropKit', 0);
+      ParentPropName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropName', '');
+      ParentPropValue := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropValue', '');
+      //PropNameColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropNameColumn', '');
+      //PropValueColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropValueColumn', '');
+      if (CfgID <> 0) {and (PropNameColumn <> '') and (PropValueColumn <> '')} then
+      begin
+        Obj := nil;
+        //TypeInfo := nil;
+        if ParentPropKit = 0 then
+        begin
+          if Assigned(Cfg) then
+            SysUtils.FreeAndNil(Cfg);
+          if CfgType = 100 then // типы
+          begin
+            Cfg := TsmxTypeCfg.Create(nil);
+            Cfg.CfgID := CfgID;
+            Cfg.SelectRequest := smxClassProcs.gSelectRequest;
+          end else
+            Cfg := smxClassFuncs.NewCfg(nil, CfgID);
+        //try
+          Cfg.Receive;
+          Obj := Cfg;
+        end else
+        if (ParentPropKit = 2) and (ParentPropName <> '') then
+        begin
+          Obj := GetParentObj(ParentPropName);
+        end;
+        if Assigned(Obj) then
+        begin
+          TypeInfo := PTypeInfo(Obj.ClassInfo);
+          Count := TypInfo.GetPropList(TypeInfo, TypInfo.tkProperties, nil);
+          if Count <> 0 then
+          begin
+            GetMem(PropList, Count * SizeOf(Pointer));
+            try
+              TypInfo.GetPropList(TypeInfo, TypInfo.tkProperties, PropList);
+              Grid.RowCount := Count;
+              for i := 0 to Grid.RowCount - 1 do
+              begin
+                {for j := 0 to Grid.SlaveCount - 1 do
+                begin
+                  if Grid.Slaves[j].SlaveName = PropNameColumn then
+                    s := PropList^[i]^.Name else
+                  if Grid.Slaves[j].SlaveName = PropValueColumn then
+                  begin
+                    if PropList^[i]^.PropType^^.Kind = tkClass then
+                      s := PropList^[i]^.PropType^^.Name else
+                      s := Variants.VarToStr(TypInfo.GetPropValue(Cfg, PropList^[i]^.Name))
+                  end else
+                    s := '';
+                  Grid.GridCaptions[j, i] := s;
+                end;}
+                Grid.GridCaptions[0, i] := PropList^[i]^.Name;
+                if PropList^[i]^.PropType^^.Kind = tkClass then
+                  Grid.GridCaptions[1, i] := PropList^[i]^.PropType^^.Name else
+                  Grid.GridCaptions[1, i] := Variants.VarToStr(TypInfo.GetPropValue(Obj, PropList^[i]^.Name));
+                if PropList^[i]^.PropType^^.Kind = tkClass then
+                begin
+                  TypeData := TypInfo.GetTypeData(PropList^[i]^.PropType^);
+                  if TypeData.ClassType.InheritsFrom(TsmxSimpleKit) then
+                    Grid.GridCaptions[2, i] := '3' else
+                    Grid.GridCaptions[2, i] := '2';
+                  if ParentPropName <> '' then
+                    Grid.GridCaptions[3, i] := ParentPropName + '.' + PropList^[i]^.Name else
+                    Grid.GridCaptions[3, i] := PropList^[i]^.Name;
+                end else
+                  Grid.GridCaptions[2, i] := '1';
+              end;
+            finally
+              FreeMem(PropList);
+            end;
+          end;
+        //finally
+          //Cfg.Free;
+        end;
+      end;
+    end;
+end;
+
+procedure SetCfgPropsGrid(Sender: TsmxComponent);
+var
+  //CfgID, CfgType: Integer;
+  //Cfg: TsmxBaseCfg;
+  //Grid: TsmxCustomGrid;
+  //PropNameColumn, PropValueColumn: String;
+  //i, j: Integer;
+  //PropName: String;
+  //PropValue: Variant;
+  PropKit: Integer;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
+    begin
+      {Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
+      CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+      CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
+      PropNameColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropNameColumn', '');
+      PropValueColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropValueColumn', '');
+      if (CfgID <> 0) and (PropNameColumn <> '') and (PropValueColumn <> '') then
+      begin}
+      PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);
+
+        if Assigned(Cfg) and (PropKit = 0) then
+        begin
+          Cfg.Return;
+        end;
+
+        {if CfgType = 100 then // типы
+        begin
+          Cfg := TsmxTypeCfg.Create(nil);
+          Cfg.CfgID := CfgID;
+          Cfg.SelectRequest := smxClassProcs.gSelectRequest;
+        end else
+          Cfg := smxClassFuncs.NewCfg(nil, CfgID);
+        try
+          for i := 0 to Grid.RowCount - 1 do
+          begin
+            PropName := '';
+            PropValue := '';
+            for j := 0 to Grid.SlaveCount - 1 do
+            begin
+              if Grid.Slaves[j].SlaveName = PropNameColumn then
+                PropName := Grid.GridCaptions[j, i] else
+              if Grid.Slaves[j].SlaveName = PropValueColumn then
+                PropValue := Grid.GridValues[j, i];
+            end;
+            if PropName <> '' then
+            begin
+              if TypInfo.GetPropInfo(Cfg, PropName)^.PropType^^.Kind = tkClass then
+                TypInfo.SetObjectProp(Cfg, PropName, nil)
+              else
+                TypInfo.SetPropValue(Cfg, PropName, PropValue);
+            end;
+          end;
+          Cfg.Return;
+        finally
+          Cfg.Free;
+        end;
+      end;}
+    end;
+end;
+
+procedure GetTypeKindNameGrid(Sender: TsmxComponent);
+var
+  Column: TsmxCustomColumn;
+  CfgID: Integer;
+  Cfg: TsmxBaseCfg;
+  s: String;
+  TypeData: PTypeData;
+  Obj: TObject;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomColumn then
+    begin
+      Column := TsmxCustomColumn(TsmxCustomAlgorithm(Sender).CellEvent);
+      CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+      if CfgID <> 0 then
+      begin
+        Cfg := smxClassFuncs.NewCfg(nil, CfgID);
+        try
+          Cfg.Receive;
+          s := TypInfo.GetEnumName(TypeInfo(TTypeKind), Integer(TypInfo.GetPropInfo(Cfg, Column.ColumnCaption)^.PropType^.Kind));
+
+          if TypInfo.GetPropInfo(Cfg, Column.ColumnCaption)^.PropType^.Kind = tkClass then
+          begin
+            Obj := TypInfo.GetObjectProp(Cfg, Column.ColumnCaption);
+            TypeData := TypInfo.GetTypeData(TypInfo.GetPropInfo(Cfg, Column.ColumnCaption)^.PropType^);
+            if Assigned(TypeData) then
+              s := s + ' ' + TypeData^.ClassType.ClassName;// + ' ' + inttostr(TypeData^.PropCount);
+            if Obj is TsmxControlKit then
+              s := s + ' ' + inttostr(TsmxControlKit(Obj).Count);
+          end;
+
+          smxFuncs.Inf(s);
+        finally
+          Cfg.Free;
+        end;
+      end;
+    end;
+end;
+
+procedure CloseOkForm(Sender: TsmxComponent);
+var
+  Form: TsmxCustomForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    Form := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+    if Assigned(Form) then
+      Form.ModalResult := mrOk;
   end;
 end;
 
-procedure SelectAndPerformRequestF(Algorithm: TsmxCustomAlgorithm; Params: Variant);
-var CfgDBName, RequestDBName: String; FormCfgID, FormID, RequestCfgID, IntfID: Integer;
-  FormRefresh: Boolean; ap: TsmxParams; c, r: TsmxBaseCell; f: TsmxCustomForm;
-  r2: TsmxCustomRequest; fld: IsmxField; prm: IsmxParam;
+procedure CloseCancelForm(Sender: TsmxComponent);
+var
+  Form: TsmxCustomForm;
 begin
-  try
-    ap := TsmxParams.Create(TsmxParam);
-    smxClassProcs.VarToParams(Params, ap);
-    try
-      CfgDBName := GetParamValueDef(ap, 'CfgDBName', '');
-      FormCfgID := GetParamValueDef(ap, 'FormCfgID', 0);
-      FormID := GetParamValueDef(ap, 'FormID', 0);
-      RequestCfgID := GetParamValueDef(ap, 'RequestCfgID', 0);
-      RequestDBName := GetParamValueDef(ap, 'RequestDBName', '');
-      IntfID := GetParamValueDef(ap, 'IntfID', 0);
-      FormRefresh := GetParamValueDef(ap, 'FormRefresh', False);
-    finally
-      ap.Free;
-    end;
-    if (FormCfgID > 0) and (RequestCfgID > 0) then
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    Form := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+    if Assigned(Form) then
+      Form.ModalResult := mrCancel;
+  end;
+end;
+
+procedure ShowMessageForm(Sender: TsmxComponent);
+begin
+  Dialogs.ShowMessage('Message');
+end;
+
+procedure ChangeRowPropsGrid(Sender: TsmxComponent);
+var
+  Grid: TsmxCustomGrid;
+  RowIndex: Integer;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
     begin
-      c := Algorithm.RootCell;
-      //if IsCellLib(c, 'TsmxCustomForm') then
-      if c is TsmxCustomForm then
+      Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
+      RowIndex := Grid.FocusedRowIndex;
+      if RowIndex <> -1 then
+        Grid.Slaves[2].IsEditing :=
+          not ((Grid.GridCaptions[2, RowIndex] = '2') or (Grid.GridCaptions[2, RowIndex] = '3'));
+    end;
+end;
+
+procedure ClickColumnPropsGrid(Sender: TsmxComponent);
+var
+  Column: TsmxCustomColumn;
+  PropKit: Integer;
+  FormCfgID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomColumn then
+    begin
+      Column := TsmxCustomColumn(TsmxCustomAlgorithm(Sender).CellEvent);
+      if Assigned(Column.CellOwner) and Assigned(Cfg) then
       begin
-        //f := NewFormLib(FindDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        f := NewForm(nil, GetDatabaseByNameLib(CfgDBName), FormCfgID, IntfID, FormID);
-        try
-          f.ParentForm := TsmxCustomForm(c);
-          f.CommonStorage := ComStorageLib;
-          f.LibraryManager := LibManagerLib;
-          f.DatabaseManager := DBManagerLib;
-          f.FormManager := FrmManagerLib;
-          f.ImageList := ImgListLib;
-          if f.ShowModalForm = mrOk then
-          begin
-            r2 := nil;
-            if Assigned(f.PageManagers[0]) then
-              if Assigned(f.PageManagers[0].ActivePage) then
-                if Assigned(f.PageManagers[0].ActivePage.Sections[0]) then
-                  r2 := f.PageManagers[0].ActivePage.Sections[0].Request;
-            //r := NewCellLib(FindDatabaseByNameLib(CfgDBName), RequestCfgID);
-            r := NewCell(nil, GetDatabaseByNameLib(CfgDBName), RequestCfgID);
-            try
-              //if not IsCellLib(r, 'TsmxCustomRequest') then
-              if not (r is TsmxCustomRequest) then
-                raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-              with TsmxCustomRequest(r) do
-              begin
-                ParentCell := c;
-                Database := GetDatabaseByNameLib(RequestDBName);
-                RefreshParams;
-                if Assigned(r2) then
-                begin
-                  prm := FindParamLocation(plInput);
-                  while Assigned(prm) do
-                  begin
-                    fld := r2.CellDataSet.FindField(prm.ParamName);
-                    if Assigned(fld) then
-                      prm.Value := fld.Value;
-                    prm := FindParamLocation(plInput, prm.ParamNo + 1);
-                  end;
-                end;
-              end;
-              if PerformRequest(TsmxCustomRequest(r), True) then
-                TsmxCustomForm(c).Prepare(FormRefresh);
-            finally
-              r.Free;
-            end;
+        PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);
+        FormCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'FormCfgID', 0);
+        if (PropKit in [2, 3]) and (FormCfgID <> 0) then
+        begin
+          AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+          Form := smxClassFuncs.NewForm(AccessoryForm, FormCfgID);
+          try
+            Form.CellParent := AccessoryForm;
+            Form.Initialize;
+            Form.IntfID := AccessoryForm.IntfID;
+            Form.ShowModal;
+          finally
+            Form.Free;
           end;
-        finally
-          f.Free;
         end;
       end;
     end;
-  except
-    raise EsmxAlgorithmError.CreateRes(@SAlgExecuteError);
-  end;
-end;}
+end;
+
+initialization
+
+finalization
+  if Assigned(Cfg) then
+    Cfg.Free;
 
 end.
 

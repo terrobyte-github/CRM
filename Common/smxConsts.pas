@@ -6,6 +6,7 @@ const
   { XML }
   cRootNodeName = 'Root';
   cCellNodeName = 'Cell';
+  cTypeNodeName = 'Type';
   cFontNodeName = 'Font';
   cKitNodeName = 'Kit';
   cItemNodeName = 'Item';
@@ -32,7 +33,9 @@ resourcestring
   rsAssignError = 'Cannot assign a ClassName %s to a ClassName %s';
   rsCfgActionError = 'A ClassName %s of configuration with ID %d %s error';
   rsCellActionError = 'A ClassName %s of cell %s error';
+  rsCellIDActionError = 'A ClassName %s of cell with ID %d %s error';
   rsListItemNotFound = 'Item ''%s'' not found';
+  rsListItemClassError = 'A ClassName %s invalid for ClassName %s';
 
 implementation
 

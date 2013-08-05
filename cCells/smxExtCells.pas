@@ -70,7 +70,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  published
     property RequestClassName: String read FRequestClassName write SetRequestClassName;
   end;
 
@@ -106,7 +106,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  published
     property DataSetType: TsmxDataSetType read FDataSetType write SetDataSetType;
   end;
 
@@ -147,7 +147,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  published
     property DataSetType: TsmxDataSetType read FDataSetType write SetDataSetType;
     property RequestFuncName: String read FRequestFuncName write SetRequestFuncName;
     property RequestLibrary: String read FRequestLibrary write SetRequestLibrary;
@@ -230,27 +230,39 @@ type
 
   { TsmxBitBtnFilter }
 
-  {TsmxBitBtnFilter = class(TsmxPanelFilter)
+  TsmxBitBtnFilter = class(TsmxPanelFilter)
   private
     FBitBtn: TBitBtn;
     FValue: Variant;
+    FButtonImageIndex: Integer;
+    function GetBitBtn: TBitBtn;
   protected
+    function GetCellCaption: String; override;
     function GetCellEnabled: Boolean; override;
-    function GetFilterText: String; override;
+    function GetCellHint: String; override;
+    function GetCellImageIndex: Integer; override;
+    function GetFilterColor: TColor; override;
+    function GetFilterFont: TFont; override;
+    //function GetFilterText: String; override;
     function GetFilterValue: Variant; override;
-    function GetInternalObject: TObject; override;
+    //function GetInternalObject: TObject; override;
+    procedure SetCellCaption(const Value: String); override;
     procedure SetCellEnabled(Value: Boolean); override;
-    procedure SetFilterText(Value: String); override;
-    procedure SetFilterValue(Value: Variant); override;
+    procedure SetCellHint(const Value: String); override;
+    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetFilterColor(Value: TColor); override;
+    procedure SetFilterFont(Value: TFont); override;
+    //procedure SetFilterText(Value: String); override;
+    procedure SetFilterValue(const Value: Variant); override;
     procedure SetImageList(Value: TCustomImageList); override;
-    procedure Initialize; override;
-    procedure UnInitialize; override;
+    //procedure Initialize; override;
+    //procedure UnInitialize; override;
 
-    property BitBtn: TBitBtn read FBitBtn;
+    property BitBtn: TBitBtn read GetBitBtn;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
+    //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-  end;}
+  end;
 
   { TsmxNumEditFilter }
 
@@ -389,7 +401,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  
     property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
   end;
 
@@ -407,7 +419,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  published
     property StateID: Integer read FStateID write SetStateID;
     property StateReqCfgID: Integer read FStateReqCfgID write SetStateReqCfgID;
   end;
@@ -470,7 +482,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
-
+  published
     property ControlBoard: TsmxControlKitItem read GetControlBoard write SetControlBoard;
     property MainMenu: TsmxControlKitItem read GetMainMenu write SetMainMenu;
     property StatusBoard: TsmxControlKitItem read GetStatusBoard write SetStatusBoard;
@@ -1282,64 +1294,153 @@ begin
   FBitBtn.Caption := '';
   Initialize;
   InstallParent;
-end;
+end;}
 
 destructor TsmxBitBtnFilter.Destroy;
 begin
-  UnInstallParent;
-  UnInitialize;
-  FBitBtn.Parent := nil;
-  FBitBtn.Free;
+  //UnInstallParent;
+  //UnInitialize;
+  //FBitBtn.Parent := nil;
+  if Assigned(FBitBtn) then
+    FBitBtn.Free;
   inherited Destroy;
 end;
 
 function TsmxBitBtnFilter.GetCellEnabled: Boolean;
 begin
-  Result := FBitBtn.Enabled;
+  Result := BitBtn.Enabled;
 end;
 
-function TsmxBitBtnFilter.GetFilterText: String;
+function TsmxBitBtnFilter.GetBitBtn: TBitBtn;
+begin
+  if not Assigned(FBitBtn) then
+  begin
+    FBitBtn := TBitBtn.Create(nil);
+    FBitBtn.Parent := Panel;
+    FBitBtn.Width := Panel.Width - 8;
+    FBitBtn.Anchors := [akLeft, akRight];
+    FBitBtn.Left := 4;
+    FBitBtn.Top := 20;
+    //FBitBtn.Margin := 2;
+    FBitBtn.OnClick := ControlClick;
+    FValue := Variants.Null;
+    //FBitBtn.Caption := '';
+  end;
+  Result := FBitBtn;
+end;
+
+function TsmxBitBtnFilter.GetCellCaption: String;
+begin
+  Result := String(BitBtn.Caption);
+end;
+
+function TsmxBitBtnFilter.GetCellHint: String;
+begin
+  Result := BitBtn.Hint;
+end;
+
+function TsmxBitBtnFilter.GetCellImageIndex: Integer;
+begin
+  Result := FButtonImageIndex;
+end;
+
+procedure TsmxBitBtnFilter.SetCellImageIndex(Value: Integer);
+begin
+  if FButtonImageIndex <> - 1 then
+  begin
+    BitBtn.Glyph := nil;
+    BitBtn.Margin := -1;
+  end;
+  FButtonImageIndex := Value;
+  if FButtonImageIndex <> - 1 then
+    if Assigned(ImageList) then
+    begin
+      ImageList.GetBitmap(FButtonImageIndex, BitBtn.Glyph);
+      BitBtn.Margin := 2;
+    end;
+end;
+
+function TsmxBitBtnFilter.GetFilterColor: TColor;
+begin
+  Result := Graphics.clBtnFace; // не поддерживается
+end;
+
+function TsmxBitBtnFilter.GetFilterFont: TFont;
+begin
+  Result := BitBtn.Font;
+end;
+
+procedure TsmxBitBtnFilter.SetCellCaption(const Value: String);
+begin
+  BitBtn.Caption := Value;
+end;
+
+procedure TsmxBitBtnFilter.SetCellHint(const Value: String);
+begin
+  BitBtn.Hint := Value;
+end;
+
+procedure TsmxBitBtnFilter.SetFilterColor(Value: TColor);
+begin
+  // не поддерживается
+end;
+
+procedure TsmxBitBtnFilter.SetFilterFont(Value: TFont);
+begin
+  BitBtn.Font := Value;
+end;
+
+{function TsmxBitBtnFilter.GetFilterText: String;
 begin
   Result := String(FBitBtn.Caption);
-end;
+end;}
 
 function TsmxBitBtnFilter.GetFilterValue: Variant;
 begin
   Result := FValue;
 end;
 
-function TsmxBitBtnFilter.GetInternalObject: TObject;
+{function TsmxBitBtnFilter.GetInternalObject: TObject;
 begin
-  Result := FBitBtn;
-end;
+  Result := BitBtn;
+end;}
 
 procedure TsmxBitBtnFilter.SetCellEnabled(Value: Boolean);
 begin
-  FBitBtn.Enabled := Value;
+  BitBtn.Enabled := Value;
 end;
 
 procedure TsmxBitBtnFilter.SetImageList(Value: TCustomImageList);
 begin
   if Assigned(ImageList) then
-    FBitBtn.Glyph := nil;
+  begin
+    BitBtn.Glyph := nil;
+    BitBtn.Margin := -1;
+  end;
   inherited SetImageList(Value);
   if Assigned(ImageList) then
-    if Assigned(Algorithm) then
-      if Algorithm.CellImageIndex >= 0 then
-        ImageList.GetBitmap(Algorithm.CellImageIndex, FBitBtn.Glyph);
+    if FButtonImageIndex <> -1 then
+    begin
+      ImageList.GetBitmap(FButtonImageIndex, BitBtn.Glyph);
+      BitBtn.Margin := 2;
+    end;
 end;
 
-procedure TsmxBitBtnFilter.SetFilterText(Value: String);
+{procedure TsmxBitBtnFilter.SetFilterText(Value: String);
 begin
   FBitBtn.Caption := TCaption(Value);
-end;
+end;}
 
-procedure TsmxBitBtnFilter.SetFilterValue(Value: Variant);
+procedure TsmxBitBtnFilter.SetFilterValue(const Value: Variant);
 begin
-  FValue := Value;
+  if FValue <> Value then
+  begin
+    FValue := Value;
+    ChangeFilter;
+  end;  
 end;
 
-procedure TsmxBitBtnFilter.Initialize;
+{procedure TsmxBitBtnFilter.Initialize;
 var c: TObject;
 begin
   if Assigned(Algorithm) then
@@ -1696,6 +1797,7 @@ end;
 
 procedure TsmxSimpleStateCfg.Clear;
 begin
+  inherited Clear;
   if Assigned(FCellStates) then
     FCellStates.Clear;
 end;
@@ -2445,8 +2547,8 @@ end;
 initialization
   Classes.RegisterClasses([TsmxLibAlgorithmCfg, TsmxLibAction,
     TsmxRefRequestCfg, TsmxRefRequest, TsmxDBRequestCfg, TsmxDBRequest,
-    TsmxLibRequestCfg, TsmxLibRequest, TsmxEditFilter{, TsmxDateTimeFilter,
-    TsmxBitBtnFilter, TsmxNumEditFilter, TsmxLabelFilter}, TsmxStateFormCfg,
+    TsmxLibRequestCfg, TsmxLibRequest, TsmxEditFilter{, TsmxDateTimeFilter},
+    TsmxBitBtnFilter{, TsmxNumEditFilter, TsmxLabelFilter}, TsmxStateFormCfg,
     TsmxStateForm, TsmxStandardFormCfg, TsmxStandardForm]);
 
 {finalization

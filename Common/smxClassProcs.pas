@@ -7,8 +7,8 @@ uses
 
 {procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);}
-procedure AllCells(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass; AIsOnlyActive: Boolean = False);
+procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
+  AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
 procedure AllParents(ACell: TsmxBaseCell; AList: TList;
   AClassList: array of TsmxBaseCellClass);
 //procedure PrepareForm(AForm: TsmxCustomForm);
@@ -69,8 +69,8 @@ begin
   end;
 end;}
 
-procedure AllCells(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass; AIsOnlyActive: Boolean = False);
+procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
+  AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
 
   function IsClass(ACurCell: TsmxBaseCell): Boolean;
   var
@@ -93,6 +93,8 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList;
   var
     i: Integer;
   begin
+    if ACurCell is TsmxCustomForm then
+      Exit else
     if (AIsEmpty or IsClass(ACurCell)) and (not AIsOnlyActive or IsActive(ACurCell)) then
       AList.Add(ACurCell);
     for i := 0 to ACurCell.CellCount - 1 do

@@ -30,11 +30,13 @@ function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEven
 function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
 function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
 function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
+//function IsBeforeShowModal(AForm: TsmxCustomForm): Boolean;
 
 implementation
 
 uses
-  Variants, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes, smxDBFuncs;
+  Variants, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes, smxDBFuncs,
+  SysUtils;
 
 function CfgIDToCfgClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfgClass;
 var
@@ -268,9 +270,11 @@ var
 begin
   Result := False;
   AValue := Variants.Null;
+  if not Assigned(AForm) then
+    Exit;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], True);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.CellVisible);
     for i := 0 to List.Count - 1 do
       if FindFilterOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin
@@ -290,9 +294,11 @@ var
 begin
   Result := False;
   AValue := Variants.Null;
+  if not Assigned(AForm) then
+    Exit;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], True);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.CellVisible);
     for i := 0 to List.Count - 1 do
       if FindColumnOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin
@@ -327,7 +333,7 @@ end;
 function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm;
 begin
   Result := nil;
-  if Assigned(AForm) then
+  if Assigned(AForm) and (ACfgID <> 0) then
     if Assigned(AForm.AlgorithmList) then
       Result := TsmxCustomAlgorithm(AForm.AlgorithmList.FindSlaveByCfgID(ACfgID));
 end;
@@ -345,7 +351,7 @@ end;
 function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
 begin
   Result := nil;
-  if Assigned(AForm) then
+  if Assigned(AForm) and (ACfgID <> 0) then
     if Assigned(AForm.RequestList) then
       Result := TsmxCustomRequest(AForm.RequestList.FindSlaveByCfgID(ACfgID));
 end;
@@ -363,9 +369,16 @@ end;
 function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
 begin
   Result := nil;
-  if Assigned(AForm) then
+  if Assigned(AForm) and (ACfgID <> 0) then
     if Assigned(AForm.PopupList) then
       Result := TsmxCustomPopupMenu(AForm.PopupList.FindSlaveByCfgID(ACfgID));
 end;
+
+{function IsBeforeShowModal(AForm: TsmxCustomForm): Boolean;
+begin
+  if Assigned(AForm) then
+    Result := AForm.IsShowModal and not AForm.CellVisible else
+    Result := False;
+end;}
 
 end.

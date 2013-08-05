@@ -9,21 +9,19 @@ uses
 
 exports
   smxLibProcs.LibInfo,
+  smxAlgs.ApplyForm,
   smxAlgs.PrepareForm,
-  smxAlgs.OpenModalForm;
-  {OpenForm,
-  OpenFormByEventID,
-  OpenFormByProblemID,
-  CloseForm,
-  RefreshForm,
-  ApplyForm,
-  SelectRecord,
-  UnSelectRecord,
-  ChangeFilterValue,
-  ChangeStateForm,
-  SelectAndPerformRequestA,
-  SelectAndPerformRequestF;}
-
+  smxAlgs.RefreshForm,
+  smxAlgs.ShowModalForm,
+  smxAlgs.CloseModalForm,
+  smxAlgs.GetCfgPropsGrid,
+  smxAlgs.SetCfgPropsGrid,
+  smxAlgs.CloseOkForm,
+  smxAlgs.CloseCancelForm,
+  smxAlgs.ShowMessageForm,
+  smxAlgs.ChangeRowPropsGrid,
+  smxAlgs.ClickColumnPropsGrid;
+  
 begin
   smxLibProcs.FillInfo(1, 0, smxLibProcs.InitLib);
 end.

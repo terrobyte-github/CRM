@@ -6,7 +6,7 @@ uses
   Classes, Controls, Graphics, Types;
 
 type
-  TsmxCellFont = record
+  {TsmxCellFont = record
     Color: Integer;
     Name: String;
     Size: Integer;
@@ -18,7 +18,7 @@ type
     Alignment: TAlignment;
     Color: Integer;
     Font: TsmxCellFont;
-  end;
+  end;}
 
   TsmxPerformanceMode = (pmOpen, pmExecute);
 
@@ -31,7 +31,7 @@ type
   end;}
 
   TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
-    goOwnerDrawHeader);
+    goOwnerDrawHeader, goEditing);
 
   TsmxGridOptions = set of TsmxGridOption;
 
