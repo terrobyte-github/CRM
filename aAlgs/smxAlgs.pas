@@ -23,7 +23,7 @@ implementation
 
 uses
   Classes, Controls, SysUtils, TypInfo, Variants, smxClasses, smxFuncs,
-  smxClassProcs, smxClassFuncs, Dialogs;
+  smxClassProcs, smxClassFuncs, smxTypes;
 
 var
   Cfg: TsmxBaseCfg = nil;
@@ -209,7 +209,7 @@ var
   ParentPropName, ParentPropValue: String;
   TypeInfo: PTypeInfo;
   Obj: TObject;
-begin
+begin                           inf('yes');
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
     begin
@@ -424,7 +424,7 @@ end;
 
 procedure ShowMessageForm(Sender: TsmxComponent);
 begin
-  Dialogs.ShowMessage('Message');
+  smxFuncs.Inf('Message');
 end;
 
 procedure ChangeRowPropsGrid(Sender: TsmxComponent);
@@ -438,8 +438,9 @@ begin
       Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
       RowIndex := Grid.FocusedRowIndex;
       if RowIndex <> -1 then
-        Grid.Slaves[2].IsEditing :=
-          not ((Grid.GridCaptions[2, RowIndex] = '2') or (Grid.GridCaptions[2, RowIndex] = '3'));
+        if not ((Grid.GridCaptions[2, RowIndex] = '2') or (Grid.GridCaptions[2, RowIndex] = '3')) then
+          Grid.Slaves[2].ColumnOptions := Grid.Slaves[2].ColumnOptions + [coEditing] else
+          Grid.Slaves[2].ColumnOptions := Grid.Slaves[2].ColumnOptions - [coEditing];
     end;
 end;
 

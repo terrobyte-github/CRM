@@ -423,8 +423,8 @@ type
   private
     FColumnFieldName: String;
     FColumnHeader: TsmxText;
+    FColumnOptions: TsmxColumnOptions;
     FColumnText: TsmxText;
-    FIsEditing: Boolean;
     FSnapHeaderAlgCfgID: Integer;
     function GetColumnHeader: TsmxText;
     function GetColumnText: TsmxText;
@@ -432,8 +432,8 @@ type
     procedure ReadCell(const Node: IXMLNode); override;
     procedure SetColumnFieldName(const Value: String); virtual;
     procedure SetColumnHeader(Value: TsmxText); virtual;
+    procedure SetColumnOptions(Value: TsmxColumnOptions); virtual;
     procedure SetColumnText(Value: TsmxText); virtual;
-    procedure SetIsEditing(Value: Boolean); virtual;
     procedure SetSnapHeaderAlgCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
@@ -446,8 +446,8 @@ type
     //property ColumnFieldName: String read FColumnFieldName write SetColumnFieldName;
     property ColumnHeader: TsmxText read GetColumnHeader write SetColumnHeader;
     //property ColumnName: String read FColumnName write SetColumnName;
+    property ColumnOptions: TsmxColumnOptions read FColumnOptions write SetColumnOptions;
     property ColumnText: TsmxText read GetColumnText write SetColumnText;
-    property IsEditing: Boolean read FIsEditing write SetIsEditing;
     property PopupMenuCfgID;
     property SnapAlgCfgID;
     property SnapHeaderAlgCfgID: Integer read FSnapHeaderAlgCfgID write SetSnapHeaderAlgCfgID;
@@ -455,25 +455,25 @@ type
 
   { TsmxGridCfg }
 
-  TsmxGridCfg = class(TsmxActionCellCfg)
+  TsmxGridCfg = class(TsmxWorkCellCfg)
   private
-    FApplyAlgCfgID: Integer;
+    //FApplyAlgCfgID: Integer;
     FChangeRowAlgCfgID: Integer;
     FGridOptions: TsmxGridOptions;
     //FPressDoubleAlgCfgID: Integer;
     //FPressHeaderAlgCfgID: Integer;
-    FPrepareAlgCfgID: Integer;
-    FRefreshAlgCfgID: Integer;
+    //FPrepareAlgCfgID: Integer;
+    //FRefreshAlgCfgID: Integer;
     FRequestCfgID: Integer;
   protected
     procedure ReadCell(const Node: IXMLNode); override;
-    procedure SetApplyAlgCfgID(Value: Integer); virtual;
+    //procedure SetApplyAlgCfgID(Value: Integer); virtual;
     procedure SetChangeRowAlgCfgID(Value: Integer); virtual;
     procedure SetGridOptions(Value: TsmxGridOptions); virtual;
     //procedure SetPressDoubleAlgCfgID(Value: Integer); virtual;
     //procedure SetPressHeaderAlgCfgID(Value: Integer); virtual;
-    procedure SetPrepareAlgCfgID(Value: Integer); virtual;
-    procedure SetRefreshAlgCfgID(Value: Integer); virtual;
+    //procedure SetPrepareAlgCfgID(Value: Integer); virtual;
+    //procedure SetRefreshAlgCfgID(Value: Integer); virtual;
     procedure SetRequestCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
   public
@@ -481,7 +481,7 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
-    property ApplyAlgCfgID: Integer read FApplyAlgCfgID write SetApplyAlgCfgID;
+    //property ApplyAlgCfgID: Integer read FApplyAlgCfgID write SetApplyAlgCfgID;
     property CfgAlign;
     property CfgAnchors;
     property CfgCursor;
@@ -497,13 +497,56 @@ type
     property GridOptions: TsmxGridOptions read FGridOptions write SetGridOptions;
     property IsSetAlgorithmEvents;
     property PopupMenuCfgID;
-    property PrepareAlgCfgID: Integer read FPrepareAlgCfgID write SetPrepareAlgCfgID;
-    property RefreshAlgCfgID: Integer read FRefreshAlgCfgID write SetRefreshAlgCfgID;
+    //property PrepareAlgCfgID: Integer read FPrepareAlgCfgID write SetPrepareAlgCfgID;
+    //property RefreshAlgCfgID: Integer read FRefreshAlgCfgID write SetRefreshAlgCfgID;
     property RequestCfgID: Integer read FRequestCfgID write SetRequestCfgID;
     property SlaveCells;
-    property SnapAlgCfgID;
+    //property SnapAlgCfgID;
     //property PressDoubleAlgCfgID: Integer read FPressDoubleAlgCfgID write SetPressDoubleAlgCfgID;
     //property PressHeaderAlgCfgID: Integer read FPressHeaderAlgCfgID write SetPressHeaderAlgCfgID;
+  end;
+
+  { TsmxTreeCfg }
+
+  TsmxTreeCfg = class(TsmxWorkCellCfg)
+  private
+    FChangeRowAlgCfgID: Integer;
+    FCollapseAlgCfgID: Integer;
+    FExpandAlgCfgID: Integer;
+    FRequestCfgID: Integer;
+    FTreeOptions: TsmxGridOptions;
+  protected
+    procedure ReadCell(const Node: IXMLNode); override;
+    procedure SetChangeRowAlgCfgID(Value: Integer); virtual;
+    procedure SetCollapseAlgCfgID(Value: Integer); virtual;
+    procedure SetExpandAlgCfgID(Value: Integer); virtual;
+    procedure SetRequestCfgID(Value: Integer); virtual;
+    procedure SetTreeOptions(Value: TsmxGridOptions); virtual;
+    procedure WriteCell(const Node: IXMLNode); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure Assign(Source: TPersistent); override;
+    procedure Clear; override;
+  published
+    property CfgAlign;
+    property CfgAnchors;
+    property CfgCursor;
+    property CfgEnabled;
+    property CfgHeight;
+    property CfgHint;
+    property CfgLeft;
+    property CfgTop;
+    property CfgVisible;
+    property CfgWidth;
+    property ChangeRowAlgCfgID: Integer read FChangeRowAlgCfgID write SetChangeRowAlgCfgID;
+    property CollapseAlgCfgID: Integer read FCollapseAlgCfgID write SetCollapseAlgCfgID;
+    property DoubleSnapAlgCfgID;
+    property ExpandAlgCfgID: Integer read FExpandAlgCfgID write SetExpandAlgCfgID;
+    property IsSetAlgorithmEvents;
+    property PopupMenuCfgID;
+    property RequestCfgID: Integer read FRequestCfgID write SetRequestCfgID;
+    property SlaveCells;
+    property TreeOptions: TsmxGridOptions read FTreeOptions write SetTreeOptions;
   end;
 
   { TsmxFilterCfg }
@@ -604,11 +647,11 @@ type
 
   { TsmxFilterDeskCfg }
 
-  TsmxFilterDeskCfg = class(TsmxActionCellCfg)
+  TsmxFilterDeskCfg = class(TsmxWorkCellCfg)
   private
-    FApplyAlgCfgID: Integer;
-    FPrepareAlgCfgID: Integer;
-    FRefreshAlgCfgID: Integer;
+    //FApplyAlgCfgID: Integer;
+    //FPrepareAlgCfgID: Integer;
+    //FRefreshAlgCfgID: Integer;
     FRequestCfgID: Integer;
     function GetSlaveCells: TsmxFilterKit;
     procedure SetSlaveCells(Value: TsmxFilterKit);
@@ -616,9 +659,9 @@ type
     function GetSlaveCellsClass: TsmxSimpleKitClass; override;
     procedure ReadCell(const Node: IXMLNode); override;
     //procedure ReadSlaveCell(Slave: TsmxOwnerKitItem; const Node: IXMLNode); override;
-    procedure SetApplyAlgCfgID(Value: Integer); virtual;
-    procedure SetPrepareAlgCfgID(Value: Integer); virtual;
-    procedure SetRefreshAlgCfgID(Value: Integer); virtual;
+    //procedure SetApplyAlgCfgID(Value: Integer); virtual;
+    //procedure SetPrepareAlgCfgID(Value: Integer); virtual;
+    //procedure SetRefreshAlgCfgID(Value: Integer); virtual;
     procedure SetRequestCfgID(Value: Integer); virtual;
     procedure WriteCell(const Node: IXMLNode); override;
     //procedure WriteSlaveCell(Slave: TsmxOwnerKitItem; const Node: IXMLNode); override;
@@ -627,7 +670,7 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure Clear; override;
   published
-    property ApplyAlgCfgID: Integer read FApplyAlgCfgID write SetApplyAlgCfgID;
+    //property ApplyAlgCfgID: Integer read FApplyAlgCfgID write SetApplyAlgCfgID;
     property CfgAlign;
     property CfgAnchors;
     property CfgCaption;
@@ -641,8 +684,8 @@ type
     property CfgWidth;
     property DoubleSnapAlgCfgID;
     property PopupMenuCfgID;
-    property PrepareAlgCfgID: Integer read FPrepareAlgCfgID write SetPrepareAlgCfgID;
-    property RefreshAlgCfgID: Integer read FRefreshAlgCfgID write SetRefreshAlgCfgID;
+    //property PrepareAlgCfgID: Integer read FPrepareAlgCfgID write SetPrepareAlgCfgID;
+    //property RefreshAlgCfgID: Integer read FRefreshAlgCfgID write SetRefreshAlgCfgID;
     property RequestCfgID: Integer read FRequestCfgID write SetRequestCfgID;
     property SlaveCells: TsmxFilterKit read GetSlaveCells write SetSlaveCells;
     property SnapAlgCfgID;
@@ -2381,8 +2424,8 @@ begin
   begin
     //ColumnFieldName := TsmxColumnCfg(Source).ColumnFieldName;
     ColumnHeader := TsmxColumnCfg(Source).ColumnHeader;
+    ColumnOptions := TsmxColumnCfg(Source).ColumnOptions;
     ColumnText := TsmxColumnCfg(Source).ColumnText;
-    IsEditing := TsmxColumnCfg(Source).IsEditing;
     SnapHeaderAlgCfgID := TsmxColumnCfg(Source).SnapHeaderAlgCfgID;
   end;
 end;
@@ -2397,8 +2440,8 @@ begin
   //DefText.Color := Integer(Graphics.clBtnFace);
   ColumnHeader.Clear; //:= DefText;
   ColumnHeader.Color := Graphics.clBtnFace;
+  ColumnOptions := [];
   ColumnText.Clear; //:= smxFuncs.DefCellText;
-  IsEditing := False;
   SnapHeaderAlgCfgID := 0;
 end;
 
@@ -2433,7 +2476,7 @@ var
 begin
   inherited ReadCell(Node);
   //ColumnFieldName := Node.Attributes['FieldName'];
-  IsEditing := Node.Attributes['IsEditing'];
+  ColumnOptions := TsmxColumnOptions(smxFuncs.StrToSet(TypeInfo(TsmxColumnOption), Node.Attributes['ColumnOptions']));
   SnapHeaderAlgCfgID := Node.Attributes['SnapHeaderAlgCfgID'];
 
   n := Node.ChildNodes.FindNode('Column');
@@ -2488,7 +2531,7 @@ var
 begin
   inherited WriteCell(Node);
   //Node.Attributes['FieldName'] := ColumnFieldName;
-  Node.Attributes['IsEditing'] := SysUtils.BoolToStr(IsEditing, True);
+  Node.Attributes['ColumnOptions'] := smxFuncs.SetToStr(TypeInfo(TsmxColumnOption), Byte(ColumnOptions));
   Node.Attributes['SnapHeaderAlgCfgID'] := SnapHeaderAlgCfgID;
 
   n := Node.AddChild('Column');
@@ -2532,9 +2575,9 @@ begin
   FColumnFieldName := Value;
 end;
 
-procedure TsmxColumnCfg.SetIsEditing(Value: Boolean);
+procedure TsmxColumnCfg.SetColumnOptions(Value: TsmxColumnOptions);
 begin
-  FIsEditing := Value;
+  FColumnOptions := Value;
 end;
 
 procedure TsmxColumnCfg.SetSnapHeaderAlgCfgID(Value: Integer);
@@ -2561,11 +2604,11 @@ begin
     //PressDoubleAlgCfgID := TsmxGridCfg(Source).PressDoubleAlgCfgID;
     //PressHeaderAlgCfgID := TsmxGridCfg(Source).PressHeaderAlgCfgID;
 
-    ApplyAlgCfgID := TsmxGridCfg(Source).ApplyAlgCfgID;
+    //ApplyAlgCfgID := TsmxGridCfg(Source).ApplyAlgCfgID;
     ChangeRowAlgCfgID := TsmxGridCfg(Source).ChangeRowAlgCfgID;
     GridOptions := TsmxGridCfg(Source).GridOptions;
-    PrepareAlgCfgID := TsmxGridCfg(Source).PrepareAlgCfgID;
-    RefreshAlgCfgID := TsmxGridCfg(Source).RefreshAlgCfgID;
+    //PrepareAlgCfgID := TsmxGridCfg(Source).PrepareAlgCfgID;
+    //RefreshAlgCfgID := TsmxGridCfg(Source).RefreshAlgCfgID;
     RequestCfgID := TsmxGridCfg(Source).RequestCfgID;
   end;
 end;
@@ -2573,13 +2616,13 @@ end;
 procedure TsmxGridCfg.Clear;
 begin
   inherited Clear;
-  ApplyAlgCfgID := 0;
+  //ApplyAlgCfgID := 0;
   ChangeRowAlgCfgID := 0;
   GridOptions := [];
   //PressDoubleAlgCfgID := 0;
   //PressHeaderAlgCfgID := 0;
-  PrepareAlgCfgID := 0;
-  RefreshAlgCfgID := 0;
+  //PrepareAlgCfgID := 0;
+  //RefreshAlgCfgID := 0;
   RequestCfgID := 0;
 end;
 
@@ -2589,12 +2632,12 @@ begin
   GridOptions := TsmxGridOptions(smxFuncs.StrToSet(TypeInfo(TsmxGridOption), Node.Attributes['GridOptions']));
   RequestCfgID := Node.Attributes['RequestCfgID'];
 
-  ApplyAlgCfgID := Node.Attributes['ApplyAlgCfgID'];
+  //ApplyAlgCfgID := Node.Attributes['ApplyAlgCfgID'];
   ChangeRowAlgCfgID := Node.Attributes['ChangeRowAlgCfgID'];
   //PressDoubleAlgCfgID := Node.Attributes['PressDoubleAlgCfgID'];
   //PressHeaderAlgCfgID := Node.Attributes['PressHeaderAlgCfgID'];
-  PrepareAlgCfgID := Node.Attributes['PrepareAlgCfgID'];
-  RefreshAlgCfgID := Node.Attributes['RefreshAlgCfgID'];
+  //PrepareAlgCfgID := Node.Attributes['PrepareAlgCfgID'];
+  //RefreshAlgCfgID := Node.Attributes['RefreshAlgCfgID'];
 end;
 
 procedure TsmxGridCfg.WriteCell(const Node: IXMLNode);
@@ -2603,18 +2646,18 @@ begin
   Node.Attributes['GridOptions'] := smxFuncs.SetToStr(TypeInfo(TsmxGridOption), Byte(GridOptions), True);
   Node.Attributes['RequestCfgID'] := RequestCfgID;
 
-  Node.Attributes['ApplyAlgCfgID'] := ApplyAlgCfgID;
+  //Node.Attributes['ApplyAlgCfgID'] := ApplyAlgCfgID;
   Node.Attributes['ChangeRowAlgCfgID'] := ChangeRowAlgCfgID;
   //Node.Attributes['PressDoubleAlgCfgID'] := PressDoubleAlgCfgID;
   //Node.Attributes['PressHeaderAlgCfgID'] := PressHeaderAlgCfgID;
-  Node.Attributes['PrepareAlgCfgID'] := PrepareAlgCfgID;
-  Node.Attributes['RefreshAlgCfgID'] := RefreshAlgCfgID;
+  //Node.Attributes['PrepareAlgCfgID'] := PrepareAlgCfgID;
+  //Node.Attributes['RefreshAlgCfgID'] := RefreshAlgCfgID;
 end;
 
-procedure TsmxGridCfg.SetApplyAlgCfgID(Value: Integer);
+{procedure TsmxGridCfg.SetApplyAlgCfgID(Value: Integer);
 begin
   FApplyAlgCfgID := Value;
-end;
+end;}
 
 procedure TsmxGridCfg.SetChangeRowAlgCfgID(Value: Integer);
 begin
@@ -2636,7 +2679,7 @@ begin
   FPressHeaderAlgCfgID := Value;
 end;}
 
-procedure TsmxGridCfg.SetPrepareAlgCfgID(Value: Integer);
+{procedure TsmxGridCfg.SetPrepareAlgCfgID(Value: Integer);
 begin
   FPrepareAlgCfgID := Value;
 end;
@@ -2644,11 +2687,92 @@ end;
 procedure TsmxGridCfg.SetRefreshAlgCfgID(Value: Integer);
 begin
   FRefreshAlgCfgID := Value;
-end;
+end;}
 
 procedure TsmxGridCfg.SetRequestCfgID(Value: Integer);
 begin
   FRequestCfgID := Value;
+end;
+
+{ TsmxTreeCfg }
+
+constructor TsmxTreeCfg.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SlaveCells.KitNodeName := 'Columns';
+  SlaveCells.ItemNodeName := 'Column';
+  SlaveCells.IsWriteEmpty := True;
+  IsSetAlgorithmEvents := True;
+end;
+
+procedure TsmxTreeCfg.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TsmxTreeCfg then
+  begin
+    ChangeRowAlgCfgID := TsmxTreeCfg(Source).ChangeRowAlgCfgID;
+    CollapseAlgCfgID := TsmxTreeCfg(Source).CollapseAlgCfgID;
+    ExpandAlgCfgID := TsmxTreeCfg(Source).ExpandAlgCfgID;
+    RequestCfgID := TsmxTreeCfg(Source).RequestCfgID;
+    TreeOptions := TsmxTreeCfg(Source).TreeOptions;
+  end;
+end;
+
+procedure TsmxTreeCfg.Clear;
+begin
+  inherited Clear;
+  ChangeRowAlgCfgID := 0;
+  CollapseAlgCfgID := 0;
+  ExpandAlgCfgID := 0;
+  RequestCfgID := 0;
+  TreeOptions := [];
+end;
+
+procedure TsmxTreeCfg.ReadCell(const Node: IXMLNode);
+begin
+  inherited ReadCell(Node);
+  RequestCfgID := Node.Attributes['RequestCfgID'];
+  TreeOptions := TsmxGridOptions(smxFuncs.StrToSet(TypeInfo(TsmxGridOption), Node.Attributes['TreeOptions']));
+
+  ChangeRowAlgCfgID := Node.Attributes['ChangeRowAlgCfgID'];
+  CollapseAlgCfgID := Node.Attributes['CollapseAlgCfgID'];
+  ExpandAlgCfgID := Node.Attributes['ExpandAlgCfgID'];
+end;
+
+procedure TsmxTreeCfg.WriteCell(const Node: IXMLNode);
+begin
+  inherited WriteCell(Node);
+  Node.Attributes['RequestCfgID'] := RequestCfgID;
+  Node.Attributes['TreeOptions'] := smxFuncs.SetToStr(TypeInfo(TsmxGridOption), Byte(TreeOptions), True);
+
+  Node.Attributes['ChangeRowAlgCfgID'] := ChangeRowAlgCfgID;
+  Node.Attributes['CollapseAlgCfgID'] := CollapseAlgCfgID;
+  Node.Attributes['ExpandAlgCfgID'] := ExpandAlgCfgID;
+end;
+
+procedure TsmxTreeCfg.SetChangeRowAlgCfgID(Value: Integer);
+begin
+  FChangeRowAlgCfgID := Value;
+end;
+
+procedure TsmxTreeCfg.SetCollapseAlgCfgID(Value: Integer);
+begin
+  FCollapseAlgCfgID := Value;
+end;
+
+procedure TsmxTreeCfg.SetExpandAlgCfgID(Value: Integer);
+begin
+  FExpandAlgCfgID := Value;
+end;
+
+procedure TsmxTreeCfg.SetRequestCfgID(Value: Integer);
+begin
+  FRequestCfgID := Value;
+end;
+
+procedure TsmxTreeCfg.SetTreeOptions(Value: TsmxGridOptions);
+begin
+  FTreeOptions := Value;
 end;
 
 { TsmxFilterCfg }
@@ -2950,9 +3074,9 @@ begin
   inherited Assign(Source);
   if Source is TsmxFilterDeskCfg then
   begin
-    ApplyAlgCfgID := TsmxFilterDeskCfg(Source).ApplyAlgCfgID;
-    PrepareAlgCfgID := TsmxFilterDeskCfg(Source).PrepareAlgCfgID;
-    RefreshAlgCfgID := TsmxFilterDeskCfg(Source).RefreshAlgCfgID;
+    //ApplyAlgCfgID := TsmxFilterDeskCfg(Source).ApplyAlgCfgID;
+    //PrepareAlgCfgID := TsmxFilterDeskCfg(Source).PrepareAlgCfgID;
+    //RefreshAlgCfgID := TsmxFilterDeskCfg(Source).RefreshAlgCfgID;
     RequestCfgID := TsmxFilterDeskCfg(Source).RequestCfgID;
   end;
 end;
@@ -2960,9 +3084,9 @@ end;
 procedure TsmxFilterDeskCfg.Clear;
 begin
   inherited Clear;
-  ApplyAlgCfgID := 0;
-  PrepareAlgCfgID := 0;
-  PrepareAlgCfgID := 0;
+  //ApplyAlgCfgID := 0;
+  //PrepareAlgCfgID := 0;
+  //PrepareAlgCfgID := 0;
   RequestCfgID := 0;
 end;
 
@@ -2986,9 +3110,9 @@ begin
   inherited ReadCell(Node);
   RequestCfgID := Node.Attributes['RequestCfgID'];
 
-  ApplyAlgCfgID := Node.Attributes['ApplyAlgCfgID'];
-  PrepareAlgCfgID := Node.Attributes['PrepareAlgCfgID'];
-  RefreshAlgCfgID := Node.Attributes['RefreshAlgCfgID'];
+  //ApplyAlgCfgID := Node.Attributes['ApplyAlgCfgID'];
+  //PrepareAlgCfgID := Node.Attributes['PrepareAlgCfgID'];
+  //RefreshAlgCfgID := Node.Attributes['RefreshAlgCfgID'];
 end;
 
 procedure TsmxFilterDeskCfg.WriteCell(const Node: IXMLNode);
@@ -2996,9 +3120,9 @@ begin
   inherited WriteCell(Node);
   Node.Attributes['RequestCfgID'] := RequestCfgID;
 
-  Node.Attributes['ApplyAlgCfgID'] := ApplyAlgCfgID;
-  Node.Attributes['PrepareAlgCfgID'] := PrepareAlgCfgID;
-  Node.Attributes['RefreshAlgCfgID'] := RefreshAlgCfgID;
+  //Node.Attributes['ApplyAlgCfgID'] := ApplyAlgCfgID;
+  //Node.Attributes['PrepareAlgCfgID'] := PrepareAlgCfgID;
+  //Node.Attributes['RefreshAlgCfgID'] := RefreshAlgCfgID;
 end;
 
 {procedure TsmxFilterDeskCfg.ReadSlaveCell(Slave: TsmxOwnerKitItem; const Node: IXMLNode);
@@ -3017,7 +3141,7 @@ begin
   Node.Attributes['ValueFormat'] := TsmxFilterKitItem(Slave).ValueFormat;
 end;}
 
-procedure TsmxFilterDeskCfg.SetApplyAlgCfgID(Value: Integer);
+{procedure TsmxFilterDeskCfg.SetApplyAlgCfgID(Value: Integer);
 begin
   FApplyAlgCfgID := Value;
 end;
@@ -3030,7 +3154,7 @@ end;
 procedure TsmxFilterDeskCfg.SetRefreshAlgCfgID(Value: Integer);
 begin
   FRefreshAlgCfgID := Value;
-end;
+end;}
 
 procedure TsmxFilterDeskCfg.SetRequestCfgID(Value: Integer);
 begin
@@ -4527,7 +4651,7 @@ begin
 
 initialization
   Classes.RegisterClasses([TsmxAlgorithmCfg, TsmxAlgorithmListCfg,
-    TsmxRequestCfg, TsmxRequestListCfg, TsmxColumnCfg, TsmxGridCfg,
+    TsmxRequestCfg, TsmxRequestListCfg, TsmxColumnCfg, TsmxGridCfg, TsmxTreeCfg,
     TsmxFilterCfg, TsmxFilterDeskCfg, TsmxSectionCfg, TsmxPageCfg,
     TsmxPageManagerCfg, TsmxMenuItemCfg, TsmxMainMenuCfg, TsmxPopupMenuCfg,
     TsmxPopupListCfg, TsmxToolItemCfg, TsmxToolBoardCfg, TsmxControlBoardCfg,

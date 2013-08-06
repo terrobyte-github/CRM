@@ -86,7 +86,11 @@ type
 
   TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
 
-  TsmxFilterOption = (foApplyValue, foPrepareValue, foApplyText, foPrepareText);
+  TsmxColumnOption = (coEditing, coSetValue);
+
+  TsmxColumnOptions = set of TsmxColumnOption;
+
+  TsmxFilterOption = (foApply, foPrepare, foEditing, foSetValue);
 
   TsmxFilterOptions = set of TsmxFilterOption;
 

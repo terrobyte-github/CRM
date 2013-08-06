@@ -184,6 +184,7 @@ type
   TsmxEditFilter = class(TsmxPanelFilter)
   private
     FEdit: TEdit;
+    FValue: Variant;
     function GetEdit: TEdit;
     procedure EditChange(Sender: TObject);
   protected
@@ -1138,6 +1139,7 @@ begin
     FEdit.OnChange := EditChange;
     FEdit.OnClick := ControlClick;
     FEdit.OnDblClick := ControlDblClick;
+    FValue := Variants.Null;
   end;
   Result := FEdit;
 end;
@@ -1164,7 +1166,9 @@ end;
 
 function TsmxEditFilter.GetFilterValue: Variant;
 begin
-  Result := smxFuncs.StrToVar(Edit.Text); //FEdit.Text;
+  if foSetValue in FilterOptions then
+    Result := FValue else
+    Result := Variants.Null; //smxFuncs.StrToVar(Edit.Text); //FEdit.Text;
   //if Result = '' then
     //Result := Null;
 end;
@@ -1173,7 +1177,9 @@ procedure TsmxEditFilter.SetFilterValue(const Value: Variant);
 begin
   //if VarIsEmpty(Value) or VarIsNull(Value) then
     //FEdit.Text := '' else
-    Edit.Text := Variants.VarToStr(Value);
+    //Edit.Text := Variants.VarToStr(Value);
+  if foSetValue in FilterOptions then
+    FValue := Value;
 end;
 
 {function TsmxEditFilter.GetFilter: TObject;
@@ -1397,7 +1403,9 @@ end;}
 
 function TsmxBitBtnFilter.GetFilterValue: Variant;
 begin
-  Result := FValue;
+  if foSetValue in FilterOptions then
+    Result := FValue else
+    Result := Variants.Null;
 end;
 
 {function TsmxBitBtnFilter.GetInternalObject: TObject;
@@ -1433,7 +1441,7 @@ end;}
 
 procedure TsmxBitBtnFilter.SetFilterValue(const Value: Variant);
 begin
-  if FValue <> Value then
+  if foSetValue in FilterOptions then
   begin
     FValue := Value;
     ChangeFilter;

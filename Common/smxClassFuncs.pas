@@ -231,7 +231,10 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    AValue := TsmxCustomFilter(Cell).FilterValue;
+    if foSetValue in TsmxCustomFilter(Cell).FilterOptions then
+      AValue := TsmxCustomFilter(Cell).FilterValue
+    else
+      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).FilterCaption);
     Result := True;
   end;
 end;
@@ -257,7 +260,10 @@ begin
       //Cell := ASection.Grid.FindSlaveByName(AName);
   if Assigned(Cell) then
   begin
-    AValue := TsmxCustomColumn(Cell).ColumnValue;
+    if coSetValue in TsmxCustomColumn(Cell).ColumnOptions then
+      AValue := TsmxCustomColumn(Cell).ColumnValue
+    else
+      AValue := smxFuncs.StrToVar(TsmxCustomColumn(Cell).ColumnCaption);
     Result := True;
   end;
 end;
