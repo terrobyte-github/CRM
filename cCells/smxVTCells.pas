@@ -362,15 +362,13 @@ begin
   Result := '';
   if CellOwner is TsmxCustomGrid then
   begin
-    with TsmxCustomGrid(CellOwner) do
-      if FocusedRowIndex <> -1 then
-        Result := GridCaptions[SlaveIndex, FocusedRowIndex];
+    if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
+      Result := TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
   end else
   if CellOwner is TsmxCustomTree then
   begin
-    with TsmxCustomTree(CellOwner) do
-      if Assigned(FocusedRowIndex) then
-        Result := TreeCaptions[SlaveIndex, FocusedRowIndex];
+    if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
+      Result := TsmxCustomTree(CellOwner).TreeCaptions[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex];
   end;
 end;
 
@@ -382,15 +380,13 @@ begin
   //SetFieldValue(smxFuncs.GetTextFieldName(SlaveName), Val);
   if CellOwner is TsmxCustomGrid then
   begin
-    with TsmxCustomGrid(CellOwner) do
-      if FocusedRowIndex <> -1 then
-        GridCaptions[SlaveIndex, FocusedRowIndex] := Value;
+    if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
+      TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
   end else
   if CellOwner is TsmxCustomTree then
   begin
-    with TsmxCustomTree(CellOwner) do
-      if Assigned(FocusedRowIndex) then
-        TreeCaptions[SlaveIndex, FocusedRowIndex] := Value;
+    if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
+      TsmxCustomTree(CellOwner).TreeCaptions[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex] := Value;
   end;
 end;
 
@@ -421,15 +417,13 @@ begin
   begin
     if CellOwner is TsmxCustomGrid then
     begin
-      with TsmxCustomGrid(CellOwner) do
-        if FocusedRowIndex <> -1 then
-          Result := GridValues[SlaveIndex, FocusedRowIndex];
+      if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
+        Result := TsmxCustomGrid(CellOwner).GridValues[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
     end else
     if CellOwner is TsmxCustomTree then
     begin
-      with TsmxCustomTree(CellOwner) do
-        if Assigned(FocusedRowIndex) then
-          Result := TreeValues[SlaveIndex, FocusedRowIndex];
+      if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
+        Result := TsmxCustomTree(CellOwner).TreeValues[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex];
     end;
   end;
 end;

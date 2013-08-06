@@ -259,7 +259,7 @@ begin
     //if Assigned(ASection.Grid) then
       //Cell := ASection.Grid.FindSlaveByName(AName);
   if Assigned(Cell) then
-  begin
+  begin                                  
     if coSetValue in TsmxCustomColumn(Cell).ColumnOptions then
       AValue := TsmxCustomColumn(Cell).ColumnValue
     else

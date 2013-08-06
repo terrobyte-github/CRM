@@ -35,6 +35,3 @@ contains
   smxClassProcs in '..\Common\smxClassProcs.pas';
 
 end.
-
-
-

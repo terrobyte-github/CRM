@@ -2048,9 +2048,9 @@ begin
   //Result := Variants.VarToStr(Val);
   Result := '';
   if CellOwner is TsmxCustomGrid then
-    with TsmxCustomGrid(CellOwner) do
-      if FocusedRowIndex <> -1 then
-        Result := GridCaptions[SlaveIndex, FocusedRowIndex];
+    //with TsmxCustomGrid(CellOwner) do
+      //if FocusedRowIndex <> -1 then
+    Result := TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
 end;
 
 procedure TsmxColumn.SetColumnCaption(const Value: String);
@@ -2061,9 +2061,9 @@ begin
   //Val := Variants.VarToStr(Value);
   //SetFieldValue(smxFuncs.GetTextFieldName(SlaveName), Val);
   if CellOwner is TsmxCustomGrid then
-    with TsmxCustomGrid(CellOwner) do
-      if FocusedRowIndex <> -1 then
-        GridCaptions[SlaveIndex, FocusedRowIndex] := Value;
+    //with TsmxCustomGrid(CellOwner) do
+      //if FocusedRowIndex <> -1 then
+    TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
 end;
 
 function TsmxColumn.GetColumnColor: TColor;
@@ -2095,9 +2095,9 @@ begin
   Result := Variants.Null;
   if coSetValue in ColumnOptions then
     if CellOwner is TsmxCustomGrid then
-      with TsmxCustomGrid(CellOwner) do
-        if FocusedRowIndex <> -1 then
-          Result := GridValues[SlaveIndex, FocusedRowIndex];
+      //with TsmxCustomGrid(CellOwner) do
+        //if FocusedRowIndex <> -1 then
+      Result := TsmxCustomGrid(CellOwner).GridValues[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
   {if Assigned(Column.Field) then
     Result := Column.Field.Value else
     Result := Variants.Null;}
@@ -2108,9 +2108,9 @@ begin
   //SetFieldValue({smxFuncs.GetValueFieldName(}SlaveName{)}, Value);
   if coSetValue in ColumnOptions then
     if CellOwner is TsmxCustomGrid then
-      with TsmxCustomGrid(CellOwner) do
-        if FocusedRowIndex <> -1 then
-          GridValues[SlaveIndex, FocusedRowIndex] := Value;
+      //with TsmxCustomGrid(CellOwner) do
+        //if FocusedRowIndex <> -1 then
+      TsmxCustomGrid(CellOwner).GridValues[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
   {if Assigned(Column.Field) then
   begin
 
@@ -2464,6 +2464,7 @@ begin
   if Assigned(DBGrid.DataSource.DataSet) then
     Result := DBGrid.DataSource.DataSet.RecNo else
     Result := -1;
+
   {Result := -1;
   if Assigned(Request) then
     if Assigned(Request.DataSet) then
@@ -2474,6 +2475,7 @@ procedure TsmxDBGrid.SetFocusedRowIndex(Value: Integer);
 begin
   if Assigned(DBGrid.DataSource.DataSet) then
     DBGrid.DataSource.DataSet.RecNo := Value;
+
   {if Assigned(Request) then
     if Assigned(Request.DataSet) then
        Request.DataSet.RecordNo := Value;}
@@ -2503,12 +2505,16 @@ begin
         //b := False;
         //CurRecordNo := Request.DataSet.RecordNo;
         try
-          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          Field := nil;
+          if RowIndex <> -1 then
           begin
+            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+              Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+          end else
             Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
-            if Assigned(Field) then
-              Result := Variants.VarToStr(Field.Value);
-          end;
+          if Assigned(Field) then
+            Result := Variants.VarToStr(Field.Value);
+
           //Request.DataSet.GotoBookmark(Bookmark);
           if Assigned(DBGrid.DataSource.DataSet) then
             DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
@@ -2520,7 +2526,7 @@ begin
           if Assigned(DBGrid.DataSource.DataSet) then
           begin
             DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-            DBGrid.DataSource.DataSet.DisableControls;
+            DBGrid.DataSource.DataSet.EnableControls;
           end;
         end;
       end;
@@ -2545,15 +2551,18 @@ begin
         end;
         try
           //Request.DataSet.RecordNo := RowIndex;
-          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          Field := nil;
+          if RowIndex <> -1 then
           begin
+            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+              Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+          end else
             Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
-            if Assigned(Field) then
-            begin
-              Request.DataSet.Edit;
-              Field.Value := smxFuncs.StrToVar(Value);
-              Request.DataSet.Post;
-            end;
+          if Assigned(Field) then
+          begin
+            Request.DataSet.Edit;
+            Field.Value := smxFuncs.StrToVar(Value);
+            Request.DataSet.Post;
           end;
           if Assigned(DBGrid.DataSource.DataSet) then
             DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
@@ -2594,12 +2603,15 @@ begin
         //b := False;
         //CurRecordNo := Request.DataSet.RecordNo;
         try
-          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          Field := nil;
+          if RowIndex <> -1 then
           begin
+            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+              Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+          end else
             Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
-            if Assigned(Field) then
-              Result := Field.Value;
-          end;
+          if Assigned(Field) then
+            Result := Field.Value;
           //Request.DataSet.GotoBookmark(Bookmark);
           if Assigned(DBGrid.DataSource.DataSet) then
             DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
@@ -2611,7 +2623,7 @@ begin
           if Assigned(DBGrid.DataSource.DataSet) then
           begin
             DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-            DBGrid.DataSource.DataSet.DisableControls;
+            DBGrid.DataSource.DataSet.EnableControls;
           end;
         end;
       end;
@@ -2636,15 +2648,18 @@ begin
         end;
         try
           //Request.DataSet.RecordNo := RowIndex;
-          if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+          Field := nil;
+          if RowIndex <> -1 then
           begin
+            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+              Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+          end else
             Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
-            if Assigned(Field) then
-            begin
-              Request.DataSet.Edit;
-              Field.Value := Value;
-              Request.DataSet.Post;
-            end;
+          if Assigned(Field) then
+          begin
+            Request.DataSet.Edit;
+            Field.Value := Value;
+            Request.DataSet.Post;
           end;
           if Assigned(DBGrid.DataSource.DataSet) then
             DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);

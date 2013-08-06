@@ -203,30 +203,35 @@ var
   Grid: TsmxCustomGrid;
   //PropNameColumn, PropValueColumn: String;
   i{, j}: Integer;
-  //s: String;
+  s: String;
   TypeData: PTypeData;
   ParentPropKit: Integer;
   ParentPropName, ParentPropValue: String;
   TypeInfo: PTypeInfo;
   Obj: TObject;
-begin                           inf('yes');
+begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
     begin
+      //s := '';
+      //for i := 0 to Grid.SlaveCount - 1 do
+        //s := s + Grid.Slaves[i].SlaveName + ' ';
+      //inf('s=' + s);  
       Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
       CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
       CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
-      ParentPropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropKit', 0);
-      ParentPropName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropName', '');
-      ParentPropValue := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropValue', '');
+      //ParentPropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropKit', 0);
+      //ParentPropName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropName', '');
+      //ParentPropValue := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropValue', '');
+         inf('cfgid=' + inttostr(cfgid) + ' cfgtype=' + inttostr(cfgtype));
       //PropNameColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropNameColumn', '');
       //PropValueColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropValueColumn', '');
       if (CfgID <> 0) {and (PropNameColumn <> '') and (PropValueColumn <> '')} then
       begin
-        Obj := nil;
+        //Obj := nil;
         //TypeInfo := nil;
-        if ParentPropKit = 0 then
-        begin
+        //if ParentPropKit = 0 then
+        //begin
           if Assigned(Cfg) then
             SysUtils.FreeAndNil(Cfg);
           if CfgType = 100 then // типы
@@ -239,11 +244,11 @@ begin                           inf('yes');
         //try
           Cfg.Receive;
           Obj := Cfg;
-        end else
-        if (ParentPropKit = 2) and (ParentPropName <> '') then
-        begin
-          Obj := GetParentObj(ParentPropName);
-        end;
+        //end else
+        //if (ParentPropKit = 2) and (ParentPropName <> '') then
+        //begin
+          //Obj := GetParentObj(ParentPropName);
+        //end;
         if Assigned(Obj) then
         begin
           TypeInfo := PTypeInfo(Obj.ClassInfo);
@@ -273,7 +278,7 @@ begin                           inf('yes');
                 if PropList^[i]^.PropType^^.Kind = tkClass then
                   Grid.GridCaptions[1, i] := PropList^[i]^.PropType^^.Name else
                   Grid.GridCaptions[1, i] := Variants.VarToStr(TypInfo.GetPropValue(Obj, PropList^[i]^.Name));
-                if PropList^[i]^.PropType^^.Kind = tkClass then
+                {if PropList^[i]^.PropType^^.Kind = tkClass then
                 begin
                   TypeData := TypInfo.GetTypeData(PropList^[i]^.PropType^);
                   if TypeData.ClassType.InheritsFrom(TsmxSimpleKit) then
@@ -283,7 +288,7 @@ begin                           inf('yes');
                     Grid.GridCaptions[3, i] := ParentPropName + '.' + PropList^[i]^.Name else
                     Grid.GridCaptions[3, i] := PropList^[i]^.Name;
                 end else
-                  Grid.GridCaptions[2, i] := '1';
+                  Grid.GridCaptions[2, i] := '1';}
               end;
             finally
               FreeMem(PropList);
