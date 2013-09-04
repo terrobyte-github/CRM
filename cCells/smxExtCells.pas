@@ -80,6 +80,7 @@ type
   private
     FDataSetIntf: IsmxDataSet;
     FRequestClass: TsmxInterfacedPersistentClass;
+    FRequestClassName: String;
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
     function GetDataSet: IsmxDataSet; override;
@@ -87,16 +88,37 @@ type
     procedure ResetCellProps; override;
     procedure SetCellProps; override;
     procedure SetRequestClass(Value: TsmxInterfacedPersistentClass); virtual;
+    procedure SetRequestClassName(const Value: String); virtual;
   public
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
 
     property RequestClass: TsmxInterfacedPersistentClass read FRequestClass write SetRequestClass;
+  published
+    property DatabaseName;
+    property DataSet;
+    //property IsManualRefreshParams;
+    property DeleteDataSet;
+    property InsertDataSet;
+    property UpdateDataSet;
+    property DeletePerformance;
+    property InsertPerformance;
+    property UpdatePerformance;
+    property OperationMode;
+    property PerformanceMode;
+    property RequestClassName: String read FRequestClassName write SetRequestClassName;
+
+    property OnDelete;
+    property OnExecute;
+    property OnInsert;
+    property OnPrepare;
+    property OnRefreshParams;
+    property OnUpdate;
   end;
 
   { TsmxDBRequestCfg }
 
-  TsmxDBRequestCfg = class(TsmxRequestCfg)
+  {TsmxDBRequestCfg = class(TsmxRequestCfg)
   private
     FDataSetType: TsmxDataSetType;
   protected
@@ -108,11 +130,11 @@ type
     procedure Clear; override;
   published
     property DataSetType: TsmxDataSetType read FDataSetType write SetDataSetType;
-  end;
+  end;}
 
   { TsmxDBRequest }
 
-  TsmxDBRequest = class(TsmxRequest)
+  {TsmxDBRequest = class(TsmxRequest)
   private
     FDataSetIntf: IsmxDataSet;
     FDataSetType: TsmxDataSetType;
@@ -129,7 +151,7 @@ type
     procedure Assign(Source: TPersistent); override;
 
     property DataSetType: TsmxDataSetType read FDataSetType write SetDataSetType;
-  end;
+  end;}
 
   { TsmxLibRequestCfg }
 
@@ -799,16 +821,25 @@ end;
 
 procedure TsmxRefRequest.SetRequestClass(Value: TsmxInterfacedPersistentClass);
 begin
-  if FRequestClass <> Value then
-  begin
-    FRequestClass := Value;
-    FDataSetIntf := nil;
-  end;
+  if Assigned(FRequestClass) then
+    FRequestClassName := '';
+  FRequestClass := Value;
+  if Assigned(FRequestClass) then
+    FRequestClassName := FRequestClass.ClassName;
+end;
+
+procedure TsmxRefRequest.SetRequestClassName(const Value: String);
+begin
+  if FRequestClassName <> '' then
+    FRequestClass := nil;
+  FRequestClassName := Value;
+  if FRequestClassName <> '' then
+    FRequestClass := TsmxInterfacedPersistentClass(Classes.FindClass(FRequestClassName));
 end;
 
 { TsmxDBRequestCfg }
 
-procedure TsmxDBRequestCfg.Assign(Source: TPersistent);
+{procedure TsmxDBRequestCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
   if Source is TsmxDBRequestCfg then
@@ -836,11 +867,11 @@ end;
 procedure TsmxDBRequestCfg.SetDataSetType(Value: TsmxDataSetType);
 begin
   FDataSetType := Value;
-end;
+end;}
 
 { TsmxDBRequest }
 
-destructor TsmxDBRequest.Destroy;
+(*destructor TsmxDBRequest.Destroy;
 begin
   FDataSetIntf := nil;
   inherited Destroy;
@@ -906,7 +937,7 @@ begin
     FDataSetType := Value;
     FDataSetIntf := nil;
   end;
-end;
+end;*)
 
 { TsmxLibRequestCfg }
 

@@ -5,11 +5,17 @@ interface
 const
   { XML }
   cRootNodeName = 'Root';
+  cParentNodeName = 'Parent';
   cCellNodeName = 'Cell';
+  cOwnerNodeName = 'Owner';
+  cSlaveNodeName = 'Slave';
   cTypeNodeName = 'Type';
   cFontNodeName = 'Font';
   cKitNodeName = 'Kit';
   cItemNodeName = 'Item';
+  cCfgIDAttributeName = 'CfgID';
+  cNameAttributeName = 'Name';
+  cClassNameAttributeName = 'ClassName';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =

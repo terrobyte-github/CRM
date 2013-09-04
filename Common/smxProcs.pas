@@ -19,7 +19,8 @@ procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 implementation
 
 uses
-  Windows, Graphics, SysUtils, CommCtrl, Variants, TypInfo, smxFuncs, smxConsts;
+  Windows, Graphics, SysUtils, CommCtrl, Variants, TypInfo, smxFuncs, smxConsts,
+  smxBaseIntf;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var

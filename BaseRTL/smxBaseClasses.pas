@@ -3,7 +3,10 @@ unit smxBaseClasses;
 interface
 
 uses
-  Classes, SysUtils, smxBaseIntf;
+  Classes, SysUtils, smxBaseIntf, smxRefIntf;
+
+const
+  IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
 
 type
   { TsmxComponent }
@@ -48,22 +51,38 @@ type
 
   TsmxInterfacedObjectClass = class of TsmxInterfacedObject;
 
+  { IsmxRefInterface }
+
+  (*TsmxInterfacedPersistent = class;
+
+  IsmxRefInterface = interface(IsmxBaseInterface)
+    ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
+    function GetInternalRef: Pointer;
+    function GetReference: TsmxInterfacedPersistent;
+  end;*)
+
   { TsmxInterfacedPersistent }
 
-  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface)
+  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface, IsmxRefInterface)
+  private
+    FName: String;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetDescription: String; virtual;
+    function GetInternalRef: Pointer; virtual;
+    function GetReference: TPersistent; virtual;
     function GetVersion: String; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
+    procedure SetName(const Value: String); virtual;
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
 
     property Description: String read GetDescription;
+    property Name: String read FName write SetName;
     property RefCount: Integer read FRefCount;
     property Version: String read GetVersion;
   end;
@@ -148,7 +167,6 @@ type
     function GetKitList: TList;
     procedure SetItem(Index: Integer; Value: TsmxKitItem);
   protected
-    property KitItemClass: TsmxKitItemClass read FKitItemClass;
     property KitList: TList read GetKitList;
   public
     constructor Create(AItemClass: TsmxKitItemClass); virtual;
@@ -160,6 +178,7 @@ type
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
+    property KitItemClass: TsmxKitItemClass read FKitItemClass;
   end;
 
   TsmxKitClass = class of TsmxKit;
@@ -210,13 +229,12 @@ type
     FRoot: TsmxHKitItem;
     function GetRoot: TsmxHKitItem;
     procedure SetRoot(Value: TsmxHKitItem);
-  protected
-    property HKitItemClass: TsmxHKitItemClass read FHKitItemClass;
   public
     constructor Create(AItemClass: TsmxHKitItemClass); virtual;
     destructor Destroy; override;
     procedure Assign(Source: TsmxHKit); virtual;
 
+    property HKitItemClass: TsmxHKitItemClass read FHKitItemClass;
     property Root: TsmxHKitItem read GetRoot write SetRoot;
   end;
 
@@ -337,6 +355,16 @@ begin
   Result := ClassName;
 end;
 
+function TsmxInterfacedPersistent.GetInternalRef: Pointer;
+begin
+  Result := nil;
+end;
+
+function TsmxInterfacedPersistent.GetReference: TPersistent;
+begin
+  Result := Self;
+end;
+
 function TsmxInterfacedPersistent.GetVersion: String;
 begin
   Result := cVersion;
@@ -353,6 +381,11 @@ begin
   if GetInterface(IID, Obj) then
     Result := S_OK else
     Result := E_NOINTERFACE;
+end;
+
+procedure TsmxInterfacedPersistent.SetName(const Value: String);
+begin
+  FName := Value;
 end;
 
 { TsmxInterfacedComponent }

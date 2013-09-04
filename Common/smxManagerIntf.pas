@@ -155,20 +155,20 @@ type
 
   IsmxImageListManager = interface(IsmxBaseInterface)
     ['{2557DE80-5DF0-4474-B686-D340690E6E54}']
-    // ImageListName = format text: "LibName[DelimiterName]ResName"
+    // ImageListName = format text: "LibName[Delimiter]ResName"
     function AddImageList(const ImageListName: String): Integer;
     procedure DeleteImageList(const ImageListName: String);
     function FindByName(const ImageListName: String): TCustomImageList;
-    function GetDelimiterName: String;
+    function GetDelimiter: String;
     function GetImageList(Index: Integer): TCustomImageList;
     function GetImageListCount: Integer;
     function GetLibraryManager: IsmxLibraryManager;
     //function GetNewResourceFuncName: String;
-    procedure SetDelimiterName(const Value: String);
+    procedure SetDelimiter(const Value: String);
     procedure SetLibraryManager(const Value: IsmxLibraryManager);
     //procedure SetNewResourceFuncName(const Value: String);
 
-    property DelimiterName: String read GetDelimiterName write SetDelimiterName;
+    property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
     property ImageListCount: Integer read GetImageListCount;
     property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;

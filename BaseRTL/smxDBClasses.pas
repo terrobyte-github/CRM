@@ -123,7 +123,7 @@ type
     function GetDataSet: IsmxDataSet;
     function GetFieldName: String; virtual;
     function GetFieldSense: TsmxFieldSense; virtual;
-    function GetInternalRef: Pointer;
+    function GetInternalRef: Pointer; override;
     procedure SetFieldName(const Value: String); virtual;
     procedure SetFieldSense(Value: TsmxFieldSense); virtual;
     procedure SetInternalRef(Value: Pointer); virtual;
@@ -199,7 +199,7 @@ type
     FInternalRef: Pointer;
   protected
     function GetDataSet: IsmxDataSet;
-    function GetInternalRef: Pointer;
+    function GetInternalRef: Pointer; override;
     function GetParamLocation: TsmxParamLocation; virtual;
     function GetParamName: String; virtual;
     procedure SetInternalRef(Value: Pointer); virtual;
@@ -318,7 +318,7 @@ type
     function GetFieldIntf(Field: TField): IsmxField; virtual;
     //function GetInternalDataSet: TDataSet; virtual;
     //function GetInternalDataSetClass: TComponentClass; virtual;
-    function GetInternalRef: Pointer; virtual;
+    //function GetInternalRef: Pointer; virtual;
     function GetRecordNo: Integer;
     function GetRecordCount: Integer;
     procedure SetActive(Value: Boolean);
@@ -1456,10 +1456,10 @@ begin
   Result := TDataSet;
 end;}
 
-function TsmxDataSet.GetInternalRef: Pointer;
+{function TsmxDataSet.GetInternalRef: Pointer;
 begin
   Result := nil; //Pointer(InternalDataSet);
-end;
+end;}
 
 function TsmxDataSet.GetRecordCount: Integer;
 begin

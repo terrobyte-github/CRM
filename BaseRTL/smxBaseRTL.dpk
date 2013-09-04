@@ -47,7 +47,8 @@ contains
   smxLibProcs in '..\Common\smxLibProcs.pas',
   smxLibFuncs in '..\Common\smxLibFuncs.pas',
   smxManagerIntf in '..\Common\smxManagerIntf.pas',
-  smxManagerClasses in 'smxManagerClasses.pas';
+  smxManagerClasses in 'smxManagerClasses.pas',
+  smxRefIntf in '..\Common\smxRefIntf.pas';
 
 end.
 

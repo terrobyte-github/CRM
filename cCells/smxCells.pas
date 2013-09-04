@@ -1838,12 +1838,18 @@ begin
   inherited ResetCellProps;
   DatabaseName := '';
   //DataSet := nil;
-  ModifyPerformances[mrDelete] := pmOpen;
-  ModifyPerformances[mrInsert] := pmOpen;
-  ModifyPerformances[mrUpdate] := pmOpen;
-  ModifyRequests[mrDelete] := nil;
-  ModifyRequests[mrInsert] := nil;
-  ModifyRequests[mrUpdate] := nil;
+  //ModifyPerformances[mrDelete] := pmOpen;
+  //ModifyPerformances[mrInsert] := pmOpen;
+  //ModifyPerformances[mrUpdate] := pmOpen;
+  DeletePerformance := pmOpen;
+  InsertPerformance := pmOpen;
+  UpdatePerformance := pmOpen;
+  //ModifyRequests[mrDelete] := nil;
+  //ModifyRequests[mrInsert] := nil;
+  //ModifyRequests[mrUpdate] := nil;
+  DeleteDataSet := nil;
+  InsertDataSet := nil;
+  UpdateDataSet := nil;
   OperationMode := omManual;
   PerformanceMode := pmOpen;
   OnDelete := nil;
@@ -1865,9 +1871,12 @@ begin
     DatabaseName := TsmxRequestCfg(Cfg).DatabaseName;
     OperationMode := TsmxRequestCfg(Cfg).OperationMode;
     PerformanceMode := TsmxRequestCfg(Cfg).PerformanceMode;
-    ModifyPerformances[mrDelete] := TsmxRequestCfg(Cfg).DeletePerformance;
-    ModifyPerformances[mrInsert] := TsmxRequestCfg(Cfg).InsertPerformance;
-    ModifyPerformances[mrUpdate] := TsmxRequestCfg(Cfg).UpdatePerformance;
+    //ModifyPerformances[mrDelete] := TsmxRequestCfg(Cfg).DeletePerformance;
+    //ModifyPerformances[mrInsert] := TsmxRequestCfg(Cfg).InsertPerformance;
+    //ModifyPerformances[mrUpdate] := TsmxRequestCfg(Cfg).UpdatePerformance;
+    DeletePerformance := TsmxRequestCfg(Cfg).DeletePerformance;
+    InsertPerformance := TsmxRequestCfg(Cfg).InsertPerformance;
+    UpdatePerformance := TsmxRequestCfg(Cfg).UpdatePerformance;
 
     //DataSetIntf := smxClassFuncs.NewIntf(CfgID, SelectRequest) as IsmxDataSet;
     //DataSetIntf := GetDataSet;
@@ -1900,9 +1909,13 @@ begin
     Form := smxClassFuncs.GetAccessoryForm(Self);
     if Assigned(Form) then
     begin
-      ModifyRequests[mrDelete] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).DeleteReqCfgID);
-      ModifyRequests[mrInsert] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).InsertReqCfgID);
-      ModifyRequests[mrUpdate] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).UpdateReqCfgID);
+      //ModifyRequests[mrDelete] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).DeleteReqCfgID);
+      //ModifyRequests[mrInsert] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).InsertReqCfgID);
+      //ModifyRequests[mrUpdate] := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).UpdateReqCfgID);
+      DeleteDataSet := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).DeleteReqCfgID);
+      InsertDataSet := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).InsertReqCfgID);
+      UpdateDataSet := smxClassFuncs.GetDataSetForm(Form, TsmxRequestCfg(Cfg).UpdateReqCfgID);
+
 
       OnDelete := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
       OnExecute := smxClassFuncs.GetEventForm(Form, TsmxRequestCfg(Cfg).DeleteAlgCfgID);
@@ -3482,7 +3495,7 @@ begin
   inherited InternalApply;
   if Assigned(Request) then
   begin
-    DataSet := Request.ModifyRequests[mrUpdate];
+    DataSet := Request.UpdateDataSet; // ModifyRequests[mrUpdate];
     if Assigned(DataSet) then
     begin
       OldIsManualRefreshParams := Request.IsManualRefreshParams;

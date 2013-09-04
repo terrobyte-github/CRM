@@ -3,7 +3,7 @@ unit smxDBIntf;
 interface
 
 uses
-  Classes, DB, smxBaseIntf;
+  Classes, DB, smxRefIntf;
 
 const
   IID_IsmxDatabase: TGUID = '{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}';
@@ -18,12 +18,12 @@ type
 
   TsmxDataSetType = (dstQuery, dstStoredProc);
 
-  IsmxDatabase = interface(IsmxBaseInterface)
+  IsmxDatabase = interface(IsmxRefInterface)
     ['{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}']
     procedure AssignDatabase(const Source: IsmxDatabase);
     procedure CommitTransaction;
     function GetConnected: Boolean;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer;
     function GetDatabaseName: String;
     function GetDriverName: String;
     function GetInTransaction: Boolean;
@@ -50,7 +50,7 @@ type
   TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
     fsForeignKey);
 
-  IsmxField = interface(IsmxBaseInterface)
+  IsmxField = interface(IsmxRefInterface)
     ['{BB7372C0-3457-487F-AB76-70717AFD7938}']
     procedure AssignField(const Source: IsmxField);
     procedure Clear;
@@ -60,7 +60,7 @@ type
     function GetFieldName: String;
     function GetFieldIndex: Integer;
     function GetFieldSense: TsmxFieldSense;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer;
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
@@ -97,7 +97,7 @@ type
     plForeignKey, plInput, plOutput, plInOutput, plStorageParam,
     plParentParam, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
 
-  IsmxParam = interface(IsmxBaseInterface)
+  IsmxParam = interface(IsmxRefInterface)
     ['{564458C3-CD9E-402C-800A-06C6065CCF1B}']
     procedure AssignParam(const Source: IsmxParam); overload;
     procedure AssignParam(const Source: IsmxField); overload;
@@ -105,7 +105,7 @@ type
     function GetDataSet: IsmxDataSet;
     function GetDataType: TsmxDataType;
     //function GetDefValue: Variant;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer;
     function GetNumericScale: Integer;
     function GetParamLocation: TsmxParamLocation;
     function GetParamName: String;
@@ -147,7 +147,7 @@ type
 
   TsmxLocateOptions = TLocateOptions;
 
-  IsmxDataSet = interface(IsmxBaseInterface)
+  IsmxDataSet = interface(IsmxRefInterface)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
     //function AddField(const FieldName: String): IsmxField;
@@ -179,7 +179,7 @@ type
     function GetDataSetType: TsmxDataSetType;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer;
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
     function GetPrepare: Boolean;

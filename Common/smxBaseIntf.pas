@@ -4,7 +4,7 @@ interface
 
 const
   IID_IsmxBaseInterface: TGUID = '{6785BD02-C530-4E8D-9001-A814F06B5045}';
-  //IID_IsmxFreeNotification: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+  //IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
 
 type
   { IsmxBaseInterface }
@@ -18,18 +18,18 @@ type
     property Version: String read GetVersion;
   end;
 
-  { IsmxOwnerNotification }
+  { IsmxRefInterface }
 
-  (*IsmxFreeNotification = interface;
-
-  IsmxOwnerNotification = interface(IInterface)
+  (*IsmxRefInterface = interface(IsmxBaseInterface)
+    ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
+    function GetInternalRef: Pointer;
     function GetReference: Pointer;
-    procedure OwnerFreeNotification(const Sender: IsmxFreeNotification);
-  end;
+    //property Name: String read GetName write SetName;
+  end;*)
 
   { IsmxFreeNotification }
 
-  IsmxFreeNotification = interface(IInterface)
+  (*IsmxFreeNotification = interface(IInterface)
     ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
     procedure FreeNotification(const Sender: IsmxFreeNotification);
     function GetOwnerNotification: IsmxOwnerNotification;

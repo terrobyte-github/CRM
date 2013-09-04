@@ -25,12 +25,13 @@ function FindFilterOnForm(AForm: TsmxCustomForm; const AName: String;
 function FindColumnOnForm(AForm: TsmxCustomForm; const AName: String;
   var AValue: Variant): Boolean;
 function GetAccessoryForm(ACell: TsmxBaseCell): TsmxCustomForm;
-function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm;
+function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm; overload;
+function GetAlgorithmForm(AForm: TsmxCustomForm; AEvent: TsmxComponentEvent): TsmxCustomAlgorithm; overload;
 function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEvent;
-function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
+function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest; overload;
+function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest; overload;
 function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
 function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
-//function IsBeforeShowModal(AForm: TsmxCustomForm): Boolean;
 
 implementation
 
@@ -380,11 +381,28 @@ begin
       Result := TsmxCustomPopupMenu(AForm.PopupList.FindSlaveByCfgID(ACfgID));
 end;
 
-{function IsBeforeShowModal(AForm: TsmxCustomForm): Boolean;
+function GetAlgorithmForm(AForm: TsmxCustomForm; AEvent: TsmxComponentEvent): TsmxCustomAlgorithm;
+var
+  i: Integer;
 begin
-  if Assigned(AForm) then
-    Result := AForm.IsShowModal and not AForm.CellVisible else
-    Result := False;
-end;}
+  Result := nil;
+  if Assigned(AForm) and Assigned(AEvent) then
+    if Assigned(AForm.AlgorithmList) then
+      for i := 0 to AForm.AlgorithmList.SlaveCount - 1 do
+        if @AForm.AlgorithmList[i].OnExecute = @AEvent then
+          Result := AForm.AlgorithmList[i];
+end;
+
+function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest;
+var
+  i: Integer;
+begin
+  Result := nil;
+  if Assigned(AForm) and Assigned(ADataSet) then
+    if Assigned(AForm.RequestList) then
+      for i := 0 to AForm.RequestList.SlaveCount - 1 do
+        if AForm.RequestList[i].DataSet = ADataSet then
+          Result := AForm.RequestList[i];
+end;
 
 end.

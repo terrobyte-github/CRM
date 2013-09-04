@@ -219,7 +219,7 @@ type
 
   TsmxImageListManager = class(TsmxComponent, IsmxImageListManager)
   private
-    FDelimiterName: String;
+    FDelimiter: String;
     FImageListRegister: TsmxParams;
     FLibraryManagerIntf: IsmxLibraryManager;
     //FNewResourceFuncName: String;
@@ -227,12 +227,12 @@ type
     function GetImageListRegister: TsmxParams;
     function LoadImageList(const ImageListName: String): TCustomImageList;
   protected
-    function GetDelimiterName: String;
+    function GetDelimiter: String;
     function GetImageListCount: Integer;
     function GetImageList(Index: Integer): TCustomImageList;
     function GetLibraryManager: IsmxLibraryManager;
     //function GetNewResourceFuncName: String;
-    procedure SetDelimiterName(const Value: String);
+    procedure SetDelimiter(const Value: String);
     procedure SetLibraryManager(const Value: IsmxLibraryManager);
     //procedure SetNewResourceFuncName(const Value: String);
 
@@ -243,7 +243,7 @@ type
     procedure DeleteImageList(const ImageListName: String);
     function FindByName(const ImageListName: String): TCustomImageList;
 
-    property DelimiterName: String read GetDelimiterName write SetDelimiterName;
+    property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
     property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
@@ -998,14 +998,14 @@ begin
   end;
 end;
 
-function TsmxImageListManager.GetDelimiterName: String;
+function TsmxImageListManager.GetDelimiter: String;
 begin
-  Result := FDelimiterName;
+  Result := FDelimiter;
 end;
 
-procedure TsmxImageListManager.SetDelimiterName(const Value: String);
+procedure TsmxImageListManager.SetDelimiter(const Value: String);
 begin
-  FDelimiterName := Value;
+  FDelimiter := Value;
 end;
 
 function TsmxImageListManager.GetImageList(Index: Integer): TCustomImageList;
@@ -1053,11 +1053,11 @@ function TsmxImageListManager.LoadImageList(const ImageListName: String): TCusto
   begin
     LibName := '';
     ResName := '';
-    i := Pos(FDelimiterName, ImageListName);
+    i := Pos(FDelimiter, ImageListName);
     if i > 0 then
     begin
       LibName := Copy(ImageListName, 1, i - 1);
-      ResName := Copy(ImageListName, i + Length(FDelimiterName), MaxInt);
+      ResName := Copy(ImageListName, i + Length(FDelimiter), MaxInt);
     end;
   end;
 
