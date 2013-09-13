@@ -15,7 +15,9 @@ const
   cItemNodeName = 'Item';
   cCfgIDAttributeName = 'CfgID';
   cNameAttributeName = 'Name';
+  cProcNameAttributeName = 'ProcName';
   cClassNameAttributeName = 'ClassName';
+  cIClassNameAttributeName = 'IClassName';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =

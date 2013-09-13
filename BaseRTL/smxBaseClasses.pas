@@ -64,8 +64,8 @@ type
   { TsmxInterfacedPersistent }
 
   TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface, IsmxRefInterface)
-  private
-    FName: String;
+  //private
+    //FName: String;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
@@ -75,14 +75,14 @@ type
     function GetReference: TPersistent; virtual;
     function GetVersion: String; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
-    procedure SetName(const Value: String); virtual;
+    //procedure SetName(const Value: String); virtual;
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
 
     property Description: String read GetDescription;
-    property Name: String read FName write SetName;
+    //property Name: String read FName write SetName;
     property RefCount: Integer read FRefCount;
     property Version: String read GetVersion;
   end;
@@ -383,10 +383,10 @@ begin
     Result := E_NOINTERFACE;
 end;
 
-procedure TsmxInterfacedPersistent.SetName(const Value: String);
+{procedure TsmxInterfacedPersistent.SetName(const Value: String);
 begin
   FName := Value;
-end;
+end;}
 
 { TsmxInterfacedComponent }
 
