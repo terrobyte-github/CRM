@@ -20,8 +20,6 @@ type
     Font: TsmxCellFont;
   end;}
 
-  TsmxPerformanceMode = (pmOpen, pmExecute);
-
   TsmxOperationMode = (omManual, omAutomatic);
 
   {TsmxRequestSetting = record

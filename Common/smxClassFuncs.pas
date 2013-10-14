@@ -49,7 +49,7 @@ begin
     ASelectRequest := smxClassProcs.gSelectRequest;
   if Assigned(ASelectRequest) then
     if smxDBFuncs.GetValueByKey(ASelectRequest.DataSet, ACfgID, ForeignKey,
-        ASelectRequest.PerformanceMode, fsKey, fsForeignKey) then
+        {ASelectRequest.PerformanceMode,} fsKey, fsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
@@ -73,7 +73,7 @@ begin
     ASelectRequest := smxClassProcs.gSelectRequest;
   if Assigned(ASelectRequest) then
     if smxDBFuncs.GetValueByKey(ASelectRequest.DataSet, ACfgID, ForeignKey,
-        ASelectRequest.PerformanceMode, fsKey, fsForeignKey) then
+        {ASelectRequest.PerformanceMode,} fsKey, fsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try

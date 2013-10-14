@@ -27,20 +27,23 @@ type
     function GetDatabaseName: String;
     function GetDriverName: String;
     function GetInTransaction: Boolean;
-    function GetParams: TStrings;
+    //function GetParams: TStrings;
+    function GetParamText: String;
     function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
     procedure RollbackTransaction;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
     procedure SetDriverName(const Value: String);
-    procedure SetParams(Value: TStrings);
+    //procedure SetParams(Value: TStrings);
+    procedure SetParamText(const Value: String);
     procedure StartTransaction;
 
     property Connected: Boolean read GetConnected write SetConnected;
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
     property DriverName: String read GetDriverName write SetDriverName;
     property InTransaction: Boolean read GetInTransaction;
-    property Params: TStrings read GetParams write SetParams;
+    //property Params: TStrings read GetParams write SetParams;
+    property ParamText: String read GetParamText write SetParamText;
   end;
 
   { IsmxField }
@@ -68,22 +71,23 @@ type
     function IsNull: Boolean;
     procedure LoadFromStream(Stream: TStream);
     procedure SaveToStream(Stream: TStream);
+    procedure SetDataType(Value: TsmxDataType);
     procedure SetDisplayFormat(const Value: String);
     procedure SetFieldIndex(Value: Integer);
     procedure SetFieldName(const Value: String);
     procedure SetFieldSense(Value: TsmxFieldSense);
-    procedure SetInternalRef(Value: Pointer);
+    //procedure SetInternalRef(Value: Pointer);
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(const Value: Variant);
 
     property DataSet: IsmxDataSet read GetDataSet;
-    property DataType: TsmxDataType read GetDataType;
+    property DataType: TsmxDataType read GetDataType write SetDataType;
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FieldName: String read GetFieldName write SetFieldName;
     property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
-    property InternalRef: Pointer read GetInternalRef write SetInternalRef;
+    //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
@@ -107,9 +111,9 @@ type
     //function GetDefValue: Variant;
     //function GetInternalRef: Pointer;
     function GetNumericScale: Integer;
+    function GetParamIndex: Integer;
     function GetParamLocation: TsmxParamLocation;
     function GetParamName: String;
-    function GetParamIndex: Integer;
     function GetParamType: TsmxParamType;
     function GetPrecision: Integer;
     function GetSize: Integer;
@@ -120,7 +124,7 @@ type
     procedure SaveToStream(Stream: TStream);
     procedure SetDataType(Value: TsmxDataType);
     //procedure SetDefValue(const Value: Variant);
-    procedure SetInternalRef(Value: Pointer);
+    //procedure SetInternalRef(Value: Pointer);
     procedure SetNumericScale(Value: Integer);
     procedure SetParamIndex(Value: Integer);
     procedure SetParamLocation(Value: TsmxParamLocation);
@@ -132,7 +136,7 @@ type
 
     property DataSet: IsmxDataSet read GetDataSet;
     property DataType: TsmxDataType read GetDataType write SetDataType;
-    property InternalRef: Pointer read GetInternalRef write SetInternalRef;
+    //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
     property ParamName: String read GetParamName write SetParamName;
@@ -147,13 +151,17 @@ type
 
   TsmxLocateOptions = TLocateOptions;
 
+  TsmxPerformanceMode = (pmOpen, pmExecute);
+
   IsmxDataSet = interface(IsmxRefInterface)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
     //function AddField(const FieldName: String): IsmxField;
     //function AddParam(const ParamName: String): IsmxParam;
-    function AddField(DataType: TsmxDataType): IsmxField;
-    function AddParam(DataType: TsmxDataType): IsmxParam;
+    //function AddField(DataType: TsmxDataType): IsmxField;
+    //function AddParam(DataType: TsmxDataType): IsmxParam;
+    function AddField: IsmxField;
+    function AddParam: IsmxParam;
     procedure AssignDataSet(const Source: IsmxDataSet);
     function Bof: Boolean;
     procedure Cancel;
@@ -182,10 +190,12 @@ type
     //function GetInternalRef: Pointer;
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
+    function GetPerformanceMode: TsmxPerformanceMode;
     function GetPrepare: Boolean;
     function GetRecordNo: Integer;
     function GetRecordCount: Integer;
-    function GetSQL: TStrings;
+    //function GetSQL: TStrings;
+    function GetSQLText: String;
     //procedure GotoBookmark(Bookmark: Pointer);
     function IsEmpty: Boolean;
     procedure Last;
@@ -194,15 +204,18 @@ type
     procedure Next;
     procedure Open;
     function ParamByName(const ParamName: String): IsmxParam;
+    procedure Perform;
     procedure Post;
     procedure Prior;
     procedure SetActive(Value: Boolean);
     procedure SetDatabase(const Value: IsmxDatabase);
     procedure SetField(Index: Integer; const Value: IsmxField);
     procedure SetParam(Index: Integer; const Value: IsmxParam);
+    procedure SetPerformanceMode(Value: TsmxPerformanceMode);
     procedure SetPrepare(Value: Boolean);
     procedure SetRecordNo(Value: Integer);
-    procedure SetSQL(Value: TStrings);
+    //procedure SetSQL(Value: TStrings);
+    procedure SetSQLText(const Value: String);
 
     property Active: Boolean read GetActive write SetActive;
     property Database: IsmxDatabase read GetDatabase write SetDatabase;
@@ -211,10 +224,12 @@ type
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
     property ParamCount: Integer read GetParamCount;
     property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
+    property PerformanceMode: TsmxPerformanceMode read GetPerformanceMode write SetPerformanceMode;
     property Prepared: Boolean read GetPrepare write SetPrepare;
     property RecordNo: Integer read GetRecordNo write SetRecordNo;
     property RecordCount: Integer read GetRecordCount;
-    property SQL: TStrings read GetSQL write SetSQL;
+    //property SQL: TStrings read GetSQL write SetSQL;
+    property SQLText: String read GetSQLText write SetSQLText;
   end;
 
 implementation

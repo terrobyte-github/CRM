@@ -132,13 +132,22 @@ type
 
   TsmxFreeNotificationObjectClass = class of TsmxFreeNotificationObject;}
 
+{$M+}
+
+  { TsmxInfoObject }
+
+  TsmxInfoObject = class(TObject)
+  end;
+
+{$M-}
+
   { TsmxKitItem }
 
   EsmxListError = class(EsmxBaseError);
 
   TsmxKit = class;
-
-  TsmxKitItem = class(TObject)
+   // может унаследываться от persistent
+  TsmxKitItem = class(TsmxInfoObject)
   private
     FKit: TsmxKit;
     procedure SetKit(Value: TsmxKit);
@@ -158,7 +167,7 @@ type
 
   { TsmxKit }
 
-  TsmxKit = class(TObject)
+  TsmxKit = class(TsmxInfoObject)
   private
     FKitItemClass: TsmxKitItemClass;
     FKitList: TList;
@@ -175,6 +184,7 @@ type
     function Add: TsmxKitItem;
     procedure Clear;
     procedure Delete(Index: Integer);
+    //function IndexOf(Item: TsmxKitItem): Integer;
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
@@ -187,7 +197,7 @@ type
 
   TsmxHKit = class;
 
-  TsmxHKitItem = class(TObject)
+  TsmxHKitItem = class(TsmxInfoObject)
   private
     FHKit: TsmxHKit;
     FHKitItemList: TList;
@@ -211,6 +221,7 @@ type
     procedure Delete(Index: Integer);
     function HasChilds: Boolean;
     function HasParent: Boolean;
+    //function IndexOf(Item: TsmxHKitItem): Integer;
 
     property Count: Integer read GetCount;
     property HKit: TsmxHKit read FHKit;
@@ -223,7 +234,7 @@ type
 
   { TsmxHKit }
 
-  TsmxHKit = class(TObject)
+  TsmxHKit = class(TsmxInfoObject)
   private
     FHKitItemClass: TsmxHKitItemClass;
     FRoot: TsmxHKitItem;
@@ -610,6 +621,11 @@ begin
   Result := FKitList;
 end;
 
+{function TsmxKit.IndexOf(Item: TsmxKitItem): Integer;
+begin
+  Result := KitList.IndexOf(Item);
+end;}
+
 { TsmxHKitItem }
 
 constructor TsmxHKitItem.Create(AHKit: TsmxHKit);
@@ -705,6 +721,11 @@ function TsmxHKitItem.HasParent: Boolean;
 begin
   Result := FParent <> FHKit.Root;
 end;
+
+{function TsmxHKitItem.IndexOf(Item: TsmxHKitItem): Integer;
+begin
+  Result := HKitItemList.IndexOf(Item);
+end;}
 
 procedure TsmxHKitItem.SetParent(Value: TsmxHKitItem);
 begin

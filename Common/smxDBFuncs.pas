@@ -18,18 +18,18 @@ function GetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParam
 function SetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
   const AValues: Variant): Boolean;
 function GetValueByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
-  var AValues: Variant; APerformance: TsmxPerformanceMode;
+  var AValues: Variant; {APerformance: TsmxPerformanceMode;}
   AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
 function SetValueByKey(const ADataSet: IsmxDataSet; var AKeys: Variant;
-  const AValues: Variant; APerformance: TsmxPerformanceMode;
+  const AValues: Variant; {APerformance: TsmxPerformanceMode;}
   AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
 function GetFieldNameList(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): String;
 function LocateByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
   AKeySense: TsmxBaseSense = fsKey): Boolean;
 function GetCurrentValue(const ADataSet: IsmxDataSet; var AValues: Variant;
-  APerformance: TsmxPerformanceMode; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
 function SetCurrentValue(const ADataSet: IsmxDataSet; const AValues: Variant;
-  APerformance: TsmxPerformanceMode; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
 function IsBlobType(ADataType: TsmxDataType; ALength: Integer = 0): Boolean;
 function DataTypeToVarType(ADataType: TsmxDataType): Integer;
 function SetNumberOfRecord(const ADataSet: IsmxDataSet; ARecordNo: Integer): Boolean;
@@ -174,7 +174,7 @@ begin
 end;
 
 function GetValueByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
-  var AValues: Variant; APerformance: TsmxPerformanceMode;
+  var AValues: Variant; {APerformance: TsmxPerformanceMode;}
   AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
 begin
   Result := False;
@@ -183,7 +183,7 @@ begin
     ADataSet.Close;
   if SetParamLocationValue(ADataSet, SenseToLocation[AKeySense], AKeys) then
   begin
-    case APerformance of
+    case ADataSet.PerformanceMode of
       pmOpen:
       begin
         ADataSet.Open;
@@ -199,7 +199,7 @@ begin
 end;
 
 function SetValueByKey(const ADataSet: IsmxDataSet; var AKeys: Variant;
-  const AValues: Variant; APerformance: TsmxPerformanceMode;
+  const AValues: Variant; {APerformance: TsmxPerformanceMode;}
   AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
 begin
   Result := False;
@@ -208,7 +208,7 @@ begin
   if SetParamLocationValue(ADataSet, SenseToLocation[AKeySense], AKeys)
       and SetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues) then
   begin
-    case APerformance of
+    case ADataSet.PerformanceMode of
       pmOpen:
       begin
         ADataSet.Open;
@@ -241,22 +241,22 @@ begin
 end;
 
 function GetCurrentValue(const ADataSet: IsmxDataSet; var AValues: Variant;
-  APerformance: TsmxPerformanceMode; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
 begin
   Result := False;
   if Assigned(ADataSet) then
-    case APerformance of
+    case ADataSet.PerformanceMode of
       pmOpen: Result := GetFieldSenseValue(ADataSet, AValueSense, AValues, AValues);
       pmExecute: Result := GetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues, AValues);
     end;
 end;
 
 function SetCurrentValue(const ADataSet: IsmxDataSet; const AValues: Variant;
-  APerformance: TsmxPerformanceMode; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
 begin
   Result := False;
   if Assigned(ADataSet) then
-    case APerformance of
+    case ADataSet.PerformanceMode of
       pmOpen: Result := SetFieldSenseValue(ADataSet, AValueSense, AValues);
       pmExecute: Result := SetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues);
     end;

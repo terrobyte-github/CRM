@@ -60,6 +60,17 @@ type
     //procedure Execute(Same: Boolean = False); override;
     //procedure RefreshParams; override;
     // function FindParamLocation(AParamLocation: TsmxParamLocation; StartPos: Integer = 0): TsmxParam; override;
+  published
+    property AlgorithmCaption;
+    property AlgorithmEnabled;
+    property AlgorithmHint;
+    property AlgorithmHotKey;
+    property AlgorithmImageIndex;
+    property AlgorithmParams;
+    property AlgorithmVisible;
+    property SlaveIndex;
+
+    property OnRefreshParams;
   end;
 
   { TsmxActionList }
@@ -89,6 +100,8 @@ type
 
     //property IsAltSlaveClass default True;
     //property IsOwnerIsParent default True;
+  published
+    property ImageListName;
   end;
 
   { TsmxRequest }
@@ -110,6 +123,21 @@ type
     procedure InternalRefreshParams; override;
     procedure ResetCellProps; override;
     procedure SetCellProps; override;
+  published
+    property DatabaseName;
+    property DataSet;
+    property DeleteDataSet;
+    property InsertDataSet;
+    property OperationMode;
+    property SlaveIndex;
+    property UpdateDataSet;
+
+    property OnDelete;
+    property OnExecute;
+    property OnInsert;
+    property OnPrepare;
+    property OnRefreshParams;
+    property OnUpdate;
   end;
 
   { TsmxRequestList }
@@ -712,6 +740,9 @@ type
     property PopupMenu: TPopupMenu read GetPopupMenu;
   public
     destructor Destroy; override;
+  published
+    property ImageListName;
+    property SlaveIndex;
   end;
 
   { TsmxPopupList }
@@ -931,6 +962,7 @@ type
     //procedure SetIsMainForm(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
     procedure SetModalResult(Value: TModalResult); override;
+    procedure SetPopupMenu(Value: TsmxCustomPopupMenu); override;
 
     property Form: TForm read GetForm;
     property IsMainForm: Boolean read FIsMainForm;
@@ -939,6 +971,30 @@ type
     //procedure Close; override;
     //procedure Show; override;
     //function ShowModal: TModalResult; override;
+  published
+    property CellActive;
+    property CellAlign;
+    property CellAnchors;
+    property CellCaption;
+    property CellCursor;
+    property CellEnabled;
+    property CellHeight;
+    property CellHint;
+    property CellImageIndex;
+    property CellLeft;
+    property CellTop;
+    property CellVisible;
+    property CellWidth;
+    property FormBorder;
+    property FormPosition;
+    property ImageListName;
+    property IsMaximize;
+    property PopupMenu;
+
+    property OnClose;
+    property OnDoubleSnap;
+    property OnShow;
+    property OnSnap;
   end;
 
   { TsmxStandardForm }
@@ -1841,9 +1897,11 @@ begin
   //ModifyPerformances[mrDelete] := pmOpen;
   //ModifyPerformances[mrInsert] := pmOpen;
   //ModifyPerformances[mrUpdate] := pmOpen;
-  DeletePerformance := pmOpen;
-  InsertPerformance := pmOpen;
-  UpdatePerformance := pmOpen;
+
+  //DeletePerformance := pmOpen;
+  //InsertPerformance := pmOpen;
+  //UpdatePerformance := pmOpen;
+
   //ModifyRequests[mrDelete] := nil;
   //ModifyRequests[mrInsert] := nil;
   //ModifyRequests[mrUpdate] := nil;
@@ -1851,7 +1909,7 @@ begin
   InsertDataSet := nil;
   UpdateDataSet := nil;
   OperationMode := omManual;
-  PerformanceMode := pmOpen;
+  //PerformanceMode := pmOpen;
   OnDelete := nil;
   OnExecute := nil;
   OnInsert := nil;
@@ -1870,23 +1928,25 @@ begin
   begin
     DatabaseName := TsmxRequestCfg(Cfg).DatabaseName;
     OperationMode := TsmxRequestCfg(Cfg).OperationMode;
-    PerformanceMode := TsmxRequestCfg(Cfg).PerformanceMode;
+    //PerformanceMode := TsmxRequestCfg(Cfg).PerformanceMode;
     //ModifyPerformances[mrDelete] := TsmxRequestCfg(Cfg).DeletePerformance;
     //ModifyPerformances[mrInsert] := TsmxRequestCfg(Cfg).InsertPerformance;
     //ModifyPerformances[mrUpdate] := TsmxRequestCfg(Cfg).UpdatePerformance;
-    DeletePerformance := TsmxRequestCfg(Cfg).DeletePerformance;
-    InsertPerformance := TsmxRequestCfg(Cfg).InsertPerformance;
-    UpdatePerformance := TsmxRequestCfg(Cfg).UpdatePerformance;
+
+    //DeletePerformance := TsmxRequestCfg(Cfg).DeletePerformance;
+    //InsertPerformance := TsmxRequestCfg(Cfg).InsertPerformance;
+    //UpdatePerformance := TsmxRequestCfg(Cfg).UpdatePerformance;
 
     //DataSetIntf := smxClassFuncs.NewIntf(CfgID, SelectRequest) as IsmxDataSet;
     //DataSetIntf := GetDataSet;
     if Assigned(DataSet) then
     begin
-      DataSet.SQL.Text := TsmxRequestCfg(Cfg).SQLText;
+      DataSet.SQLText := TsmxRequestCfg(Cfg).SQLText;
       DataSet.ClearFields;
       for i := 0 to TsmxRequestCfg(Cfg).Fields.Count - 1 do
-        with DataSet.AddField(TsmxRequestCfg(Cfg).Fields[i].DataType) do
+        with DataSet.AddField do
         begin
+          DataType :=  TsmxRequestCfg(Cfg).Fields[i].DataType;
           FieldName := TsmxRequestCfg(Cfg).Fields[i].FieldName;
           DisplayFormat := TsmxRequestCfg(Cfg).Fields[i].DisplayFormat;
           FieldSense := TsmxRequestCfg(Cfg).Fields[i].FieldSense;
@@ -1895,8 +1955,9 @@ begin
         end;
       DataSet.ClearParams;
       for i := 0 to TsmxRequestCfg(Cfg).Params.Count - 1 do
-        with DataSet.AddParam(TsmxRequestCfg(Cfg).Params[i].DataType) do
+        with DataSet.AddParam do
         begin
+          DataType := TsmxRequestCfg(Cfg).Params[i].DataType;
           ParamName := TsmxRequestCfg(Cfg).Params[i].ParamName;
           ParamLocation := TsmxRequestCfg(Cfg).Params[i].ParamLocation;
           ParamType := TsmxRequestCfg(Cfg).Params[i].ParamType;
@@ -3564,7 +3625,7 @@ begin
           for i := 0 to SlaveCount - 1 do
           begin
             if foPrepare in Slaves[i].FilterOptions then
-              case Request.PerformanceMode of
+              case DataSet.PerformanceMode of
                 pmOpen:
                 begin
                   //if foSetValue in Slaves[i].FilterOptions then
@@ -3637,7 +3698,7 @@ begin
         for i := 0 to SlaveCount - 1 do
         begin
           if foPrepare in Slaves[i].FilterOptions then
-            case Request.PerformanceMode of
+            case DataSet.PerformanceMode of
               pmOpen:
               begin
                 //if foSetValue in Slaves[i].FilterOptions then
@@ -6681,6 +6742,21 @@ begin
   PrepareForm;
   Result := TModalResult(Form.ShowModal);
 end;}
+
+procedure TsmxForm.SetPopupMenu(Value: TsmxCustomPopupMenu);
+var
+  Obj: TObject;
+begin
+  if Assigned(PopupMenu) then
+    Form.PopupMenu := nil;
+  inherited SetPopupMenu(Value);
+  if Assigned(PopupMenu) then
+  begin
+    Obj := _TsmxBaseCell(PopupMenu).GetInternalObject;
+    if Obj is TPopupMenu then
+      Form.PopupMenu := TPopupMenu(Obj);
+  end;
+end;
 
 { TsmxStandardForm }
 

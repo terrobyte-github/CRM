@@ -21,6 +21,7 @@ procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TLi
 
 var
   gSelectRequest: TsmxCustomRequest = nil;
+  //gSelectDataSet: IsmxDataSet = nil;
   gStorageManagerIntf: IsmxStorageManager = nil;
   gLibraryManagerIntf: IsmxLibraryManager = nil;
   gDatabaseManagerIntf: IsmxDatabaseManager = nil;
@@ -435,7 +436,22 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
     Obj := TypInfo.GetObjectProp(AObject, PropInfo);
     if Assigned(Obj) then
     begin
-      n := Node.AddChild(PropInfo^.Name);
+      n := Node.AddChild(PropInfo^.Name, 0);
+      {if Obj is TsmxSlaveList then
+      begin
+        WriteProps(Obj, n, AFindList);
+        for i := 0 to TsmxSlaveList(Obj).Count - 1 do
+        begin
+          n2 := n.AddChild(smxConsts.cItemNodeName)
+          if Assigned(TsmxSlaveList(Obj)[i].Slave) then
+          begin
+            n2.Attributes[smxConsts.cIClassNameAttributeName] := '';
+            n2.Attributes[smxConsts.cClassNameAttributeName] := TsmxSlaveList(Obj)[i].Slave.ClassName;
+            //n2.Attributes[smxConsts.cCfgIDAttributeName] := TsmxSlaveList(Obj)[i].Slave.CfgID;
+          end;
+          WriteProps(TsmxSlaveList(Obj)[i], n2, AFindList);
+        end;    // лучше вынести в отдельную процедуру, т.к. много особенностей
+      end else}
       if Obj is TsmxKit then
       begin
         WriteProps(Obj, n, AFindList);
@@ -502,7 +518,7 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
     Intf := TypInfo.GetInterfaceProp(AObject, PropInfo);
     if Assigned(Intf) and (AObject is TsmxBaseCell) then
     begin
-      n := Node.AddChild(PropInfo^.Name);
+      n := Node.AddChild(PropInfo^.Name, 0);
       if SysUtils.Supports(Intf, IsmxRefInterface) then
       begin
         if IsImplIntf(IsmxRefInterface(Intf)) then
@@ -565,7 +581,7 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
     Method := TypInfo.GetMethodProp(AObject, PropInfo);
     if Assigned(Method.Code) and (AObject is TsmxBaseCell) then
     begin
-      n := ANode.AddChild(PropInfo^.Name);
+      n := ANode.AddChild(PropInfo^.Name, 0);
       //Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(AObject));
       //if Assigned(Form) then
       //begin
@@ -599,7 +615,7 @@ begin
     try
       TypInfo.GetPropList(PTypeInfo(AObject.ClassInfo),
         TypInfo.tkProperties + TypInfo.tkMethods, PropList);
-      for i := 0 to Count - 1 do
+      for i := Count - 1 downto 0 do
       begin
         PropInfo := PropList^[i];
         if TypInfo.IsStoredProp(AObject, PropInfo) then
@@ -614,7 +630,7 @@ begin
             tkEnumeration:
               ANode.Attributes[PropInfo^.Name] := TypInfo.GetEnumProp(AObject, PropInfo);
             tkSet:
-              ANode.Attributes[PropInfo^.Name] := TypInfo.GetSetProp(AObject, PropInfo);
+              ANode.Attributes[PropInfo^.Name] := TypInfo.GetSetProp(AObject, PropInfo, True);
             else
               ANode.Attributes[PropInfo^.Name] := TypInfo.GetPropValue(AObject, PropInfo^.Name);
           end;
@@ -780,8 +796,8 @@ begin
     if Cell.IsWriteCell then
     begin
       n := ANode.AddChild(smxConsts.cCellNodeName);
-      n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
       n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
+      n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
       n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
       WriteProps(Cell, n, AFindList);
       WriteCell(Cell, n, AFindList);
@@ -809,7 +825,7 @@ begin
   for i := 0 to ANode.ChildNodes.Count - 1 do
   begin
     n := ANode.ChildNodes[i];
-    if n.NodeName = smxConsts.cSlaveNodeName then
+    if n.NodeName = smxConsts.cCellNodeName then
     begin
       if n.Attributes[smxConsts.cClassNameAttributeName] <> ACell.SlaveClass.ClassName then
         Cell := ACell.AddSlaveAsClass(
@@ -845,9 +861,9 @@ begin
   for i := 0 to ACell.SlaveCount - 1 do
   begin
     Cell := ACell.Slaves[i];
-    n := ANode.AddChild(smxConsts.cSlaveNodeName);
-    n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
+    n := ANode.AddChild(smxConsts.cCellNodeName);
     n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
+    n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
     n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
     WriteProps(Cell, n, AFindList);
     WriteSlave(Cell, n, AFindList);

@@ -83,7 +83,7 @@ type
     FRequestClassName: String;
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetDataSet: IsmxDataSet; override;
+    //function GetDataSet: IsmxDataSet; override;
     //procedure InternalInitialize; override;
     procedure ResetCellProps; override;
     procedure SetCellProps; override;
@@ -95,25 +95,25 @@ type
 
     property RequestClass: TsmxInterfacedPersistentClass read FRequestClass write SetRequestClass;
   published
-    property DatabaseName;
-    property DataSet;
-    //property IsManualRefreshParams;
-    property DeleteDataSet;
-    property InsertDataSet;
-    property UpdateDataSet;
-    property DeletePerformance;
-    property InsertPerformance;
-    property UpdatePerformance;
-    property OperationMode;
-    property PerformanceMode;
+    //property DatabaseName;
+    //property DataSet;
+    ////property IsManualRefreshParams;
+    //property DeleteDataSet;
+    //property InsertDataSet;
+    //property UpdateDataSet;
+    ////property DeletePerformance;
+    ////property InsertPerformance;
+    ////property UpdatePerformance;
+    //property OperationMode;
+    ////property PerformanceMode;
     property RequestClassName: String read FRequestClassName write SetRequestClassName;
 
-    property OnDelete;
-    property OnExecute;
-    property OnInsert;
-    property OnPrepare;
-    property OnRefreshParams;
-    property OnUpdate;
+    //property OnDelete;
+    //property OnExecute;
+    //property OnInsert;
+    //property OnPrepare;
+    //property OnRefreshParams;
+    //property OnUpdate;
   end;
 
   { TsmxDBRequestCfg }
@@ -478,7 +478,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     function CellParams(const Name: String; var Value: Variant): Boolean; override;
-
+  published
     //property StateCfgClass: TsmxStateCfgClass read GetStateCfgClass;// write SetStateCfgClass;
     property StateID: Integer read FStateID write SetStateID;
     property StateRequest: TsmxCustomRequest read FStateRequest write SetStateRequest;
@@ -539,11 +539,15 @@ type
     constructor Create(AOwner: TComponent); override;
     function AddSlave: TsmxCustomPageManager;
 
+    property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
+  published
+    property AlgorithmList;
     //property AlgorithmList: TsmxCustomAlgorithmList read FAlgorithmList write SetAlgorithmList;
     property ControlBoard: TsmxCustomControlBoard read FControlBoard write SetControlBoard;
     property MainMenu: TsmxCustomMainMenu read FMainMenu write SetMainMenu;
     //property RequestList: TsmxCustomRequestList read FRequestList write SetRequestList;
-    property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
+    property PopupList;
+    property RequestList;
     property StatusBoard: TsmxCustomStatusBoard read FStatusBoard write SetStatusBoard;
   end;
 
@@ -783,7 +787,7 @@ begin
   Result := TsmxRefRequestCfg;
 end;
 
-function TsmxRefRequest.GetDataSet: IsmxDataSet;
+(*function TsmxRefRequest.GetDataSet: IsmxDataSet;
 begin
   if not Assigned(FDataSetIntf) then
     if Assigned(FRequestClass) then
@@ -792,7 +796,7 @@ begin
   {if Assigned(FRequestClass) then
     Result := FRequestClass.Create as IsmxDataSet else
     Result := nil;}
-end;
+end;*)
 
 {procedure TsmxRefRequest.InternalInitialize;
 begin
@@ -2585,7 +2589,7 @@ end;
 
 initialization
   Classes.RegisterClasses([TsmxLibAlgorithmCfg, TsmxLibAction,
-    TsmxRefRequestCfg, TsmxRefRequest, TsmxDBRequestCfg, TsmxDBRequest,
+    TsmxRefRequestCfg, TsmxRefRequest{, TsmxDBRequestCfg, TsmxDBRequest},
     TsmxLibRequestCfg, TsmxLibRequest, TsmxEditFilter{, TsmxDateTimeFilter},
     TsmxBitBtnFilter{, TsmxNumEditFilter, TsmxLabelFilter}, TsmxStateFormCfg,
     TsmxStateForm, TsmxStandardFormCfg, TsmxStandardForm]);

@@ -155,6 +155,7 @@ type
     FIsRecieveCfg: Boolean;
     FLibraryManagerIntf: IsmxLibraryManager;
     FOnInitialize: TsmxComponentEvent;
+    FOnFinalize: TsmxComponentEvent;
     FSelectRequest: TsmxCustomRequest;
     FStorageManagerIntf: IsmxStorageManager;
     procedure ClearCells;
@@ -176,6 +177,7 @@ type
     function _Release: Integer; stdcall;
     procedure DoEvent(Event: TsmxComponentEvent; AlgCfgID: Integer); virtual;
     procedure DoInitialize; virtual;
+    procedure DoFinalize; virtual;
     function FindChildByInternalObject(Obj: TObject): TsmxBaseCell;
     function GetCfgClass: TsmxBaseCfgClass; virtual;
     function GetInternalObject: TObject; virtual;
@@ -210,6 +212,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     function CellParams(const Name: String; var Value: Variant): Boolean; virtual;
+    procedure Finalize;
     function FindChildByCfgID(CfgID: Integer): TsmxBaseCell;
     //function FindChildByName(const Name: String): TsmxBaseCell;
     procedure Initialize;
@@ -232,6 +235,8 @@ type
     property SelectRequest: TsmxCustomRequest read FSelectRequest write SetSelectRequest;
     property StorageManager: IsmxStorageManager read FStorageManagerIntf write SetStorageManager;
   published
+    property Name stored True;
+    property OnFinalize: TsmxComponentEvent read FOnFinalize write FOnFinalize;
     property OnInitialize: TsmxComponentEvent read FOnInitialize write FOnInitialize;
   end;
 
@@ -369,9 +374,61 @@ type
     property SlaveName: String read FSlaveName write SetSlaveName;
   end;
 
-  { TsmxOwnerCell }
+  { TsmxSlaveItem }
+
+  TsmxOwnerCell = class;
 
   TsmxOwnerCellClass = class of TsmxOwnerCell;
+
+  TsmxSlaveList = class;
+
+  TsmxSlaveItem = class(TsmxKitItem)
+  private
+    FSlave: TsmxOwnerCell;
+    function GetKit: TsmxSlaveList;
+    procedure SetKit(Value: TsmxSlaveList);
+  protected
+    procedure AddSlave{(CellClass: TsmxOwnerCellClass = nil; const Implementor: IsmxRefInterface = nil)}; virtual;
+    procedure DelSlave; virtual;
+
+    property Slave: TsmxOwnerCell read FSlave write FSlave;
+  public
+    constructor Create(AKit: TsmxKit); {overload;} override;
+    //constructor Create(AKit: TsmxKit; const AImplementor: IsmxRefInterface); reintroduce; overload; virtual;
+    //constructor Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass); reintroduce; overload; virtual;
+    //constructor Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass; const AImplementor: IsmxRefInterface); reintroduce; overload; virtual;
+    destructor Destroy; override;
+    procedure Assign(Source: TsmxKitItem); override;
+
+    property Kit: TsmxSlaveList read GetKit write SetKit;
+  end;
+
+  { TsmxSlaveList }
+
+  TsmxSlaveList = class(TsmxKit)
+  private
+    FOwner: TsmxOwnerCell;
+    FImplementor: IsmxRefInterface;
+    FCellClass: TsmxOwnerCellClass;
+    function GetItem(Index: Integer): TsmxSlaveItem;
+    procedure SetItem(Index: Integer; Value: TsmxSlaveItem);
+  protected
+    procedure GetSlaveVars(var CellClass: TsmxOwnerCellClass; var Implementor: IsmxRefInterface);
+    procedure SetSlaveVars(CellClass: TsmxOwnerCellClass; const Implementor: IsmxRefInterface);
+
+    property Owner: TsmxOwnerCell read FOwner write FOwner;
+  public
+    function Add: TsmxSlaveItem; overload;
+    //function Add(const AImplementor: IsmxRefInterface): TsmxSlaveItem; overload;
+    //function Add(ACellClass: TsmxOwnerCellClass): TsmxSlaveItem; overload;
+    function Add(ACellClass: TsmxOwnerCellClass = nil; const AImplementor: IsmxRefInterface = nil): TsmxSlaveItem; overload;
+
+    property Items[Index: Integer]: TsmxSlaveItem read GetItem write SetItem; default;
+  end;
+
+  { TsmxOwnerCell }
+
+  //TsmxOwnerCellClass = class of TsmxOwnerCell;
 
   TsmxOwnerCell = class(TsmxBaseCell)
   private
@@ -381,20 +438,24 @@ type
     FIsOwnerIsParent: Boolean;
     FSlaveList: TList;
     FSlaveName: String;
-    function Add(CellClass: TsmxOwnerCellClass; const AImplementor: IsmxRefInterface = nil): TsmxOwnerCell;
+    FSlaveListNew: TsmxSlaveList;
     function GetSlave(Index: Integer): TsmxOwnerCell;
     function GetSlaveCount: Integer;
     function GetSlaveIndex: Integer;
     function GetSlaveList: TList;
     procedure SetCellOwner(Value: TsmxOwnerCell);
     procedure SetSlave(Index: Integer; Value: TsmxOwnerCell);
+    function GetSlaveListNew: TsmxSlaveList;
+    procedure SetSlaveListNew(Value: TsmxSlaveList);
   protected
+    function Add(CellClass: TsmxOwnerCellClass = nil; const AImplementor: IsmxRefInterface = nil): TsmxOwnerCell; virtual;
     function FindSlaveByInternalObject(Obj: TObject): TsmxOwnerCell;
     function GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass; virtual;
     function GetCfgClass: TsmxBaseCfgClass; override;
     function GetIsWriteCell: Boolean; override;
     function GetSlaveClass: TsmxOwnerCellClass; virtual;
     //procedure InternalInitialize; override;
+    //procedure InternalFinalize; override;
     procedure ResetCellProps; override;
     procedure ResetProps; override;
     procedure SetCellProps; override;
@@ -427,8 +488,9 @@ type
     property SlaveCount: Integer read GetSlaveCount;
     property SlaveIndex: Integer read GetSlaveIndex write SetSlaveIndex;
     property Slaves[Index: Integer]: TsmxOwnerCell read GetSlave write SetSlave; default;
-  published
     property SlaveName: String read FSlaveName write SetSlaveName;
+  published
+    property SlaveListNew: TsmxSlaveList read GetSlaveListNew write SetSlaveListNew stored False;
   end;
 
   { TsmxControlKitItem }
@@ -877,15 +939,15 @@ type
   TsmxCustomRequest = class(TsmxOwnerCell)
   private
     FCellRequest: TsmxBaseCell;
-    FCurPerformanceMode: TsmxPerformanceMode;
+    //FCurPerformanceMode: TsmxPerformanceMode;
     FCurDataSetIntf: IsmxDataSet;
     FDatabaseIntf: IsmxDatabase;
     FDatabaseName: String;
     //FDataSetIntf: IsmxDataSet;
-    FDeletePerformance: TsmxPerformanceMode;
+    //FDeletePerformance: TsmxPerformanceMode;
     //FDeleteRequestIntf: IsmxDataSet;
     FIsManualRefreshParams: Boolean;
-    FInsertPerformance: TsmxPerformanceMode;
+    //FInsertPerformance: TsmxPerformanceMode;
     //FInsertRequestIntf: IsmxDataSet;
     FOnDelete: TsmxComponentEvent;
     FOnExecute: TsmxComponentEvent;
@@ -894,8 +956,8 @@ type
     FOnRefreshParams: TsmxComponentEvent;
     FOnUpdate: TsmxComponentEvent;
     FOperationMode: TsmxOperationMode;
-    FPerformanceMode: TsmxPerformanceMode;
-    FUpdatePerformance: TsmxPerformanceMode;
+    //FPerformanceMode: TsmxPerformanceMode;
+    //FUpdatePerformance: TsmxPerformanceMode;
     //FUpdateRequestIntf: IsmxDataSet;
     FDeleteDataSetIntf: IsmxDataSet;
     FInsertDataSetIntf: IsmxDataSet;
@@ -929,12 +991,12 @@ type
     //procedure SetModifyPerformance(Modify: TsmxModifyRequest; Value: TsmxPerformanceMode); virtual;
     //procedure SetModifyRequest(Modify: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
     procedure SetOperationMode(Value: TsmxOperationMode); virtual;
-    procedure SetPerformanceMode(Value: TsmxPerformanceMode); virtual;
+    //procedure SetPerformanceMode(Value: TsmxPerformanceMode); virtual;
     procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
-    procedure SetModifyPerformance(Index: TsmxModifyRequest; const Value: TsmxPerformanceMode); virtual;
+    //procedure SetModifyPerformance(Index: TsmxModifyRequest; const Value: TsmxPerformanceMode); virtual;
 
     property CurDataSet: IsmxDataSet read FCurDataSetIntf write FCurDataSetIntf;
-    property CurPerformanceMode: TsmxPerformanceMode read FCurPerformanceMode write FCurPerformanceMode;
+    //property CurPerformanceMode: TsmxPerformanceMode read FCurPerformanceMode write FCurPerformanceMode;
   public
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
@@ -954,13 +1016,13 @@ type
     //property ModifyPerformances[Modify: TsmxModifyRequest]: TsmxPerformanceMode read GetModifyPerformance write SetModifyPerformance;
     //property ModifyRequests[Modify: TsmxModifyRequest]: IsmxDataSet read GetModifyRequest write SetModifyRequest;
     property OperationMode: TsmxOperationMode read FOperationMode write SetOperationMode {default omManual};
-    property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write SetPerformanceMode;
+    //property PerformanceMode: TsmxPerformanceMode read FPerformanceMode write SetPerformanceMode;
     property DeleteDataSet: IsmxDataSet index mrDelete read FDeleteDataSetIntf write SetModifyDataSet;
     property InsertDataSet: IsmxDataSet index mrInsert read FInsertDataSetIntf write SetModifyDataSet;
     property UpdateDataSet: IsmxDataSet index mrUpdate read FUpdateDataSetIntf write SetModifyDataSet;
-    property DeletePerformance: TsmxPerformanceMode index mrDelete read FDeletePerformance write SetModifyPerformance;
-    property InsertPerformance: TsmxPerformanceMode index mrInsert read FInsertPerformance write SetModifyPerformance;
-    property UpdatePerformance: TsmxPerformanceMode index mrUpdate read FUpdatePerformance write SetModifyPerformance;
+    //property DeletePerformance: TsmxPerformanceMode index mrDelete read FDeletePerformance write SetModifyPerformance;
+    //property InsertPerformance: TsmxPerformanceMode index mrInsert read FInsertPerformance write SetModifyPerformance;
+    //property UpdatePerformance: TsmxPerformanceMode index mrUpdate read FUpdatePerformance write SetModifyPerformance;
 
     property OnDelete: TsmxComponentEvent read FOnExecute write FOnExecute;
     property OnExecute: TsmxComponentEvent read FOnExecute write FOnExecute;
@@ -1683,6 +1745,7 @@ end;
 
 function TsmxBaseCfg.GetRootNode: IXMLNode;
 begin
+  XMLDoc.Active := True;
   Result := XMLDoc.ChildNodes.FindNode(smxConsts.cRootNodeName);
   if not Assigned(Result) then
     Result := XMLDoc.AddChild(smxConsts.cRootNodeName);
@@ -1729,7 +1792,7 @@ begin
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'load'], FCfgID);
   if smxDBFuncs.GetValueByKey(FSelectRequest.DataSet,
-      FCfgID, Value, FSelectRequest.PerformanceMode) then
+      FCfgID, Value{, FSelectRequest.PerformanceMode}) then
     XMLDoc.XML.Text := Value else
     XMLDoc.XML.Text := '';
   try
@@ -1744,7 +1807,7 @@ end;
 procedure TsmxBaseCfg.Save;
 var
   Request: IsmxDataSet;
-  Performance: TsmxPerformanceMode;
+  //Performance: TsmxPerformanceMode;
   Key: Variant;
 begin
   if not Assigned(FSelectRequest) then
@@ -1753,17 +1816,24 @@ begin
   if FCfgID = 0 then
   begin
     Request := FSelectRequest.InsertDataSet; //ModifyRequests[mrInsert];
-    Performance := FSelectRequest.InsertPerformance; //ModifyPerformances[mrInsert];
+    //Performance := FSelectRequest.InsertPerformance; //ModifyPerformances[mrInsert];
   end else
   begin
     Request := FSelectRequest.UpdateDataSet; //ModifyRequests[mrUpdate];
-    Performance := FSelectRequest.UpdatePerformance; //ModifyPerformances[mrUpdate];
+    //Performance := FSelectRequest.UpdatePerformance; //ModifyPerformances[mrUpdate];
   end;
   if not Assigned(Request) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'save'], FCfgID);
+  try
+    XMLDoc.Active := True;
+  except
+    on E: Exception do
+      raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
+        [ClassName, FCfgID, 'save'], FCfgID, E.Message);
+  end;
   Key := FCfgID;
-  if smxDBFuncs.SetValueByKey(Request, Key, XMLDoc.XML.Text, Performance) then
+  if smxDBFuncs.SetValueByKey(Request, Key, XMLDoc.XML.Text{, Performance}) then
     FCfgID := Key;
 end;
 
@@ -1792,19 +1862,19 @@ end;
 procedure TsmxBaseCfg.Remove;
 var
   Request: IsmxDataSet;
-  Performance: TsmxPerformanceMode;
+  //Performance: TsmxPerformanceMode;
   Key: Variant;
 begin
   if not Assigned(FSelectRequest) or (FCfgID = 0) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'remove'], FCfgID);
   Request := FSelectRequest.DeleteDataSet; //ModifyRequests[mrDelete];
-  Performance := FSelectRequest.DeletePerformance; //ModifyPerformances[mrDelete];
+  //Performance := FSelectRequest.DeletePerformance; //ModifyPerformances[mrDelete];
   if not Assigned(Request) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'remove'], FCfgID);
   Key := FCfgID;
-  if smxDBFuncs.SetValueByKey(Request, Key, Variants.Null, Performance) then
+  if smxDBFuncs.SetValueByKey(Request, Key, Variants.Null{, Performance}) then
     FCfgID := 0;
 end;
 
@@ -2076,16 +2146,16 @@ var
   FindList: TList;
 begin
   try
-    //ResetCellProps;
+    ResetCellProps;
     if FIsRecieveCfg then
     begin
       Cfg.CfgID := FCfgID;
       Cfg.SelectRequest := FSelectRequest;
-      //Cfg.Receive;
-      Cfg.Load;
+      Cfg.Receive;
+      //Cfg.Load;
     end;
-    //SetCellProps;
-    ResetProps;
+    SetCellProps;
+    {ResetProps;
     ResolvedList := TsmxResolvedKit.Create(TsmxResolvedItem);
     try
       SetProps(ResolvedList);
@@ -2099,7 +2169,7 @@ begin
       end;
     finally
       ResolvedList.Free;
-    end;
+    end;}
   except
     on E: Exception do
       raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
@@ -2402,8 +2472,8 @@ begin
     begin
       Cfg.CfgID := FCfgID;
       Cfg.SelectRequest := FSelectRequest;
-      //Cfg.Receive;
-      Cfg.Save;
+      //Cfg.Return;
+      //Cfg.Save;
     end;
     //SetCellProps;
     //SetAttrs;
@@ -2452,6 +2522,18 @@ begin
     Result := FImplementor.QueryInterface(IID, Obj)
   else
     Result := inherited QueryInterface(IID, Obj);
+end;
+
+procedure TsmxBaseCell.DoFinalize;
+begin
+  if Assigned(FOnFinalize) then
+    DoEvent(FOnFinalize, 0);
+end;
+
+procedure TsmxBaseCell.Finalize;
+begin
+  InternalFinalize;
+  DoFinalize;
 end;
 
 { TsmxTypeCfg }
@@ -2810,8 +2892,10 @@ begin
   inherited Destroy;
 end;
 
-function TsmxOwnerCell.Add(CellClass: TsmxOwnerCellClass; const AImplementor: IsmxRefInterface = nil): TsmxOwnerCell;
+function TsmxOwnerCell.Add(CellClass: TsmxOwnerCellClass = nil; const AImplementor: IsmxRefInterface = nil): TsmxOwnerCell;
 begin
+  if not Assigned(CellClass) then
+    CellClass := GetSlaveClass;
   if Assigned(AImplementor) then
     Result := CellClass.CreateByImpl(nil, AImplementor)
   else
@@ -2838,7 +2922,9 @@ begin
   if FIsOwnerIsParent then
     Result.CellParent := Self;
   SlaveList.Add(Result);}
-  Result := Add(GetSlaveClass, AImplementor);
+  if FIsAltSlaveClass then
+    Result := Add(GetAltSlaveClass(SlaveList.Count), AImplementor) else
+    Result := Add(GetSlaveClass, AImplementor);
 end;
 
 function TsmxOwnerCell.AddSlaveAsClass(CellClass: TsmxOwnerCellClass;
@@ -3109,8 +3195,34 @@ end;
 
 function TsmxOwnerCell.GetIsWriteCell: Boolean;
 begin
-  Result := inherited GetIsWriteCell and not Assigned(FCellOwner);
+  Result := (inherited GetIsWriteCell and not Assigned(FCellOwner))
+    or (Assigned(FCellOwner) and (FCellOwner = CellParent));
 end;
+
+function TsmxOwnerCell.GetSlaveListNew: TsmxSlaveList;
+begin
+  if not Assigned(FSlaveListNew) then
+  begin
+    FSlaveListNew := TsmxSlaveList.Create(TsmxSlaveItem);
+    FSlaveListNew.Owner := Self;
+  end;
+  Result := FSlaveListNew;
+end;
+
+procedure TsmxOwnerCell.SetSlaveListNew(Value: TsmxSlaveList);
+begin
+  SlaveListNew.Assign(Value);
+end;
+
+{type
+  TsmxKit_ = class(TsmxKit)
+  end;}
+
+{procedure TsmxOwnerCell.InternalFinalize;
+begin
+  TsmxKit_(SlaveListNew).KitList.Assign(SlaveList);
+  inherited InternalFinalize;
+end;}
 
 { TsmxControlKitItem }
 
@@ -4516,6 +4628,7 @@ begin
   SetModifyDataSet(mrInsert, nil);
   SetModifyDataSet(mrUpdate, nil);
   FCurDataSetIntf := nil;
+  //FDataSetIntf := nil;
   inherited Destroy;
 end;
 
@@ -4529,9 +4642,11 @@ begin
     //ModifyPerformances[mrDelete] := TsmxCustomRequest(Source).ModifyPerformances[mrDelete];
     //ModifyPerformances[mrInsert] := TsmxCustomRequest(Source).ModifyPerformances[mrInsert];
     //ModifyPerformances[mrUpdate] := TsmxCustomRequest(Source).ModifyPerformances[mrUpdate];
-    DeletePerformance := TsmxCustomRequest(Source).DeletePerformance;
-    InsertPerformance := TsmxCustomRequest(Source).InsertPerformance;
-    UpdatePerformance := TsmxCustomRequest(Source).UpdatePerformance;
+
+    //DeletePerformance := TsmxCustomRequest(Source).DeletePerformance;
+    //InsertPerformance := TsmxCustomRequest(Source).InsertPerformance;
+    //UpdatePerformance := TsmxCustomRequest(Source).UpdatePerformance;
+
     //ModifyRequests[mrDelete] := TsmxCustomRequest(Source).ModifyRequests[mrDelete];
     //ModifyRequests[mrInsert] := TsmxCustomRequest(Source).ModifyRequests[mrInsert];
     //ModifyRequests[mrUpdate] := TsmxCustomRequest(Source).ModifyRequests[mrUpdate];
@@ -4539,7 +4654,8 @@ begin
     InsertDataSet := TsmxCustomRequest(Source).InsertDataSet;
     UpdateDataSet := TsmxCustomRequest(Source).UpdateDataSet;
     OperationMode := TsmxCustomRequest(Source).OperationMode;
-    PerformanceMode := TsmxCustomRequest(Source).PerformanceMode;
+
+    //PerformanceMode := TsmxCustomRequest(Source).PerformanceMode;
   end;
 end;
 
@@ -4557,7 +4673,7 @@ end;
 procedure TsmxCustomRequest.Delete;
 begin
   FCurDataSetIntf := FDeleteDataSetIntf;// FDeleteRequestIntf;
-  FCurPerformanceMode := FDeletePerformance;
+  //FCurPerformanceMode := FDeletePerformance;
   InternalPrepare;
   DoPrepare;
   if not FIsManualRefreshParams then
@@ -4583,7 +4699,7 @@ end;
 procedure TsmxCustomRequest.Execute;
 begin
   FCurDataSetIntf := DataSet;
-  FCurPerformanceMode := FPerformanceMode;
+  //FCurPerformanceMode := FPerformanceMode;
   InternalPrepare;
   DoPrepare;
   if not FIsManualRefreshParams then
@@ -4609,7 +4725,7 @@ end;
 procedure TsmxCustomRequest.Insert;
 begin
   FCurDataSetIntf := FInsertDataSetIntf; // FInsertRequestIntf;
-  FCurPerformanceMode := FInsertPerformance;
+  //FCurPerformanceMode := FInsertPerformance;
   InternalPrepare;
   DoPrepare;
   if not FIsManualRefreshParams then
@@ -4646,7 +4762,7 @@ end;
 procedure TsmxCustomRequest.Prepare;
 begin
   FCurDataSetIntf := DataSet;
-  FCurPerformanceMode := FPerformanceMode;
+  //FCurPerformanceMode := FPerformanceMode;
   InternalPrepare;
   DoPrepare;
   if FOperationMode = omAutomatic then
@@ -4681,7 +4797,7 @@ end;
 procedure TsmxCustomRequest.RefreshParams;
 begin
   FCurDataSetIntf := DataSet;
-  FCurPerformanceMode := FPerformanceMode;
+  //FCurPerformanceMode := FPerformanceMode;
   //if not FIsManualRefreshParams then
   //begin
     InternalRefreshParams;
@@ -4703,7 +4819,7 @@ end;
 procedure TsmxCustomRequest.Update;
 begin
   FCurDataSetIntf := FUpdateDataSetIntf; // FUpdateRequestIntf;
-  FCurPerformanceMode := FUpdatePerformance;
+  //FCurPerformanceMode := FUpdatePerformance;
   InternalPrepare;
   DoPrepare;
   if not FIsManualRefreshParams then
@@ -4727,7 +4843,14 @@ end;
 
 function TsmxCustomRequest.GetDataSet: IsmxDataSet;
 begin
-  GetInterface(IsmxDataSet, Result);
+  //GetInterface(IsmxDataSet, Result);
+  //if not Assigned(FDataSetIntf) then
+    //QueryInterface(IsmxDataSet, FDataSetIntf);
+  if Assigned(Implementor) then
+    Implementor.QueryInterface(IsmxDataSet, Result)
+  else
+    Result := nil;
+  //Result := FDataSetIntf;
 end;
 
 {procedure TsmxCustomRequest.SetDataSet(const Value: IsmxDataSet);
@@ -4786,10 +4909,11 @@ begin
   begin
     try
       FCurDataSetIntf.Close;
-      case FCurPerformanceMode of
+      {case FCurPerformanceMode of
         pmOpen: FCurDataSetIntf.Open;
         pmExecute: FCurDataSetIntf.Execute;
-      end;
+      end;}
+      FCurDataSetIntf.Perform;
     except
       on E: Exception do
         raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellActionError,
@@ -4850,10 +4974,10 @@ begin
   FOperationMode := Value;
 end;
 
-procedure TsmxCustomRequest.SetPerformanceMode(Value: TsmxPerformanceMode);
+{procedure TsmxCustomRequest.SetPerformanceMode(Value: TsmxPerformanceMode);
 begin
   FPerformanceMode := Value;
-end;
+end;}
 
 procedure TsmxCustomRequest.SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet);
 begin
@@ -4864,14 +4988,14 @@ begin
   end;
 end;
 
-procedure TsmxCustomRequest.SetModifyPerformance(Index: TsmxModifyRequest; const Value: TsmxPerformanceMode);
+{procedure TsmxCustomRequest.SetModifyPerformance(Index: TsmxModifyRequest; const Value: TsmxPerformanceMode);
 begin
   case Index of
     mrDelete: FDeletePerformance := Value;
     mrInsert: FInsertPerformance := Value;
     mrUpdate: FUpdatePerformance := Value;
   end;
-end;
+end;}
 
 { TsmxCustomRequestList }
 
@@ -6413,16 +6537,16 @@ begin
     KeySense := fsKey;
   end;
   if smxDBFuncs.GetValueByKey(FSelectRequest.DataSet, Key, Value,
-      FSelectRequest.PerformanceMode, KeySense) then
+      {FSelectRequest.PerformanceMode,} KeySense) then
   begin
     if smxDBFuncs.LocateByKey(FSelectRequest.DataSet, Key, KeySense) then
     begin
       if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value,
-          FSelectRequest.PerformanceMode, fsKey) then
+          {FSelectRequest.PerformanceMode,} fsKey) then
         FRecID := Value else
         FRecID := 0;
-      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value,
-          FSelectRequest.PerformanceMode) then
+      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value{,
+          FSelectRequest.PerformanceMode}) then
         XMLDoc.XML.Text := Value else
         XMLDoc.XML.Text := '';
       try
@@ -6439,7 +6563,7 @@ end;
 procedure TsmxStateCfg.Save;
 var
   Request: IsmxDataSet;
-  Performance: TsmxPerformanceMode;
+  //Performance: TsmxPerformanceMode;
   Key, Value: Variant;
   KeySense: TsmxBaseSense;
 begin
@@ -6450,11 +6574,11 @@ begin
   if FRecID = 0 then
   begin
     Request := FSelectRequest.InsertDataSet; // ModifyRequests[mrInsert];
-    Performance := FSelectRequest.InsertPerformance; // ModifyPerformances[mrInsert];
+    //Performance := FSelectRequest.InsertPerformance; // ModifyPerformances[mrInsert];
   end else
   begin
     Request := FSelectRequest.UpdateDataSet; // ModifyRequests[mrUpdate];
-    Performance := FSelectRequest.UpdatePerformance; // ModifyPerformances[mrUpdate];
+    //Performance := FSelectRequest.UpdatePerformance; // ModifyPerformances[mrUpdate];
   end;
   if not Assigned(Request) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
@@ -6468,8 +6592,8 @@ begin
     Key := FRecID;
     KeySense := fsKey;
   end;
-  if smxDBFuncs.SetValueByKey(Request, Key, XMLDoc.XML.Text, Performance, KeySense) then
-    if smxDBFuncs.GetCurrentValue(Request, Value, Performance, fsKey) then
+  if smxDBFuncs.SetValueByKey(Request, Key, XMLDoc.XML.Text, {Performance,} KeySense) then
+    if smxDBFuncs.GetCurrentValue(Request, Value, {Performance,} fsKey) then
       FRecID := Value;
 end;
 
@@ -6486,10 +6610,10 @@ begin
     FSelectRequest.DataSet.First;
     while not FSelectRequest.DataSet.Eof do
     begin
-      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value, FSelectRequest.PerformanceMode) then
+      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value{, FSelectRequest.PerformanceMode}) then
         XMLDoc.XML.Text := Value else
         XMLDoc.XML.Text := '';
-      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value, FSelectRequest.PerformanceMode, fsForeignKey) then
+      if smxDBFuncs.GetCurrentValue(FSelectRequest.DataSet, Value, {FSelectRequest.PerformanceMode,} fsForeignKey) then
         CurIntfID := smxFuncs.GetSingleValue(Value, 0, 1) else
         CurIntfID := 0;
       try
@@ -6531,7 +6655,7 @@ end;
 procedure TsmxStateCfg.Remove;
 var
   Request: IsmxDataSet;
-  Performance: TsmxPerformanceMode;
+  //Performance: TsmxPerformanceMode;
   Key: Variant;
   KeySense: TsmxBaseSense;
 begin
@@ -6540,7 +6664,7 @@ begin
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'remove'], FCfgID);
   Request := FSelectRequest.DeleteDataSet; // ModifyRequests[mrDelete];
-  Performance := FSelectRequest.DeletePerformance; // ModifyPerformances[mrDelete];
+  //Performance := FSelectRequest.DeletePerformance; // ModifyPerformances[mrDelete];
   if not Assigned(Request) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'remove'], FCfgID);
@@ -6553,7 +6677,7 @@ begin
     Key := FRecID;
     KeySense := fsKey;
   end;
-  if smxDBFuncs.SetValueByKey(Request, Key, Variants.Null, Performance, KeySense) then
+  if smxDBFuncs.SetValueByKey(Request, Key, Variants.Null, {Performance,} KeySense) then
     FRecID := 0;
 end;
 
@@ -6650,6 +6774,144 @@ end;
 procedure TsmxText.SetFont(Value: TFont);
 begin
   Font.Assign(Value);
+end;
+
+{ TsmxSlaveItem }
+
+constructor TsmxSlaveItem.Create(AKit: TsmxKit);
+begin
+  inherited Create(AKit);
+  AddSlave;
+end;
+
+{constructor TsmxSlaveItem.Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass);
+begin
+  inherited Create(AKit);
+  AddSlave(ACellClass);
+end;
+
+constructor TsmxSlaveItem.Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass;
+  const AImplementor: IsmxRefInterface);
+begin
+  inherited Create(AKit);
+  AddSlave(ACellClass, AImplementor);
+end;
+
+constructor TsmxSlaveItem.Create(AKit: TsmxKit; const AImplementor: IsmxRefInterface);
+begin
+  inherited Create(AKit);
+  AddSlave(nil, AImplementor);
+end;}
+
+destructor TsmxSlaveItem.Destroy;
+begin
+  DelSlave;
+  inherited Destroy;
+end;
+
+procedure TsmxSlaveItem.AddSlave{(CellClass: TsmxOwnerCellClass = nil;
+  const Implementor: IsmxRefInterface = nil)};
+var
+  CellClass: TsmxOwnerCellClass;
+  Implementor: IsmxRefInterface;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.Owner) then
+      if not Assigned(FSlave) then
+      begin
+        Kit.GetSlaveVars(CellClass, Implementor);
+        if not Assigned(CellClass) then
+          CellClass := Kit.Owner.GetSlaveClass;
+        if Assigned(Implementor) then
+          FSlave := CellClass.CreateByImpl(nil, Implementor)
+        else
+          FSlave := CellClass.Create(nil);
+        FSlave.CellOwner := Kit.Owner;
+      end;
+end;
+
+procedure TsmxSlaveItem.DelSlave;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.Owner) then
+      if Assigned(FSlave) then
+      begin
+        FSlave.Free;
+        FSlave := nil;
+      end;
+end;
+
+procedure TsmxSlaveItem.Assign(Source: TsmxKitItem);
+begin
+  if (Source is TsmxSlaveItem) and Assigned(Slave) then
+    Slave.Assign(TsmxSlaveItem(Source).Slave)
+  else
+    inherited Assign(Source);
+end;
+
+function TsmxSlaveItem.GetKit: TsmxSlaveList;
+begin
+  Result := TsmxSlaveList(inherited Kit);
+end;
+
+procedure TsmxSlaveItem.SetKit(Value: TsmxSlaveList);
+begin
+  if Assigned(Kit) then
+    DelSlave;
+  inherited Kit := Value;
+  if Assigned(Kit) then
+    AddSlave;
+end;
+
+{ TsmxSlaveList }
+
+function TsmxSlaveList.Add: TsmxSlaveItem;
+begin
+  SetSlaveVars(nil, nil);
+  Result := TsmxSlaveItem(inherited Add);
+end;
+
+{function TsmxSlaveList.Add(const AImplementor: IsmxRefInterface): TsmxSlaveItem;
+begin
+  FCellClass := nil;
+  FImplementor := AImplementor;
+end;}
+
+function TsmxSlaveList.Add(ACellClass: TsmxOwnerCellClass = nil;
+  const AImplementor: IsmxRefInterface = nil): TsmxSlaveItem;
+begin
+  SetSlaveVars(ACellClass, AImplementor);
+  Result := TsmxSlaveItem(inherited Add);
+  SetSlaveVars(nil, nil);
+end;
+
+{function TsmxSlaveList.Add(ACellClass: TsmxOwnerCellClass): TsmxSlaveItem;
+begin
+
+end;}
+
+procedure TsmxSlaveList.GetSlaveVars(var CellClass: TsmxOwnerCellClass;
+  var Implementor: IsmxRefInterface);
+begin
+  CellClass := FCellClass;
+  Implementor := FImplementor;
+end;
+
+procedure TsmxSlaveList.SetSlaveVars(CellClass: TsmxOwnerCellClass;
+  const Implementor: IsmxRefInterface);
+begin
+  FCellClass := CellClass;
+  FImplementor := Implementor;
+end;
+
+function TsmxSlaveList.GetItem(Index: Integer): TsmxSlaveItem;
+begin
+  Result := TsmxSlaveItem(inherited Items[Index]);
+end;
+
+procedure TsmxSlaveList.SetItem(Index: Integer; Value: TsmxSlaveItem);
+begin
+  inherited Items[Index] := Value;
 end;
 
 end.
