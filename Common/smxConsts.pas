@@ -5,20 +5,20 @@ interface
 const
   { XML }
   cRootNodeName = 'Root';
-  cParentNodeName = 'Parent';
+  //cParentNodeName = 'Parent';
   cCellNodeName = 'Cell';
-  cInfoNodeName = 'Info';
-  cOwnerNodeName = 'Owner';
-  //cSlaveNodeName = 'Slave';
+  //cInfoNodeName = 'Info';
+  //cOwnerNodeName = 'Owner';
+  cSlaveNodeName = 'Slave';
   cTypeNodeName = 'Type';
   cFontNodeName = 'Font';
   cKitNodeName = 'Kit';
   cItemNodeName = 'Item';
   cCfgIDAttributeName = 'CfgID';
   cNameAttributeName = 'Name';
-  cProcNameAttributeName = '.ProcName';
-  cClassNameAttributeName = '.ClassName';
-  cIClassNameAttributeName = '.IClassName';
+  cProcNameAttributeName = 'ProcName';
+  cClassNameAttributeName = 'ClassName';
+  cIClassNameAttributeName = 'IClassName';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =
@@ -26,7 +26,10 @@ const
     ' encoding="' + cXMLDocEncoding + '"?>' +
     '<' + cRootNodeName + '>' +
     '</' + cRootNodeName + '>';
+
+  { Consts }
   cSuffixTextFieldName = 'Text';
+  cDelimiterObjNameMethodName = '.';
 
   { Global objects }
   cApplicationHandle = 0;

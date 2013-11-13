@@ -3,13 +3,13 @@ unit smxClassProcs;
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxManagerIntf{,
-  smxClassFuncs};
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxManagerIntf,
+  smxClassTypes;
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
   AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
-procedure AllParents(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass);
+procedure AllParents(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
+  AIncludeParentForm: Boolean = False);
 procedure ClearProps(AObject: TObject);
 procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
 procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
@@ -75,8 +75,8 @@ begin
     AddChilds(ACell.Cells[i], Length(AClassList) = 0);
 end;
 
-procedure AllParents(ACell: TsmxBaseCell; AList: TList;
-  AClassList: array of TsmxBaseCellClass);
+procedure AllParents(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
+  AIncludeParentForm: Boolean = False);
 
   function IsClass(ACurCell: TsmxBaseCell): Boolean;
   var
@@ -88,19 +88,42 @@ procedure AllParents(ACell: TsmxBaseCell; AList: TList;
         Result := True;
   end;
 
+  function IsInclude(ACurCell: TsmxBaseCell; var AIsFirstForm: Boolean): Boolean;
+  begin
+    Result := True;
+    if ACurCell is TsmxCustomForm then
+      if not AIsFirstForm then
+        AIsFirstForm := True
+      else
+        Result := False;
+  end;
+
 var
   Cell: TsmxBaseCell;
   Empty: Boolean;
+  IsFirstForm: Boolean;
 begin
-  if not Assigned(AList) then
+  if not Assigned(AList) or not Assigned(ACell) then
     Exit;
   AList.Clear;
   Empty := Length(AClassList) = 0;
+  IsFirstForm := ACell is TsmxCustomForm;
+  {if Assigned(ACell.CellParent) then
+    Cell := ACell.CellParent else
+  if ACell is TsmxOwnerCell then
+    Cell := TsmxOwnerCell(ACell).CellOwner else
+    Cell := nil;}
   Cell := ACell.CellParent;
   while Assigned(Cell) do
   begin
-    if Empty or IsClass(Cell) then
+    if (Empty or IsClass(Cell))
+        and (AIncludeParentForm or IsInclude(Cell, IsFirstForm)) then
       AList.Add(Cell);
+    {if Assigned(Cell.CellParent) then
+      Cell := Cell.CellParent else
+    if Cell is TsmxOwnerCell then
+      Cell := TsmxOwnerCell(Cell).CellOwner else
+      Cell := nil;}
     Cell := Cell.CellParent;
   end;
 end;
@@ -172,6 +195,10 @@ procedure ClearProps(AObject: TObject);
       TypInfo.SetMethodProp(AObject, PropInfo, NilMethod);
   end;
 
+  {procedure ClearChild(Cell: TsmxBaseCell);
+  begin
+  end;}
+
 var
   Count: Integer;
   PropList: PPropList;
@@ -219,24 +246,29 @@ end;
 
 procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
 
-  procedure ReadClass(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure ReadClass(APropInfo: PPropInfo; const Node: IXMLNode);
   var
     Obj: TObject;
     n: IXMLNode;
     i: Integer;
     Cls: TClass;
+    s: String;
   begin
-    n := Node.ChildNodes.FindNode(PropInfo^.Name);
-    if Assigned(n) then
-    begin
-      Cls := TypInfo.GetTypeData(PropInfo^.PropType^)^.ClassType;
-      Obj := TypInfo.GetObjectProp(AObject, PropInfo);
+    //n := Node.ChildNodes.FindNode(PropInfo^.Name);
+    //if Assigned(n) then
+    //begin
+      Cls := TypInfo.GetTypeData(APropInfo^.PropType^)^.ClassType;
+      Obj := TypInfo.GetObjectProp(AObject, APropInfo);
       if Cls.InheritsFrom(TsmxKit) then
       begin
-        ReadProps(Obj, n, AResolvedList);
-        for i := 0 to n.ChildNodes.Count - 1 do
-          if n.ChildNodes[i].NodeName = smxConsts.cItemNodeName then
-            ReadProps(TsmxKit(Obj).Add, n.ChildNodes[i], AResolvedList);
+        n := Node.ChildNodes.FindNode(APropInfo^.Name);
+        if Assigned(n) then
+        begin
+          ReadProps(Obj, n, AResolvedList);
+          for i := 0 to n.ChildNodes.Count - 1 do
+            if n.ChildNodes[i].NodeName = smxConsts.cItemNodeName then
+              ReadProps(TsmxKit(Obj).Add, n.ChildNodes[i], AResolvedList);
+        end;
       end {else
       if Cls.InheritsFrom(TCollection) then
       begin
@@ -247,14 +279,16 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
       end} else
       if Cls.InheritsFrom(TsmxBaseCell) then
       begin
-        if Assigned(AResolvedList) then
-          if (n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
-              or (n.Attributes[smxConsts.cNameAttributeName] <> '') then
+        s := Variants.VarToStr(Node.Attributes[APropInfo^.Name]);
+        if {Node.Attributes[PropInfo^.Name]} s <> '' then
+          if Assigned(AResolvedList) then
+          //if (n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
+          //    or (n.Attributes[smxConsts.cNameAttributeName] <> '') then
             with AResolvedList.Add do
             begin
               Instance := AObject;
-              PropInfo := PropInfo;
-              if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
+              PropInfo := APropInfo;
+              {if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
               begin
                 //TVarData(PropValue).VType := vtInteger;
                 PropValue := n.Attributes[smxConsts.cCfgIDAttributeName];
@@ -262,7 +296,8 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
               begin
                 //TVarData(PropValue).VType := vtString;
                 PropValue := n.Attributes[smxConsts.cNameAttributeName];
-              end;
+              end;}
+              PropValue := s; //Variants.VarToStr(Node.Attributes[PropInfo^.Name]);
             end;
       end {else
       if Cls.InheritsFrom(TComponent) then
@@ -278,12 +313,12 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
       end} else
       begin
         if Assigned(Obj) then
-          ReadProps(Obj, n, AResolvedList);
+          ReadProps(Obj, Node.ChildNodes.FindNode(APropInfo^.Name), AResolvedList);
       end;
-    end;
+    //end;
   end;
 
-  procedure ReadIntf(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure ReadIntf(APropInfo: PPropInfo; const Node: IXMLNode);
 
     function IsImplIntf(const AIntf: IsmxRefInterface): Boolean;
     var
@@ -295,30 +330,34 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
 
   var
     Intf: IInterface;
-    n: IXMLNode;
+    //n: IXMLNode;
     GUID: TGUID;
+    s: String;
   begin
-    n := Node.ChildNodes.FindNode(PropInfo^.Name);
-    if Assigned(n) and (AObject is TsmxBaseCell) then
+    //n := Node.ChildNodes.FindNode(PropInfo^.Name);
+    if {Assigned(n) and (}AObject is TsmxBaseCell{)} then
     begin
-      GUID := TypInfo.GetTypeData(PropInfo^.PropType^)^.Guid;
-      Intf := TypInfo.GetInterfaceProp(AObject, PropInfo);
+      GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
+      Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
       if {SysUtils.IsEqualGUID(GUID, IsmxRefInterface)
           or} SysUtils.Supports(Intf, IsmxRefInterface) {then
       begin
         if} and IsImplIntf(IsmxRefInterface(Intf)) then
-          ReadProps(IsmxRefInterface(Intf).GetReference, n, AResolvedList)
-        else
         begin
-          if Assigned(AResolvedList) then
+          ReadProps(IsmxRefInterface(Intf).GetReference, Node.ChildNodes.FindNode(APropInfo^.Name), AResolvedList);
+        end else
+        begin
+          s := Variants.VarToStr(Node.Attributes[APropInfo^.Name]);
+          if {Node.Attributes[PropInfo^.Name]} s <> '' then
+            if Assigned(AResolvedList) then
           //begin
-            if (n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
-                or (n.Attributes[smxConsts.cNameAttributeName] <> '') then
+            //if (n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
+            //    or (n.Attributes[smxConsts.cNameAttributeName] <> '') then
               with AResolvedList.Add do
               begin
                 Instance := AObject;
-                PropInfo := PropInfo;
-                if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
+                PropInfo := APropInfo;
+                {if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
                 begin
                   //TVarData(PropValue).VType := vtInteger;
                   PropValue := n.Attributes[smxConsts.cCfgIDAttributeName];
@@ -326,7 +365,8 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
                 begin
                   //TVarData(PropValue).VType := vtString;
                   PropValue := n.Attributes[smxConsts.cNameAttributeName];
-                end;
+                end;}
+                PropValue := s; //Variants.VarToStr(Node.Attributes[PropInfo^.Name]);
               end;
           //end;
         end;
@@ -352,22 +392,40 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
     end;
   end;
 
-  procedure ReadMethod(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure ReadMethod(APropInfo: PPropInfo; const Node: IXMLNode);
+
+    procedure GetObjAndMethodName(const Text: String; var ObjName, MethName: String);
+    var
+      i: Integer;
+    begin
+      ObjName := '';
+      MethName := '';
+      i := Pos(smxConsts.cDelimiterObjNameMethodName, Text);
+      if i <> 0 then
+      begin
+        ObjName := Copy(Text, 1, i - 1);
+        MethName := Copy(Text, i + 1, Length(Text) - i);
+      end;
+    end;
+
   var
-    n: IXMLNode;
+    //n: IXMLNode;
+    ObjName, MethName: String;
   begin
-    n := Node.ChildNodes.FindNode(PropInfo^.Name);
-    if Assigned(n) and (AObject is TsmxBaseCell) then
+    //n := Node.ChildNodes.FindNode(PropInfo^.Name);
+    GetObjAndMethodName(Variants.VarToStr(Node.Attributes[APropInfo^.Name]), ObjName, MethName);
+    //if Assigned(n) and (AObject is TsmxBaseCell) then
+    if (ObjName <> '') and (MethName <> '') then
     begin
       if Assigned(AResolvedList) then
-        if ((n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
-              or (n.Attributes[smxConsts.cNameAttributeName] <> ''))
-            and (n.Attributes[smxConsts.cProcNameAttributeName] <> '') then
+        //if ((n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
+        //      or (n.Attributes[smxConsts.cNameAttributeName] <> ''))
+        //    and (n.Attributes[smxConsts.cProcNameAttributeName] <> '') then
           with AResolvedList.Add do
           begin
             Instance := AObject;
-            PropInfo := PropInfo;
-            if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
+            PropInfo := APropInfo;
+            {if n.Attributes[smxConsts.cCfgIDAttributeName] <> 0 then
             begin
               //TVarData(PropValue).VType := vtInteger;
               PropValue := n.Attributes[smxConsts.cCfgIDAttributeName];
@@ -375,9 +433,59 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
             begin
               //TVarData(PropValue).VType := vtString;
               PropValue := n.Attributes[smxConsts.cNameAttributeName];
-            end;
-            ProcName := n.Attributes[smxConsts.cProcNameAttributeName];
+            end;}
+            PropValue := ObjName;
+            ProcName := MethName; //n.Attributes[smxConsts.cProcNameAttributeName];
           end;
+    end;
+  end;
+
+  procedure ReadChild(ACell: TsmxBaseCell; const Node: IXMLNode);
+
+    function GetImplIntf(const ClassName: String): IsmxRefInterface;
+    begin
+      Result := nil;
+      if ClassName <> '' then
+        if SysUtils.Supports(Classes.FindClass(ClassName), IsmxRefInterface) then
+          Classes.FindClass(ClassName).Create.GetInterface(IsmxRefInterface, Result);
+    end;
+
+  var
+    n: IXMLNode;
+    i: Integer;
+    Cell: TsmxBaseCell;
+    ClsName, IClsName: String;
+    CfgID: Integer;
+  begin
+    for i := 0 to Node.ChildNodes.Count - 1 do
+    begin
+      n := Node.ChildNodes[i];
+      if n.NodeName = smxConsts.cCellNodeName then
+      begin
+        ClsName := n.Attributes[smxConsts.cClassNameAttributeName];
+        IClsName := n.Attributes[smxConsts.cIClassNameAttributeName];
+        CfgID := n.Attributes[smxConsts.cCfgIDAttributeName];
+        if ClsName <> '' then
+          Cell := TsmxBaseCellClass(Classes.FindClass(ClsName)).CreateByImpl(nil, GetImplIntf(IClsName))
+        else
+          Cell := nil;
+        if Assigned(Cell) then
+        begin
+          Cell.CfgID := CfgID;
+          Cell.CellParent := ACell;
+          ReadProps(Cell, n, AResolvedList);
+        end;
+      end else
+      if (n.NodeName = smxConsts.cSlaveNodeName) and (ACell is TsmxOwnerCell) then
+      begin
+        ClsName := n.Attributes[smxConsts.cClassNameAttributeName];
+        IClsName := n.Attributes[smxConsts.cIClassNameAttributeName];
+        CfgID := n.Attributes[smxConsts.cCfgIDAttributeName];
+        Cell := TsmxOwnerCell(ACell).SlaveListNew.Add(
+          TsmxOwnerCellClass(Classes.FindClass(ClsName)), GetImplIntf(IClsName)).Slave;
+        Cell.CfgID := CfgID;
+        ReadProps(Cell, n, AResolvedList);
+      end;
     end;
   end;
 
@@ -423,20 +531,22 @@ begin
       FreeMem(PropList);
     end;
   end;
+  if AObject is TsmxBaseCell then
+    ReadChild(TsmxBaseCell(AObject), ANode);
 end;
 
 procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
 
-  procedure WriteClass(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure WriteClass(APropInfo: PPropInfo; const Node: IXMLNode);
   var
     Obj: TObject;
     n: IXMLNode;
     i: Integer;
   begin
-    Obj := TypInfo.GetObjectProp(AObject, PropInfo);
-    if Assigned(Obj) then
-    begin
-      n := Node.AddChild(PropInfo^.Name, 0);
+    Obj := TypInfo.GetObjectProp(AObject, APropInfo);
+    //if Assigned(Obj) then
+    //begin
+      //n := Node.AddChild(PropInfo^.Name, 0);
       {if Obj is TsmxSlaveList then
       begin
         WriteProps(Obj, n, AFindList);
@@ -454,6 +564,7 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
       end else}
       if Obj is TsmxKit then
       begin
+        n := Node.AddChild(APropInfo^.Name);
         WriteProps(Obj, n, AFindList);
         for i := 0 to TsmxKit(Obj).Count - 1 do
           WriteProps(TsmxKit(Obj)[i], n.AddChild(smxConsts.cItemNodeName), AFindList);
@@ -466,22 +577,28 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
       end} else
       if Obj is TsmxBaseCell then
       begin
-        if TsmxBaseCell(Obj).CfgID <> 0 then
-          n.Attributes[smxConsts.cCfgIDAttributeName] := TsmxBaseCell(Obj).CfgID
-        else
-          n.Attributes[smxConsts.cNameAttributeName] := TsmxBaseCell(Obj).Name;
+        {if Assigned(PropInfo^.SetProc) then
+        begin}
+          if TsmxBaseCell(Obj).CfgID <> 0 then
+            Node.Attributes[APropInfo^.Name{smxConsts.cCfgIDAttributeName}] := TsmxBaseCell(Obj).CfgID
+          else
+            Node.Attributes[APropInfo^.Name{smxConsts.cNameAttributeName}] := TsmxBaseCell(Obj).Name;
+        {end else
+          WriteProps(Obj, Node.AddChild(PropInfo^.Name, 0), AFindList);}
       end {else
       if Obj is TComponent then
       begin
         n.Attributes[smxConsts.cNameAttributeName] := TComponent(Obj).Name;
       end} else
+      if Assigned(Obj) then
       begin
-        WriteProps(Obj, n, AFindList);
-      end;
-    end;
+        WriteProps(Obj, Node.AddChild(APropInfo^.Name), AFindList);
+      end else
+        Node.Attributes[APropInfo^.Name] := '';
+    //end;
   end;
 
-  procedure WriteIntf(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure WriteIntf(APropInfo: PPropInfo; const Node: IXMLNode);
 
     function IsImplIntf(const AIntf: IsmxRefInterface): Boolean;
     var
@@ -497,7 +614,7 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
       Intf: IInterface;
     begin
       Result := nil;
-      if Assigned(AFindList) then
+      if Assigned(AIntf) and Assigned(AFindList) then
       begin
         for i := 0 to AFindList.Count - 1 do
           if TObject(AFindList[i]).GetInterface(IsmxRefInterface, Intf)
@@ -512,18 +629,19 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
   var
     Intf: IInterface;
     Obj: TObject;
-    n: IXMLNode;
+    //n: IXMLNode;
     //Form: TsmxCustomForm;
   begin
-    Intf := TypInfo.GetInterfaceProp(AObject, PropInfo);
-    if Assigned(Intf) and (AObject is TsmxBaseCell) then
+    Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
+    if AObject is TsmxBaseCell then
     begin
-      n := Node.AddChild(PropInfo^.Name, 0);
-      if SysUtils.Supports(Intf, IsmxRefInterface) then
+      if {Assigned(Intf) and} SysUtils.Supports(Intf, IsmxRefInterface) {then
       begin
-        if IsImplIntf(IsmxRefInterface(Intf)) then
-          WriteProps(IsmxRefInterface(Intf).GetReference, n, AFindList)
-        else
+        if} and IsImplIntf(IsmxRefInterface(Intf)) then
+        begin
+          //n := Node.AddChild(PropInfo^.Name, 0);
+          WriteProps(IsmxRefInterface(Intf).GetReference, Node.AddChild(APropInfo^.Name), AFindList);
+        end else
         //begin
           //Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(AObject));
           //if Assigned(AChildList) then
@@ -532,14 +650,15 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
           if Obj is TsmxBaseCell then
           begin
             if TsmxBaseCell(Obj).CfgID <> 0 then
-              n.Attributes[smxConsts.cCfgIDAttributeName] := TsmxBaseCell(Obj).CfgID
+              Node.Attributes[APropInfo^.Name{smxConsts.cCfgIDAttributeName}] := TsmxBaseCell(Obj).CfgID
             else
-              n.Attributes[smxConsts.cNameAttributeName] := TsmxBaseCell(Obj).Name;
-          end;
+              Node.Attributes[APropInfo^.Name{smxConsts.cNameAttributeName}] := TsmxBaseCell(Obj).Name;
+          end else
+            Node.Attributes[APropInfo^.Name] := '';
         end;
-        //end;
-      end {else
-      if SysUtils.Supports(Intf, IsmxRefInterface) then
+      {end else
+        Node.Attributes[PropInfo^.Name] := ''};
+      {if SysUtils.Supports(Intf, IsmxRefInterface) then
       begin
         if IsImplIntf(Intf) then
           WriteProps(IsmxRefInterface(Intf).GetReference, n)
@@ -550,21 +669,22 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
             n.Attributes[smxConsts.cNameAttributeName] := TsmxInterfacedPersistent(Obj).Name else
             n.Attributes[smxConsts.cNameAttributeName] := '';
         end;
-      end};
+      end;}
     end;
   end;
 
-  procedure WriteMethod(PropInfo: PPropInfo; const Node: IXMLNode);
+  procedure WriteMethod(APropInfo: PPropInfo; const Node: IXMLNode);
 
     function FindMethodObj(Method: TMethod): TObject;
     var
       i: Integer;
     begin
       Result := nil;
-      if Assigned(AFindList) then
+      if Assigned(Method.Code) and Assigned(AFindList) then
       begin
         for i := 0 to AFindList.Count - 1 do
-          if TObject(AFindList[i]).MethodName(Method.Code) <> '' then
+          if (AFindList[i] = Method.Data)
+              and (TObject(AFindList[i]).MethodName(Method.Code) <> '') then
           begin
             Result := TObject(AFindList[i]);
             Break;
@@ -575,28 +695,75 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
   var
     Method: TMethod;
     Obj: TObject;
-    n: IXMLNode;
+    //n: IXMLNode;
     //Form: TsmxCustomForm;
   begin
-    Method := TypInfo.GetMethodProp(AObject, PropInfo);
-    if Assigned(Method.Code) and (AObject is TsmxBaseCell) then
+    Method := TypInfo.GetMethodProp(AObject, APropInfo);
+    if AObject is TsmxBaseCell then
     begin
-      n := ANode.AddChild(PropInfo^.Name, 0);
-      //Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(AObject));
-      //if Assigned(Form) then
-      //begin
-        //Obj := smxClassFuncs.GetAlgorithmForm(Form, TsmxComponentEvent(Method));
-        Obj := FindMethodObj(Method);
-        if Obj is TsmxBaseCell then
-        begin
-          if TsmxBaseCell(Obj).CfgID <> 0 then
-            n.Attributes[smxConsts.cCfgIDAttributeName] := TsmxBaseCell(Obj).CfgID
-          else
-            n.Attributes[smxConsts.cNameAttributeName] := TsmxBaseCell(Obj).Name;
-          n.Attributes[smxConsts.cProcNameAttributeName] := Obj.MethodName(Method.Code);
-        end;
-      //end;
+      {if Assigned(Method.Code) then
+      begin}
+        //n := ANode.AddChild(PropInfo^.Name, 0);
+        //Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(AObject));
+        //if Assigned(Form) then
+        //begin
+          //Obj := smxClassFuncs.GetAlgorithmForm(Form, TsmxComponentEvent(Method));
+          Obj := FindMethodObj(Method);
+          if Obj is TsmxBaseCell then
+          begin
+            if TsmxBaseCell(Obj).CfgID <> 0 then
+              Node.Attributes[APropInfo^.Name{smxConsts.cCfgIDAttributeName}] :=
+                Format('%d%s%s', [TsmxBaseCell(Obj).CfgID, smxConsts.cDelimiterObjNameMethodName, Obj.MethodName(Method.Code)])
+            else
+              Node.Attributes[APropInfo^.Name{smxConsts.cNameAttributeName}] :=
+                Format('%s%s%s', [TsmxBaseCell(Obj).Name, smxConsts.cDelimiterObjNameMethodName, Obj.MethodName(Method.Code)]);
+            //n.Attributes[smxConsts.cProcNameAttributeName] := Obj.MethodName(Method.Code);
+          end else
+            Node.Attributes[APropInfo^.Name] := '';
+        //end;
+      {end else
+        Node.Attributes[PropInfo^.Name] := '';}
     end;
+  end;
+
+  procedure WriteChild(ACell: TsmxBaseCell; const Node: IXMLNode);
+
+    function GetImplClassName(Cell: TsmxBaseCell): String;
+    begin
+      Result := '';
+      if Assigned(Cell) then
+        if Assigned(Cell.Implementor) then
+          if Assigned(Cell.Implementor.GetReference) then
+            Result := Cell.Implementor.GetReference.ClassName;
+    end;
+
+  var
+    i: Integer;
+    Cell: TsmxBaseCell;
+    n: IXMLNode;
+  begin
+    for i := 0 to ACell.CellCount - 1 do
+    begin
+      Cell := ACell.Cells[i];
+      if not ((Cell is TsmxOwnerCell) and Assigned(TsmxOwnerCell(Cell).CellOwner)) then
+      begin
+        n := Node.AddChild(smxConsts.cCellNodeName);
+        WriteProps(Cell, n, AFindList);
+        n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
+        n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
+        n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
+      end;
+    end;
+    if ACell is TsmxOwnerCell then
+      for i := 0 to TsmxOwnerCell(ACell).SlaveCount - 1 do
+      begin
+        Cell := TsmxOwnerCell(ACell).Slaves[i];
+        n := Node.AddChild(smxConsts.cSlaveNodeName);
+        WriteProps(Cell, n, AFindList);
+        n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
+        n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
+        n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
+      end;
   end;
 
 var
@@ -615,7 +782,7 @@ begin
     try
       TypInfo.GetPropList(PTypeInfo(AObject.ClassInfo),
         TypInfo.tkProperties + TypInfo.tkMethods, PropList);
-      for i := Count - 1 downto 0 do
+      for i := 0 to Count - 1 do
       begin
         PropInfo := PropList^[i];
         if TypInfo.IsStoredProp(AObject, PropInfo) then
@@ -640,6 +807,8 @@ begin
       FreeMem(PropList);
     end;
   end;
+  if AObject is TsmxBaseCell then
+    WriteChild(TsmxBaseCell(AObject), ANode);
 end;
 
 procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
@@ -673,7 +842,8 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
      begin
        GUID := TypInfo.GetTypeData(Item.PropInfo^.PropType^)^.Guid;
        for i := 0 to AFindList.Count - 1 do
-         if SysUtils.Supports(TObject(AFindList[i]), GUID, Intf) and (TObject(AFindList[i]) is TsmxBaseCell) then
+         if SysUtils.Supports(TObject(AFindList[i]), GUID, Intf)
+             and (TObject(AFindList[i]) is TsmxBaseCell) then
            if (TsmxBaseCell(AFindList[i]).CfgID = Item.PropValue)
                or (TsmxBaseCell(AFindList[i]).Name = Item.PropValue) then
            begin
@@ -693,8 +863,9 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
        //Method := TypInfo.GetTypeData(Item.PropInfo^.PropType^)^.Guid;
        for i := 0 to AFindList.Count - 1 do
          if TObject(AFindList[i]) is TsmxBaseCell then
-           if (TsmxBaseCell(AFindList[i]).CfgID = Item.PropValue)
-               or (TsmxBaseCell(AFindList[i]).Name = Item.PropValue) then
+           if ((TsmxBaseCell(AFindList[i]).CfgID = Item.PropValue)
+                 or (TsmxBaseCell(AFindList[i]).Name = Item.PropValue))
+               and Assigned(TObject(AFindList[i]).MethodAddress(Item.ProcName)) then
            begin
              Method.Data := AFindList[i];
              Method.Code := TObject(AFindList[i]).MethodAddress(Item.ProcName);
@@ -735,29 +906,29 @@ procedure ReadCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AResolvedList: Ts
   end;
 
 var
-  i: Integer;
-  n: IXMLNode;
+  //i: Integer;
+  //n: IXMLNode;
   Cell: TsmxBaseCell;
 begin
   if not Assigned(ACell) or not Assigned(ANode) then
     Exit;
-  for i := 0 to ANode.ChildNodes.Count - 1 do
-  begin
-    n := ANode.ChildNodes[i];
-    if n.NodeName = smxConsts.cCellNodeName then
-    begin
-      if n.Attributes[smxConsts.cClassNameAttributeName] <> '' then
+  //for i := 0 to ANode.ChildNodes.Count - 1 do
+  //begin
+    //n := ANode.ChildNodes[i];
+    //if n.NodeName = smxConsts.cCellNodeName then
+    //begin
+      if ANode.Attributes[smxConsts.cClassNameAttributeName] <> '' then
       begin
-        if n.Attributes[smxConsts.cIClassNameAttributeName] <> '' then
-          Cell := TsmxBaseCellClass(Classes.FindClass(n.Attributes[smxConsts.cClassNameAttributeName])).CreateByImpl(
-            nil, GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName]))
+        if ANode.Attributes[smxConsts.cIClassNameAttributeName] <> '' then
+          Cell := TsmxBaseCellClass(Classes.FindClass(ANode.Attributes[smxConsts.cClassNameAttributeName])).CreateByImpl(
+            nil, GetImplIntf(ANode.Attributes[smxConsts.cIClassNameAttributeName]))
         else
-          Cell := TsmxBaseCellClass(Classes.FindClass(n.Attributes[smxConsts.cClassNameAttributeName])).Create(nil);
+          Cell := TsmxBaseCellClass(Classes.FindClass(ANode.Attributes[smxConsts.cClassNameAttributeName])).Create(nil);
       end else
         Cell := nil;
       if Assigned(Cell) then
       begin
-        Cell.CfgID := n.Attributes[smxConsts.cCfgIDAttributeName];
+        Cell.CfgID := ANode.Attributes[smxConsts.cCfgIDAttributeName];
         Cell.CellParent := ACell;
         // м.б. глобалные объекты не присваивать... где-то уже это было...
         {Cell.StorageManager := gStorageManagerIntf;
@@ -765,11 +936,13 @@ begin
         Cell.DatabaseManager := gDatabaseManagerIntf;
         Cell.FormManager := gFormManagerIntf;
         Cell.ImageListManager := gImageListManagerIntf;}
-        ReadProps(Cell, n, AResolvedList);
-        ReadCell(Cell, n, AResolvedList);
+        ReadProps(Cell, ANode, AResolvedList);
+        //ReadCell(Cell, n, AResolvedList);
+        //if Cell is TsmxOwnerCell then
+          //ReadSlave(TsmxOwnerCell(Cell), n, AResolvedList);
       end;
-    end;
-  end;
+    //end;
+  //end;
 end;
 
 procedure WriteCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AFindList: TList);
@@ -783,26 +956,28 @@ procedure WriteCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AFindList: TList
           Result := Cell.Implementor.GetReference.ClassName;
   end;
 
-var
-  i: Integer;
-  n: IXMLNode;
-  Cell: TsmxBaseCell;
+//var
+  //i: Integer;
+  //n: IXMLNode;
+  //Cell: TsmxBaseCell;
 begin
   if not Assigned(ACell) or not Assigned(ANode) then
     Exit;
-  for i := 0 to ACell.CellCount - 1 do
-  begin
-    Cell := ACell.Cells[i];
-    if Cell.IsWriteCell then
-    begin
-      n := ANode.AddChild(smxConsts.cCellNodeName);
-      n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
-      n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
-      n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
-      WriteProps(Cell, n, AFindList);
-      WriteCell(Cell, n, AFindList);
-    end;
-  end;
+  //for i := 0 to ACell.CellCount - 1 do
+  //begin
+    //Cell := ACell.Cells[i];
+    //if not ((Cell is TsmxOwnerCell) and Assigned(TsmxOwnerCell(Cell).CellOwner)) then
+    //begin
+      //n := ANode.AddChild(smxConsts.cCellNodeName);
+      WriteProps(ACell, ANode, AFindList);
+      ANode.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(ACell);
+      ANode.Attributes[smxConsts.cClassNameAttributeName] := ACell.ClassName;
+      ANode.Attributes[smxConsts.cCfgIDAttributeName] := ACell.CfgID;
+      //WriteCell(Cell, n, AFindList);
+      //if Cell is TsmxOwnerCell then
+        //WriteSlave(TsmxOwnerCell(Cell), n, AFindList);
+    //end;
+  //end;
 end;
 
 procedure ReadSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
@@ -816,28 +991,33 @@ procedure ReadSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AResolvedList: 
   end;
 
 var
-  i: Integer;
-  n: IXMLNode;
+  //i: Integer;
+  //n: IXMLNode;
   Cell: TsmxOwnerCell;
 begin
   if not Assigned(ACell) or not Assigned(ANode) then
     Exit;
-  for i := 0 to ANode.ChildNodes.Count - 1 do
-  begin
-    n := ANode.ChildNodes[i];
-    if n.NodeName = smxConsts.cCellNodeName then
-    begin
-      if n.Attributes[smxConsts.cClassNameAttributeName] <> ACell.SlaveClass.ClassName then
-        Cell := ACell.AddSlaveAsClass(
-          TsmxOwnerCellClass(Classes.FindClass(n.Attributes[smxConsts.cClassNameAttributeName])),
-          GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName]))
-      else
-        Cell := ACell.AddSlave(GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName]));
-      Cell.CfgID := n.Attributes[smxConsts.cCfgIDAttributeName];
-      ReadProps(Cell, n, AResolvedList);
-      ReadSlave(Cell, n, AResolvedList);
-    end;
-  end;
+  //for i := 0 to ANode.ChildNodes.Count - 1 do
+  //begin
+    //n := ANode.ChildNodes[i];
+    //if n.NodeName = smxConsts.cCellNodeName then
+    //begin
+      //if n.Attributes[smxConsts.cClassNameAttributeName] <> ACell.SlaveClass.ClassName then
+        Cell := ACell.SlaveListNew.Add(
+          TsmxOwnerCellClass(Classes.FindClass(ANode.Attributes[smxConsts.cClassNameAttributeName])),
+          GetImplIntf(ANode.Attributes[smxConsts.cIClassNameAttributeName])).Slave;
+        //Cell := ACell.AddSlaveAsClass(
+          //TsmxOwnerCellClass(Classes.FindClass(n.Attributes[smxConsts.cClassNameAttributeName])),
+          //GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName]))
+      //else
+        //Cell := ACell.SlaveListNew.Add(nil, GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName])).Slave;
+        //Cell := ACell.AddSlave(GetImplIntf(n.Attributes[smxConsts.cIClassNameAttributeName]));
+
+      Cell.CfgID := ANode.Attributes[smxConsts.cCfgIDAttributeName];
+      ReadProps(Cell, ANode, AResolvedList);
+      //ReadSlave(Cell, n, AResolvedList);
+    //end;
+  //end;
 end;
 
 procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TList);
@@ -851,23 +1031,23 @@ procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TLi
           Result := Cell.Implementor.GetReference.ClassName;
   end;
 
-var
-  i: Integer;
-  n: IXMLNode;
-  Cell: TsmxOwnerCell;
+//var
+  //i: Integer;
+  //n: IXMLNode;
+  //Cell: TsmxOwnerCell;
 begin
   if not Assigned(ACell) or not Assigned(ANode) then
     Exit;
-  for i := 0 to ACell.SlaveCount - 1 do
-  begin
-    Cell := ACell.Slaves[i];
-    n := ANode.AddChild(smxConsts.cCellNodeName);
-    n.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(Cell);
-    n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
-    n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
-    WriteProps(Cell, n, AFindList);
-    WriteSlave(Cell, n, AFindList);
-  end;
+  //for i := 0 to ACell.SlaveCount - 1 do
+  //begin
+    //Cell := ACell.Slaves[i];
+    //n := ANode.AddChild(smxConsts.cSlaveNodeName);
+    WriteProps(ACell, ANode, AFindList);
+    ANode.Attributes[smxConsts.cIClassNameAttributeName] := GetImplClassName(ACell);
+    ANode.Attributes[smxConsts.cClassNameAttributeName] := ACell.ClassName;
+    ANode.Attributes[smxConsts.cCfgIDAttributeName] := ACell.CfgID;
+    //WriteSlave(Cell, n, AFindList);
+  //end;
 end;
 
 end.

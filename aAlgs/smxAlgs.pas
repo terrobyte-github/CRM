@@ -25,8 +25,8 @@ uses
   Classes, Controls, SysUtils, TypInfo, Variants, smxClasses, smxFuncs,
   smxClassProcs, smxClassFuncs, smxTypes;
 
-var
-  Cfg: TsmxBaseCfg = nil;
+//var
+  //Cfg: TsmxBaseCfg = nil;
 
 procedure ApplyForm(Sender: TsmxComponent);
 var
@@ -129,6 +129,7 @@ begin
       Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
       try
         Form.CellParent := AccessoryForm;
+        Form.IsNewInitialize := True;
         Form.Initialize;
         Form.IntfID := AccessoryForm.IntfID;
         Form.ShowModal;
@@ -174,7 +175,7 @@ end;
 
 procedure GetCfgPropsGrid(Sender: TsmxComponent);
 
-  function GetParentObj(ParentPropName: String): TObject;
+  {function GetParentObj(ParentPropName: String): TObject;
   var
     List: TStrings;
     i: Integer;
@@ -193,7 +194,7 @@ procedure GetCfgPropsGrid(Sender: TsmxComponent);
         List.Free;
       end;
     end;
-  end;
+  end;}
 
 var
   CfgID, CfgType: Integer;
@@ -209,6 +210,7 @@ var
   ParentPropName, ParentPropValue: String;
   TypeInfo: PTypeInfo;
   Obj: TObject;
+  Cfg: TsmxBaseCfg;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
@@ -216,7 +218,7 @@ begin
       //s := '';
       //for i := 0 to Grid.SlaveCount - 1 do
         //s := s + Grid.Slaves[i].SlaveName + ' ';
-      //inf('s=' + s);  
+      //inf('s=' + s);
       Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
       CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
       CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
@@ -228,6 +230,7 @@ begin
       //PropValueColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropValueColumn', '');
       if (CfgID <> 0) {and (PropNameColumn <> '') and (PropValueColumn <> '')} then
       begin
+        Exit;
         //Obj := nil;
         //TypeInfo := nil;
         //if ParentPropKit = 0 then
@@ -311,6 +314,7 @@ var
   //PropName: String;
   //PropValue: Variant;
   PropKit: Integer;
+  Cfg: TsmxBaseCfg;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
@@ -323,7 +327,7 @@ begin
       if (CfgID <> 0) and (PropNameColumn <> '') and (PropValueColumn <> '') then
       begin}
       PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);
-
+      Exit;
         if Assigned(Cfg) and (PropKit = 0) then
         begin
           Cfg.Return;
@@ -455,10 +459,12 @@ var
   PropKit: Integer;
   FormCfgID: Integer;
   AccessoryForm, Form: TsmxCustomForm;
+  Cfg: TsmxBaseCfg;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomColumn then
     begin
+      Exit;
       Column := TsmxCustomColumn(TsmxCustomAlgorithm(Sender).CellEvent);
       if Assigned(Column.CellOwner) and Assigned(Cfg) then
       begin
@@ -481,11 +487,11 @@ begin
     end;
 end;
 
-initialization
+{initialization
 
 finalization
   if Assigned(Cfg) then
-    Cfg.Free;
+    Cfg.Free;}
 
 end.
 

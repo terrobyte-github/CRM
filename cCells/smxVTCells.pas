@@ -65,6 +65,20 @@ type
     property VTHeaderFont: TFont read GetVTHeaderFont;
   public
     destructor Destroy; override;
+  published
+    property ColumnAlignment;
+    property ColumnColor;
+    property ColumnFont;
+    property ColumnOptions;
+    property CellVisible;
+    property CellWidth;
+    property HeaderAlignment;
+    property HeaderCaption;
+    property HeaderColor;
+    property HeaderFont;
+
+    property OnSnap;
+    property OnSnapHeader;
   end;
 
   { TsmxVTNode }
@@ -170,6 +184,24 @@ type
     property VTNodes: TsmxVTNodes read GetVTNodes;
   public
     destructor Destroy; override;
+  published
+    property CellAlign;
+    property CellAnchors;
+    property CellCursor;
+    property CellEnabled;
+    property CellHeight;
+    property CellHint;
+    property CellLeft;
+    property CellTop;
+    property CellVisible;
+    property CellWidth;
+    property GridOptions;
+    property PopupMenu;
+    property Request;
+    property SlaveListNew;
+
+    property OnChangeRow;
+    property OnDoubleSnap;  
   end;
 
   { TsmxVTTree }
@@ -245,6 +277,26 @@ type
     function AddRow(RowIndex: Pointer): Pointer; override;
     procedure DelRow(RowIndex: Pointer); override;
     function RowLevel(RowIndex: Pointer): Integer; override;
+  published
+    property CellAlign;
+    property CellAnchors;
+    property CellCursor;
+    property CellEnabled;
+    property CellHeight;
+    property CellHint;
+    property CellLeft;
+    property CellTop;
+    property CellVisible;
+    property CellWidth;
+    property PopupMenu;
+    property Request;
+    property SlaveListNew;
+    property TreeOptions;
+
+    property OnChangeRow;
+    property OnCollapse;
+    property OnDoubleSnap;
+    property OnExpand;
   end;
 
 implementation
@@ -326,10 +378,29 @@ begin
 end;
 
 procedure TsmxVTColumn.SetCellVisible(Value: Boolean);
+var
+  VT: TVirtualStringTree;
 begin
-  if Value then
-    VTColumn.Options := VTColumn.Options + [coVisible] else
-    VTColumn.Options := VTColumn.Options - [coVisible];
+  if GetCellVisible <> Value then
+  begin
+    VT := nil;
+    try
+      if not Assigned(VTColumn.Collection) then
+      begin
+        VT := TVirtualStringTree.Create(nil);
+        VTColumn.Collection := VT.Header.Columns;
+      end;
+      if Value then
+        VTColumn.Options := VTColumn.Options + [coVisible] else
+        VTColumn.Options := VTColumn.Options - [coVisible];
+    finally
+      if Assigned(VT) then
+      begin
+        VTColumn.Collection := nil;
+        VT.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxVTColumn.GetCellWidth: Integer;
@@ -338,8 +409,27 @@ begin
 end;
 
 procedure TsmxVTColumn.SetCellWidth(Value: Integer);
+var
+  VT: TVirtualStringTree;
 begin
-  VTColumn.Width := Value;
+  if GetCellWidth <> Value then
+  begin
+    VT := nil;
+    try
+      if not Assigned(VTColumn.Collection) then
+      begin
+        VT := TVirtualStringTree.Create(nil);
+        VTColumn.Collection := VT.Header.Columns;
+      end;
+      VTColumn.Width := Value;
+    finally
+      if Assigned(VT) then
+      begin
+        VTColumn.Collection := nil;
+        VT.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxVTColumn.GetCfgClass: TsmxBaseCfgClass;
@@ -353,8 +443,27 @@ begin
 end;
 
 procedure TsmxVTColumn.SetColumnAlignment(Value: TAlignment);
+var
+  VT: TVirtualStringTree;
 begin
-  VTColumn.Alignment := Value;
+  if GetColumnAlignment <> Value then
+  begin
+    VT := nil;
+    try
+      if not Assigned(VTColumn.Collection) then
+      begin
+        VT := TVirtualStringTree.Create(nil);
+        VTColumn.Collection := VT.Header.Columns;
+      end;
+      VTColumn.Alignment := Value;
+    finally
+      if Assigned(VT) then
+      begin
+        VTColumn.Collection := nil;
+        VT.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxVTColumn.GetColumnCaption: String;
@@ -396,8 +505,27 @@ begin
 end;
 
 procedure TsmxVTColumn.SetColumnColor(Value: TColor);
+var
+  VT: TVirtualStringTree;
 begin
-  VTColumn.Color := Value;
+  if GetColumnColor <> Value then
+  begin
+    VT := nil;
+    try
+      if not Assigned(VTColumn.Collection) then
+      begin
+        VT := TVirtualStringTree.Create(nil);
+        VTColumn.Collection := VT.Header.Columns;
+      end;
+      VTColumn.Color := Value;
+    finally
+      if Assigned(VT) then
+      begin
+        VTColumn.Collection := nil;
+        VT.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxVTColumn.GetColumnFont: TFont;
@@ -407,7 +535,7 @@ end;
 
 procedure TsmxVTColumn.SetColumnFont(Value: TFont);
 begin
-  FVTColumnFont.Assign(Value);
+  VTColumnFont.Assign(Value);
 end;
 
 function TsmxVTColumn.GetColumnValue: Variant;
@@ -435,15 +563,13 @@ begin
   begin
     if CellOwner is TsmxCustomGrid then
     begin
-      with TsmxCustomGrid(CellOwner) do
-        if FocusedRowIndex <> -1 then
-          GridValues[SlaveIndex, FocusedRowIndex] := Value;
+      if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
+        TsmxCustomGrid(CellOwner).GridValues[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
     end else
     if CellOwner is TsmxCustomTree then
     begin
-      with TsmxCustomTree(CellOwner) do
-        if Assigned(FocusedRowIndex) then
-          TreeValues[SlaveIndex, FocusedRowIndex] := Value;
+      if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
+        TsmxCustomTree(CellOwner).TreeValues[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex] := Value;
     end;
   end;
 end;
@@ -454,9 +580,28 @@ begin
 end;
 
 procedure TsmxVTColumn.SetHeaderAlignment(Value: TAlignment);
+var
+  VT: TVirtualStringTree;
 begin
-  VTColumn.CaptionAlignment := Value;
-  VTColumn.Options := VTColumn.Options + [coUseCaptionAlignment];
+  if GetHeaderAlignment <> Value then
+  begin
+    VT := nil;
+    try
+      if not Assigned(VTColumn.Collection) then
+      begin
+        VT := TVirtualStringTree.Create(nil);
+        VTColumn.Collection := VT.Header.Columns;
+      end;
+      VTColumn.CaptionAlignment := Value;
+      VTColumn.Options := VTColumn.Options + [coUseCaptionAlignment];
+    finally
+      if Assigned(VT) then
+      begin
+        VTColumn.Collection := nil;
+        VT.Free;
+      end;
+    end;  
+  end;
 end;
 
 function TsmxVTColumn.GetHeaderCaption: String;
@@ -487,7 +632,7 @@ end;
 
 procedure TsmxVTColumn.SetHeaderFont(Value: TFont);
 begin
-  FVTHeaderFont.Assign(Value);
+  VTHeaderFont.Assign(Value);
 end;
 
 function TsmxVTColumn.GetInternalObject: TObject;
@@ -534,14 +679,18 @@ end;
 
 procedure TsmxVTColumn.InvalidateHeader;
 begin
-  if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
-    TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).Header.Invalidate(VTColumn);
+  if Assigned(CellOwner) then
+    if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
+      if TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).HandleAllocated then
+        TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).Header.Invalidate(VTColumn);
 end;
 
 procedure TsmxVTColumn.InvalidateColumn;
 begin
-  if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
-    TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).InvalidateColumn(VTColumn.Index);
+  if Assigned(CellOwner) then
+    if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
+      if TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).HandleAllocated then
+        TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).InvalidateColumn(VTColumn.Index);
 end;
 
 procedure TsmxVTColumn.ResetCellProps;
@@ -875,7 +1024,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
               Result := Variants.VarToStr(Field.Value);
           end;
@@ -904,7 +1053,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -938,7 +1087,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
               Result := Field.Value;
           end;
@@ -967,7 +1116,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1485,7 +1634,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
               Result := Variants.VarToStr(Field.Value);
           end;
@@ -1514,7 +1663,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].SlaveName);
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1548,7 +1697,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
               Result := Field.Value;
           end;
@@ -1577,7 +1726,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].SlaveName));
+            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;

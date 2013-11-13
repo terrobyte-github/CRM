@@ -342,7 +342,8 @@ type
 
 function DatabaseCLSID: TGUID;
 function NewDatabase: IsmxDatabase;
-function NewDataSet(ADataSetType: TsmxDataSetType): IsmxDataSet;
+function NewQuery: IsmxDataSet;
+function NewProcedure: IsmxDataSet;
 
 implementation
 
@@ -368,18 +369,15 @@ begin
   Result := TsmxBDEDatabase.Create as IsmxDatabase;
 end;
 
-function NewDataSet(ADataSetType: TsmxDataSetType): IsmxDataSet;
+function NewQuery: IsmxDataSet;
 begin
-  case ADataSetType of
-    dstQuery: Result := TsmxBDEQuery.Create as IsmxDataSet;
-    dstStoredProc: Result := TsmxBDEStoredProc.Create as IsmxDataSet;
-  end;
+  Result := TsmxBDEQuery.Create as IsmxDataSet;
 end;
 
-{function NewADODataSet: IsmxDataSet;
+function NewProcedure: IsmxDataSet;
 begin
-  Result := TsmxBDEQuery.Create;
-end;}
+  Result := TsmxBDEStoredProc.Create as IsmxDataSet;
+end;
 
 { TsmxBDEDatabase }
 

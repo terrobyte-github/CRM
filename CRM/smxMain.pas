@@ -12,7 +12,7 @@ implementation
 uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, ComObj,
   Graphics, IniFiles, StrUtils, Variants, smxBaseClasses, smxClasses,
-  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf, smxConsts,
+  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxRefIntf, smxDBIntf, smxConsts,
   smxManagerClasses, smxManagerIntf, smxDBClasses, smxPConsts, smxClassProcs,
   smxDBTypes, smxDBFuncs, smxLibTypes, smxLogIn;
 
@@ -114,8 +114,8 @@ begin
     end;
   end;}
   gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
-  gImageListManager.DelimiterName :=
-    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiterName];
+  gImageListManager.Delimiter :=
+    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
 end;
 
 procedure LoadClassLibraries;
@@ -202,16 +202,37 @@ end;
 
 procedure CreateMainObjects;
 var
+  ReqClsName, IReqClsName: String;
+  ReqLibName, ReqProcName: String;
   CellClass: TsmxBaseCellClass;
+  IntfClass: TsmxInterfacedPersistentClass;
+  FuncNewDataSet: TsmxFuncNewDataSet;
 begin
-  if gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName] <> '' then
-    CellClass := TsmxBaseCellClass(Classes.FindClass(
-      gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName]))
+  ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName];
+  IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
+  ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestLibName];
+  ReqProcName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestProcName];
+  if ReqClsName <> '' then
+    CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName))
   else
     CellClass := nil;
-  if Assigned(CellClass) then
-    if CellClass.InheritsFrom(TsmxCustomRequest) then
-      smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.Create(nil));
+  if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomRequest) then
+  begin
+    if IReqClsName <> '' then
+    begin
+      IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
+      if Assigned(IntfClass) then
+        smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.CreateByImpl(
+          nil, IntfClass.Create as IsmxRefInterface));
+    end else
+    if (ReqLibName <> '') and (ReqProcName <> '') then
+    begin
+      FuncNewDataSet := gLibraryManager.GetProcedure(ReqLibName, ReqProcName);
+      if Assigned(FuncNewDataSet) then
+        smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.CreateByImpl(
+          nil, FuncNewDataSet));
+    end;
+  end;
 end;
 
 procedure DestroyMainObjects;
@@ -227,12 +248,13 @@ begin
     _TsmxBaseCell(smxClassProcs.gSelectRequest).Cfg.XMLText :=
       Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestXMLText]);
     smxClassProcs.gSelectRequest.IsRecieveCfg := False;
-    smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
-    smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
-    smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
-    smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
-    smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
+    //smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
+    //smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
+    //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+    //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
+    //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
     smxClassProcs.gSelectRequest.Database := gMainConnection.Database;
+    smxClassProcs.gSelectRequest.IsNewInitialize := True;
     smxClassProcs.gSelectRequest.Initialize;
     smxClassProcs.gSelectRequest.Prepare;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
@@ -393,7 +415,7 @@ function LogIn: Boolean;
     case Connection.Generation of
       gmFunction:
       begin
-        @FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
+        FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
         if Assigned(FuncNewDatabase) then
           Database := FuncNewDatabase;
       end;
@@ -410,7 +432,7 @@ function LogIn: Boolean;
       begin
         if gLibraryManager.AddLibrary(Connection.LibraryName) <> -1 then
         begin
-          IntfClass := TsmxInterfacedPersistentClass(Classes.FindClass(Connection.FuncOrClassNameOrProgID));
+          IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(Connection.FuncOrClassNameOrProgID));
           if Assigned(IntfClass) then
             Database := IntfClass.Create as IsmxDatabase;
         end;
@@ -420,7 +442,7 @@ function LogIn: Boolean;
     begin
       Database.DatabaseName := Connection.DatabaseName;
       Database.DriverName := Connection.DriverName;
-      Database.Params.Text :=
+      Database.ParamText :=
         SysUtils.StringReplace(
           SysUtils.StringReplace(
             Connection.Params,
@@ -523,12 +545,13 @@ function LogIn: Boolean;
     if CfgID > 0 then
     begin
       Forms.Application.ShowMainForm := False;
-      gMainForm := smxClassFuncs.NewForm(nil, CfgID, smxClassProcs.gSelectRequest);
+      gMainForm := smxClassFuncs.NewForm(nil, CfgID);
       {gMainForm.StorageManager := gStorageManager as IsmxStorageManager;
       gMainForm.LibraryManager := gLibraryManager as IsmxLibraryManager;
       gMainForm.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
       gMainForm.FormManager := gFormManager as IsmxFormManager;
       gMainForm.ImageListManager := gImageListManager as IsmxImageListManager;}
+      gMainForm.IsNewInitialize := True;
       gMainForm.Initialize;
       gMainForm.IntfID := IntfID;
       Result := True;

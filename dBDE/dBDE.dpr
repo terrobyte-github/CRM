@@ -13,7 +13,8 @@ exports
   ComServ.DllUnregisterServer,
   smxLibProcs.LibInfo,
   smxBDEDB.NewDatabase,
-  smxBDEDB.NewDataSet,
+  smxBDEDB.NewQuery,
+  smxBDEDB.NewProcedure,
   smxBDEDB.DatabaseCLSID;
 
 {$R *.RES}

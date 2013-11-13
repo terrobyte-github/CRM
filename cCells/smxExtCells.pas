@@ -42,10 +42,10 @@ type
   private
     FAlgorithmLibrary: String;
     FAlgorithmProcName: String;
-    FProcPointer: Pointer;
+    //FProcPointer: Pointer;
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetProcPointer: Pointer; override;
+    //function GetProcPointer: Pointer; override;
     //procedure InternalInitialize; override;
     procedure ResetCellProps; override;
     procedure SetAlgorithmLibrary(const Value: String); virtual;
@@ -53,6 +53,8 @@ type
     procedure SetCellProps; override;
   public
     procedure Assign(Source: TPersistent); override;
+  published
+    procedure AlgorithmExecute(Sender: TsmxComponent); override;
 
     property AlgorithmLibrary: String read FAlgorithmLibrary write SetAlgorithmLibrary;
     property AlgorithmProcName: String read FAlgorithmProcName write SetAlgorithmProcName;
@@ -185,7 +187,7 @@ type
     FRequestLibrary: String;
   protected
     function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetDataSet: IsmxDataSet; override;
+    //function GetDataSet: IsmxDataSet; override;
     //procedure InternalInitialize; override;
     procedure ResetCellProps; override;
     procedure SetCellProps; override;
@@ -285,6 +287,15 @@ type
   public
     //constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
+  published
+    property CellImageIndex;
+    property FilterCaption;
+    property FilterFont;
+    property FilterOptions;
+    property FilterValue;
+    property ImageListName;
+
+    property OnSnap;
   end;
 
   { TsmxNumEditFilter }
@@ -462,6 +473,7 @@ type
     function GetStateCfgClass: TsmxStateCfgClass; virtual;
     //procedure LockState; virtual;
     //procedure InternalInitialize; override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     //procedure PutState; virtual;
     procedure RefreshStateCfg; virtual;
     procedure RefreshStateID; virtual;
@@ -528,6 +540,7 @@ type
     //procedure InternalApply; override;
     //procedure InternalPrepare; override;
     //procedure InternalInitialize; override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure ResetCellProps; override;
     //procedure SetAlgorithmList(Value: TsmxCustomAlgorithmList); virtual;
     procedure SetCellProps; override;
@@ -548,13 +561,15 @@ type
     //property RequestList: TsmxCustomRequestList read FRequestList write SetRequestList;
     property PopupList;
     property RequestList;
+    property SlaveListNew;
     property StatusBoard: TsmxCustomStatusBoard read FStatusBoard write SetStatusBoard;
   end;
 
 implementation
 
 uses
-  Variants, Forms, SysUtils, TypInfo, smxFuncs, smxClassFuncs, smxDBTypes;
+  Variants, Forms, SysUtils, TypInfo, smxBaseTypes, smxDBTypes, smxFuncs,
+  smxClassFuncs, smxClassProcs;
 
 type
   { _TsmxBaseCell }
@@ -607,6 +622,29 @@ end;
 
 { TsmxLibAction }
 
+procedure TsmxLibAction.AlgorithmExecute(Sender: TsmxComponent);
+var
+  ProcExecute: TsmxProcExecuteEvent;
+begin
+  //if Assigned(LibraryManager) then
+  if Assigned(smxClassProcs.gLibraryManagerIntf) then
+  begin
+    //ProcExecute := LibraryManager.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
+    ProcExecute := smxClassProcs.gLibraryManagerIntf.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
+    if Assigned(ProcExecute) then
+    begin
+      if Sender is TsmxBaseCell then
+      begin
+        CellEvent := TsmxBaseCell(Sender);
+        if not IsManualRefreshParams then
+          RefreshParams;
+        ProcExecute(Self);
+      end else
+        ProcExecute(Sender);
+    end;
+  end;
+end;
+
 procedure TsmxLibAction.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
@@ -622,13 +660,13 @@ begin
   Result := TsmxLibAlgorithmCfg;
 end;
 
-function TsmxLibAction.GetProcPointer: Pointer;
+{function TsmxLibAction.GetProcPointer: Pointer;
 begin
   if not Assigned(FProcPointer) then
     if Assigned(LibraryManager) then
       FProcPointer := LibraryManager.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
   Result := FProcPointer;
-end;
+end;}
 
 (*procedure TsmxLibAction.InternalInitialize;
 //var
@@ -660,20 +698,20 @@ end;
 
 procedure TsmxLibAction.SetAlgorithmLibrary(const Value: String);
 begin
-  if FAlgorithmLibrary <> Value then
-  begin
+  //if FAlgorithmLibrary <> Value then
+  //begin
     FAlgorithmLibrary := Value;
-    FProcPointer := nil;
-  end;
+    //FProcPointer := nil;
+  //end;
 end;
 
 procedure TsmxLibAction.SetAlgorithmProcName(const Value: String);
 begin
-  if FAlgorithmProcName <> Value then
-  begin
+  //if FAlgorithmProcName <> Value then
+  //begin
     FAlgorithmProcName := Value;
-    FProcPointer := nil;
-  end;
+    //FProcPointer := nil;
+  //end;
 end;
 
 {procedure TsmxLibAction.Initialize(const ACfgDatabase: IsmxDatabase;
@@ -731,6 +769,7 @@ begin
       Method.Data := Self;
       OnExecute := TsmxComponentEvent(Method);
     end;}
+    //OnExecute := AlgorithmExecute;
   end;
   inherited SetCellProps;
 end;
@@ -1019,7 +1058,7 @@ begin
   Result := TsmxLibRequestCfg;
 end;
 
-function TsmxLibRequest.GetDataSet: IsmxDataSet;
+(*function TsmxLibRequest.GetDataSet: IsmxDataSet;
 var
   Func: TsmxFuncNewDataSet;
 begin
@@ -1038,7 +1077,7 @@ begin
   if Assigned(Func) then
     Result := Func(FDataSetType) else
     Result := nil;}
-end;
+end;*)
 
 {procedure TsmxLibRequest.InternalInitialize;
 begin
@@ -2044,6 +2083,13 @@ begin
   end;
 end;}
 
+procedure TsmxStateForm.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (AComponent = StateRequest) and (Operation = opRemove) then
+    StateRequest := nil;
+end;
+
 {procedure TsmxStateForm.PutState;
 
   procedure PutCell(AItem: TsmxStateKitItem; ACell: TsmxBaseCell);
@@ -2182,6 +2228,8 @@ begin
       FStateCfg.SelectRequest := Value;
       RefreshStateCfg;
     end;}
+    if Assigned(FStateRequest) then
+      FStateRequest.FreeNotification(Self);
   end;
 end;
 
@@ -2516,6 +2564,20 @@ begin
   end;
 end;*)
 
+procedure TsmxStandardForm.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    if AComponent = ControlBoard then
+      ControlBoard := nil else
+    if AComponent = MainMenu then
+      MainMenu := nil else
+    if AComponent = StatusBoard then
+      StatusBoard := nil;
+  end;
+end;
+
 procedure TsmxStandardForm.ResetCellProps;
 begin
   inherited ResetCellProps;
@@ -2536,7 +2598,7 @@ procedure TsmxStandardForm.SetCellProps;
     {Result := nil;
     if AItem.CfgID > 0 then
     begin}
-      Result := TsmxControlCell(smxClassFuncs.NewCell(nil, AItem.CfgID, SelectRequest));
+      Result := TsmxControlCell(smxClassFuncs.NewCell(nil, AItem.CfgID{, SelectRequest}));
       Result.CellParent := Self;
       Result.Initialize;
       Result.CellActive := AItem.ItemActive;

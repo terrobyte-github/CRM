@@ -6,7 +6,9 @@ uses
   smxClasses;
 
 type
-  TsmxProcAlgExecute = procedure(Algorithm: TsmxCustomAlgorithm);
+  TsmxCellArray = array of TsmxBaseCell;
+
+  TsmxCellClassArray = array of TsmxBaseCellClass;
 
 implementation
 

@@ -2,6 +2,9 @@ const
   cIni =
     '[Init]'#13#10 +
     'RequestClassName='#13#10 +
+    'IRequestClassName='#13#10 +
+    'RequestLibName='#13#10 +
+    'RequestProcName='#13#10 +
     'RequestXMLText='#13#10 +
     'CheckUserReqCfgID=0'#13#10 +
     'CheckIntfReqCfgID=0'#13#10 +
@@ -20,7 +23,7 @@ const
     'LibInfoProcName=LibInfo'#13#10 +
     'CheckComp=False'#13#10 + #13#10 +
     '[ImageList]'#13#10 +
-    'DelimiterName=:'#13#10 +
+    'Delimiter=:'#13#10 +
     '[Param]'#13#10 +
     'DatabaseName=Base'#13#10 +
     'UserName=UserName'#13#10 +

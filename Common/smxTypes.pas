@@ -92,7 +92,7 @@ type
 
   TsmxFilterOptions = set of TsmxFilterOption;
 
-  TsmxFormPosition = (fpDesigned, fpDesktopCenter, fpOwnerFormCenter);
+  TsmxFormPosition = (fpDesigned, fpScreenCenter, fpOwnerFormCenter);
 
   TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
 

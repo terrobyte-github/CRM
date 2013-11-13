@@ -3,16 +3,17 @@ unit smxClassFuncs;
 interface
 
 uses
-  Classes, smxBaseClasses, smxClasses, smxTypes, smxBaseIntf, smxDBIntf;
+  Classes, smxBaseClasses, smxClasses, smxTypes, smxBaseIntf, smxDBIntf,
+  smxRefIntf, smxBaseTypes;
 
 function CfgIDToCfgClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfgClass;
 function CfgIDToCellClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCellClass;
-//function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
+function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCell;
-//function NewIntf(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): IsmxBaseInterface;
+function NewIntf(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): IsmxRefInterface;
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil; AID: Integer = 0): TsmxCustomForm;
 function ExistsParent(ACell, ACellParent: TsmxBaseCell): Boolean;
@@ -87,7 +88,7 @@ begin
     end;
 end;
 
-{function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
+function CfgIDToIntfClass(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): TsmxInterfacedPersistentClass;
 var
   TypeCfg: TsmxTypeCfg;
   ForeignKey: Variant;
@@ -97,7 +98,7 @@ begin
     ASelectRequest := smxClassProcs.gSelectRequest;
   if Assigned(ASelectRequest) then
     if smxDBFuncs.GetValueByKey(ASelectRequest.DataSet, ACfgID, ForeignKey,
-        ASelectRequest.PerformanceMode, fsKey, fsForeignKey) then
+        {ASelectRequest.PerformanceMode,} fsKey, fsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
@@ -109,7 +110,7 @@ begin
         TypeCfg.Free;
       end;
     end;
-end;}
+end;
 
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCfg;
@@ -133,26 +134,31 @@ function NewCell(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil): TsmxBaseCell;
 var
   CellClass: TsmxBaseCellClass;
+  IntfClass: TsmxInterfacedPersistentClass;
 begin
   if not Assigned(ASelectRequest) then
     ASelectRequest := smxClassProcs.gSelectRequest;
   CellClass := CfgIDToCellClass(ACfgID, ASelectRequest);
   if Assigned(CellClass) then
   begin
-    Result := CellClass.Create(AOwner);
+    IntfClass := CfgIDToIntfClass(ACfgID, ASelectRequest);
+    if Assigned(IntfClass) then
+      Result := CellClass.CreateByImpl(AOwner, IntfClass.Create as IsmxRefInterface)
+    else
+      Result := CellClass.Create(AOwner);
     Result.CfgID := ACfgID;
-    Result.SelectRequest := ASelectRequest;
-    Result.StorageManager := smxClassProcs.gStorageManagerIntf;
-    Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
-    Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
-    Result.FormManager := smxClassProcs.gFormManagerIntf;
-    Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
+    //Result.SelectRequest := ASelectRequest;
+    //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
+    //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
+    //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
+    //Result.FormManager := smxClassProcs.gFormManagerIntf;
+    //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellActionError,
-      ['nil', 'create'], ACfgID);
+    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
+      ['nil', ACfgID, 'create'], ACfgID);
 end;
 
-{function NewIntf(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): IsmxBaseInterface;
+function NewIntf(ACfgID: Integer; ASelectRequest: TsmxCustomRequest = nil): IsmxRefInterface;
 var
   IntfClass: TsmxInterfacedPersistentClass;
 begin
@@ -160,35 +166,47 @@ begin
     ASelectRequest := smxClassProcs.gSelectRequest;
   IntfClass := CfgIDToIntfClass(ACfgID, ASelectRequest);
   if Assigned(IntfClass) then
-    Result := IntfClass.Create as IsmxBaseInterface
+    Result := IntfClass.Create as IsmxRefInterface
   else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
+    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
       ['nil', ACfgID, 'create'], ACfgID);
-end;}
+end;
 
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   ASelectRequest: TsmxCustomRequest = nil; AID: Integer = 0): TsmxCustomForm;
 var
   CellClass: TsmxBaseCellClass;
+  IntfClass: TsmxInterfacedPersistentClass;
 begin
   if not Assigned(ASelectRequest) then
     ASelectRequest := smxClassProcs.gSelectRequest;
   CellClass := CfgIDToCellClass(ACfgID, ASelectRequest);
   if CellClass.InheritsFrom(TsmxCustomForm) then
   begin
+    IntfClass := CfgIDToIntfClass(ACfgID, ASelectRequest);
     if AID = 0 then
-      Result := TsmxCustomFormClass(CellClass).Create(AOwner) else
-      Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID);
+    begin
+      if Assigned(IntfClass) then
+        Result := TsmxCustomFormClass(CellClass).CreateByImpl(AOwner, IntfClass.Create as IsmxRefInterface)
+      else
+        Result := TsmxCustomFormClass(CellClass).Create(AOwner);
+    end else
+    begin
+      if Assigned(IntfClass) then
+        Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID, IntfClass.Create as IsmxRefInterface)
+      else
+        Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID);
+    end;
     Result.CfgID := ACfgID;
-    Result.SelectRequest := ASelectRequest;
-    Result.StorageManager := smxClassProcs.gStorageManagerIntf;
-    Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
-    Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
+    //Result.SelectRequest := ASelectRequest;
+    //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
+    //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
+    //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
     Result.FormManager := smxClassProcs.gFormManagerIntf;
-    Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
+    //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellActionError,
-      ['nil', 'create'], ACfgID);
+    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
+      ['nil', ACfgID, 'create'], ACfgID);
 end;
 
 function ExistsParent(ACell, ACellParent: TsmxBaseCell): Boolean;
@@ -332,8 +350,12 @@ begin
       Result := TsmxCustomForm(ACell);
       Break;
     end;
+    {if Assigned(ACell.CellParent) then
+      ACell := ACell.CellParent else
+    if ACell is TsmxOwnerCell then
+      ACell := TsmxOwnerCell(ACell).CellOwner else
+      ACell := nil;}
     ACell := ACell.CellParent;
-    //Cell := Cell.CellParent;
   end;
 end;
 
