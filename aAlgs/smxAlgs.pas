@@ -245,7 +245,9 @@ begin
           end else
             Cfg := smxClassFuncs.NewCfg(nil, CfgID);
         //try
-          Cfg.Receive;
+          //Cfg.Receive;
+          Cfg.Load;
+          Cfg.Read;
           Obj := Cfg;
         //end else
         //if (ParentPropKit = 2) and (ParentPropName <> '') then
@@ -330,7 +332,9 @@ begin
       Exit;
         if Assigned(Cfg) and (PropKit = 0) then
         begin
-          Cfg.Return;
+          //Cfg.Return;
+          Cfg.Write;
+          Cfg.Save;
         end;
 
         {if CfgType = 100 then // типы
@@ -384,7 +388,7 @@ begin
       CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
       if CfgID <> 0 then
       begin
-        Cfg := smxClassFuncs.NewCfg(nil, CfgID);
+        {Cfg := smxClassFuncs.NewCfg(nil, CfgID);
         try
           Cfg.Receive;
           s := TypInfo.GetEnumName(TypeInfo(TTypeKind), Integer(TypInfo.GetPropInfo(Cfg, Column.ColumnCaption)^.PropType^.Kind));
@@ -402,7 +406,7 @@ begin
           smxFuncs.Inf(s);
         finally
           Cfg.Free;
-        end;
+        end;}
       end;
     end;
 end;

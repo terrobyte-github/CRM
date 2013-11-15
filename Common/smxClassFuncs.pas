@@ -56,7 +56,9 @@ begin
       try
         TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
-        TypeCfg.Receive;
+        //TypeCfg.Receive;
+        TypeCfg.Load;
+        TypeCfg.Read;
         Result := TypeCfg.CfgClass;
       finally
         TypeCfg.Free;
@@ -80,7 +82,9 @@ begin
       try
         TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
-        TypeCfg.Receive;
+        //TypeCfg.Receive;
+        TypeCfg.Load;
+        TypeCfg.Read;
         Result := TypeCfg.CellClass;
       finally
         TypeCfg.Free;
@@ -104,7 +108,9 @@ begin
       try
         TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectRequest := ASelectRequest;
-        TypeCfg.Receive;
+        //TypeCfg.Receive;
+        TypeCfg.Load;
+        TypeCfg.Read;
         Result := TypeCfg.IntfClass;
       finally
         TypeCfg.Free;

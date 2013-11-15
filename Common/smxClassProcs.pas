@@ -10,14 +10,14 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxB
   AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
 procedure AllParents(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
   AIncludeParentForm: Boolean = False);
-procedure ClearProps(AObject: TObject);
+//procedure ClearProps(AObject: TObject);
 procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
 procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
 procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
-procedure ReadCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
-procedure WriteCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AFindList: TList);
-procedure ReadSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
-procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TList);
+//procedure ReadCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
+//procedure WriteCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AFindList: TList);
+//procedure ReadSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
+//procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TList);
 
 var
   gSelectRequest: TsmxCustomRequest = nil;
@@ -128,7 +128,7 @@ begin
   end;
 end;
 
-procedure ClearProps(AObject: TObject);
+(*procedure ClearProps(AObject: TObject);
 
   procedure ClearClass(PropInfo: PPropInfo);
   var
@@ -242,7 +242,7 @@ begin
       FreeMem(PropList);
     end;
   end;
-end;
+end;*)
 
 procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
 
@@ -895,7 +895,7 @@ begin
   end;
 end;
 
-procedure ReadCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
+(*procedure ReadCell(ACell: TsmxBaseCell; const ANode: IXMLNode; AResolvedList: TsmxResolvedKit);
 
   function GetImplIntf(const ClassName: String): IsmxRefInterface;
   begin
@@ -1048,6 +1048,6 @@ begin
     ANode.Attributes[smxConsts.cCfgIDAttributeName] := ACell.CfgID;
     //WriteSlave(Cell, n, AFindList);
   //end;
-end;
+end;*)
 
 end.

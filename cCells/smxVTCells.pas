@@ -26,10 +26,10 @@ type
     procedure InvalidateColumn;
     procedure InvalidateHeader;
   protected
-    procedure DoSnapHeader; override;
+    //procedure DoSnapHeader; override;
     function GetCellVisible: Boolean; override;
     function GetCellWidth: Integer; override;
-    function GetCfgClass: TsmxBaseCfgClass; override;
+    //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetColumnAlignment: TAlignment; override;
     function GetColumnCaption: String; override;
     function GetColumnColor: TColor; override;
@@ -41,9 +41,9 @@ type
     function GetHeaderCaption: String; override;
     //function GetIsEditing: Boolean; override;
     function GetInternalObject: TObject; override;
-    procedure ResetCellProps; override;
+    //procedure ResetCellProps; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
-    procedure SetCellProps; override;
+    //procedure SetCellProps; override;
     procedure SetCellVisible(Value: Boolean); override;
     procedure SetCellWidth(Value: Integer); override;
     procedure SetColumnAlignment(Value: TAlignment); override;
@@ -153,11 +153,11 @@ type
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType);
   protected
     //procedure DoApply; override;
-    procedure DoChangeRow; override;
+    //procedure DoChangeRow; override;
     //procedure DoPrepare; override;
     //procedure DoRefresh; override;
     function GetCellHint: String; override;
-    function GetCfgClass: TsmxBaseCfgClass; override;
+    //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetFocusedRowIndex: Integer; override;
     function GetFocusedColIndex: Integer; override;
     function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
@@ -167,9 +167,9 @@ type
     function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
-    procedure ResetCellProps; override;
+    //procedure ResetCellProps; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
-    procedure SetCellProps; override;
+    //procedure SetCellProps; override;
     procedure SetCellHint(const Value: String); override;
     procedure SetFocusedColIndex(Value: Integer); override;
     procedure SetFocusedRowIndex(Value: Integer); override;
@@ -239,11 +239,11 @@ type
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType);
   protected
     //procedure DoApply; override;
-    procedure DoChangeRow; override;
-    procedure DoCollapse; override;
-    procedure DoExpand; override;
+    //procedure DoChangeRow; override;
+    //procedure DoCollapse; override;
+    //procedure DoExpand; override;
     function GetCellHint: String; override;
-    function GetCfgClass: TsmxBaseCfgClass; override;
+    //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetExpanded(RowIndex: Pointer): Boolean; override;
     function GetFocusedRowIndex: Pointer; override;
     function GetFocusedColIndex: Integer; override;
@@ -255,9 +255,9 @@ type
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; override;
     //procedure InternalPrepare; override;
     //procedure InternalRefresh; override;
-    procedure ResetCellProps; override;
+    //procedure ResetCellProps; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
-    procedure SetCellProps; override;
+    //procedure SetCellProps; override;
     procedure SetCellHint(const Value: String); override;
     procedure SetExpanded(RowIndex: Pointer; Value: Boolean); override;
     procedure SetFocusedColIndex(Value: Integer); override;
@@ -302,7 +302,7 @@ type
 implementation
 
 uses
-  Variants, smxCfgs, smxFuncs, smxClassFuncs, smxDBFuncs, smxDBIntf;
+  Variants, {smxCfgs,} smxFuncs, smxClassFuncs, smxDBFuncs, smxDBIntf;
 
 type
   { _TsmxBaseCell }
@@ -359,7 +359,7 @@ begin
   end;
 end;
 
-procedure TsmxVTColumn.DoSnapHeader;
+{procedure TsmxVTColumn.DoSnapHeader;
 var
   AlgCfgID: Integer;
 begin
@@ -370,7 +370,7 @@ begin
       AlgCfgID := 0;
     DoEvent(OnSnapHeader, AlgCfgID);
   end;
-end;
+end;}
 
 function TsmxVTColumn.GetCellVisible: Boolean;
 begin
@@ -432,10 +432,10 @@ begin
   end;
 end;
 
-function TsmxVTColumn.GetCfgClass: TsmxBaseCfgClass;
+{function TsmxVTColumn.GetCfgClass: TsmxBaseCfgClass;
 begin
   Result := TsmxColumnCfg;
-end;
+end;}
 
 function TsmxVTColumn.GetColumnAlignment: TAlignment;
 begin
@@ -693,7 +693,7 @@ begin
         TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).InvalidateColumn(VTColumn.Index);
 end;
 
-procedure TsmxVTColumn.ResetCellProps;
+{procedure TsmxVTColumn.ResetCellProps;
 begin
   inherited ResetCellProps;
   ColumnAlignment := taLeftJustify;
@@ -713,7 +713,7 @@ begin
   HeaderFont.Size := 0;
   HeaderFont.Style := [];
   OnSnapHeader := nil;
-end;
+end;}
 
 procedure TsmxVTColumn.SetCellFeedBack;
 begin
@@ -735,7 +735,7 @@ begin
   end;
 end;
 
-procedure TsmxVTColumn.SetCellProps;
+{procedure TsmxVTColumn.SetCellProps;
 var
   Form: TsmxCustomForm;
 begin
@@ -762,7 +762,7 @@ begin
     if Assigned(Form) then
       OnSnapHeader := smxClassFuncs.GetEventForm(Form, TsmxColumnCfg(Cfg).SnapHeaderAlgCfgID);
   end;
-end;
+end;}
 
 procedure TsmxVTColumn.SetSlaveIndex(Value: Integer);
 begin
@@ -901,7 +901,7 @@ begin
   end;
 end;}
 
-procedure TsmxVTGrid.DoChangeRow;
+{procedure TsmxVTGrid.DoChangeRow;
 var
   AlgCfgID: Integer;
 begin
@@ -912,7 +912,7 @@ begin
       AlgCfgID := 0;
     DoEvent(OnChangeRow, AlgCfgID);
   end;
-end;
+end;}
 
 {procedure TsmxVTGrid.DoPrepare;
 var
@@ -1002,10 +1002,10 @@ begin
   VTGrid.Hint := Value;
 end;
 
-function TsmxVTGrid.GetCfgClass: TsmxBaseCfgClass;
+{function TsmxVTGrid.GetCfgClass: TsmxBaseCfgClass;
 begin
   Result := TsmxGridCfg;
-end;
+end;}
 
 function TsmxVTGrid.GetDBText(ColIndex: Integer; Node: PVirtualNode): String;
 var
@@ -1265,7 +1265,7 @@ begin
   Result := FVTNodes;
 end;
 
-procedure TsmxVTGrid.ResetCellProps;
+{procedure TsmxVTGrid.ResetCellProps;
 begin
   inherited ResetCellProps;
   GridOptions := [];
@@ -1274,7 +1274,7 @@ begin
   //OnPrepare := nil;
   //OnRefresh := nil;
   Request := nil;
-end;
+end;}
 
 function TsmxVTGrid.RowIndexToNode(RowIndex: Integer): PVirtualNode;
 var
@@ -1308,7 +1308,7 @@ begin
   end;
 end;
 
-procedure TsmxVTGrid.SetCellProps;
+{procedure TsmxVTGrid.SetCellProps;
 var
   Form: TsmxCustomForm;
 begin
@@ -1326,7 +1326,7 @@ begin
       //OnRefresh := smxClassFuncs.GetEventForm(Form, TsmxGridCfg(Cfg).RefreshAlgCfgID);
     end;
   end;
-end;
+end;}
 
 procedure TsmxVTGrid.SetGridOptions(Value: TsmxGridOptions);
 begin
@@ -1511,7 +1511,7 @@ begin
   end;
 end;}
 
-procedure TsmxVTTree.DoChangeRow;
+{procedure TsmxVTTree.DoChangeRow;
 var
   AlgCfgID: Integer;
 begin
@@ -1522,9 +1522,9 @@ begin
       AlgCfgID := 0;
     DoEvent(OnChangeRow, AlgCfgID);
   end;
-end;
+end;}
 
-procedure TsmxVTTree.DoCollapse;
+{procedure TsmxVTTree.DoCollapse;
 var
   AlgCfgID: Integer;
 begin
@@ -1535,7 +1535,7 @@ begin
       AlgCfgID := 0;
     DoEvent(OnCollapse, AlgCfgID);
   end;
-end;
+end;}
 
 {procedure TsmxVTTree.InternalPrepare;
 var
@@ -1564,7 +1564,7 @@ begin
   end;
 end;}
 
-procedure TsmxVTTree.DoExpand;
+{procedure TsmxVTTree.DoExpand;
 var
   AlgCfgID: Integer;
 begin
@@ -1575,7 +1575,7 @@ begin
       AlgCfgID := 0;
     DoEvent(OnExpand, AlgCfgID);
   end;
-end;
+end;}
 
 {procedure TsmxVTTree.InternalRefresh;
 var
@@ -1612,10 +1612,10 @@ begin
   VTTree.Hint := Value;
 end;
 
-function TsmxVTTree.GetCfgClass: TsmxBaseCfgClass;
+{function TsmxVTTree.GetCfgClass: TsmxBaseCfgClass;
 begin
   Result := TsmxTreeCfg;
-end;
+end;}
 
 function TsmxVTTree.GetDBText(ColIndex: Integer; Node: PVirtualNode): String;
 var
@@ -1892,7 +1892,7 @@ begin
   Result := FVTNodes;
 end;
 
-procedure TsmxVTTree.ResetCellProps;
+{procedure TsmxVTTree.ResetCellProps;
 begin
   inherited ResetCellProps;
   OnChangeRow := nil;
@@ -1900,7 +1900,7 @@ begin
   OnExpand := nil;
   Request := nil;
   TreeOptions := [];
-end;
+end;}
 
 {function TsmxVTTree.RowIndexToNode(RowIndex: Integer): PVirtualNode;
 var
@@ -1941,7 +1941,7 @@ begin
   end;
 end;
 
-procedure TsmxVTTree.SetCellProps;
+{procedure TsmxVTTree.SetCellProps;
 var
   Form: TsmxCustomForm;
 begin
@@ -1958,7 +1958,7 @@ begin
       OnExpand := smxClassFuncs.GetEventForm(Form, TsmxTreeCfg(Cfg).ExpandAlgCfgID);
     end;
   end;
-end;
+end;}
 
 procedure TsmxVTTree.SetTreeOptions(Value: TsmxGridOptions);
 begin

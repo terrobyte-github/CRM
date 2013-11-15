@@ -3,7 +3,6 @@ library cCells;
 uses
   smxLibProcs,
   smxLibTypes,
-  smxCfgs in 'smxCfgs.pas',
   smxCells in 'smxCells.pas',
   smxExtCells in 'smxExtCells.pas',
   smxStdCtrls in 'smxStdCtrls.pas',
