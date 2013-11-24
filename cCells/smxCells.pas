@@ -35,7 +35,7 @@ type
     function GetAlgorithmImageIndex: Integer; override;
     function GetAlgorithmVisible: Boolean; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //function GetProcPointer: Pointer; virtual;
     //procedure InitializeEvent; virtual;
     //procedure InternalInitialize; override;
@@ -81,7 +81,7 @@ type
   protected
     //function GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure InternalInitialize; override;
     procedure SetImageList(Value: TCustomImageList); override;
@@ -165,7 +165,7 @@ type
     function GetColumn: TColumn;
     //function GetFieldValue(const FieldName: String; var Value: Variant): Boolean;
     //function SetFieldValue(const FieldName: String; const Value: Variant): Boolean;
-    function IsOwnerDrawHeader: Boolean;
+    //function IsOwnerDrawHeader: Boolean;
   protected
     //procedure DoSnapHeader; override;
     function GetCellVisible: Boolean; override;
@@ -182,7 +182,7 @@ type
     function GetHeaderFont: TFont; override;
     function GetHeaderCaption: String; override;
     //function GetIsEditing: Boolean; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
@@ -237,7 +237,7 @@ type
     procedure DBGridDataChange(Sender: TObject; Field: TField);
     //procedure DBGridDblClick(Sender: TObject);
     procedure DBGridTitleClick(Column: TColumn);
-    procedure DrawHeaderDefault;
+    //procedure DrawHeaderDefault;
   protected
     //procedure DoApply; override;
     //procedure DoChangeRow; override;
@@ -259,7 +259,7 @@ type
     function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
     function GetRowCount: Integer; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure InternalApply; override;
     //procedure InternalInitialize; override;
@@ -346,7 +346,7 @@ type
     function GetHeaderCaption: String; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
     //procedure SetCellAlign(Value: TAlign); override;
@@ -423,7 +423,7 @@ type
     function GetCellCaption: String; override;
     function GetCellHint: String; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure InternalApply; override;
     //procedure InternalInitialize; override;
@@ -499,7 +499,7 @@ type
     //function GetCellVisible: Boolean; override;
     //function GetCellWidth: Integer; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
     //procedure SetCellAlign(Value: TAlign); override;
@@ -570,7 +570,7 @@ type
     function GetCellVisible: Boolean; override;
     //function GetCellWidth: Integer; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure InternalInitialize; override;
     //procedure SetCellActive(Value: Boolean); override;
@@ -634,7 +634,7 @@ type
     //function GetCellVisible: Boolean; override;
     //function GetCellWidth: Integer; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetIsMultiLine: Boolean; override;
     function GetPageManagerStyle: TsmxPageManagerStyle; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
@@ -702,7 +702,7 @@ type
     //function GetAlgorithmHotKey: Integer; override;
     //function GetAlgorithmImageIndex: Integer; override;
     //function GetAlgorithmVisible: Boolean; override;
-    //function GetInternalObject: TObject; override;
+    //function GetInternalRef: Pointer; override;
     procedure InternalInitialize; override;
     //procedure InternalRefreshParams; override;
     procedure ResetCellProps; override;
@@ -766,7 +766,7 @@ type
     function GetCellImageIndex: Integer; override;
     function GetCellVisible: Boolean; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetIsChecked: Boolean; override;
     function GetMenuItemHotKey: Integer; override;
     function GetMenuItemStyle: TsmxMenuItemStyle; override;
@@ -817,7 +817,7 @@ type
     function GetCellEnabled: Boolean; override;
     function GetCellVisible: Boolean; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
@@ -839,7 +839,7 @@ type
     function GetPopupMenu: TPopupMenu;
   protected
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure SetImageList(Value: TCustomImageList); override;
 
@@ -871,7 +871,7 @@ type
     function GetCellHint: String; override;
     function GetCellImageIndex: Integer; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetIsChecked: Boolean; override;
     function GetToolItemStyle: TsmxToolItemStyle; override;
     //procedure InternalInitialize; override;
@@ -910,7 +910,7 @@ type
     //function GetCellVisible: Boolean; override;
     //function GetCellWidth: Integer; override;
    // function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetIsFlat: Boolean; override;
     function GetIsShowCaptions: Boolean; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
@@ -965,7 +965,7 @@ type
     function GetControlBar: TControlBar;
   protected
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellEnabled: Boolean; override;
@@ -1056,7 +1056,7 @@ type
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetFormBorder: TsmxFormBorder; override;
     function GetFormPosition: TsmxFormPosition; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //function GetIsMainForm: Boolean; override;
     function GetIsMaximize: Boolean; override;
     function GetModalResult: TModalResult; override;
@@ -1120,7 +1120,7 @@ type
   protected
     procedure ProcClose(Sender: TObject; var Action: TCloseAction); virtual;
    // function GetFormModalResult:  TModalResult; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetCellAlign: TAlign; override;
     function GetCellEnabled: Boolean; override;
     function GetCellHeight: Integer; override;
@@ -1174,7 +1174,7 @@ type
   protected
     procedure ProcClose(Sender: TObject; var Action: TCloseAction); virtual;
     procedure ProcCloseQuery(Sender: TObject; var CanClose: Boolean); virtual;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetCellAlign: TAlign; override;
     function GetCellEnabled: Boolean; override;
     function GetCellHeight: Integer; override;
@@ -1205,13 +1205,14 @@ implementation
 uses
   SysUtils, Variants, ToolWin, Messages, {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,} smxFuncs,
-  smxDBFuncs, smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs;
+  smxDBFuncs, smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs,
+  smxBaseIntf;
 
 type
   { _TsmxBaseCell }
 
-  _TsmxBaseCell = class(TsmxBaseCell)
-  end;
+  //_TsmxBaseCell = class(TsmxBaseCell)
+  //end;
 
   { _TMenuItem }
 
@@ -1333,9 +1334,9 @@ begin
   Result := TsmxAlgorithmCfg;
 end;}
 
-function TsmxAction.GetInternalObject: TObject;
+function TsmxAction.GetInternalRef: Pointer;
 begin
-  Result := Action;
+  Result := Pointer(Action);
 end;
 
 {function TsmxAction.GetParamValue(const ParamName: String): Variant;
@@ -1514,7 +1515,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TCustomActionList then
       Action.ActionList := TCustomActionList(Obj);
   end;
@@ -1644,9 +1645,9 @@ begin
   Result := TsmxAlgorithmListCfg;
 end;}
 
-function TsmxActionList.GetInternalObject: TObject;
+function TsmxActionList.GetInternalRef: Pointer;
 begin
-  Result := ActionList;
+  Result := Pointer(ActionList);
 end;
 
 function TsmxActionList.GetSlaveClass: TsmxOwnerCellClass;
@@ -2239,7 +2240,7 @@ begin
   Result := '';
   if CellOwner is TsmxCustomGrid then
     //with TsmxCustomGrid(CellOwner) do
-      //if FocusedRowIndex <> -1 then
+      //if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
     Result := TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
 end;
 
@@ -2283,7 +2284,7 @@ begin
   //Result := GetFieldValue(smxFuncs.GetValueFieldName(SlaveName));
 
   Result := Variants.Null;
-  if coSetValue in ColumnOptions then
+  //if coSetValue in ColumnOptions then
     if CellOwner is TsmxCustomGrid then
       //with TsmxCustomGrid(CellOwner) do
         //if FocusedRowIndex <> -1 then
@@ -2296,7 +2297,7 @@ end;
 procedure TsmxColumn.SetColumnValue(const Value: Variant);
 begin
   //SetFieldValue({smxFuncs.GetValueFieldName(}SlaveName{)}, Value);
-  if coSetValue in ColumnOptions then
+  //if coSetValue in ColumnOptions then
     if CellOwner is TsmxCustomGrid then
       //with TsmxCustomGrid(CellOwner) do
         //if FocusedRowIndex <> -1 then
@@ -2383,7 +2384,7 @@ end;
 
 procedure TsmxColumn.SetHeaderColor(Value: TColor);
 begin
-  if IsOwnerDrawHeader then
+  //if IsOwnerDrawHeader then
     Column.Title.Color := Value;
 end;
 
@@ -2394,13 +2395,13 @@ end;
 
 procedure TsmxColumn.SetHeaderFont(Value: TFont);
 begin
-  if IsOwnerDrawHeader then  // м.б. предется мудрить с установкой св-тв шрифта
+  //if IsOwnerDrawHeader then  // м.б. предется мудрить с установкой св-тв шрифта
     Column.Title.Font := Value;
 end;
 
-function TsmxColumn.GetInternalObject: TObject;
+function TsmxColumn.GetInternalRef: Pointer;
 begin
-  Result := Column;
+  Result := Pointer(Column);
 end;
 
 {function TsmxColumn.GetIsEditing: Boolean;
@@ -2436,13 +2437,13 @@ begin
   end;
 end;}
 
-function TsmxColumn.IsOwnerDrawHeader: Boolean;
+{function TsmxColumn.IsOwnerDrawHeader: Boolean;
 begin
   if CellOwner is TsmxCustomGrid then
     Result := goOwnerDrawHeader in TsmxCustomGrid(CellOwner).GridOptions
   else
     Result := True;
-end;
+end;}
 
 {procedure TsmxColumn.ResetCellProps;
 begin
@@ -2475,7 +2476,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TDBGrid then
       Column.Collection := TDBGrid(Obj).Columns;
   end;
@@ -2635,7 +2636,7 @@ begin
   end;
 end;
 
-procedure TsmxDBGrid.DrawHeaderDefault;
+{procedure TsmxDBGrid.DrawHeaderDefault;
 var
   i: Integer;
 begin
@@ -2644,7 +2645,7 @@ begin
     Slaves[i].HeaderColor := Graphics.clBtnFace;
     Slaves[i].HeaderFont := DBGrid.TitleFont;
   end;
-end;
+end;}
 
 function TsmxDBGrid.GetFocusedColIndex: Integer;
 begin
@@ -2737,45 +2738,46 @@ var
   Field: IsmxField;
   Bookmark: TBookmark;
 begin
-  if Assigned(Request) then
-    if Assigned(Request.DataSet) then
-      if Request.DataSet.Active then
-      begin
-        //OldRecordNo := Request.DataSet.RecordNo;
-        Bookmark := nil;
-        if Assigned(DBGrid.DataSource.DataSet) then
+  if coEditing in Slaves[ColIndex].ColumnOptions then
+    if Assigned(Request) then
+      if Assigned(Request.DataSet) then
+        if Request.DataSet.Active then
         begin
-          DBGrid.DataSource.DataSet.DisableControls;
-          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
-        end;
-        try
-          //Request.DataSet.RecordNo := RowIndex;
-          Field := nil;
-          if RowIndex <> -1 then
+          //OldRecordNo := Request.DataSet.RecordNo;
+          Bookmark := nil;
+          if Assigned(DBGrid.DataSource.DataSet) then
           begin
-            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+            DBGrid.DataSource.DataSet.DisableControls;
+            Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+          end;
+          try
+            //Request.DataSet.RecordNo := RowIndex;
+            Field := nil;
+            if RowIndex <> -1 then
+            begin
+              if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+                Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            end else
               Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
-          end else
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
-          if Assigned(Field) then
-          begin
-            Request.DataSet.Edit;
-            Field.Value := smxFuncs.StrToVar(Value);
-            Request.DataSet.Post;
+            if Assigned(Field) then
+            begin
+              Request.DataSet.Edit;
+              Field.Value := smxFuncs.StrToVar(Value);
+              Request.DataSet.Post;
+            end;
+            if Assigned(DBGrid.DataSource.DataSet) then
+              DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+          finally
+            //Request.DataSet.RecordNo := OldRecordNo;
+            if Assigned(DBGrid.DataSource.DataSet) then
+            begin
+              DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+              DBGrid.DataSource.DataSet.EnableControls;
+            end;
+            //Request.DataSet.FreeBookmark(Bookmark);
+            //Request.DataSet.EnalbleControls;
           end;
-          if Assigned(DBGrid.DataSource.DataSet) then
-            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
-        finally
-          //Request.DataSet.RecordNo := OldRecordNo;
-          if Assigned(DBGrid.DataSource.DataSet) then
-          begin
-            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-            DBGrid.DataSource.DataSet.EnableControls;
-          end;
-          //Request.DataSet.FreeBookmark(Bookmark);
-          //Request.DataSet.EnalbleControls;
         end;
-      end;
 end;
 
 function TsmxDBGrid.GetGridValue(ColIndex, RowIndex: Integer): Variant;
@@ -2787,45 +2789,46 @@ var
   Bookmark: TBookmark;
 begin
   Result := Variants.Null;
-  if Assigned(Request) then
-    if Assigned(Request.DataSet) then
-      if Request.DataSet.Active then
-      begin
-        //Request.DataSet.DisableControls;
-        //Bookmark := Request.DataSet.GetBookmark;
-        Bookmark := nil;
-        if Assigned(DBGrid.DataSource.DataSet) then
+  if coHasValue in Slaves[ColIndex].ColumnOptions then
+    if Assigned(Request) then
+      if Assigned(Request.DataSet) then
+        if Request.DataSet.Active then
         begin
-          DBGrid.DataSource.DataSet.DisableControls;
-          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
-        end;
-        //b := False;
-        //CurRecordNo := Request.DataSet.RecordNo;
-        try
-          Field := nil;
-          if RowIndex <> -1 then
+          //Request.DataSet.DisableControls;
+          //Bookmark := Request.DataSet.GetBookmark;
+          Bookmark := nil;
+          if Assigned(DBGrid.DataSource.DataSet) then
           begin
-            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+            DBGrid.DataSource.DataSet.DisableControls;
+            Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+          end;
+          //b := False;
+          //CurRecordNo := Request.DataSet.RecordNo;
+          try
+            Field := nil;
+            if RowIndex <> -1 then
+            begin
+              if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+                Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            end else
               Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-          end else
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-          if Assigned(Field) then
-            Result := Field.Value;
-          //Request.DataSet.GotoBookmark(Bookmark);
-          if Assigned(DBGrid.DataSource.DataSet) then
-            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
-        finally
-          //Request.DataSet.RecordNo := CurRecordNo;
+            if Assigned(Field) then
+              Result := Field.Value;
+            //Request.DataSet.GotoBookmark(Bookmark);
+            if Assigned(DBGrid.DataSource.DataSet) then
+              DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+          finally
+            //Request.DataSet.RecordNo := CurRecordNo;
 
-          //Request.DataSet.FreeBookmark(Bookmark);
-          //Request.DataSet.EnalbleControls;
-          if Assigned(DBGrid.DataSource.DataSet) then
-          begin
-            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-            DBGrid.DataSource.DataSet.EnableControls;
+            //Request.DataSet.FreeBookmark(Bookmark);
+            //Request.DataSet.EnalbleControls;
+            if Assigned(DBGrid.DataSource.DataSet) then
+            begin
+              DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+              DBGrid.DataSource.DataSet.EnableControls;
+            end;
           end;
         end;
-      end;
 end;
 
 procedure TsmxDBGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
@@ -2834,45 +2837,46 @@ var
   Field: IsmxField;
   Bookmark: TBookmark;
 begin
-  if Assigned(Request) then
-    if Assigned(Request.DataSet) then
-      if Request.DataSet.Active then
-      begin
-        //OldRecordNo := Request.DataSet.RecordNo;
-        Bookmark := nil;
-        if Assigned(DBGrid.DataSource.DataSet) then
+  if [coEditing, coHasValue] * Slaves[ColIndex].ColumnOptions = [coEditing, coHasValue] then
+    if Assigned(Request) then
+      if Assigned(Request.DataSet) then
+        if Request.DataSet.Active then
         begin
-          DBGrid.DataSource.DataSet.DisableControls;
-          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
-        end;
-        try
-          //Request.DataSet.RecordNo := RowIndex;
-          Field := nil;
-          if RowIndex <> -1 then
+          //OldRecordNo := Request.DataSet.RecordNo;
+          Bookmark := nil;
+          if Assigned(DBGrid.DataSource.DataSet) then
           begin
-            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+            DBGrid.DataSource.DataSet.DisableControls;
+            Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+          end;
+          try
+            //Request.DataSet.RecordNo := RowIndex;
+            Field := nil;
+            if RowIndex <> -1 then
+            begin
+              if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+                Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            end else
               Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-          end else
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-          if Assigned(Field) then
-          begin
-            Request.DataSet.Edit;
-            Field.Value := Value;
-            Request.DataSet.Post;
+            if Assigned(Field) then
+            begin
+              Request.DataSet.Edit;
+              Field.Value := Value;
+              Request.DataSet.Post;
+            end;
+            if Assigned(DBGrid.DataSource.DataSet) then
+              DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+          finally
+            //Request.DataSet.RecordNo := OldRecordNo;
+            if Assigned(DBGrid.DataSource.DataSet) then
+            begin
+              DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+              DBGrid.DataSource.DataSet.EnableControls;
+            end;
+            //Request.DataSet.FreeBookmark(Bookmark);
+            //Request.DataSet.EnalbleControls;
           end;
-          if Assigned(DBGrid.DataSource.DataSet) then
-            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
-        finally
-          //Request.DataSet.RecordNo := OldRecordNo;
-          if Assigned(DBGrid.DataSource.DataSet) then
-          begin
-            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-            DBGrid.DataSource.DataSet.EnableControls;
-          end;
-          //Request.DataSet.FreeBookmark(Bookmark);
-          //Request.DataSet.EnalbleControls;
         end;
-      end;
 end;
 
 {procedure TsmxDBGrid.Initialize(const ACfgDatabase: IsmxDatabase; ACfgID: Integer;
@@ -3044,9 +3048,9 @@ begin
   Result := FDBGrid;
 end;
 
-function TsmxDBGrid.GetInternalObject: TObject;
+function TsmxDBGrid.GetInternalRef: Pointer;
 begin
-  Result := DBGrid;
+  Result := Pointer(DBGrid);
 end;
 
 function TsmxDBGrid.GetSlaveClass: TsmxOwnerCellClass;
@@ -3058,7 +3062,7 @@ procedure TsmxDBGrid.DBGridCellClick(Column: TColumn);
 var
   Slave: TsmxOwnerCell;
 begin
-  Slave := FindSlaveByInternalObject(Column);
+  Slave := FindSlaveByInternalRef(Pointer(Column));
   if Slave is TsmxCustomColumn then
     TsmxCustomColumn(Slave).Snap;
 end;
@@ -3077,7 +3081,7 @@ procedure TsmxDBGrid.DBGridTitleClick(Column: TColumn);
 var
   Slave: TsmxOwnerCell;
 begin
-  Slave := FindSlaveByInternalObject(Column);
+  Slave := FindSlaveByInternalRef(Pointer(Column));
   if Slave is TsmxCustomColumn then
     TsmxCustomColumn(Slave).SnapHeader;
 end;
@@ -3123,7 +3127,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       DBGrid.Parent := TWinControl(Obj);
   end;
@@ -3169,8 +3173,8 @@ begin
   if goEditing in Value then
     DBGrid.Options := DBGrid.Options + [dgEditing] else
     DBGrid.Options := DBGrid.Options - [dgEditing];  
-  if not (goOwnerDrawHeader in Value) then
-    DrawHeaderDefault;
+  //if not (goOwnerDrawHeader in Value) then
+    //DrawHeaderDefault;
 end;
 
 procedure TsmxDBGrid.SetRequest(Value: TsmxCustomRequest);
@@ -3437,9 +3441,9 @@ begin
   Header.Font := Value;
 end;
 
-function TsmxPanelFilter.GetInternalObject: TObject;
+function TsmxPanelFilter.GetInternalRef: Pointer;
 begin
-  Result := Panel;
+  Result := Pointer(Panel);
 end;
 
 function TsmxPanelFilter.GetPanel: TPanel;
@@ -3530,7 +3534,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       Panel.Parent := TWinControl(Obj);
   end;
@@ -3998,9 +4002,9 @@ begin
   Result := TsmxFilterDeskCfg;
 end;}
 
-function TsmxPanelFilterDesk.GetInternalObject: TObject;
+function TsmxPanelFilterDesk.GetInternalRef: Pointer;
 begin
-  Result := Panel;
+  Result := Pointer(Panel);
 end;
 
 function TsmxPanelFilterDesk.GetPanel: TPanel;
@@ -4096,7 +4100,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       Panel.Parent := TWinControl(Obj);
   end;
@@ -4317,9 +4321,9 @@ begin
   Result := TsmxSectionCfg;
 end;}
 
-function TsmxPanelSection.GetInternalObject: TObject;
+function TsmxPanelSection.GetInternalRef: Pointer;
 begin
-  Result := Panel;
+  Result := Pointer(Panel);
 end;
 
 function TsmxPanelSection.GetPanel: TPanel;
@@ -4386,7 +4390,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       Panel.Parent := TWinControl(Obj);
   end;
@@ -4475,8 +4479,31 @@ begin
 end;
 
 procedure TsmxTabSheet.SetCellCaption(const Value: String);
+var
+  PageControl: TPageControl;
+  Form: TForm;
 begin
-  TabSheet.Caption := Value;
+  if GetCellCaption <> Value then
+  begin
+    PageControl := TabSheet.PageControl;
+    Form := nil;
+    try
+      if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      begin
+        Form := TForm.Create(nil);
+        PageControl.Parent := Form;
+      end;
+      TabSheet.PageControl := nil;
+      TabSheet.Caption := Value;
+      TabSheet.PageControl := PageControl;
+    finally
+      if Assigned(Form) then
+      begin
+        PageControl.Parent := nil;
+        Form.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxTabSheet.GetCellHint: String;
@@ -4495,8 +4522,31 @@ begin
 end;
 
 procedure TsmxTabSheet.SetCellImageIndex(Value: Integer);
+var
+  PageControl: TPageControl;
+  Form: TForm;
 begin
-  TabSheet.ImageIndex := Value;
+  if GetCellImageIndex <> Value then
+  begin
+    PageControl := TabSheet.PageControl;
+    Form := nil;
+    try
+      if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      begin
+        Form := TForm.Create(nil);
+        PageControl.Parent := Form;
+      end;
+      TabSheet.PageControl := nil;
+      TabSheet.ImageIndex := Value;
+      TabSheet.PageControl := PageControl;
+    finally
+      if Assigned(Form) then
+      begin
+        PageControl.Parent := nil;
+        Form.Free;
+      end;
+    end;
+  end;
 end;
 
 function TsmxTabSheet.GetCellVisible: Boolean;
@@ -4597,9 +4647,9 @@ begin
   Result := TsmxPageCfg;
 end;}
 
-function TsmxTabSheet.GetInternalObject: TObject;
+function TsmxTabSheet.GetInternalRef: Pointer;
 begin
-  Result := TabSheet;
+  Result := Pointer(TabSheet);
 end;
 
 function TsmxTabSheet.GetSlaveClass: TsmxOwnerCellClass;
@@ -4654,7 +4704,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TPageControl then
     begin
       PageControl := TPageControl(Obj);
@@ -4831,14 +4881,33 @@ end;
 procedure TsmxPageControl.SetCellTop(Value: Integer);
 begin
   FPageControl.Top := Value;
-end;
+end;}
 
-procedure TsmxPageControl.SetCellVisible(Value: Boolean);
+{procedure TsmxPageControl.SetCellVisible(Value: Boolean);
+var
+  Form: TForm;
 begin
-  FPageControl.Visible := Value;
-end;
+  if GetCellVisible <> Value then
+  begin
+    Form := nil;
+    try
+      if not Assigned(PageControl.Parent) then
+      begin
+        Form := TForm.Create(nil);
+        PageControl.Parent := Form;
+      end;
+      PageControl.Visible := Value;
+    finally
+      if Assigned(Form) then
+      begin
+        PageControl.Parent := nil;
+        Form.Free;
+      end;
+    end;
+  end;
+end;}
 
-procedure TsmxPageControl.SetCellWidth(Value: Integer);
+{procedure TsmxPageControl.SetCellWidth(Value: Integer);
 begin
   FPageControl.Width := Value;
 end;}
@@ -4862,8 +4931,27 @@ begin
 end;
 
 procedure TsmxPageControl.SetActivePageIndex(Value: Integer);
+var
+  Form: TForm;
 begin
-  PageControl.ActivePageIndex := Value;
+  if GetActivePageIndex <> Value then
+  begin
+    Form := nil;
+    try
+      if not Assigned(PageControl.Parent) then
+      begin
+        Form := TForm.Create(nil);
+        PageControl.Parent := Form;
+      end;
+      PageControl.ActivePageIndex := Value;
+    finally
+      if Assigned(Form) then
+      begin
+        PageControl.Parent := nil;
+        Form.Free;
+      end;
+    end;
+  end;
 end;
 
 {function TsmxPageControl.GetCfgClass: TsmxBaseCfgClass;
@@ -4871,9 +4959,9 @@ begin
   Result := TsmxPageManagerCfg;
 end;}
 
-function TsmxPageControl.GetInternalObject: TObject;
+function TsmxPageControl.GetInternalRef: Pointer;
 begin
-  Result := PageControl;
+  Result := Pointer(PageControl);
 end;
 
 function TsmxPageControl.GetIsMultiLine: Boolean;
@@ -4955,7 +5043,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       PageControl.Parent := TWinControl(Obj);
   end;
@@ -5088,7 +5176,7 @@ begin
   Action.Visible := Value;
 end;
 
-function TsmxLibAction.GetInternalObject: TObject;
+function TsmxLibAction.GetInternalRef: Pointer;
 begin
   Result := Action;
 end;}
@@ -5373,9 +5461,9 @@ begin
   Result := TsmxMenuItemCfg;
 end;}
 
-function TsmxMenuItem.GetInternalObject: TObject;
+function TsmxMenuItem.GetInternalRef: Pointer;
 begin
-  Result := MenuItem;
+  Result := Pointer(MenuItem);
 end;
 
 function TsmxMenuItem.GetIsChecked: Boolean;
@@ -5448,7 +5536,7 @@ var
 begin
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TMenuItem then
       TMenuItem(Obj).Remove(MenuItem) else
     if Obj is TMainMenu then
@@ -5457,7 +5545,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TMenuItem then
       TMenuItem(Obj).Add(MenuItem) else
     if Obj is TMainMenu then
@@ -5599,9 +5687,9 @@ begin
   Result := TsmxMainMenuCfg;
 end;}
 
-function TsmxMainMenu.GetInternalObject: TObject;
+function TsmxMainMenu.GetInternalRef: Pointer;
 begin
-  Result := MainMenu;
+  Result := Pointer(MainMenu);
 end;
 
 function TsmxMainMenu.GetMainMenu: TMainMenu;
@@ -5625,7 +5713,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TCustomForm then
       MainMenu.WindowHandle := TCustomForm(Obj).Handle;
   end;
@@ -5673,9 +5761,9 @@ begin
   Result := TsmxPopupMenuCfg;
 end;}
 
-function TsmxPopupMenu.GetInternalObject: TObject;
+function TsmxPopupMenu.GetInternalRef: Pointer;
 begin
-  Result := PopupMenu;
+  Result := Pointer(PopupMenu);
 end;
 
 function TsmxPopupMenu.GetPopupMenu: TPopupMenu;
@@ -5761,9 +5849,9 @@ begin
   Result := TsmxToolItemCfg;
 end;}
 
-function TsmxToolItem.GetInternalObject: TObject;
+function TsmxToolItem.GetInternalRef: Pointer;
 begin
-  Result := ToolButton;
+  Result := Pointer(ToolButton);
 end;
 
 function TsmxToolItem.GetIsChecked: Boolean;
@@ -5825,7 +5913,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       ToolButton.Parent := TWinControl(Obj);
   end;
@@ -5907,9 +5995,9 @@ begin
   Result := TsmxToolBoardCfg;
 end;}
 
-function TsmxToolBar.GetInternalObject: TObject;
+function TsmxToolBar.GetInternalRef: Pointer;
 begin
-  Result := ToolBar;
+  Result := Pointer(ToolBar);
 end;
 
 {function TsmxToolBar.GetCellAlign: TAlign;
@@ -6072,7 +6160,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       ToolBar.Parent := TWinControl(Obj);
   end;
@@ -6207,9 +6295,9 @@ begin
   Result := FControlBar;
 end;
 
-function TsmxControlBar.GetInternalObject: TObject;
+function TsmxControlBar.GetInternalRef: Pointer;
 begin
-  Result := ControlBar;
+  Result := Pointer(ControlBar);
 end;
 
 {function TsmxControlBar.GetCellAlign: TAlign;
@@ -6296,7 +6384,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       ControlBar.Parent := TWinControl(Obj);
   end;
@@ -6414,7 +6502,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TStatusPanels then
       StatusPanel.Collection := TStatusPanels(Obj);
   end;
@@ -6479,7 +6567,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       StatusBar.Parent := TWinControl(Obj);
   end;
@@ -6490,7 +6578,7 @@ procedure TsmxStatusBar.StatusBarDraw(StatusBar: TStatusBar; Panel: TStatusPanel
 var
   Slave: TsmxOwnerCell;
 begin
-  Slave := FindSlaveByInternalObject(Panel);
+  Slave := FindSlaveByInternalRef(Pointer(Panel));
   if Slave is TsmxCustomStatusItem then
     TsmxCustomStatusItem(Slave).DrawPanel;
 end;
@@ -6713,9 +6801,9 @@ begin
   Form.Position := OutInPosition[Value];
 end;
 
-function TsmxForm.GetInternalObject: TObject;
+function TsmxForm.GetInternalRef: Pointer;
 begin
-  Result := Form;
+  Result := Pointer(Form);
 end;
 
 {function TsmxForm.GetIsMainForm: Boolean;
@@ -6919,7 +7007,7 @@ begin
   inherited SetPopupMenu(Value);
   if Assigned(PopupMenu) then
   begin
-    Obj := _TsmxBaseCell(PopupMenu).GetInternalObject;
+    Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TPopupMenu then
       Form.PopupMenu := TPopupMenu(Obj);
   end;
@@ -6992,7 +7080,7 @@ begin
   Result := FForm.ModalResult;
 end;}
 
-{function TsmxStandardForm.GetInternalObject: TObject;
+{function TsmxStandardForm.GetInternalRef: Pointer;
 begin
   Result := FForm;
 end;
@@ -7290,7 +7378,7 @@ begin
   CanClose := Ask('Закрыть программу?' );
 end;
 
-function TsmxMainForm.GetInternalObject: TObject;
+function TsmxMainForm.GetInternalRef: Pointer;
 begin
   Result := FForm;
 end;

@@ -29,7 +29,7 @@ const
 
   { Consts }
   cSuffixTextFieldName = 'Text';
-  cDelimiterObjNameMethodName = '.';
+  cDelimiterObjAndMethName = '.';
 
   { Global objects }
   cApplicationHandle = 0;
@@ -44,8 +44,10 @@ resourcestring
   rsActionError = 'A ClassName %s %s error';
   rsAssignError = 'Cannot assign a ClassName %s to a ClassName %s';
   rsCfgActionError = 'A ClassName %s of configuration with ID %d %s error';
+  rsCfgActionErrorM = 'A ClassName %s of configuration with ID %d %s error'#13#10'%s';
   rsCellActionError = 'A ClassName %s of cell %s error';
   rsCellIDActionError = 'A ClassName %s of cell with ID %d %s error';
+  rsCellIDActionErrorM = 'A ClassName %s of cell with ID %d %s error'#13#10'%s';
   rsListItemNotFound = 'Item ''%s'' not found';
   rsListItemClassError = 'A ClassName %s invalid for ClassName %s';
 

@@ -2,9 +2,13 @@ unit smxBaseIntf;
 
 interface
 
+uses
+  Classes;
+
 const
   IID_IsmxBaseInterface: TGUID = '{6785BD02-C530-4E8D-9001-A814F06B5045}';
-  //IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+  IID_IsmxRefPersistent: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+  IID_IsmxRefComponent: TGUID = '{48732C0C-F577-4061-9B97-926BA4B715DA}';
 
 type
   { IsmxBaseInterface }
@@ -18,24 +22,21 @@ type
     property Version: String read GetVersion;
   end;
 
-  { IsmxRefInterface }
+  { IsmxRefComponent }
 
-  (*IsmxRefInterface = interface(IsmxBaseInterface)
+  IsmxRefComponent = interface(IsmxBaseInterface)
+    ['{48732C0C-F577-4061-9B97-926BA4B715DA}']
+    function GetInternalRef: Pointer;
+    function GetReference: TComponent;
+  end;
+
+  { IsmxRefPersistent }
+
+  IsmxRefPersistent = interface(IsmxBaseInterface)
     ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
     function GetInternalRef: Pointer;
-    function GetReference: Pointer;
-    //property Name: String read GetName write SetName;
-  end;*)
-
-  { IsmxFreeNotification }
-
-  (*IsmxFreeNotification = interface(IInterface)
-    ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
-    procedure FreeNotification(const Sender: IsmxFreeNotification);
-    function GetOwnerNotification: IsmxOwnerNotification;
-    procedure InsertFreeNotification(const Receiver: IsmxFreeNotification);
-    procedure RemoveFreeNotification(const Receiver: IsmxFreeNotification);
-  end;*)
+    function GetReference: TPersistent;
+  end;
 
 implementation
 

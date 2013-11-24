@@ -3,7 +3,7 @@ unit smxDBIntf;
 interface
 
 uses
-  Classes, DB, smxRefIntf;
+  Classes, DB, smxBaseIntf;
 
 const
   IID_IsmxDatabase: TGUID = '{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}';
@@ -18,7 +18,7 @@ type
 
   TsmxDataSetType = (dstQuery, dstStoredProc);
 
-  IsmxDatabase = interface(IsmxRefInterface)
+  IsmxDatabase = interface(IsmxRefPersistent)
     ['{6C2E66AD-62E3-4E2E-B207-FB4F0D62F09A}']
     procedure AssignDatabase(const Source: IsmxDatabase);
     procedure CommitTransaction;
@@ -53,7 +53,7 @@ type
   TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
     fsForeignKey);
 
-  IsmxField = interface(IsmxRefInterface)
+  IsmxField = interface(IsmxRefPersistent)
     ['{BB7372C0-3457-487F-AB76-70717AFD7938}']
     procedure AssignField(const Source: IsmxField);
     procedure Clear;
@@ -101,7 +101,7 @@ type
     plForeignKey, plInput, plOutput, plInOutput, plStorageParam,
     plParentParam, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
 
-  IsmxParam = interface(IsmxRefInterface)
+  IsmxParam = interface(IsmxRefPersistent)
     ['{564458C3-CD9E-402C-800A-06C6065CCF1B}']
     procedure AssignParam(const Source: IsmxParam); overload;
     procedure AssignParam(const Source: IsmxField); overload;
@@ -153,7 +153,7 @@ type
 
   TsmxPerformanceMode = (pmOpen, pmExecute);
 
-  IsmxDataSet = interface(IsmxRefInterface)
+  IsmxDataSet = interface(IsmxRefPersistent)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
     //function AddField(const FieldName: String): IsmxField;

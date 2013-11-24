@@ -29,7 +29,7 @@ type
   end;}
 
   TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
-    goOwnerDrawHeader, goEditing);
+    {goOwnerDrawHeader,} goEditing);
 
   TsmxGridOptions = set of TsmxGridOption;
 
@@ -84,9 +84,14 @@ type
 
   TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
 
-  TsmxColumnOption = (coEditing, coSetValue);
+  TsmxColumnOption = (coEditing, coHasValue);
 
   TsmxColumnOptions = set of TsmxColumnOption;
+
+  TsmxTreeOption = (toColLines, toRowLines, toRowSelect, toShowHeader,
+    {toOwnerDrawHeader,} toEditing, toTreeLines);
+
+  TsmxTreeOptions = set of TsmxTreeOption;
 
   TsmxFilterOption = (foApply, foPrepare, foEditing, foSetValue);
 

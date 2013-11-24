@@ -3,7 +3,7 @@ unit smxBaseClasses;
 interface
 
 uses
-  Classes, SysUtils, smxBaseIntf, smxRefIntf;
+  Classes, SysUtils, smxBaseIntf;
 
 const
   IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
@@ -14,7 +14,7 @@ type
   EsmxBaseError = class(Exception);
 
   EsmxComponentError = class(EsmxBaseError)
-  private
+  {private
     FOriginMessage: String;
   public
     constructor CreateByOrigin(Ident: Integer; const Args: array of const;
@@ -22,12 +22,14 @@ type
     constructor CreateByOrigin(ResStringRec: PResStringRec; const Args: array of const;
       const OriginMessage: String); overload;
 
-    property OriginMessage: String read FOriginMessage write FOriginMessage;
+    property OriginMessage: String read FOriginMessage write FOriginMessage;}
   end;
 
-  TsmxComponent = class(TComponent, IsmxBaseInterface)
+  TsmxComponent = class(TComponent, IsmxBaseInterface, IsmxRefComponent)
   protected
     function GetDescription: String; virtual;
+    function GetInternalRef: Pointer; virtual;
+    function GetReference: TComponent;
     function GetVersion: String; virtual;
   public
     property Description: String read GetDescription;
@@ -61,24 +63,28 @@ type
 
   { TsmxInterfacedPersistent }
 
-  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface, IsmxRefInterface)
-  //private
+  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface, IsmxRefPersistent)
+  private
     //FName: String;
+    FController: Pointer;
+    function GetController: IsmxRefComponent;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetDescription: String; virtual;
     function GetInternalRef: Pointer; virtual;
-    function GetReference: TPersistent; virtual;
+    function GetReference: TPersistent;
     function GetVersion: String; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
+    constructor Create(const Controller: IsmxRefComponent); overload;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
 
+    property Controller: IsmxRefComponent read GetController;
     property Description: String read GetDescription;
     //property Name: String read FName write SetName;
     property RefCount: Integer read FRefCount;
@@ -296,7 +302,7 @@ uses
 
 { EsmxComponentError }
 
-constructor EsmxComponentError.CreateByOrigin(Ident: Integer;
+{constructor EsmxComponentError.CreateByOrigin(Ident: Integer;
   const Args: array of const; const OriginMessage: String);
 begin
   CreateResFmt(Ident, Args);
@@ -308,13 +314,23 @@ constructor EsmxComponentError.CreateByOrigin(ResStringRec: PResStringRec;
 begin
   CreateResFmt(ResStringRec, Args);
   FOriginMessage := OriginMessage;
-end;
+end;}
 
 { TsmxComponent }
 
 function TsmxComponent.GetDescription: String;
 begin
   Result := ClassName;
+end;
+
+function TsmxComponent.GetInternalRef: Pointer;
+begin
+  Result := nil;
+end;
+
+function TsmxComponent.GetReference: TComponent;
+begin
+  Result := Self;
 end;
 
 function TsmxComponent.GetVersion: String;
@@ -336,14 +352,25 @@ end;
 
 { TsmxInterfacedPersistent }
 
+constructor TsmxInterfacedPersistent.Create(const Controller: IsmxRefComponent);
+begin
+  FController := Pointer(Controller);
+end;
+
 function TsmxInterfacedPersistent._AddRef: Integer;
 begin
-  Result := Windows.InterlockedIncrement(FRefCount);
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._AddRef
+  else
+    Result := Windows.InterlockedIncrement(FRefCount);
 end;
 
 function TsmxInterfacedPersistent._Release: Integer;
 begin
-  Result := Windows.InterlockedDecrement(FRefCount);
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._Release
+  else
+    Result := Windows.InterlockedDecrement(FRefCount);
   if Result = 0 then
     Destroy;
 end;
@@ -357,6 +384,11 @@ procedure TsmxInterfacedPersistent.BeforeDestruction;
 begin
   if RefCount <> 0 then
     System.Error(reInvalidPtr);
+end;
+
+function TsmxInterfacedPersistent.GetController: IsmxRefComponent;
+begin
+  Result := IsmxRefComponent(FController);
 end;
 
 function TsmxInterfacedPersistent.GetDescription: String;
@@ -387,6 +419,8 @@ end;
 
 function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController).QueryInterface(IID, Obj) else
   if GetInterface(IID, Obj) then
     Result := S_OK else
     Result := E_NOINTERFACE;

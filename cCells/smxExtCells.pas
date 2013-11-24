@@ -571,11 +571,11 @@ uses
   Variants, Forms, SysUtils, TypInfo, smxBaseTypes, smxDBTypes, smxFuncs,
   smxClassFuncs, smxClassProcs;
 
-type
+//type
   { _TsmxBaseCell }
 
-  _TsmxBaseCell = class(TsmxBaseCell)
-  end;
+  //_TsmxBaseCell = class(TsmxBaseCell)
+  //end;
 
 { TsmxLibAlgorithmCfg }
 
@@ -2128,7 +2128,7 @@ end;}
 procedure TsmxStateForm.RefreshStateCfg;
 begin
   //if Assigned(StateCfg) then
-    if Assigned(StateCfg.SelectRequest) and (StateCfg.CfgID <> 0)
+    if Assigned(StateCfg.SelectDataSet) and (StateCfg.CfgID <> 0)
         and (StateCfg.IntfID <> 0) then
     begin
       //StateCfg.Receive;
@@ -2222,7 +2222,12 @@ begin
   if FStateRequest <> Value then
   begin
     FStateRequest := Value;
-    StateCfg.SelectRequest := Value;
+    //StateCfg.SelectRequest := Value;
+    { TODO -oПоляков Александр : сделать присвоение свойств statecfg в обновление }
+    StateCfg.SelectDataSet := Value.DataSet;
+    StateCfg.DeleteDataSet := Value.DeleteDataSet;
+    StateCfg.InsertDataSet := Value.InsertDataSet;
+    StateCfg.UpdateDataSet := Value.UpdateDataSet;
     RefreshStateCfg;
     RefreshStateID;
     {if Assigned(FStateCfg) then

@@ -12,7 +12,7 @@ implementation
 uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, ComObj,
   Graphics, IniFiles, StrUtils, Variants, smxBaseClasses, smxClasses,
-  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxRefIntf, smxDBIntf, smxConsts,
+  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxBaseIntf, smxDBIntf, smxConsts,
   smxManagerClasses, smxManagerIntf, smxDBClasses, smxPConsts, smxClassProcs,
   smxDBTypes, smxDBFuncs, smxLibTypes, smxLogIn;
 
@@ -31,6 +31,7 @@ var
   gDatabaseManager: TsmxDatabaseManager = nil;
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
+  gCfgRequest: TsmxCustomRequest = nil;
   gMainConnection: TsmxConnection = nil;
   gMainForm: TsmxCustomForm = nil;
 
@@ -222,41 +223,50 @@ begin
     begin
       IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
       if Assigned(IntfClass) then
-        smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.CreateByImpl(
-          nil, IntfClass.Create as IsmxRefInterface));
+        gCfgRequest := TsmxCustomRequest(CellClass.CreateByImpl(
+          nil, IntfClass.Create as IsmxRefPersistent));
     end else
     if (ReqLibName <> '') and (ReqProcName <> '') then
     begin
       FuncNewDataSet := gLibraryManager.GetProcedure(ReqLibName, ReqProcName);
       if Assigned(FuncNewDataSet) then
-        smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.CreateByImpl(
+        gCfgRequest := TsmxCustomRequest(CellClass.CreateByImpl(
           nil, FuncNewDataSet));
     end;
+    smxClassProcs.gCfgSelectDataSet := gCfgRequest.DataSet;
+    smxClassProcs.gCfgDeleteDataSet := gCfgRequest.DeleteDataSet;
+    smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
+    smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
   end;
 end;
 
 procedure DestroyMainObjects;
 begin
-  if Assigned(smxClassProcs.gSelectRequest) then
-    SysUtils.FreeAndNil(smxClassProcs.gSelectRequest);
+  if Assigned(gCfgRequest) then
+  begin
+    SysUtils.FreeAndNil(gCfgRequest);
+    smxClassProcs.gCfgSelectDataSet := nil;
+    smxClassProcs.gCfgDeleteDataSet := nil;
+    smxClassProcs.gCfgInsertDataSet := nil;
+    smxClassProcs.gCfgUpdateDataSet := nil;
+  end;
 end;
 
 procedure AssignMainObjects;
 begin
-  if Assigned(smxClassProcs.gSelectRequest) then
+  if Assigned(gCfgRequest) then
   begin
-    _TsmxBaseCell(smxClassProcs.gSelectRequest).Cfg.XMLText :=
+    _TsmxBaseCell(gCfgRequest).Cfg.XMLText :=
       Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestXMLText]);
-    smxClassProcs.gSelectRequest.IsRecieveCfg := False;
+    gCfgRequest.IsRecieveCfg := False;
     //smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
     //smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
     //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
-    smxClassProcs.gSelectRequest.Database := gMainConnection.Database;
-    smxClassProcs.gSelectRequest.IsNewInitialize := True;
-    smxClassProcs.gSelectRequest.Initialize;
-    smxClassProcs.gSelectRequest.Prepare;
+    gCfgRequest.Database := gMainConnection.Database;
+    gCfgRequest.Initialize;
+    gCfgRequest.Prepare;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
   end;
@@ -551,7 +561,6 @@ function LogIn: Boolean;
       gMainForm.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
       gMainForm.FormManager := gFormManager as IsmxFormManager;
       gMainForm.ImageListManager := gImageListManager as IsmxImageListManager;}
-      gMainForm.IsNewInitialize := True;
       gMainForm.Initialize;
       gMainForm.IntfID := IntfID;
       Result := True;

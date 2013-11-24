@@ -3,8 +3,8 @@ unit smxClassProcs;
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxManagerIntf,
-  smxClassTypes;
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxDBIntf,
+  smxManagerIntf, smxClassTypes;
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
   AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
@@ -20,8 +20,11 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
 //procedure WriteSlave(ACell: TsmxOwnerCell; const ANode: IXMLNode; AFindList: TList);
 
 var
-  gSelectRequest: TsmxCustomRequest = nil;
-  //gSelectDataSet: IsmxDataSet = nil;
+  //gSelectRequest: TsmxCustomRequest = nil;
+  gCfgSelectDataSet: IsmxDataSet = nil;
+  gCfgDeleteDataSet: IsmxDataSet = nil;
+  gCfgInsertDataSet: IsmxDataSet = nil;
+  gCfgUpdateDataSet: IsmxDataSet = nil;
   gStorageManagerIntf: IsmxStorageManager = nil;
   gLibraryManagerIntf: IsmxLibraryManager = nil;
   gDatabaseManagerIntf: IsmxDatabaseManager = nil;
@@ -31,7 +34,7 @@ var
 implementation
 
 uses
-  Variants, SysUtils, TypInfo, smxConsts, smxDBIntf, smxRefIntf;
+  Variants, SysUtils, TypInfo, smxConsts, smxBaseIntf;
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
   AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
@@ -320,12 +323,12 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
 
   procedure ReadIntf(APropInfo: PPropInfo; const Node: IXMLNode);
 
-    function IsImplIntf(const AIntf: IsmxRefInterface): Boolean;
+    function IsImplIntf(const AIntf: IsmxRefPersistent): Boolean;
     var
-      Intf: IsmxRefInterface;
+      Intf: IsmxRefPersistent;
     begin
-      Result := AObject.GetInterface(IsmxRefInterface, Intf)
-        and (IsmxRefInterface(Intf).GetReference = AIntf.GetReference);
+      Result := AObject.GetInterface(IsmxRefPersistent, Intf)
+        and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference);
     end;
 
   var
@@ -340,11 +343,11 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
       GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
       Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
       if {SysUtils.IsEqualGUID(GUID, IsmxRefInterface)
-          or} SysUtils.Supports(Intf, IsmxRefInterface) {then
+          or} SysUtils.Supports(Intf, IsmxRefPersistent) {then
       begin
-        if} and IsImplIntf(IsmxRefInterface(Intf)) then
+        if} and IsImplIntf(IsmxRefPersistent(Intf)) then
         begin
-          ReadProps(IsmxRefInterface(Intf).GetReference, Node.ChildNodes.FindNode(APropInfo^.Name), AResolvedList);
+          ReadProps(IsmxRefPersistent(Intf).GetReference, Node.ChildNodes.FindNode(APropInfo^.Name), AResolvedList);
         end else
         begin
           s := Variants.VarToStr(Node.Attributes[APropInfo^.Name]);
@@ -394,13 +397,13 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
 
   procedure ReadMethod(APropInfo: PPropInfo; const Node: IXMLNode);
 
-    procedure GetObjAndMethodName(const Text: String; var ObjName, MethName: String);
+    procedure GetObjAndMethName(const Text: String; var ObjName, MethName: String);
     var
       i: Integer;
     begin
       ObjName := '';
       MethName := '';
-      i := Pos(smxConsts.cDelimiterObjNameMethodName, Text);
+      i := Pos(smxConsts.cDelimiterObjAndMethName, Text);
       if i <> 0 then
       begin
         ObjName := Copy(Text, 1, i - 1);
@@ -413,7 +416,7 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
     ObjName, MethName: String;
   begin
     //n := Node.ChildNodes.FindNode(PropInfo^.Name);
-    GetObjAndMethodName(Variants.VarToStr(Node.Attributes[APropInfo^.Name]), ObjName, MethName);
+    GetObjAndMethName(Variants.VarToStr(Node.Attributes[APropInfo^.Name]), ObjName, MethName);
     //if Assigned(n) and (AObject is TsmxBaseCell) then
     if (ObjName <> '') and (MethName <> '') then
     begin
@@ -442,12 +445,12 @@ procedure ReadProps(AObject: TObject; const ANode: IXMLNode; AResolvedList: Tsmx
 
   procedure ReadChild(ACell: TsmxBaseCell; const Node: IXMLNode);
 
-    function GetImplIntf(const ClassName: String): IsmxRefInterface;
+    function GetImplIntf(const ClassName: String): IsmxRefPersistent;
     begin
       Result := nil;
       if ClassName <> '' then
-        if SysUtils.Supports(Classes.FindClass(ClassName), IsmxRefInterface) then
-          Classes.FindClass(ClassName).Create.GetInterface(IsmxRefInterface, Result);
+        if SysUtils.Supports(Classes.FindClass(ClassName), IsmxRefPersistent) then
+          Classes.FindClass(ClassName).Create.GetInterface(IsmxRefPersistent, Result);
     end;
 
   var
@@ -600,15 +603,15 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
 
   procedure WriteIntf(APropInfo: PPropInfo; const Node: IXMLNode);
 
-    function IsImplIntf(const AIntf: IsmxRefInterface): Boolean;
+    function IsImplIntf(const AIntf: IsmxRefPersistent): Boolean;
     var
-      Intf: IsmxRefInterface;
+      Intf: IsmxRefPersistent;
     begin
-      Result := AObject.GetInterface(IsmxRefInterface, Intf)
-        and (IsmxRefInterface(Intf).GetReference = AIntf.GetReference);
+      Result := AObject.GetInterface(IsmxRefPersistent, Intf)
+        and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference);
     end;
 
-    function FindImplObj(const AIntf: IsmxRefInterface): TObject;
+    function FindImplObj(const AIntf: IsmxRefPersistent): TObject;
     var
       i: Integer;
       Intf: IInterface;
@@ -617,8 +620,8 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
       if Assigned(AIntf) and Assigned(AFindList) then
       begin
         for i := 0 to AFindList.Count - 1 do
-          if TObject(AFindList[i]).GetInterface(IsmxRefInterface, Intf)
-              and (IsmxRefInterface(Intf).GetReference = AIntf.GetReference) then
+          if TObject(AFindList[i]).GetInterface(IsmxRefPersistent, Intf)
+              and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference) then
           begin
             Result := AFindList[i];
             Break;
@@ -635,18 +638,18 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
     Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
     if AObject is TsmxBaseCell then
     begin
-      if {Assigned(Intf) and} SysUtils.Supports(Intf, IsmxRefInterface) {then
+      if {Assigned(Intf) and} SysUtils.Supports(Intf, IsmxRefPersistent) {then
       begin
-        if} and IsImplIntf(IsmxRefInterface(Intf)) then
+        if} and IsImplIntf(IsmxRefPersistent(Intf)) then
         begin
           //n := Node.AddChild(PropInfo^.Name, 0);
-          WriteProps(IsmxRefInterface(Intf).GetReference, Node.AddChild(APropInfo^.Name), AFindList);
+          WriteProps(IsmxRefPersistent(Intf).GetReference, Node.AddChild(APropInfo^.Name), AFindList);
         end else
         //begin
           //Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(AObject));
           //if Assigned(AChildList) then
         begin
-          Obj := FindImplObj(IsmxRefInterface(Intf));
+          Obj := FindImplObj(IsmxRefPersistent(Intf));
           if Obj is TsmxBaseCell then
           begin
             if TsmxBaseCell(Obj).CfgID <> 0 then
@@ -713,10 +716,10 @@ procedure WriteProps(AObject: TObject; const ANode: IXMLNode; AFindList: TList);
           begin
             if TsmxBaseCell(Obj).CfgID <> 0 then
               Node.Attributes[APropInfo^.Name{smxConsts.cCfgIDAttributeName}] :=
-                Format('%d%s%s', [TsmxBaseCell(Obj).CfgID, smxConsts.cDelimiterObjNameMethodName, Obj.MethodName(Method.Code)])
+                Format('%d%s%s', [TsmxBaseCell(Obj).CfgID, smxConsts.cDelimiterObjAndMethName, Obj.MethodName(Method.Code)])
             else
               Node.Attributes[APropInfo^.Name{smxConsts.cNameAttributeName}] :=
-                Format('%s%s%s', [TsmxBaseCell(Obj).Name, smxConsts.cDelimiterObjNameMethodName, Obj.MethodName(Method.Code)]);
+                Format('%s%s%s', [TsmxBaseCell(Obj).Name, smxConsts.cDelimiterObjAndMethName, Obj.MethodName(Method.Code)]);
             //n.Attributes[smxConsts.cProcNameAttributeName] := Obj.MethodName(Method.Code);
           end else
             Node.Attributes[APropInfo^.Name] := '';

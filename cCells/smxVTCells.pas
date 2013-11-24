@@ -40,7 +40,7 @@ type
     function GetHeaderFont: TFont; override;
     function GetHeaderCaption: String; override;
     //function GetIsEditing: Boolean; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     //procedure ResetCellProps; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
@@ -162,7 +162,7 @@ type
     function GetFocusedColIndex: Integer; override;
     function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure InternalPrepare; override;
@@ -201,7 +201,7 @@ type
     property SlaveListNew;
 
     property OnChangeRow;
-    property OnDoubleSnap;  
+    property OnDoubleSnap;
   end;
 
   { TsmxVTTree }
@@ -247,7 +247,8 @@ type
     function GetExpanded(RowIndex: Pointer): Boolean; override;
     function GetFocusedRowIndex: Pointer; override;
     function GetFocusedColIndex: Integer; override;
-    function GetInternalObject: TObject; override;
+    function GetInternalRef: Pointer; override;
+    function GetRootRow: Pointer; override;
     function GetRow(RowIndex: Pointer; Index: Integer): Pointer; override;
     function GetRowCount(RowIndex: Pointer): Integer; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
@@ -265,7 +266,7 @@ type
     //procedure SetRow(RowIndex: Pointer; Index: Integer; Value: Pointer); override;
     procedure SetRowCount(RowIndex: Pointer; Value: Integer); override;
     procedure SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String); override;
-    procedure SetTreeOptions(Value: TsmxGridOptions); override;
+    procedure SetTreeOptions(Value: TsmxTreeOptions); override;
     procedure SetTreeValue(ColIndex: Integer; RowIndex: Pointer; const Value: Variant); override;
 
     property DBText[ColIndex: Integer; Node: PVirtualNode]: String read GetDBText write SetDBText;
@@ -302,13 +303,14 @@ type
 implementation
 
 uses
-  Variants, {smxCfgs,} smxFuncs, smxClassFuncs, smxDBFuncs, smxDBIntf;
+  Windows, Variants, {smxCfgs,} smxFuncs, smxClassFuncs, smxDBFuncs, smxDBIntf,
+  smxBaseIntf;
 
-type
+//type
   { _TsmxBaseCell }
 
-  _TsmxBaseCell = class(TsmxBaseCell)
-  end;
+  //_TsmxBaseCell = class(TsmxBaseCell)
+  //end;
 
 { TsmxVTColumn }
 
@@ -541,8 +543,8 @@ end;
 function TsmxVTColumn.GetColumnValue: Variant;
 begin
   Result := Variants.Null;
-  if coSetValue in ColumnOptions then
-  begin
+  //if coSetValue in ColumnOptions then
+  //begin
     if CellOwner is TsmxCustomGrid then
     begin
       if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
@@ -553,14 +555,14 @@ begin
       if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
         Result := TsmxCustomTree(CellOwner).TreeValues[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex];
     end;
-  end;
+  //end;
 end;
 
 procedure TsmxVTColumn.SetColumnValue(const Value: Variant);
 begin
   //SetFieldValue(SlaveName, Value);
-  if coSetValue in ColumnOptions then
-  begin
+  //if coSetValue in ColumnOptions then
+  //begin
     if CellOwner is TsmxCustomGrid then
     begin
       if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
@@ -571,7 +573,7 @@ begin
       if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
         TsmxCustomTree(CellOwner).TreeValues[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex] := Value;
     end;
-  end;
+  //end;
 end;
 
 function TsmxVTColumn.GetHeaderAlignment: TAlignment;
@@ -635,9 +637,9 @@ begin
   VTHeaderFont.Assign(Value);
 end;
 
-function TsmxVTColumn.GetInternalObject: TObject;
+function TsmxVTColumn.GetInternalRef: Pointer;
 begin
-  Result := VTColumn;
+  Result := Pointer(VTColumn);
 end;
 
 {function TsmxVTColumn.GetIsEditing: Boolean;
@@ -680,17 +682,17 @@ end;
 procedure TsmxVTColumn.InvalidateHeader;
 begin
   if Assigned(CellOwner) then
-    if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
-      if TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).HandleAllocated then
-        TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).Header.Invalidate(VTColumn);
+    if {_TsmxBaseCell}TObject((CellOwner as IsmxRefComponent).GetInternalRef) is TVirtualStringTree then
+      if TVirtualStringTree((CellOwner as IsmxRefComponent).GetInternalRef).HandleAllocated then
+        TVirtualStringTree((CellOwner as IsmxRefComponent).GetInternalRef).Header.Invalidate(VTColumn);
 end;
 
 procedure TsmxVTColumn.InvalidateColumn;
 begin
   if Assigned(CellOwner) then
-    if _TsmxBaseCell(CellOwner).GetInternalObject is TVirtualStringTree then
-      if TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).HandleAllocated then
-        TVirtualStringTree(_TsmxBaseCell(CellOwner).GetInternalObject).InvalidateColumn(VTColumn.Index);
+    if TObject((CellOwner as IsmxRefComponent).GetInternalRef) is TVirtualStringTree then
+      if TVirtualStringTree((CellOwner as IsmxRefComponent).GetInternalRef).HandleAllocated then
+        TVirtualStringTree((CellOwner as IsmxRefComponent).GetInternalRef).InvalidateColumn(VTColumn.Index);
 end;
 
 {procedure TsmxVTColumn.ResetCellProps;
@@ -729,7 +731,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject((CellOwner as IsmxRefComponent).GetInternalRef);
     if Obj is TVirtualStringTree then
       VTColumn.Collection := TVirtualStringTree(Obj).Header.Columns;
   end;
@@ -1163,24 +1165,27 @@ function TsmxVTGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
 var
   Node: PVirtualNode;
 begin
+  Result := '';
   Node := RowIndexToNode(RowIndex);
   if Assigned(Node) then
   begin
     FNodeProp := npCaption;
     Result := VTGrid.Text[Node, ColIndex]
-  end else
-    Result := '';
+  end;
 end;
 
 procedure TsmxVTGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
 var
   Node: PVirtualNode;
 begin
-  Node := RowIndexToNode(RowIndex);
-  if Assigned(Node) then
+  if coEditing in Slaves[ColIndex].ColumnOptions then
   begin
-    FNodeProp := npCaption;
-    VTGrid.Text[Node, ColIndex] := Value;
+    Node := RowIndexToNode(RowIndex);
+    if Assigned(Node) then
+    begin
+      FNodeProp := npCaption;
+      VTGrid.Text[Node, ColIndex] := Value;
+    end;
   end;
 end;
 
@@ -1188,30 +1193,36 @@ function TsmxVTGrid.GetGridValue(ColIndex, RowIndex: Integer): Variant;
 var
   Node: PVirtualNode;
 begin
-  Node := RowIndexToNode(RowIndex);
-  if Assigned(Node) then
+  Result := Variants.Null;
+  if coHasValue in Slaves[ColIndex].ColumnOptions then
   begin
-    FNodeProp := npValue;
-    Result := smxFuncs.StrToVar(VTGrid.Text[Node, ColIndex])
-  end else
-    Result := Variants.Null;
+    Node := RowIndexToNode(RowIndex);
+    if Assigned(Node) then
+    begin
+      FNodeProp := npValue;
+      Result := smxFuncs.StrToVar(VTGrid.Text[Node, ColIndex])
+    end;
+  end;
 end;
 
 procedure TsmxVTGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
 var
   Node: PVirtualNode;
 begin
-  Node := RowIndexToNode(RowIndex);
-  if Assigned(Node) then
+  if [coEditing, coHasValue] * Slaves[ColIndex].ColumnOptions = [coEditing, coHasValue] then
   begin
-    FNodeProp := npValue;
-    VTGrid.Text[Node, ColIndex] := Variants.VarToStr(Value);
+    Node := RowIndexToNode(RowIndex);
+    if Assigned(Node) then
+    begin
+      FNodeProp := npValue;
+      VTGrid.Text[Node, ColIndex] := Variants.VarToStr(Value);
+    end;
   end;
 end;
 
-function TsmxVTGrid.GetInternalObject: TObject;
+function TsmxVTGrid.GetInternalRef: Pointer;
 begin
-  Result := VTGrid;
+  Result := Pointer(VTGrid);
 end;
 
 function TsmxVTGrid.GetRowCount: Integer;
@@ -1241,6 +1252,7 @@ begin
       [toExtendedFocus];
     FVTGrid.TreeOptions.MiscOptions := FVTGrid.TreeOptions.MiscOptions +
       [toGridExtensions];
+    FVTGrid.Header.Options := FVTGrid.Header.Options + [hoOwnerDraw];
     FVTGrid.LineStyle := lsSolid;
     FVTGrid.Colors.GridLineColor := clSilver;
     FVTGrid.EditDelay := 50;
@@ -1302,7 +1314,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject((CellOwner as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       VTGrid.Parent := TWinControl(Obj);
   end;
@@ -1343,9 +1355,9 @@ begin
   if goShowHeader in Value then
     VTGrid.Header.Options := VTGrid.Header.Options + [hoVisible] else
     VTGrid.Header.Options := VTGrid.Header.Options - [hoVisible];
-  if goOwnerDrawHeader in Value then
+  {if goOwnerDrawHeader in Value then
     VTGrid.Header.Options := VTGrid.Header.Options + [hoOwnerDraw] else
-    VTGrid.Header.Options := VTGrid.Header.Options - [hoOwnerDraw];
+    VTGrid.Header.Options := VTGrid.Header.Options - [hoOwnerDraw];}
   if goEditing in Value then
     VTGrid.TreeOptions.MiscOptions := VTGrid.TreeOptions.MiscOptions + [toEditable] else
     VTGrid.TreeOptions.MiscOptions := VTGrid.TreeOptions.MiscOptions - [toEditable];
@@ -1377,7 +1389,7 @@ begin
         if hpeBackground in Elements then
         begin
           TargetCanvas.Brush.Color := TsmxCustomColumn(Wrapper).HeaderColor;
-          TargetCanvas.FillRect(PaintRectangle);
+          Windows.DrawFrameControl(TargetCanvas.Handle, PaintRectangle, DFC_BUTTON, DFCS_BUTTONPUSH or DFCS_ADJUSTRECT);
         end;
         if hpeText in Elements then
         begin
@@ -1494,7 +1506,7 @@ end;
 
 procedure TsmxVTTree.DelRow(RowIndex: Pointer);
 begin
-  if Assigned(RowIndex) then
+  if Assigned(RowIndex) then 
     VTTree.DeleteNode(RowIndex);
 end;
 
@@ -1778,45 +1790,53 @@ end;
 
 function TsmxVTTree.GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String;
 begin
+  Result := '';
   if Assigned(RowIndex) then
   begin
     FNodeProp := npCaption;
     Result := VTTree.Text[RowIndex, ColIndex]
-  end else
-    Result := '';
+  end;
 end;
 
 procedure TsmxVTTree.SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String);
 begin
-  if Assigned(RowIndex) then
-  begin
-    FNodeProp := npCaption;
-    VTTree.Text[RowIndex, ColIndex] := Value;
-  end;
+  if coEditing in Slaves[ColIndex].ColumnOptions then
+    if Assigned(RowIndex) then
+    begin
+      FNodeProp := npCaption;
+      VTTree.Text[RowIndex, ColIndex] := Value;
+    end;
 end;
 
 function TsmxVTTree.GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant;
 begin
-  if Assigned(RowIndex) then
-  begin
-    FNodeProp := npValue;
-    Result := smxFuncs.StrToVar(VTTree.Text[RowIndex, ColIndex])
-  end else
-    Result := Variants.Null;
+  Result := Variants.Null;
+  if coHasValue in Slaves[ColIndex].ColumnOptions then
+    if Assigned(RowIndex) then
+    begin
+      FNodeProp := npValue;
+      Result := smxFuncs.StrToVar(VTTree.Text[RowIndex, ColIndex])
+    end;
 end;
 
 procedure TsmxVTTree.SetTreeValue(ColIndex: Integer; RowIndex: Pointer; const Value: Variant);
 begin
-  if Assigned(RowIndex) then
-  begin
-    FNodeProp := npValue;
-    VTTree.Text[RowIndex, ColIndex] := Variants.VarToStr(Value);
-  end;
+  if [coEditing, coHasValue] * Slaves[ColIndex].ColumnOptions = [coEditing, coHasValue] then
+    if Assigned(RowIndex) then
+    begin
+      FNodeProp := npValue;
+      VTTree.Text[RowIndex, ColIndex] := Variants.VarToStr(Value);
+    end;
 end;
 
-function TsmxVTTree.GetInternalObject: TObject;
+function TsmxVTTree.GetInternalRef: Pointer;
 begin
-  Result := VTTree;
+  Result := Pointer(VTTree);
+end;
+
+function TsmxVTTree.GetRootRow: Pointer;
+begin
+  Result := VTTree.RootNode;
 end;
 
 function TsmxVTTree.GetRow(RowIndex: Pointer; Index: Integer): Pointer;
@@ -1863,9 +1883,10 @@ begin
   begin
     FVTTree := TVirtualStringTree.Create(nil);
     FVTTree.TreeOptions.PaintOptions := FVTTree.TreeOptions.PaintOptions -
-      [toThemeAware];
+      [toThemeAware, toShowTreeLines];
     FVTTree.TreeOptions.SelectionOptions := FVTTree.TreeOptions.SelectionOptions +
       [toExtendedFocus];
+    FVTTree.Header.Options := VTTree.Header.Options + [hoOwnerDraw];
     FVTTree.LineStyle := lsSolid;
     FVTTree.Colors.GridLineColor := clSilver;
     FVTTree.EditDelay := 50;
@@ -1935,7 +1956,7 @@ begin
   inherited SetCellParent(Value);
   if Assigned(CellParent) then
   begin
-    Obj := _TsmxBaseCell(CellParent).GetInternalObject;
+    Obj := TObject((CellOwner as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
       VTTree.Parent := TWinControl(Obj);
   end;
@@ -1960,27 +1981,30 @@ begin
   end;
 end;}
 
-procedure TsmxVTTree.SetTreeOptions(Value: TsmxGridOptions);
+procedure TsmxVTTree.SetTreeOptions(Value: TsmxTreeOptions);
 begin
   inherited SetTreeOptions(Value);
-  if goColLines in Value then
+  if toColLines in Value then
     VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions + [toShowVertGridLines] else
     VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions - [toShowVertGridLines];
-  if goRowLines in Value then
+  if toRowLines in Value then
     VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions + [toShowHorzGridLines] else
     VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions - [toShowHorzGridLines];
-  if goRowSelect in Value then
+  if toRowSelect in Value then
     VTTree.TreeOptions.SelectionOptions := VTTree.TreeOptions.SelectionOptions + [toFullRowSelect] else
     VTTree.TreeOptions.SelectionOptions := VTTree.TreeOptions.SelectionOptions - [toFullRowSelect];
-  if goShowHeader in Value then
+  if toShowHeader in Value then
     VTTree.Header.Options := VTTree.Header.Options + [hoVisible] else
     VTTree.Header.Options := VTTree.Header.Options - [hoVisible];
-  if goOwnerDrawHeader in Value then
+  {if toOwnerDrawHeader in Value then
     VTTree.Header.Options := VTTree.Header.Options + [hoOwnerDraw] else
-    VTTree.Header.Options := VTTree.Header.Options - [hoOwnerDraw];
-  if goEditing in Value then
+    VTTree.Header.Options := VTTree.Header.Options - [hoOwnerDraw];}
+  if toEditing in Value then
     VTTree.TreeOptions.MiscOptions := VTTree.TreeOptions.MiscOptions + [toEditable] else
     VTTree.TreeOptions.MiscOptions := VTTree.TreeOptions.MiscOptions - [toEditable];
+  if toTreeLines in Value then
+    VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions + [toShowTreeLines] else
+    VTTree.TreeOptions.PaintOptions := VTTree.TreeOptions.PaintOptions - [toShowTreeLines];
 end;
 
 function TsmxVTTree.SetRecordNoByNode(Node: PVirtualNode): Boolean;
@@ -2009,7 +2033,7 @@ begin
         if hpeBackground in Elements then
         begin
           TargetCanvas.Brush.Color := TsmxCustomColumn(Wrapper).HeaderColor;
-          TargetCanvas.FillRect(PaintRectangle);
+          Windows.DrawFrameControl(TargetCanvas.Handle, PaintRectangle, DFC_BUTTON, DFCS_BUTTONPUSH or DFCS_ADJUSTRECT);
         end;
         if hpeText in Elements then
         begin
