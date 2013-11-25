@@ -5054,10 +5054,24 @@ begin
 end;}
 
 procedure TsmxCustomRequest.Notification(AComponent: TComponent; Operation: TOperation);
+var
+  Component: TComponent;
 begin
   inherited Notification(AComponent, Operation);
-  if (AComponent = CellRequest) and (Operation = opRemove) then
-    CellRequest := nil;
+  if Operation = opRemove then
+  begin
+    if AComponent = CellRequest then
+      CellRequest := nil else
+    if Assigned(DeleteDataSet) and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+        and (AComponent = Component) then
+      DeleteDataSet := nil else
+    if Assigned(InsertDataSet) and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+        and (AComponent = Component) then
+      InsertDataSet := nil else
+    if Assigned(UpdateDataSet) and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+        and (AComponent = Component) then
+      UpdateDataSet := nil;
+  end;
 end;
 
 procedure TsmxCustomRequest.PerformRequest;
@@ -5137,12 +5151,16 @@ begin
 end;}
 
 procedure TsmxCustomRequest.SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet);
+var
+  Component: TComponent;
 begin
   case Index of
     mrDelete: FDeleteDataSetIntf := Value;
     mrInsert: FInsertDataSetIntf := Value;
     mrUpdate: FUpdateDataSetIntf := Value;
   end;
+  if Assigned(Value) and smxFuncs.GetRefComponent(Value.GetReference, Component) then
+    Component.FreeNotification(Self);
 end;
 
 {procedure TsmxCustomRequest.SetModifyPerformance(Index: TsmxModifyRequest; const Value: TsmxPerformanceMode);

@@ -30,6 +30,7 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime; overload;
+function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
 
 implementation
 
@@ -279,6 +280,15 @@ end;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime;
 begin
   Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+end;
+
+function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
+begin
+  AController := nil;
+  if AImplementor is TsmxInterfacedPersistent then
+    if Assigned(TsmxInterfacedPersistent(AImplementor).Controller) then
+      AController := TsmxInterfacedPersistent(AImplementor).Controller.GetReference;
+  Result := Assigned(AController);
 end;
 
 end.
