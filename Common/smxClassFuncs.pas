@@ -159,10 +159,10 @@ begin
   if Assigned(CellClass) then
   begin
     IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-    if Assigned(IntfClass) then
-      Result := CellClass.CreateByImpl(AOwner, IntfClass.Create as IsmxRefPersistent)
-    else
-      Result := CellClass.Create(AOwner);
+    //if Assigned(IntfClass) then
+      Result := CellClass.Create(AOwner, IntfClass);
+    //else
+      //Result := CellClass.Create(AOwner);
     Result.CfgID := ACfgID;
     //Result.SelectRequest := ASelectRequest;
     //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
@@ -205,7 +205,8 @@ begin
   if CellClass.InheritsFrom(TsmxCustomForm) then
   begin
     IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-    if AID = 0 then
+    Result := TsmxCustomFormClass(CellClass).Create(AOwner, IntfClass, AID);
+    {if AID = 0 then
     begin
       if Assigned(IntfClass) then
         Result := TsmxCustomFormClass(CellClass).CreateByImpl(AOwner, IntfClass.Create as IsmxRefPersistent)
@@ -217,7 +218,7 @@ begin
         Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID, IntfClass.Create as IsmxRefPersistent)
       else
         Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID);
-    end;
+    end;}
     Result.CfgID := ACfgID;
     //Result.SelectRequest := ASelectRequest;
     //Result.StorageManager := smxClassProcs.gStorageManagerIntf;

@@ -549,7 +549,7 @@ type
     //procedure SetRequestList(Value: TsmxCustomRequestList); virtual;
     procedure SetStatusBoard(Value: TsmxCustomStatusBoard); virtual;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     function AddSlave: TsmxCustomPageManager;
 
     property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
@@ -561,7 +561,7 @@ type
     //property RequestList: TsmxCustomRequestList read FRequestList write SetRequestList;
     property PopupList;
     property RequestList;
-    property SlaveListNew;
+    property SlaveList;
     property StatusBoard: TsmxCustomStatusBoard read FStatusBoard write SetStatusBoard;
   end;
 
@@ -2472,11 +2472,11 @@ end;*)
 
 { TsmxStandardForm }
 
-constructor TsmxStandardForm.Create(AOwner: TComponent);
+{constructor TsmxStandardForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 function TsmxStandardForm.AddSlave: TsmxCustomPageManager;
 begin

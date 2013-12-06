@@ -51,7 +51,7 @@ type
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     //procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
 
     property Action: TAction read GetAction;
   public
@@ -90,7 +90,7 @@ type
 
     property ActionList: TActionList read GetActionList;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     //function GetAlgorithmParamValue(CfgID: Integer; const ParamName: String;
     //  var ParamValue: Variant): Boolean; override;
@@ -101,7 +101,7 @@ type
     //property IsOwnerIsParent default True;
   published
     property ImageListName;
-    property SlaveListNew;
+    property SlaveList;
   end;
 
   { TsmxRequest }
@@ -147,14 +147,14 @@ type
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); override;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     //function GetRequestParamValue(CfgID: Integer; const ParamName: String;
     //  var ParamValue: Variant): Boolean; override;
 
     //property IsAltSlaveClass default True;
     //property IsOwnerIsParent default True;
   published
-    property SlaveListNew;
+    property SlaveList;
   end;
 
   { TsmxColumn }
@@ -201,7 +201,7 @@ type
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
     procedure SetName(const NewName: TComponentName); override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
     //procedure SetSlaveName(const Value: String); override;
 
     property Column: TColumn read GetColumn;
@@ -303,7 +303,7 @@ type
     property GridOptions;
     property PopupMenu;
     property Request;
-    property SlaveListNew;
+    property SlaveList;
 
     property OnChangeRow;
     property OnDoubleSnap;
@@ -447,7 +447,7 @@ type
 
     property Panel: TPanel read GetPanel;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     //property IsAltSlaveClass default True;
@@ -464,7 +464,7 @@ type
     property CellVisible;
     property CellWidth;
     property PopupMenu;
-    property SlaveListNew;
+    property SlaveList;
 
     property OnDoubleSnap;
     property OnSnap;
@@ -517,7 +517,7 @@ type
 
     property Panel: TPanel read GetPanel;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     //property IsAltSlaveClass default True;
@@ -532,7 +532,7 @@ type
     property CellVisible;
     property CellWidth;
     property PopupMenu;
-    property SlaveListNew;
+    property SlaveList;
 
     property OnDoubleSnap;
     property OnSnap;
@@ -585,11 +585,11 @@ type
     //procedure SetCellTop(Value: Integer); override;
     procedure SetCellVisible(Value: Boolean); override;
     //procedure SetCellWidth(Value: Integer); override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
 
     property TabSheet: TTabSheet read GetTabSheet;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     //property IsAltSlaveClass default True;
@@ -599,7 +599,7 @@ type
     property CellImageIndex;
     property CellVisible;
     property PopupMenu;
-    property SlaveListNew;
+    property SlaveList;
   end;
 
   { TsmxPageManager }
@@ -676,7 +676,7 @@ type
     property IsMultiLine;
     property PageManagerStyle;
     property PopupMenu;
-    property SlaveListNew;
+    property SlaveList;
 
     property OnChangePage;
   end;
@@ -783,7 +783,7 @@ type
     procedure SetIsChecked(Value: Boolean); override;
     procedure SetMenuItemHotKey(Value: Integer); override;
     procedure SetMenuItemStyle(Value: TsmxMenuItemStyle); override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
 
     property MenuItem: TMenuItem read GetMenuItem;
   public
@@ -857,7 +857,7 @@ type
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
   end;
 
   { TsmxToolItem }
@@ -934,7 +934,7 @@ type
 
     property ToolBar: TToolBar read GetToolBar;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     //procedure AddAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
     //procedure DelAlgorithm(Algorithm: TsmxCustomAlgorithm); override;
@@ -986,7 +986,7 @@ type
 
     property ControlBar: TControlBar read GetControlBar;
   public
-    constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
@@ -1009,7 +1009,7 @@ type
     procedure SetCellWidth(Value: Integer); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
     procedure SetStatusItemAlignment(Value: TAlignment); override;
     procedure SetStatusItemStyle(Value: TsmxStatusItemStyle); override;
 
@@ -1567,19 +1567,19 @@ begin
     @FLibProc := LibraryManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
 end;}
 
-procedure TsmxAction.SetSlaveIndex(Value: Integer);
+procedure TsmxAction.ChangeSlaveIndex(Value: Integer);
 begin
-  inherited SetSlaveIndex(Value);
+  //inherited SetSlaveIndex(Value);
   Action.Index := Value;
 end;
 
 { TsmxActionList }
 
-constructor TsmxActionList.Create(AOwner: TComponent);
+{constructor TsmxActionList.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 destructor TsmxActionList.Destroy;
 begin
@@ -2107,11 +2107,11 @@ end;}
 
 { TsmxRequestList }
 
-constructor TsmxRequestList.Create(AOwner: TComponent);
+{constructor TsmxRequestList.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 {function TsmxRequestList.GetCfgClass: TsmxBaseCfgClass;
 begin
@@ -2517,9 +2517,9 @@ begin
   Column.ReadOnly := not (coEditing in Value);
 end;
 
-procedure TsmxColumn.SetSlaveIndex(Value: Integer);
+procedure TsmxColumn.ChangeSlaveIndex(Value: Integer);
 begin
-  inherited SetSlaveIndex(Value);
+  //inherited SetSlaveIndex(Value);
   Column.Index := Value;
 end;
 
@@ -2593,7 +2593,7 @@ var
 begin
   inherited InternalPrepare;
   if Assigned(Request) then
-  begin
+  begin 
     if Assigned(Request.DataSet) then
       Request.DataSet.Close;
     OldIsManualRefreshParams := Request.IsManualRefreshParams;
@@ -3649,11 +3649,11 @@ end;}
 
 { TsmxPanelFilterDesk }
 
-constructor TsmxPanelFilterDesk.Create(AOwner: TComponent);
+{constructor TsmxPanelFilterDesk.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 destructor TsmxPanelFilterDesk.Destroy;
 begin
@@ -4211,11 +4211,11 @@ end;}
 
 { TsmxPanelSection }
 
-constructor TsmxPanelSection.Create(AOwner: TComponent);
+{constructor TsmxPanelSection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 destructor TsmxPanelSection.Destroy;
 begin
@@ -4444,11 +4444,11 @@ end;}
 
 { TsmxTabSheet }
 
-constructor TsmxTabSheet.Create(AOwner: TComponent);
+{constructor TsmxTabSheet.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 destructor TsmxTabSheet.Destroy;
 begin
@@ -4727,9 +4727,9 @@ begin
   end;
 end;
 
-procedure TsmxTabSheet.SetSlaveIndex(Value: Integer);
+procedure TsmxTabSheet.ChangeSlaveIndex(Value: Integer);
 begin
-  inherited SetSlaveIndex(Value);
+  //inherited SetSlaveIndex(Value);
   TabSheet.PageIndex := Value;
 end;
 
@@ -5564,9 +5564,9 @@ begin
   end;
 end;}
 
-procedure TsmxMenuItem.SetSlaveIndex(Value: Integer);
+procedure TsmxMenuItem.ChangeSlaveIndex(Value: Integer);
 begin
-  inherited SetSlaveIndex(Value);
+  //inherited SetSlaveIndex(Value);
   MenuItem.MenuIndex := Value;
 end;
 
@@ -5789,11 +5789,11 @@ end;
 
 { TsmxPopupList }
 
-constructor TsmxPopupList.Create(AOwner: TComponent);
+{constructor TsmxPopupList.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   IsAltSlaveClass := True;
-end;
+end;}
 
 {function TsmxPopupList.GetCfgClass: TsmxBaseCfgClass;
 begin
@@ -5938,7 +5938,7 @@ end;}
 
 { TsmxToolBar }
 
-constructor TsmxToolBar.Create(AOwner: TComponent);
+(*constructor TsmxToolBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   {FToolBar := TToolBar.Create(Self);
@@ -5950,7 +5950,7 @@ begin
   FToolBar.ShowHint := Cfg.BarShowHint;}
   //Initialize;
   IsAltSlaveClass := True;
-end;
+end;*)
 
 destructor TsmxToolBar.Destroy;
 begin
@@ -6261,7 +6261,7 @@ end;}
 
 { TsmxControlBar }
 
-constructor TsmxControlBar.Create(AOwner: TComponent);
+(*constructor TsmxControlBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   {FControlBar := TControlBar.Create(Self);
@@ -6269,7 +6269,7 @@ begin
   FControlBar.BevelInner := bvNone;
   InstallParent;}
   IsAltSlaveClass := True;
-end;
+end;*)
 
 destructor TsmxControlBar.Destroy;
 begin
@@ -6523,9 +6523,9 @@ begin
   end;
 end;}
 
-procedure TsmxStatusPanel.SetSlaveIndex(Value: Integer);
+procedure TsmxStatusPanel.ChangeSlaveIndex(Value: Integer);
 begin
-  inherited SetSlaveIndex(Value);
+  //inherited SetSlaveIndex(Value);
   StatusPanel.Index := Value;
 end;
 

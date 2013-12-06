@@ -57,7 +57,7 @@ type
     procedure SetHeaderCaption(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
-    procedure SetSlaveIndex(Value: Integer); override;
+    procedure ChangeSlaveIndex(Value: Integer); override;
 
     property VTColumn: TVirtualTreeColumn read GetVTColumn;
     property VTColumnFont: TFont read GetVTColumnFont;
@@ -198,7 +198,7 @@ type
     property GridOptions;
     property PopupMenu;
     property Request;
-    property SlaveListNew;
+    property SlaveList;
 
     property OnChangeRow;
     property OnDoubleSnap;
@@ -291,7 +291,7 @@ type
     property CellWidth;
     property PopupMenu;
     property Request;
-    property SlaveListNew;
+    property SlaveList;
     property TreeOptions;
 
     property OnChangeRow;
@@ -766,7 +766,7 @@ begin
   end;
 end;}
 
-procedure TsmxVTColumn.SetSlaveIndex(Value: Integer);
+procedure TsmxVTColumn.ChangeSlaveIndex(Value: Integer);
 begin
   VTColumn.Index := Value;
 end;
@@ -1890,6 +1890,8 @@ begin
     FVTTree.LineStyle := lsSolid;
     FVTTree.Colors.GridLineColor := clSilver;
     FVTTree.EditDelay := 50;
+    FVTTree.Margin := 2;
+    FVTTree.TextMargin := 0;
     FVTTree.OnAdvancedHeaderDraw := VTTreeAdvancedHeaderDraw;
     FVTTree.OnChange := VTTreeChange;
     FVTTree.OnCollapsed := VTTreeCollapsed;
