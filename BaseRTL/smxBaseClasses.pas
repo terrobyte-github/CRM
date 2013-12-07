@@ -419,8 +419,8 @@ end;
 
 function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
-  if Assigned(FController) then
-    Result := IsmxRefComponent(FController).QueryInterface(IID, Obj) else
+  //if Assigned(FController) then
+    //Result := IsmxRefComponent(FController).QueryInterface(IID, Obj) else
   if GetInterface(IID, Obj) then
     Result := S_OK else
     Result := E_NOINTERFACE;

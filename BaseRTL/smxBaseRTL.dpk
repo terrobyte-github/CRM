@@ -48,7 +48,8 @@ contains
   smxLibFuncs in '..\Common\smxLibFuncs.pas',
   smxManagerIntf in '..\Common\smxManagerIntf.pas',
   smxManagerClasses in 'smxManagerClasses.pas',
-  smxBaseTypes in '..\Common\smxBaseTypes.pas';
+  smxBaseTypes in '..\Common\smxBaseTypes.pas',
+  smxStdCtrls in 'smxStdCtrls.pas';
 
 end.
 

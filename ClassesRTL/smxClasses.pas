@@ -163,7 +163,7 @@ type
     function CellParams(const Name: String; var Value: Variant): Boolean; virtual;
     procedure Finalize;
     function FindChildByCfgID(CfgID: Integer): TsmxBaseCell;
-    //function FindChildByName(const Name: String): TsmxBaseCell;
+    function FindChildByName(const Name: String): TsmxBaseCell;
     procedure Initialize;
 
     property CellCount: Integer read GetCellCount;
@@ -2409,6 +2409,19 @@ begin
     end;
 end;
 
+function TsmxBaseCell.FindChildByName(const Name: String): TsmxBaseCell;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to CellCount - 1 do
+    if SysUtils.AnsiCompareText(Cells[i].Name, Name) = 0 then
+    begin
+      Result := Cells[i];
+      Break;
+    end;
+end;
+
 function TsmxBaseCell.GetCell(Index: Integer): TsmxBaseCell;
 begin
   Result := TsmxBaseCell(CellList[Index]);
@@ -2736,7 +2749,7 @@ end;
 function TsmxBaseCell.GetImplementor: IsmxRefPersistent;
 begin
   if not Assigned(FImplementor) and Assigned(FImplementorClass) then
-    FImplementor := FImplementorClass.Create(Self as IsmxRefComponent);// as IsmxRefPersistent;
+    FImplementor := FImplementorClass.Create(Self as IsmxRefComponent) as IsmxRefPersistent;
   Result := FImplementor;
 end;
 
@@ -5101,8 +5114,9 @@ end;
 
 function TsmxCustomRequest.GetDataSet: IsmxDataSet;
 begin
-  if Assigned(Implementor) and Assigned(Implementor.GetReference) then
-    TsmxInterfacedPersistent(Implementor.GetReference).GetInterface(IsmxDataSet, Result)
+  if Assigned(Implementor) {and Assigned(Implementor.GetReference)} then
+    //TsmxInterfacedPersistent(Implementor.GetReference).GetInterface(IsmxDataSet, Result)
+    Result := Implementor as IsmxDataSet
   else
     Result := nil;
 end;
