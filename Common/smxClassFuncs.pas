@@ -272,7 +272,7 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    if foSetValue in TsmxCustomFilter(Cell).FilterOptions then
+    if foHasValue in TsmxCustomFilter(Cell).FilterOptions then
       AValue := TsmxCustomFilter(Cell).FilterValue
     else
       AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).FilterCaption);

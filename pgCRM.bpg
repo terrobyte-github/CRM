@@ -10,7 +10,7 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = smxBaseRTL.bpl smxClassesRTL.bpl dADO.dll dBDE.dll rImages.dll \
-  aAlgs.dll cCells.dll cVTCells.dll CRM.exe
+  aAlgs.dll cCells.dll cVTCells.dll aVTAlgs.dll CRM.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -41,6 +41,9 @@ cCells.dll: cCells\cCells.dpr
   $(DCC)
 
 cVTCells.dll: cVTCells\cVTCells.dpr
+  $(DCC)
+
+aVTAlgs.dll: aVTAlgs\aVTAlgs.dpr
   $(DCC)
 
 CRM.exe: CRM\CRM.dpr

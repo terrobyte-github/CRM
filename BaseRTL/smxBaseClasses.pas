@@ -136,13 +136,11 @@ type
 
   TsmxFreeNotificationObjectClass = class of TsmxFreeNotificationObject;}
 
-{$M+}
-
   { TsmxInfoObject }
 
+{$M+}
   TsmxInfoObject = class(TObject)
   end;
-
 {$M-}
 
   { TsmxKitItem }
@@ -156,6 +154,8 @@ type
     FKit: TsmxKit;
     procedure SetKit(Value: TsmxKit);
   protected
+    function GetDisplayName: String; virtual;
+    function GetDisplayObject: TObject; virtual;
     function GetIndex: Integer; virtual;
     procedure SetIndex(Value: Integer); virtual;
   public
@@ -163,6 +163,8 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); virtual;
 
+    property DisplayName: String read GetDisplayName;
+    property DisplayObject: TObject read GetDisplayObject;
     property ItemIndex: Integer read GetIndex write SetIndex;
     property Kit: TsmxKit read FKit write SetKit;
   end;
@@ -175,14 +177,18 @@ type
   private
     FKitItemClass: TsmxKitItemClass;
     FKitList: TList;
+    FOwner: TObject;
     function GetCount: Integer;
     function GetItem(Index: Integer): TsmxKitItem;
     function GetKitList: TList;
     procedure SetItem(Index: Integer; Value: TsmxKitItem);
   protected
+    //function GetOwner: TPersistent; virtual;
+
     property KitList: TList read GetKitList;
   public
-    constructor Create(AItemClass: TsmxKitItemClass); virtual;
+    constructor Create(AItemClass: TsmxKitItemClass); overload; virtual;
+    constructor Create(AOwner: TObject; AItemClass: TsmxKitItemClass); overload; virtual;
     destructor Destroy; override;
     procedure Assign(Source: TsmxKit); virtual;
     function Add: TsmxKitItem;
@@ -193,6 +199,7 @@ type
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
     property KitItemClass: TsmxKitItemClass read FKitItemClass;
+    property Owner: TObject read FOwner;
   end;
 
   TsmxKitClass = class of TsmxKit;
@@ -560,6 +567,16 @@ begin
   raise EsmxListError.CreateResFmt(@smxConsts.rsAssignError, [Name, ClassName]);
 end;
 
+function TsmxKitItem.GetDisplayName: String;
+begin
+  Result := ClassName;
+end;
+
+function TsmxKitItem.GetDisplayObject: TObject;
+begin
+  Result := Self;
+end;
+
 function TsmxKitItem.GetIndex: Integer;
 begin
   if Assigned(FKit) then
@@ -590,6 +607,12 @@ end;
 constructor TsmxKit.Create(AItemClass: TsmxKitItemClass);
 begin
   FKitItemClass := AItemClass;
+end;
+
+constructor TsmxKit.Create(AOwner: TObject; AItemClass: TsmxKitItemClass);
+begin
+  Create(AItemClass);
+  FOwner := AOwner;
 end;
 
 destructor TsmxKit.Destroy;
@@ -652,6 +675,11 @@ begin
     FKitList := TList.Create;
   Result := FKitList;
 end;
+
+{function TsmxKit.GetOwner: TPersistent;
+begin
+  Result := nil;
+end;}
 
 {function TsmxKit.IndexOf(Item: TsmxKitItem): Integer;
 begin

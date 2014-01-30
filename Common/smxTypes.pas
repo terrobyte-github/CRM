@@ -93,7 +93,7 @@ type
 
   TsmxTreeOptions = set of TsmxTreeOption;
 
-  TsmxFilterOption = (foApply, foPrepare, foEditing, foSetValue);
+  TsmxFilterOption = (foApply, foPrepare, foEditing, foHasValue);
 
   TsmxFilterOptions = set of TsmxFilterOption;
 
@@ -101,13 +101,26 @@ type
 
   TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
 
+  TsmxFormOption = (foFrameForm, foFreeOnClose);
+
+  TsmxFormOptions = set of TsmxFormOption;
+
   TsmxPageManagerStyle = (pmsTab, pmsFlat);
+
+  TsmxPagePosition = (ppTop, ppButtom, ppLeft, ppRight);
 
   TsmxMenuItemStyle = (misPoint, misDivider);
 
   TsmxToolItemStyle = (tisButton, tisCheck, tisDivider);
 
   TsmxStatusItemStyle = (sisText, sisDraw);
+
+  TsmxEditorType = (etNone, etString, etNumber, etDate, etPickString,
+    etButtonString);
+
+  TsmxCellState = (csInitialized, csFinalized, csEventParam{, csDesigning});
+
+  TsmxCellStates = set of TsmxCellState;
 
 implementation
 

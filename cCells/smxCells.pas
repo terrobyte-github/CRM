@@ -637,6 +637,7 @@ type
     function GetInternalRef: Pointer; override;
     function GetIsMultiLine: Boolean; override;
     function GetPageManagerStyle: TsmxPageManagerStyle; override;
+    function GetPagePosition: TsmxPagePosition; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
     //procedure InstallParent; override;
     //procedure InternalInitialize; override;
@@ -655,6 +656,7 @@ type
     procedure SetImageList(Value: TCustomImageList); override;
     procedure SetIsMultiLine(Value: Boolean); override;
     procedure SetPageManagerStyle(Value: TsmxPageManagerStyle); override;
+    procedure SetPagePosition(Value: TsmxPagePosition); override;
     //procedure UnInstallParent; override;
 
     property PageControl: TPageControl read GetPageControl;
@@ -1043,7 +1045,9 @@ type
     FFormImageIndex: Integer;
     FIsMainForm: Boolean;
     function GetForm: TForm;
+    procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDeactivate(Sender: TObject);
     //procedure FormDestroy(Sender: TObject);
     //procedure PrepareForm;
   protected
@@ -1070,10 +1074,13 @@ type
     procedure SetCellCaption(const Value: String); override;
     procedure SetCellHint(const Value: String); override;
     procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     procedure SetFormBorder(Value: TsmxFormBorder); override;
+    procedure SetFormOptions(Value: TsmxFormOptions); override;
     procedure SetFormPosition(Value: TsmxFormPosition); override;
     procedure SetImageList(Value: TCustomImageList); override;
+    //procedure SetIsFrameForm(Value: Boolean); override;
     //procedure SetIsMainForm(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
     procedure SetModalResult(Value: TModalResult); override;
@@ -1101,12 +1108,15 @@ type
     property CellVisible;
     property CellWidth;
     property FormBorder;
+    property FormOptions;
     property FormPosition;
     property ImageListName;
     property IsMaximize;
     property PopupMenu;
 
+    property OnActivate;
     property OnClose;
+    property OnDeactivate;
     property OnDoubleSnap;
     property OnShow;
     property OnSnap;
@@ -4990,6 +5000,16 @@ begin
   PageControl.Style := OutInStyle[Value];
 end;
 
+function TsmxPageControl.GetPagePosition: TsmxPagePosition;
+begin
+  Result := TsmxPagePosition(PageControl.TabPosition);
+end;
+
+procedure TsmxPageControl.SetPagePosition(Value: TsmxPagePosition);
+begin
+  PageControl.TabPosition := TTabPosition(Value);
+end;
+
 function TsmxPageControl.GetPageControl: TPageControl;
 begin
   if not Assigned(FPageControl) then
@@ -6619,8 +6639,9 @@ end;}
 
 procedure TsmxForm.InternalClose;
 begin
-  Form.OnClose := nil;
+  //Form.OnClose := nil;
   Form.Close;
+
   {if not FIsMainForm then
   begin
     if not (fsModal in (Form.FormState)) and FIsCloseUser then
@@ -6628,6 +6649,20 @@ begin
   end else
     FForm := nil;}
   //Form.OnClose := FormClose;
+
+  {if not FIsMainForm then
+  begin
+    if not (fsModal in (Form.FormState)) and (foFreeOnClose in FormOptions) then
+    begin
+      //Action := caNone;
+      Free;
+    end else
+      Form.Close;
+  end else
+  begin
+    FForm := nil;
+    Free;
+  end;}
 end;
 
 {procedure TsmxForm.DoShow;
@@ -6644,26 +6679,43 @@ begin
 end;}
 
 procedure TsmxForm.InternalShow;
-begin
-  Form.OnClose := FormClose;
+begin                
+  //Form.OnClose := FormClose;
   Form.Show;
 end;
 
 function TsmxForm.InternalShowModal: TModalResult;
 begin
-  Form.OnClose := FormClose;
+  //Form.OnClose := FormClose;
   Result := TModalResult(Form.ShowModal);
+end;
+
+procedure TsmxForm.FormActivate(Sender: TObject);
+begin
+  Activate;
+end;
+
+procedure TsmxForm.FormDeactivate(Sender: TObject);
+begin
+  Deactivate;
 end;
 
 procedure TsmxForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DoClose;
+  //Action := caNone;
+  //Close;
+
+  //DoClose;
   if not FIsMainForm then
   begin
     if not (fsModal in (Form.FormState)) then
     begin
-      Action := caNone;
-      Free;
+      if (foFreeOnClose in FormOptions) and not IsDesigning then
+      begin
+        Action := caNone;
+        Free;
+      end else
+        Action := caHide;
     end;
   end else
   begin
@@ -6754,9 +6806,10 @@ begin
         FIsMainForm := True;
       end else
         FForm := TForm.Create(nil);
-      //FForm.OnClose := FormClose;
+      FForm.OnClose := FormClose;
       //FForm.OnDestroy := FormDestroy;
-
+      FForm.OnActivate := FormActivate;
+      FForm.OnDeactivate := FormDeactivate;
       //FIsMainForm := Forms.Application.MainForm = FForm;
       //if FIsMainForm then
         //FForm.FreeNotification(Self);
@@ -6960,6 +7013,21 @@ begin
   end;}
 end;*)
 
+procedure TsmxForm.SetFormOptions(Value: TsmxFormOptions);
+var
+  Obj: TObject;
+begin
+  if (foFrameForm in FormOptions) and Assigned(CellParent) then
+    Form.Parent := nil;
+  inherited SetFormOptions(Value);
+  if (foFrameForm in FormOptions) and Assigned(CellParent) then
+  begin
+    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
+    if Obj is TWinControl then
+      Form.Parent := TWinControl(Obj);
+  end;
+end;
+
 procedure TsmxForm.SetImageList(Value: TCustomImageList);
 begin
   if Assigned(ImageList) and Assigned(Form) then
@@ -6969,6 +7037,21 @@ begin
     if FFormImageIndex <> -1 then
       ImageList.GetIcon(FFormImageIndex, Form.Icon);
 end;
+
+{procedure TsmxForm.SetIsFrameForm(Value: Boolean);
+var
+  Obj: TObject;
+begin
+  if IsFrameForm and Assigned(CellParent) then
+    Form.Parent := nil;
+  inherited SetIsFrameForm(Value);
+  if IsFrameForm and Assigned(CellParent) then
+  begin
+    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
+    if Obj is TWinControl then
+      Form.Parent := TWinControl(Obj);
+  end;
+end;}
 
 {procedure TsmxForm.SetIsMainForm(Value: Boolean);
 begin
@@ -6997,6 +7080,21 @@ begin
   PrepareForm;
   Result := TModalResult(Form.ShowModal);
 end;}
+
+procedure TsmxForm.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+    Form.Parent := nil;
+  inherited SetCellParent(Value);
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  begin
+    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
+    if Obj is TWinControl then
+      Form.Parent := TWinControl(Obj);
+  end;
+end;
 
 procedure TsmxForm.SetPopupMenu(Value: TsmxCustomPopupMenu);
 var

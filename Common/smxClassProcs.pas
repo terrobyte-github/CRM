@@ -499,7 +499,7 @@ var
   PropList: PPropList;
   i: Integer;
   PropInfo: PPropInfo;
-begin
+begin              
   if not Assigned(AObject) or not Assigned(ANode) then
     Exit;
   Count := TypInfo.GetPropList(PTypeInfo(AObject.ClassInfo),
@@ -523,9 +523,11 @@ begin
             tkMethod:
               ReadMethod(PropInfo, ANode);
             tkEnumeration:
-              TypInfo.SetEnumProp(AObject, PropInfo, ANode.Attributes[PropInfo^.Name]);
+              if ANode.HasAttribute(PropInfo^.Name) then
+                TypInfo.SetEnumProp(AObject, PropInfo, ANode.Attributes[PropInfo^.Name]);
             tkSet:
-              TypInfo.SetSetProp(AObject, PropInfo, ANode.Attributes[PropInfo^.Name]);
+              if ANode.HasAttribute(PropInfo^.Name) then
+                TypInfo.SetSetProp(AObject, PropInfo, ANode.Attributes[PropInfo^.Name]);
             else
               if ANode.HasAttribute(PropInfo^.Name) then
                 TypInfo.SetPropValue(AObject, PropInfo^.Name, ANode.Attributes[PropInfo^.Name]);

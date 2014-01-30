@@ -9,10 +9,12 @@ procedure ApplyForm(Sender: TsmxComponent);
 procedure CancelForm(Sender: TsmxComponent);
 procedure PrepareForm(Sender: TsmxComponent);
 procedure RefreshForm(Sender: TsmxComponent);
+procedure ShowForm(Sender: TsmxComponent);
+procedure ShowUniForm(Sender: TsmxComponent);
 procedure ShowModalForm(Sender: TsmxComponent);
 procedure CloseModalForm(Sender: TsmxComponent);
-procedure GetPropsTree(Sender: TsmxComponent);
-procedure SetPropsTree(Sender: TsmxComponent);
+//procedure GetPropsTree(Sender: TsmxComponent);
+//procedure SetPropsTree(Sender: TsmxComponent);
 //procedure GetTypeKindNameGrid(Sender: TsmxComponent);
 procedure CloseOkForm(Sender: TsmxComponent);
 procedure CloseCancelForm(Sender: TsmxComponent);
@@ -23,8 +25,8 @@ procedure ClickColumnPropsGrid(Sender: TsmxComponent);
 implementation
 
 uses
-  Classes, Controls, SysUtils, TypInfo, Variants, smxClasses, smxFuncs,
-  smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf;
+  Classes, Controls, SysUtils, TypInfo, Variants, smxStdCtrls, smxClasses,
+  smxFuncs, smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxManagerIntf;
 
 //var
   //Cfg: TsmxBaseCfg = nil;
@@ -109,6 +111,58 @@ begin
     end;
 end;
 
+procedure ShowForm(Sender: TsmxComponent);
+var
+  CfgID, ID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    if CfgID <> 0 then
+    begin
+      AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+      try
+        Form.CellParent := AccessoryForm;
+        Form.Initialize;
+        Form.IntfID := AccessoryForm.IntfID;
+        Form.Show;
+      finally
+        //Form.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure ShowUniForm(Sender: TsmxComponent);
+var
+  CfgID, ID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+  FormIntf: IsmxForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    if CfgID <> 0 then
+    begin
+      FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(CfgID, ID);
+      if not Assigned(FormIntf) then
+      begin
+        AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+        Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+        Form.CellParent := AccessoryForm;
+        Form.Initialize;
+        Form.IntfID := AccessoryForm.IntfID;
+        FormIntf := Form as IsmxForm;
+      end;
+      FormIntf.Show;
+    end;
+  end;
+end;
+
 procedure ShowModalForm(Sender: TsmxComponent);
 
   {procedure ExecuteAlg(Form: TsmxCustomForm; AlgCfgID: Integer);
@@ -184,10 +238,19 @@ begin
       end;
 end;
 
-procedure GetPropsTree(Sender: TsmxComponent);
+(*procedure GetPropsTree(Sender: TsmxComponent);
 
   procedure AddProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer;
     AFindList: TList);
+
+    procedure AddValue(APropInfo: PPropInfo; ARow: Pointer; AEditorType: TsmxEditorType);
+    var
+      V: Variant;
+    begin
+      V := Variants.VarArrayOf([Integer(Pointer(AObject)),
+        Integer(Pointer(APropInfo)), Integer(AEditorType)]);
+      ATree.TreeValues[1, ARow] := V;
+    end;
 
     procedure AddClass(APropInfo: PPropInfo; ARow: Pointer);
     var
@@ -200,17 +263,20 @@ procedure GetPropsTree(Sender: TsmxComponent);
       if Cls.InheritsFrom(TsmxKit) then
       begin
         // add ...
+        AddValue(APropInfo, ARow, etButtonString);
         if Assigned(Obj) then
           ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
       end else
       if Cls.InheritsFrom(TsmxBaseCell) then
       begin
         // add box
+        AddValue(APropInfo, ARow, etPickString);
         if Assigned(Obj) then
           ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
       end else
       begin
         // add blank
+        AddValue(APropInfo, ARow, etNone);
         if Assigned(Obj) then
         begin
           ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
@@ -258,15 +324,23 @@ procedure GetPropsTree(Sender: TsmxComponent);
       begin
         if IsImplIntf(IsmxRefPersistent(Intf)) then
         begin
+          AddValue(APropInfo, ARow, etNone);
           ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
           AddProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow, AFindList);
         end else
         begin
+          AddValue(APropInfo, ARow, etPickString);
           Obj := FindImplObj(IsmxRefPersistent(Intf));
           if Obj is TsmxBaseCell then
             ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
         end;
       end;
+    end;
+
+    procedure AddEnumeration(APropInfo: PPropInfo; ARow: Pointer);
+    begin
+      AddValue(APropInfo, ARow, etPickString);
+      ATree.TreeCaptions[1, ARow] := TypInfo.GetEnumProp(AObject, APropInfo);
     end;
 
     procedure AddSet(APropInfo: PPropInfo; ARow: Pointer);
@@ -276,6 +350,7 @@ procedure GetPropsTree(Sender: TsmxComponent);
       TypeData: PTypeData;
       i: Integer;
     begin
+      AddValue(APropInfo, ARow, etNone);
       SetStr := TypInfo.GetSetProp(AObject, APropInfo, True);
       ATree.TreeCaptions[1, ARow] := SetStr;
       TypeInfo := TypInfo.GetTypeData(APropInfo^.PropType^)^.CompType^;
@@ -283,6 +358,7 @@ procedure GetPropsTree(Sender: TsmxComponent);
       ATree.RowCount[ARow] := TypeData^.MaxValue - TypeData^.MinValue + 1;
       for i := TypeData^.MinValue to TypeData^.MaxValue do
       begin
+        AddValue(APropInfo, ATree.Rows[ARow, i], etPickString);
         EnumStr := TypInfo.GetEnumName(TypeInfo, i);
         ATree.TreeCaptions[0, ATree.Rows[ARow, i]] := EnumStr;
         ATree.TreeCaptions[1, ATree.Rows[ARow, i]] := SysUtils.BoolToStr(Pos(EnumStr, SetStr) > 0, True);
@@ -314,12 +390,15 @@ procedure GetPropsTree(Sender: TsmxComponent);
             tkInterface:
               AddIntf(PropInfo, ATree.Rows[AParentRow, i]);
             tkEnumeration:
-              ATree.TreeCaptions[1, ATree.Rows[AParentRow, i]] := TypInfo.GetEnumProp(AObject, PropInfo);
+              AddEnumeration(PropInfo, ATree.Rows[AParentRow, i]);
             tkSet:
               AddSet(PropInfo, ATree.Rows[AParentRow, i]);
             else
+            begin
+              AddValue(PropInfo, ATree.Rows[AParentRow, i], etString);
               ATree.TreeCaptions[1, ATree.Rows[AParentRow, i]] :=
                 Variants.VarToStr(TypInfo.GetPropValue(AObject, PropInfo^.Name));
+            end;
           end;
         end;
       finally
@@ -333,6 +412,9 @@ var
   Tree: TsmxCustomTree;
   Obj: TObject;
   FindList: TList;
+  Form: TsmxCustomForm;
+  //CellClass: TsmxBaseCellClass;
+  //IntfClass: TsmxInterfacedPersistentClass;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomTree then
@@ -354,20 +436,36 @@ begin
             TsmxTypeCfg(Obj).Read;
           end else
           begin
+            //CellClass := smxClassFuncs.CfgIDToCellClass(CfgID);
+            //IntfClass := smxClassFuncs.CfgIDToIntfClass(CfgID);
+            Form := smxClassFuncs.GetAccessoryForm(Tree);
+            {if Assigned(Form) and CellClass.InheritsFrom(TsmxControlCell) then
+            begin
+              Obj := Form.Slaves[1].Slaves[0].Slaves[0].AddSlaveAsClass(TsmxOwnerCellClass(CellClass), IntfClass);
+              TsmxControlCell(Obj).CellVisible := True;
+            end else
+              //Obj := smxClassFuncs.NewCell(nil, CfgID);
+              Obj := CellClass.Create(nil, IntfClass);
+              TsmxBaseCell(Obj).CellParent := Tree;
+            end;}
             Obj := smxClassFuncs.NewCell(nil, CfgID);
+            TsmxBaseCell(Obj).CellParent := Form.Slaves[1].Slaves[0].Slaves[0];
+            TsmxBaseCell(Obj).CfgID := CfgID;
             TsmxBaseCell(Obj).Initialize;
             smxClassProcs.AllCells(TsmxBaseCell(Obj), FindList, []);
             FindList.Add(Obj);
+            if Obj is TsmxControlCell then
+              TsmxControlCell(Obj).CellVisible := True;
           end;
           if Assigned(Obj) then
             AddProps(Obj, Tree, Tree.RootRow, FindList);
         finally
           FindList.Free;
-          if Assigned(Obj) then
+          if Assigned(Obj) and (CfgType = 100) then
             Obj.Free;
         end;
       end;
-    end;
+    end;  
 end;
 
 procedure SetPropsTree(Sender: TsmxComponent);
@@ -434,7 +532,7 @@ begin
         end;
       end;}
     end;
-end;
+end;*)
 
 procedure GetTypeKindNameGrid(Sender: TsmxComponent);
 var

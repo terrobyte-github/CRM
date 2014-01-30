@@ -1240,7 +1240,7 @@ end;
 
 function TsmxEditFilter.GetFilterValue: Variant;
 begin
-  if foSetValue in FilterOptions then
+  if foHasValue in FilterOptions then
     Result := FValue else
     Result := Variants.Null; //smxFuncs.StrToVar(Edit.Text); //FEdit.Text;
   //if Result = '' then
@@ -1252,7 +1252,7 @@ begin
   //if VarIsEmpty(Value) or VarIsNull(Value) then
     //FEdit.Text := '' else
     //Edit.Text := Variants.VarToStr(Value);
-  if foSetValue in FilterOptions then
+  if foHasValue in FilterOptions then
     FValue := Value;
 end;
 
@@ -1477,7 +1477,7 @@ end;}
 
 function TsmxBitBtnFilter.GetFilterValue: Variant;
 begin
-  if foSetValue in FilterOptions then
+  if foHasValue in FilterOptions then
     Result := FValue else
     Result := Variants.Null;
 end;
@@ -1515,7 +1515,7 @@ end;}
 
 procedure TsmxBitBtnFilter.SetFilterValue(const Value: Variant);
 begin
-  if foSetValue in FilterOptions then
+  if foHasValue in FilterOptions then
   begin
     FValue := Value;
     ChangeFilter;
