@@ -188,6 +188,23 @@ begin
 end;
 
 procedure CellPropsForm(Sender: TsmxComponent);
+
+  procedure FillTree(ACell: TsmxBaseCell; ATree: TsmxCustomTree; AParentRow: Pointer);
+  var
+    i: Integer;
+  begin
+    ATree.RowCount[AParentRow] := ACell.CellCount;
+    //ATree.Slaves[0].ColumnOptions := ATree.Slaves[0].ColumnOptions + [coEditing];
+    for i := 0 to ACell.CellCount - 1 do
+    begin
+      ATree.TreeCaptions[0, ATree.Rows[AParentRow, i]] := Format('%s [%d]', [ACell.Cells[i].Name, ACell.Cells[i].CfgID]);
+      ATree.TreeValues[0, ATree.Rows[AParentRow, i]] := Integer(ACell.Cells[i]);
+      if ACell.Cells[i].CellCount > 0 then
+        FillTree(ACell.Cells[i], ATree, ATree.Rows[AParentRow, i]);
+    end;
+    //ATree.Slaves[0].ColumnOptions := ATree.Slaves[0].ColumnOptions - [coEditing];
+  end;
+
 var
   Form, FormParent: TsmxCustomForm;
   //Cell: TsmxBaseCell;
@@ -195,6 +212,7 @@ var
   Tree: TsmxCustomTree;
   V: Variant;
   NewObj, CurObj: TObject;
+  FormIntf: IsmxForm;
 begin
   if Sender is TsmxCustomForm then
   begin
@@ -231,6 +249,19 @@ begin
                 smxClassProcs.AllCells(TsmxBaseCell(NewObj), FindList, []);
               //FindList.Add(Obj);
               AddProps(NewObj, Tree, Tree.RootRow, FindList);
+              FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(0, -1);
+              if Assigned(FormIntf) then
+                if NewObj is TsmxBaseCell then
+                begin
+                  Form := TsmxCustomForm(FormIntf.GetReference);
+                  Tree := TsmxCustomTree(Form.Cells[0]);
+                  Tree.RowCount[Tree.RootRow] := 1;
+                  Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
+                  Tree.TreeCaptions[0, Tree.Rows[Tree.RootRow, 0]] := Format('%s [%d]', [TsmxBaseCell(NewObj).Name, TsmxBaseCell(NewObj).CfgID]);
+                  Tree.TreeValues[0, Tree.Rows[Tree.RootRow, 0]] := Integer(TsmxBaseCell(NewObj));
+                  FillTree(TsmxBaseCell(NewObj), Tree, Tree.Rows[Tree.RootRow, 0]);
+                  Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
+                end;
             finally
               FindList.Free;
             end;
@@ -268,6 +299,16 @@ begin
     end;
     if Assigned(NewObj) then
     begin
+      Obj := nil;
+      if NewObj is TsmxKitItem then
+      begin
+        if TsmxKitItem(NewObj).Kit.Owner is TsmxBaseCell then
+        begin
+          Obj := TsmxBaseCell(TsmxKitItem(NewObj).Kit.Owner);
+          if Assigned(TsmxBaseCell(Obj).Owner) then
+            Obj := TsmxBaseCell(Obj).Owner;
+        end;
+      end;
       List := TList.Create;
       try
         smxClassProcs.AllCells(FormParent, List, [TsmxCustomTree], True);
@@ -325,6 +366,82 @@ begin
       NewObj := nil;
     if Assigned(NewObj) then
     begin
+      Obj := nil;
+      if NewObj is TsmxKitItem then
+      begin
+        if TsmxKitItem(NewObj).Kit.Owner is TsmxBaseCell then
+        begin
+          Obj := TsmxKitItem(NewObj).Kit.Owner;
+          if Assigned(TsmxBaseCell(Obj).Owner) then
+            Obj := TsmxBaseCell(Obj).Owner;
+        end;
+      end;
+      List := TList.Create;
+      try
+        smxClassProcs.AllCells(FormParent, List, [TsmxCustomTree], True);
+        if List.Count <> 0 then
+        begin
+          Tree := TsmxCustomTree(List[0]);
+          CurObj := nil;
+          if Tree.RowCount[Tree.RootRow] <> 0 then
+          begin
+            V := Tree.TreeValues[1, Tree.Rows[Tree.RootRow, 0]];
+            if Variants.VarIsArray(V) then
+              CurObj := TObject(Integer(V[0]));
+          end;
+          if NewObj <> CurObj then
+          begin
+            Tree.RowCount[Tree.RootRow] := 0;
+            FindList := TList.Create;
+            try
+              if Obj is TsmxBaseCell then
+                smxClassProcs.AllCells(TsmxBaseCell(Obj), FindList, []);
+              //FindList.Add(Obj);
+              AddProps(NewObj, Tree, Tree.RootRow, FindList);
+            finally
+              FindList.Free;
+            end;
+          end;
+        end;
+      finally
+        List.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure ChangeItemTree(Sender: TsmxComponent);
+var
+  Form, FormParent: TsmxCustomForm;
+  List, FindList: TList;
+  Tree: TsmxCustomTree;
+  Obj: TObject;
+  V: Variant;
+  NewObj: TObject;
+  CurObj: TObject;
+begin
+  if Sender is TsmxCustomTree then
+  begin
+    Tree := TsmxCustomTree(Sender);
+    Form := TsmxCustomForm(Tree.CellParent);
+    //////Obj := TObject(Form.CfgID);
+    FormParent := TsmxCustomForm(Form.CellParent);
+    if Assigned(Tree.FocusedRowIndex) then
+      NewObj := TObject(Integer(Tree.TreeValues[0, Tree.FocusedRowIndex]))
+    else
+      NewObj := nil;
+    if Assigned(NewObj) then
+    begin
+      Obj := nil;
+      if NewObj is TsmxKitItem then
+      begin
+        if TsmxKitItem(NewObj).Kit.Owner is TsmxBaseCell then
+        begin
+          Obj := TsmxKitItem(NewObj).Kit.Owner;
+          if Assigned(TsmxBaseCell(Obj).Owner) then
+            Obj := TsmxBaseCell(Obj).Owner;
+        end;
+      end;
       List := TList.Create;
       try
         smxClassProcs.AllCells(FormParent, List, [TsmxCustomTree], True);
@@ -383,6 +500,43 @@ procedure GetPropsTree(Sender: TsmxComponent);
     end;
   end;
 
+  function CreateTreeForm(AFormParent: TsmxCustomForm): TsmxCustomForm;
+  var
+    FormClass: TsmxCustomFormClass;
+    Method: TMethod;
+    CellClass: TsmxBaseCellClass;
+    Tree: TsmxCustomTree;
+  begin
+    FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+    Result := FormClass.Create(nil, -1);
+    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.CellParent := AFormParent;
+    Result.CellLeft := 50;
+    Result.CellTop := 50;
+    //Method.Code := @ItemPropsForm;
+    //Method.Data := Result;
+    //Result.OnActivate := TsmxComponentEvent(Method);
+
+    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+    if Assigned(CellClass) then
+    begin
+      Tree := TsmxCustomTree(CellClass.Create(nil));
+      Tree.CellParent := Result;
+      Tree.CellVisible := True;
+      Tree.CellAlign := alClient;
+      Tree.TreeOptions := [toEditing, toTreeLines];
+      Method.Code := @ChangeItemTree;
+      Method.Data := Tree;
+      Tree.OnChangeRow := TsmxComponentEvent(Method);
+      with Tree.AddSlave do
+      begin
+        CellVisible := True;
+        CellWidth := Tree.CellWidth;
+        ColumnOptions := [coHasValue];
+      end;
+    end;
+  end;
+
   {function FindForm(AFormParent: TsmxCustomForm; ACfgID: Integer): TsmxCustomForm;
   var
     i: Integer;
@@ -435,14 +589,23 @@ begin
           begin
             FormParent := smxClassFuncs.GetAccessoryForm(Tree);
             //Form := FindForm(FormParent, CfgID);
-            FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(CfgID);
+            FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(0, -1);
+            if not Assigned(FormIntf) then
+            begin
+              Form := CreateTreeForm(FormParent);
+              Form.Show;
+            end else
+              Form := TsmxCustomForm(FormIntf.GetReference);
+            Form.CellCaption := 'CellTreeView';//Format('CellTreeView [%d] - %s %s', [CfgID, TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName{CfgName}]);
+
+            FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(-CfgID);
             if not Assigned(FormIntf) then
             begin
               Obj := smxClassFuncs.NewCell(nil, CfgID);
               TsmxBaseCell(Obj).IsDesigning := True;
               Form := CreateForm(FormParent);
-              Form.CellCaption := Format('[%d] - %s', [CfgID, CfgName]);
-              Form.CfgID := CfgID;
+              Form.CellCaption := Format('[%d] - %s %s', [CfgID, TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName{CfgName}]);
+              Form.CfgID := -CfgID;
               TsmxBaseCell(Obj).CellParent := Form;
               TsmxBaseCell(Obj).CfgID := CfgID;
               TsmxBaseCell(Obj).Initialize;
@@ -704,6 +867,7 @@ procedure BeforeEditPropTree(Sender: TsmxComponent);
     Method: TMethod;
     CellClass: TsmxBaseCellClass;
     Grid: TsmxCustomGrid;
+    ToolBar: TsmxCustomToolBoard;
   begin
     FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
     Result := FormClass.Create(nil, Integer(Pointer(APropInfo)));
@@ -732,6 +896,19 @@ procedure BeforeEditPropTree(Sender: TsmxComponent);
         CellVisible := True;
         CellWidth := Grid.CellWidth;
         ColumnOptions := [coHasValue];
+      end;
+    end;
+
+    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxToolBar'));
+    if Assigned(CellClass) then
+    begin
+      ToolBar := TsmxCustomToolBoard(CellClass.Create(nil));
+      ToolBar.CellParent := Result;
+      ToolBar.CellVisible := True;
+      ToolBar.CellAlign := alTop;
+      with ToolBar.AddSlave do
+      begin
+        ;
       end;
     end;
   end;
@@ -778,6 +955,7 @@ procedure BeforeEditPropTree(Sender: TsmxComponent);
     FormIntf: IsmxForm;
     //Owner: TObject;
     CfgID: Integer;
+    CfgName: String;
   begin
     Tree := nil;
     if Sender is TsmxButtonMaskEdit then
@@ -812,15 +990,25 @@ procedure BeforeEditPropTree(Sender: TsmxComponent);
         CfgID := TsmxBaseCell(Owner).CfgID else
         CfgID := 0;}
 
-      if Obj is TsmxBaseCell then
+      {if Obj is TsmxBaseCell then
         CfgID := TsmxBaseCell(Obj).CfgID else
-        CfgID := 0;
+        CfgID := 0;}
 
-      FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(CfgID, Integer(Pointer(PropInfo)));
+      FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(0{CfgID}, Integer(Pointer(PropInfo)));
       if not Assigned(FormIntf) then
       begin
         Form := CreateForm({Obj,} PropInfo, smxClassFuncs.GetAccessoryForm(Tree));
-        Form.CfgID := CfgID;
+        //Form.CfgID := CfgID;
+        if Obj is TsmxBaseCell then
+        begin
+          CfgID := TsmxBaseCell(Obj).CfgID;
+          CfgName := TsmxBaseCell(Obj).Name;
+        end else
+        begin
+          CfgID := 0;
+          CfgName := '';
+        end;
+        Form.CellCaption := Format('[%d] - %s.%s %s', [CfgID, CfgName, PropInfo^.Name, TypInfo.GetTypeData(PropInfo^.PropType^)^.ClassType.ClassName]);
         FormIntf := Form as IsmxForm;
         case PropInfo^.PropType^^.Kind of
           tkClass:

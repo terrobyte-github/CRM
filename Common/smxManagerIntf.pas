@@ -80,11 +80,11 @@ type
 
   IsmxDatabaseManager = interface;
 
-  IsmxConnection = interface(IsmxBaseInterface)
+  IsmxConnection = interface(IsmxRefComponent)
     ['{24415658-D331-48A8-8560-1845F3076622}']
     procedure Connect;
     procedure Disconnect;
-    procedure FreeConnection;
+    //procedure FreeConnection;
     function GetConnected: Boolean;
     function GetDatabase: IsmxDatabase;
     function GetDatabaseManager: IsmxDatabaseManager;
@@ -116,10 +116,10 @@ type
 
   IsmxFormManager = interface;
 
-  IsmxForm = interface(IsmxBaseInterface)
+  IsmxForm = interface(IsmxRefComponent)
     ['{6A6AE753-A9BB-4617-B65E-4BC0DD271966}']
     procedure Close;
-    procedure FreeForm;
+    //procedure FreeForm;
     function GetCfgID: Integer;
     function GetFormManager: IsmxFormManager;
     function GetID: Integer;

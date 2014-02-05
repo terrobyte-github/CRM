@@ -624,7 +624,7 @@ type
     FDatabaseIntf: IsmxDatabase;
     FDatabaseManagerIntf: IsmxDatabaseManager;
   protected
-    procedure FreeConnection;
+    //procedure FreeConnection;
     function GetConnected: Boolean;
     function GetDatabase: IsmxDatabase;
     function GetDatabaseManager: IsmxDatabaseManager;
@@ -3071,10 +3071,10 @@ begin
     FDatabaseIntf.Connected := False;
 end;
 
-procedure TsmxConnection.FreeConnection;
+{procedure TsmxConnection.FreeConnection;
 begin
   Free;
-end;
+end;}
 
 function TsmxConnection.GetConnected: Boolean;
 begin

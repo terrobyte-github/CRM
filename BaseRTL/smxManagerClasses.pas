@@ -825,7 +825,7 @@ var
   i: Integer;
 begin
   for i := ConnectionList.Count - 1 downto 0 do
-    (ConnectionList[i] as IsmxConnection).FreeConnection;
+    (ConnectionList[i] as IsmxConnection).GetReference.Free; //FreeConnection;
 end;
 
 function TsmxDatabaseManager.FindByName(const DatabaseName: String): IsmxConnection;
@@ -887,7 +887,7 @@ var
   i: Integer;
 begin
   for i := FormList.Count - 1 downto 0 do
-    (FormList[i] as IsmxForm).FreeForm;
+    (FormList[i] as IsmxForm).GetReference.Free; //FreeForm;
 end;
 
 function TsmxFormManager.FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxForm;
