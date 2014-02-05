@@ -3,7 +3,7 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes;
+  Classes, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes, smxBaseIntf;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -30,6 +30,10 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime; overload;
+function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
+function IsImplIntf(AObject: TObject; const AIntf: IsmxRefPersistent): Boolean;
+//function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
+function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
 
 implementation
 
@@ -279,6 +283,50 @@ end;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime;
 begin
   Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+end;
+
+function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
+begin
+  AController := nil;
+  if AImplementor is TsmxInterfacedPersistent then
+    if Assigned(TsmxInterfacedPersistent(AImplementor).Controller) then
+      AController := TsmxInterfacedPersistent(AImplementor).Controller.GetReference;
+  Result := Assigned(AController);
+end;
+
+function IsImplIntf(AObject: TObject; const AIntf: IsmxRefPersistent): Boolean;
+var
+  Intf: IsmxRefPersistent;
+begin
+  Result := Assigned(AObject) and AObject.GetInterface(IsmxRefPersistent, Intf)
+    and Assigned(AIntf) and (Intf.GetReference = AIntf.GetReference);
+end;
+
+{function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
+var
+  TypeDataDesc, TypeDataAns: PTypeData;
+begin
+  Result := False;
+  TypeDataDesc := TypInfo.GetTypeData(ADescendant);
+  TypeDataAns := TypInfo.GetTypeData(AAnsector);
+  while Assigned(TypeDataDesc) and not Result do
+  begin
+    Result := SysUtils.IsEqualGUID(TypeDataDesc^.Guid, TypeDataAns^.Guid);
+    TypeDataDesc := TypInfo.GetTypeData(TypeDataDesc^.IntfParent^);
+  end;
+end;}
+
+function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
+var
+  IntfTypeData: PTypeData;
+begin
+  Result := False;
+  IntfTypeData := TypInfo.GetTypeData(AIntfInfo);
+  while Assigned(IntfTypeData) and not Result do
+  begin
+    Result := SysUtils.IsEqualGUID(IntfTypeData^.Guid, IID);
+    IntfTypeData := TypInfo.GetTypeData(IntfTypeData^.IntfParent^);
+  end;
 end;
 
 end.

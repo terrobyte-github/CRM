@@ -31,78 +31,178 @@ type
     property Database: IsmxDatabase read FDatabaseIntf implements IsmxDatabase;
   end;
 
-  { TsmxSenseItem }
+  { TsmxFieldItem }
 
-  TsmxSenseList = class;
+  TsmxFieldList = class;
+  //TsmxCustomField = class;
 
-  TsmxSenseItem = class(TsmxKitItem)
+  TsmxFieldItem = class(TsmxKitItem)
   private
+    {FDataType: TsmxDataType;
+    FDisplayFormat: String;}
+    FField: IsmxField;
+    {FFieldIndex: Integer;
     FFieldName: String;
     FFieldSense: TsmxFieldSense;
-    function GetKit: TsmxSenseList;
-    procedure SetKit(Value: TsmxSenseList);
+    FPrecision: Integer;
+    FSize: Integer;}
+    function GetKit: TsmxFieldList;
+    procedure SetKit(Value: TsmxFieldList);
+  protected
+    procedure AddField; virtual;
+    procedure DelField; virtual;
+    function GetDataType: TsmxDataType; virtual;
+    function GetDisplayFormat: String; virtual;
+    function GetFieldIndex: Integer; virtual;
+    function GetFieldName: String; virtual;
+    function GetFieldSense: TsmxFieldSense; virtual;
+    function GetPrecision: Integer; virtual;
+    function GetSize: Integer; virtual;
+    procedure SetDataType(Value: TsmxDataType); virtual;
+    procedure SetDisplayFormat(const Value: String); virtual;
+    //procedure SetField(Value: TsmxCustomField); virtual;
+    procedure SetFieldIndex(Value: Integer); virtual;
+    procedure SetFieldName(const Value: String); virtual;
+    procedure SetFieldSense(Value: TsmxFieldSense); virtual;
+    //procedure SetIndex(Value: Integer); override;
+    procedure SetPrecision(Value: Integer); virtual;
+    procedure SetSize(Value: Integer); virtual;
+
+    property Field: IsmxField read FField write FField;
   public
+    constructor Create(AKit: TsmxKit); override;
+    destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); override;
 
-    property FieldName: String read FFieldName write FFieldName;
-    property FieldSense: TsmxFieldSense read FFieldSense write FFieldSense;
-    property Kit: TsmxSenseList read GetKit write SetKit;
+    property Kit: TsmxFieldList read GetKit write SetKit;
+  published
+    property DataType: TsmxDataType read GetDataType write SetDataType;
+    property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
+    property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
+    property FieldName: String read GetFieldName write SetFieldName;
+    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    property Precision: Integer read GetPrecision write SetPrecision;
+    property Size: Integer read GetSize write SetSize;
   end;
 
-  { TsmxSenseList }
+  //TsmxSenseItemClass = class of TsmxFieldItem;
 
-  TsmxSenseList = class(TsmxKit)
+  { TsmxFieldList }
+
+  TsmxCustomDataSet = class;
+
+  TsmxFieldList = class(TsmxKit)
   private
-    function GetItem(Index: Integer): TsmxSenseItem;
+    FInternalDataSet: TsmxCustomDataSet;
+    function GetItem(Index: Integer): TsmxFieldItem;
     //function GetSense(const FieldName: String): TsmxFieldSense;
-    procedure SetItem(Index: Integer; Value: TsmxSenseItem);
+    procedure SetItem(Index: Integer; Value: TsmxFieldItem);
     //procedure SetSense(const FieldName: String; Value: TsmxFieldSense);
+  protected
+    //procedure AddField(Item: TsmxFieldItem); virtual;
+    //procedure DelField(Item: TsmxFieldItem); virtual;
+
+    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write FInternalDataSet;
   public
-    function Add: TsmxSenseItem;
-    function FindByName(const FieldName: String): TsmxSenseItem;
-    //function IndexOfName(const FieldName: String): Integer;
+    //constructor Create(AItemClass: TsmxKitItemClass; InternalDataSet: TsmxCustomDataSet); reintroduce; overload; virtual;
+    function Add: TsmxFieldItem;
+    //procedure Delete(Index: Integer);
+    //function FindByName(const FieldName: String): TsmxFieldItem;
+    //function FindByField(const Field: IsmxField): TsmxFieldItem;
+    function IndexOfField(const Field: IsmxField): Integer;
+    function IndexOfFieldName(const FieldName: String): Integer;
+    //function IndexOfFieldIndex(FieldIndex: Integer): Integer;
     //function Insert(const FieldName: String): Integer;
     //function Remove(const FieldName: String): Integer;
 
     //property Senses[const FieldName: String]: TsmxFieldSense read GetSense write SetSense;
-    property Items[Index: Integer]: TsmxSenseItem read GetItem write SetItem; default;
+    property Items[Index: Integer]: TsmxFieldItem read GetItem write SetItem; default;
   end;
 
-  { TsmxLocationItem }
+  { TsmxParamItem }
 
-  TsmxLocationList = class;
+  TsmxParamList = class;
+  //TsmxCustomParam = class;
 
-  TsmxLocationItem = class(TsmxKitItem)
+  TsmxParamItem = class(TsmxKitItem)
   private
+    FParam: IsmxParam;
+    {FDataType: TsmxDataType;
+    FNumericScale: Integer;
     FParamLocation: TsmxParamLocation;
     FParamName: String;
-    function GetKit: TsmxLocationList;
-    procedure SetKit(Value: TsmxLocationList);
+    FParamType: TsmxParamType;
+    FParamValue: Variant;
+    FPrecision: Integer;
+    FSize: Integer;}
+    function GetKit: TsmxParamList;
+    procedure SetKit(Value: TsmxParamList);
+  protected
+    procedure AddParam; virtual;
+    procedure DelParam; virtual;
+    function GetDataType: TsmxDataType; virtual;
+    function GetNumericScale: Integer; virtual;
+    function GetParamIndex: Integer; virtual;
+    function GetParamLocation: TsmxParamLocation; virtual;
+    function GetParamName: String; virtual;
+    function GetParamType: TsmxParamType; virtual;
+    function GetParamValue: Variant; virtual;
+    function GetPrecision: Integer; virtual;
+    function GetSize: Integer; virtual;
+    procedure SetDataType(Value: TsmxDataType); virtual;
+    procedure SetNumericScale(Value: Integer); virtual;
+    procedure SetParamIndex(Value: Integer); virtual;
+    procedure SetParamLocation(Value: TsmxParamLocation); virtual;
+    procedure SetParamName(const Value: String); virtual;
+    procedure SetParamType(Value: TsmxParamType); virtual;
+    procedure SetParamValue(const Value: Variant); virtual;
+    procedure SetPrecision(Value: Integer); virtual;
+    procedure SetSize(Value: Integer); virtual;
+
+    property Param: IsmxParam read FParam write FParam;
   public
+    constructor Create(AKit: TsmxKit); override;
+    destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); override;
 
-    property Kit: TsmxLocationList read GetKit write SetKit;
-    property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
-    property ParamName: String read FParamName write FParamName;
+    property Kit: TsmxParamList read GetKit write SetKit;
+  published
+    property DataType: TsmxDataType read GetDataType write SetDataType;
+    property NumericScale: Integer read GetNumericScale write SetNumericScale;
+    property ParamIndex: Integer read GetParamIndex write SetParamIndex;
+    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
+    property ParamName: String read GetParamName write SetParamName;
+    property ParamType: TsmxParamType read GetParamType write SetParamType;
+    property ParamValue: Variant read GetParamValue write SetParamValue;
+    property Precision: Integer read GetPrecision write SetPrecision;
+    property Size: Integer read GetSize write SetSize;
   end;
 
-  { TsmxLocationList }
+  { TsmxParamList }
 
-  TsmxLocationList = class(TsmxKit)
+  TsmxParamList = class(TsmxKit)
   private
-    function GetItem(Index: Integer): TsmxLocationItem;
+    FInternalDataSet: TsmxCustomDataSet;
+    function GetItem(Index: Integer): TsmxParamItem;
     //function GetLocation(const ParamName: String): TsmxParamLocation;
-    procedure SetItem(Index: Integer; Value: TsmxLocationItem);
+    procedure SetItem(Index: Integer; Value: TsmxParamItem);
     //procedure SetLocation(const ParamName: String; Value: TsmxParamLocation);
+  protected
+    //procedure AddParam(Item: TsmxParamItem); virtual;
+    //procedure DelParam(Item: TsmxParamItem); virtual;
+
+    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write FInternalDataSet;
   public
-    function Add: TsmxLocationItem;
-    function FindByName(const ParamName: String): TsmxLocationItem;
-    //function IndexOfName(const ParamName: String): Integer;
+    function Add: TsmxParamItem;
+    //procedure Delete(Index: Integer);
+    function IndexOfParam(const Param: IsmxParam): Integer;
+    //function FindByName(const ParamName: String): TsmxParamItem;
+    function IndexOfParamName(const ParamName: String): Integer;
     //function InsertLocation(const ParamName: String; Location: TsmxParamLocation): Integer;
     //function RemoveLocation(const ParamName: String; Location: TsmxParamLocation): Integer;
 
     //property Locations[const ParamName: String]: TsmxParamLocation read GetLocation write SetLocation;
-    property Items[Index: Integer]: TsmxLocationItem read GetItem write SetItem; default;
+    property Items[Index: Integer]: TsmxParamItem read GetItem write SetItem; default;
   end;
 
   { TsmxCustomDatabase }
@@ -112,65 +212,97 @@ type
 
   { TsmxCustomField }
 
-  TsmxCustomDataSet = class;
-
   TsmxCustomField = class(TsmxInterfacedPersistent)
   private
-    FDataSetIntf: IsmxDataSet;
+    //FDataSetIntf: IsmxDataSet;
+    FDataType: TsmxDataType;
+    FDisplayFormat: String;
+    FFieldIndex: Integer;
+    FFieldName: String;
+    FFieldSense: TsmxFieldSense;
     FInternalDataSet: TsmxCustomDataSet;
-    FInternalRef: Pointer;
+    //FInternalRef: Pointer;
+    FPrecision: Integer;
+    //FSenseItem: TsmxFieldItem;
+    FSize: Integer;
   protected
     function GetDataSet: IsmxDataSet;
+    function GetDataType: TsmxDataType; virtual;
+    function GetDisplayFormat: String; virtual;
+    function GetFieldIndex: Integer; virtual;
     function GetFieldName: String; virtual;
     function GetFieldSense: TsmxFieldSense; virtual;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer; override;
+    function GetPrecision: Integer; virtual;
+    function GetSize: Integer; virtual;
+    procedure SetDataType(Value: TsmxDataType); virtual;
+    procedure SetDisplayFormat(const Value: String); virtual;
+    procedure SetFieldIndex(Value: Integer); virtual;
     procedure SetFieldName(const Value: String); virtual;
     procedure SetFieldSense(Value: TsmxFieldSense); virtual;
-    procedure SetInternalRef(Value: Pointer); virtual;
+    procedure SetInternalDataSet(Value: TsmxCustomDataSet); virtual;
+    //procedure SetInternalRef(Value: Pointer); virtual;
+    procedure SetPrecision(Value: Integer); virtual;
+    procedure SetSize(Value: Integer); virtual;
     //procedure SetIntfDataSet(Value: TsmxCustomDataSet); virtual;
+
+    //property SenseItem: TsmxFieldItem read FSenseItem write FSenseItem;
   public
-    constructor Create({AOwner: TComponent;} InternalDataSet: TsmxCustomDataSet); virtual;
+    //constructor Create({AOwner: TComponent;} InternalDataSet: TsmxCustomDataSet); virtual;
     destructor Destroy; override;
     procedure AssignField(const Source: IsmxField); virtual;
     procedure Clear; virtual;
 
     property DataSet: IsmxDataSet read GetDataSet;
+    property DataType: TsmxDataType read GetDataType write SetDataType;
+    property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
+    property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     property FieldName: String read GetFieldName write SetFieldName;
     property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
-    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet;
-    property InternalRef: Pointer read GetInternalRef write SetInternalRef;
+    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write SetInternalDataSet;
+    //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
+    property Precision: Integer read GetPrecision write SetPrecision;
+    property Size: Integer read GetSize write SetSize;
   end;
+
+  TsmxCustomFieldClass = class of TsmxCustomField;
 
   { TsmxField }
 
   TsmxField = class(TsmxCustomField, IsmxField)
   private
-    //FField: TField;
-    function GetField: TField;
+    FField: TField;
+    //function GetField: TField;
+    //function CreateField(DataType: TsmxDataType): TField;
+    procedure InstallDisplayFormat(const Format: String);
+    procedure InstallFieldName(const Name: String);
+    procedure InstallPrecision(Accuracy: Integer);
   protected
     //function GetDataSet: IsmxDataSet;
-    function GetDataType: TsmxDataType;
-    function GetDisplayFormat: String;
-    function GetFieldIndex: Integer;
-    function GetFieldName: String; override;
+    //function GetDataType: TsmxDataType;
+    //function GetDisplayFormat: String;
+    //function GetFieldIndex: Integer; override;
+    //function GetFieldName: String; override;
     //function GetFieldSense: TsmxFieldSense;
-    //function GetInternalRef: Pointer; override;
-    function GetPrecision: Integer;
-    function GetSize: Integer;
+    function GetInternalRef: Pointer; override;
+    //function GetPrecision: Integer;
+    //function GetSize: Integer;
     function GetValue: Variant;
     //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure SetDisplayFormat(const Value: String);
+    procedure SetDataType(Value: TsmxDataType); override;
+    procedure SetDisplayFormat(const Value: String); override;
     //procedure SetField(Value: TField); virtual;
-    procedure SetFieldIndex(Value: Integer);
+    procedure SetFieldIndex(Value: Integer); override;
     procedure SetFieldName(const Value: String); override;
     //procedure SetFieldSense(Value: TsmxFieldSense);
     //procedure SetInternalRef(Value: Pointer); override;
-    procedure SetPrecision(Value: Integer);
-    procedure SetSize(Value: Integer);
+    procedure SetPrecision(Value: Integer); override;
+    procedure SetSize(Value: Integer); override;
     procedure SetValue(const Value: Variant);
 
-    property Field: TField read GetField;
+    property Field: TField read FField write FField;//GetField;
   public
+    //destructor Destroy; override;
     procedure AssignField(const Source: IsmxField); override;
     procedure Clear; override;
     function IsBlob: Boolean;
@@ -179,14 +311,14 @@ type
     procedure SaveToStream(Stream: TStream);
 
     //property DataSet: IsmxDataSet read GetDataSet;
-    property DataType: TsmxDataType read GetDataType;
-    property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
+    //property DataType: TsmxDataType read GetDataType write SetDataType;
+    //property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     //property Field: TField read FField write SetField;
-    property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
+    //property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     //property FieldName: String read GetFieldName write SetFieldName;
     //property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
-    property Precision: Integer read GetPrecision write SetPrecision;
-    property Size: Integer read GetSize write SetSize;
+    //property Precision: Integer read GetPrecision write SetPrecision;
+    //property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
   end;
 
@@ -194,31 +326,63 @@ type
 
   TsmxCustomParam = class(TsmxInterfacedPersistent)
   private
-    FDataSetIntf: IsmxDataSet;
+    //FDataSetIntf: IsmxDataSet;
     FInternalDataSet: TsmxCustomDataSet;
-    FInternalRef: Pointer;
+    //FInternalRef: Pointer;
+    FDataType: TsmxDataType;
+    FNumericScale: Integer;
+    FParamIndex: Integer;
+    FParamLocation: TsmxParamLocation;
+    FParamName: String;
+    FParamType: TsmxParamType;
+    FPrecision: Integer;
+    FSize: Integer;
+    FValue: Variant;
   protected
     function GetDataSet: IsmxDataSet;
-    function GetInternalRef: Pointer;
+    //function GetInternalRef: Pointer; override;
+    function GetDataType: TsmxDataType; virtual;
+    function GetNumericScale: Integer; virtual;
+    function GetParamIndex: Integer; virtual;
     function GetParamLocation: TsmxParamLocation; virtual;
     function GetParamName: String; virtual;
-    procedure SetInternalRef(Value: Pointer); virtual;
+    function GetParamType: TsmxParamType; virtual;
+    function GetPrecision: Integer; virtual;
+    function GetSize: Integer; virtual;
+    function GetValue: Variant; virtual;
+    //procedure SetInternalRef(Value: Pointer); virtual;
+    procedure SetDataType(Value: TsmxDataType); virtual;
+    procedure SetInternalDataSet(Value: TsmxCustomDataSet); virtual;
+    procedure SetNumericScale(Value: Integer); virtual;
+    procedure SetParamIndex(Value: Integer); virtual;
     procedure SetParamLocation(Value: TsmxParamLocation); virtual;
     procedure SetParamName(const Value: String); virtual;
+    procedure SetParamType(Value: TsmxParamType); virtual;
+    procedure SetPrecision(Value: Integer); virtual;
+    procedure SetSize(Value: Integer); virtual;
+    procedure SetValue(const Value: Variant); virtual;
     //procedure SetIntfDataSet(Value: TsmxCustomDataSet); virtual;
   public
-    constructor Create(InternalDataSet: TsmxCustomDataSet); virtual;
+    //constructor Create(InternalDataSet: TsmxCustomDataSet); virtual;
     destructor Destroy; override;
     procedure AssignParam(const Source: IsmxParam); overload; virtual;
     procedure AssignParam(const Source: IsmxField); overload; virtual;
     procedure Clear; virtual;
 
     property DataSet: IsmxDataSet read GetDataSet;
-    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet;
-    property ParamName: String read GetParamName write SetParamName;
+    property DataType: TsmxDataType read GetDataType write SetDataType;
+    property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write SetInternalDataSet;
+    property NumericScale: Integer read GetNumericScale write SetNumericScale;
+    property ParamIndex: Integer read GetParamIndex write SetParamIndex;
     property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
-    property InternalRef: Pointer read GetInternalRef write SetInternalRef;
+    property ParamName: String read GetParamName write SetParamName;
+    property ParamType: TsmxParamType read GetParamType write SetParamType;
+    property Precision: Integer read GetPrecision write SetPrecision;
+    property Size: Integer read GetSize write SetSize;
+    property Value: Variant read GetValue write SetValue;
   end;
+
+  TsmxCustomParamClass = class of TsmxCustomParam;
 
   { TsmxNotificationParam }
 
@@ -237,9 +401,9 @@ type
 
   { TsmxReferenceItem }
 
-  TsmxReferenceList = class;
+  //TsmxReferenceList = class;
 
-  TsmxReferenceItem = class(TsmxKitItem)
+  {TsmxReferenceItem = class(TsmxKitItem)
   private
     FOwner: TsmxInterfacedPersistent;
     FReference: Pointer;
@@ -251,11 +415,11 @@ type
     property Owner: TsmxInterfacedPersistent read FOwner write FOwner;
     property Reference: Pointer read FReference write FReference;
     property Kit: TsmxReferenceList read GetKit write SetKit;
-  end;
+  end;}
 
   { TsmxReferenceList }
 
-  TsmxReferenceList = class(TsmxKit)
+  {TsmxReferenceList = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxReferenceItem;
     procedure SetItem(Index: Integer; Value: TsmxReferenceItem);
@@ -266,83 +430,136 @@ type
     procedure RemoveReference(Owner: TsmxInterfacedPersistent; Reference: Pointer);
 
     property Items[Index: Integer]: TsmxReferenceItem read GetItem write SetItem; default;
-  end;
+  end;}
 
   { TsmxCustomDataSet }
 
   TsmxCustomDataSet = class(TsmxInterfacedPersistent)
   private
-    FFieldReferenceList: TsmxReferenceList;
-    FLocationList: TsmxLocationList;
-    FParamReferenceList: TsmxReferenceList;
-    FSenseList: TsmxSenseList;
-    function GetFieldReferenceList: TsmxReferenceList;
-    function GetLocationList: TsmxLocationList;
-    function GetParamReferenceList: TsmxReferenceList;
-    function GetSenseList: TsmxSenseList;
-    procedure ClearFieldReferences;
-    procedure ClearParamReferences;
-    procedure ResetFieldReference(Reference: Pointer);
-    procedure ResetParamReference(Reference: Pointer);
+    FDatabaseIntf: IsmxDatabase;
+    //FFieldReferenceList: TsmxReferenceList;
+    FParamList: TsmxParamList;
+    //FParamReferenceList: TsmxReferenceList;
+    FFieldList: TsmxFieldList;
+    //FFieldIntfList: TInterfaceList;
+    //FParamIntfList: TInterfaceList;
+    //function GetFieldReferenceList: TsmxReferenceList;
+    function GetFieldList: TsmxFieldList;
+    function GetParamList: TsmxParamList;
+    procedure SetFieldList(Value: TsmxFieldList);
+    procedure SetParamList(Value: TsmxParamList);
+    //function GetParamReferenceList: TsmxReferenceList;
+    //function GetFieldIntfList: TInterfaceList;
+    //function GetParamIntfList: TInterfaceList;
+    //procedure ClearFieldReferences;
+    //procedure ClearParamReferences;
+    //procedure ResetFieldReference(Reference: Pointer);
+    //procedure ResetParamReference(Reference: Pointer);
   protected
-    procedure SetFieldReferenceList(Value: TsmxReferenceList); virtual;
-    procedure SetLocationList(Value: TsmxLocationList); virtual;
-    procedure SetParamReferenceList(Value: TsmxReferenceList); virtual;
-    procedure SetSenseList(Value: TsmxSenseList); virtual;
+    function GetDatabase: IsmxDatabase; //virtual;
+    procedure SetDatabase(const Value: IsmxDatabase); virtual;
+    function GetFieldIntfClass: TsmxCustomFieldClass; virtual;
+    function GetParamIntfClass: TsmxCustomParamClass; virtual;
+    //procedure SetFieldReferenceList(Value: TsmxReferenceList); virtual;
+    //procedure SetParamReferenceList(Value: TsmxReferenceList); virtual;
+    procedure CreateInternalField(Field: TsmxCustomField); virtual;
+    procedure CreateInternalParam(Param: TsmxCustomParam); virtual;
+    procedure DestroyInternalField(Field: TsmxCustomField); virtual;
+    procedure DestroyInternalParam(Param: TsmxCustomParam); virtual;
+    function GetField(Index: Integer): IsmxField; //virtual;
+    function GetFieldCount: Integer; //virtual;
+    procedure SetField(Index: Integer; const Value: IsmxField); //virtual;
+    function GetParamCount: Integer; //virtual;
+    function GetParam(Index: Integer): IsmxParam; //virtual;
+    procedure SetParam(Index: Integer; const Value: IsmxParam); //virtual;
+    //procedure SetDatabase(const Value: IsmxDatabase); virtual;
+
+    //property FieldIntfList: TInterfaceList read GetFieldIntfList;
+    //property ParamIntfList: TInterfaceList read GetParamIntfList;
   public
     destructor Destroy; override;
-    //function AddField(const FieldName: String): IsmxField; virtual;
-    //function AddParam(const ParamName: String): IsmxParam; virtual;
-    procedure ClearFields; virtual;
-    procedure ClearParams; virtual;
-    procedure DeleteField(const Field: IsmxField); virtual;
-    procedure DeleteParam(const Param: IsmxParam); virtual;
+    function AddField: IsmxField; //virtual;
+    function AddParam: IsmxParam; //virtual;
+    procedure AssignDataSet(const Source: IsmxDataSet); virtual;
+    procedure ClearFields; //virtual;
+    procedure ClearParams; //virtual;
+    procedure DeleteField(const Field: IsmxField); //virtual;
+    procedure DeleteParam(const Param: IsmxParam); //virtual;
+    function FieldByName(const FieldName: String): IsmxField;
+    function FindField(const FieldName: String): IsmxField;
+    function FindParam(const ParamName: String): IsmxParam;
+    function ParamByName(const ParamName: String): IsmxParam;
 
-    property FieldReferenceList: TsmxReferenceList read GetFieldReferenceList write SetFieldReferenceList;
-    property LocationList: TsmxLocationList read GetLocationList write SetLocationList;
-    property ParamReferenceList: TsmxReferenceList read GetParamReferenceList write SetParamReferenceList;
-    property SenseList: TsmxSenseList read GetSenseList write SetSenseList;
+    //property FieldReferenceList: TsmxReferenceList read GetFieldReferenceList write SetFieldReferenceList;
+    //property ParamReferenceList: TsmxReferenceList read GetParamReferenceList write SetParamReferenceList;
+    //property FieldIntfClass: TsmxCustomFieldClass read GetFieldIntfClass;
+    //property ParamIntfClass: TsmxCustomParamClass read GetParamIntfClass;
+    property Database: IsmxDatabase read GetDatabase write SetDatabase;
+    property FieldCount: Integer read GetFieldCount;
+    property FieldList: TsmxFieldList read GetFieldList write SetFieldList;
+    property Fields[Index: Integer]: IsmxField read GetField write SetField;
+    property ParamCount: Integer read GetParamCount;
+    property ParamList: TsmxParamList read GetParamList write SetParamList;
+    property Params[Index: Integer]: IsmxParam read GetParam write SetParam;
   end;
 
   { TsmxDataSet }
 
   TsmxDataSet = class(TsmxCustomDataSet)
   private
-    FDatabaseIntf: IsmxDatabase;
+    FPerformanceMode: TsmxPerformanceMode;
+    //FDatabaseIntf: IsmxDatabase;
     //FInternalDataSet: TDataSet;
+    //procedure ClearFieldRef;
+    //procedure ClearParamRef;
   protected
     function GetActive: Boolean;
-    function GetDatabase: IsmxDatabase;
-    function GetField(Index: Integer): IsmxField;
-    function GetFieldCount: Integer;
-    function GetFieldIntf(Field: TField): IsmxField; virtual;
+    //function GetDatabase: IsmxDatabase;
+    //function GetField(Index: Integer): IsmxField;
+    //function GetFieldCount: Integer;
+    //function GetFieldIntf(Field: TField): IsmxField; virtual;
     //function GetInternalDataSet: TDataSet; virtual;
     //function GetInternalDataSetClass: TComponentClass; virtual;
-    function GetInternalRef: Pointer; virtual;
+    //function GetInternalRef: Pointer; virtual;
+    //function GetFieldIntf: IsmxField; virtual;
+    //function GetParamIntf: IsmxParam; virtual;
+    function GetPerformanceMode: TsmxPerformanceMode;
     function GetRecordNo: Integer;
     function GetRecordCount: Integer;
+    //function GetSQL: TStrings; virtual;
+    //procedure SetSQL(Value: TStrings); virtual;
     procedure SetActive(Value: Boolean);
-    procedure SetDatabase(const Value: IsmxDatabase); virtual;
-    procedure SetField(Index: Integer; const Value: IsmxField);
+    //procedure SetDatabase(const Value: IsmxDatabase); virtual;
+    //procedure SetField(Index: Integer; const Value: IsmxField);
+    procedure SetPerformanceMode(Value: TsmxPerformanceMode);
     procedure SetRecordNo(Value: Integer);
+    procedure CreateInternalField(Field: TsmxCustomField); override;
+    procedure DestroyInternalField(Field: TsmxCustomField); override;
+    function GetFieldIntfClass: TsmxCustomFieldClass; override;
 
     //property InternalDataSet: TDataSet read GetInternalDataSet;
   public
     destructor Destroy; override;
     procedure Add;
-    function AddField(DataType: TsmxDataType): IsmxField; virtual;
+    //function AddField{(DataType: TsmxDataType)}: IsmxField; override;
+    //function AddParam: IsmxParam; override;
+    procedure AssignDataSet(const Source: IsmxDataSet); override;
     function Bof: Boolean;
     procedure Cancel;
-    procedure ClearFields; override;
-    procedure Close;
+    //procedure ClearFields; override;
+    //procedure ClearParams; override;
+    //function CreateField(DataType: TsmxDataType): TObject; override;
+    procedure Close; virtual;
     procedure Delete;
-    procedure DeleteField(const Field: IsmxField); override;
+    //procedure DeleteField(const Field: IsmxField); override;
+    //procedure DeleteParam(const Param: IsmxParam); override;
     //procedure DisableControls;
     procedure Edit;
     //procedure EnalbleControls;
     function Eof: Boolean;
-    function FieldByName(const FieldName: String): IsmxField;
-    function FindField(const FieldName: String): IsmxField;
+    procedure Execute; virtual;
+    //function FieldByName(const FieldName: String): IsmxField;
+    //function FindField(const FieldName: String): IsmxField;
     procedure First;
     //procedure FreeBookmark(Bookmark: Pointer);
     //function GetBookmark: Pointer;
@@ -352,16 +569,20 @@ type
     function Locate(const KeyFields: String; const KeyValues: Variant;
       Options: TsmxLocateOptions = []): Boolean;
     procedure Next;
-    procedure Open;
+    procedure Open; virtual;
+    procedure Perform;
     procedure Post;
     procedure Prior;
 
-    property Active: Boolean read GetActive write SetActive;
-    property Database: IsmxDatabase read GetDatabase write SetDatabase;
-    property FieldCount: Integer read GetFieldCount;
-    property Fields[Index: Integer]: IsmxField read GetField write SetField;
+    //property Database: IsmxDatabase read GetDatabase write SetDatabase;
+    //property FieldCount: Integer read GetFieldCount;
+    //property Fields[Index: Integer]: IsmxField read GetField write SetField;
     property RecordNo: Integer read GetRecordNo write SetRecordNo;
     property RecordCount: Integer read GetRecordCount;
+    //property SQL: TStrings read GetSQL write SetSQL;
+  published
+    property Active: Boolean read GetActive write SetActive stored False;
+    property PerformanceMode: TsmxPerformanceMode read GetPerformanceMode write SetPerformanceMode;
   end;
 
   { TsmxTargetRequest }
@@ -390,7 +611,7 @@ type
     function NewRequest(const SQLText: String = ''; RequestType: TsmxDataSetType = dstQuery;
       const DSFrom: IsmxDataSet = nil): IsmxDataSet;
     function PrepRequest(const Request: IsmxDataSet; Get: Boolean = True;
-      Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
+      {Perform: TsmxPerformanceMode = pmOpen;} const DSFrom: IsmxDataSet = nil): Boolean;
 
     property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
     property ParamValues[const Key: String]: Variant read GetValue write SetValue; default;
@@ -403,7 +624,7 @@ type
     FDatabaseIntf: IsmxDatabase;
     FDatabaseManagerIntf: IsmxDatabaseManager;
   protected
-    procedure FreeConnection;
+    //procedure FreeConnection;
     function GetConnected: Boolean;
     function GetDatabase: IsmxDatabase;
     function GetDatabaseManager: IsmxDatabaseManager;
@@ -444,36 +665,246 @@ begin
   FDatabaseIntf := GetDatabaseIntf;
 end;
 
-{ TsmxSenseItem }
+{ TsmxFieldItem }
 
-procedure TsmxSenseItem.Assign(Source: TsmxKitItem);
+constructor TsmxFieldItem.Create(AKit: TsmxKit);
 begin
-  if Source is TsmxSenseItem then
+  inherited Create(AKit);
+  AddField;
+end;
+
+destructor TsmxFieldItem.Destroy;
+begin
+  DelField;
+  inherited Destroy;
+end;
+
+procedure TsmxFieldItem.AddField;
+var
+  AField: TsmxCustomField;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.InternalDataSet) then
+      if not Assigned(FField) then
+      begin
+        AField := Kit.InternalDataSet.GetFieldIntfClass.Create;
+        AField.InternalDataSet := Kit.InternalDataSet;
+        FField := AField as IsmxField;
+      end;
+end;
+
+procedure TsmxFieldItem.DelField;
+var
+  AField: TsmxCustomField;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.InternalDataSet) then
+      if Assigned(FField) then
+      begin
+        AField := TsmxCustomField(FField.GetReference);
+        AField.InternalDataSet := nil;
+        FField := nil;
+      end;
+end;
+
+procedure TsmxFieldItem.Assign(Source: TsmxKitItem);
+begin
+  if Source is TsmxFieldItem then
   begin
-    FieldName := TsmxSenseItem(Source).FieldName;
-    FieldSense := TsmxSenseItem(Source).FieldSense;
+    DataType := TsmxFieldItem(Source).DataType;
+    DisplayFormat := TsmxFieldItem(Source).DisplayFormat;
+    FieldName := TsmxFieldItem(Source).FieldName;
+    FieldSense := TsmxFieldItem(Source).FieldSense;
+    Precision := TsmxFieldItem(Source).Precision;
+    Size := TsmxFieldItem(Source).Size;
   end else
     inherited Assign(Source);
 end;
 
-function TsmxSenseItem.GetKit: TsmxSenseList;
+function TsmxFieldItem.GetKit: TsmxFieldList;
 begin
-  Result := TsmxSenseList(inherited Kit);
+  Result := TsmxFieldList(inherited Kit);
 end;
 
-procedure TsmxSenseItem.SetKit(Value: TsmxSenseList);
+procedure TsmxFieldItem.SetKit(Value: TsmxFieldList);
 begin
+  if Assigned(Kit) then
+    DelField;
   inherited Kit := Value;
+  if Assigned(Kit) then
+    AddField;
 end;
 
-{ TsmxSenseList }
-
-function TsmxSenseList.Add: TsmxSenseItem;
+procedure TsmxFieldItem.SetDataType(Value: TsmxDataType);
 begin
-  Result := TsmxSenseItem(inherited Add);
+  if Assigned(FField) then
+    FField.DataType := Value;
 end;
 
-function TsmxSenseList.FindByName(const FieldName: String): TsmxSenseItem;
+procedure TsmxFieldItem.SetDisplayFormat(const Value: String);
+begin
+  if Assigned(FField) then
+    FField.DisplayFormat := Value;
+end;
+
+{procedure TsmxFieldItem.SetField(Value: TsmxCustomField);
+begin
+  if Assigned(FField) then
+    FField.SenseItem := nil;
+  FField := Value;
+  if Assigned(FField) then
+  begin
+    FField.SenseItem := Self;
+    FField.DataType := DataType;
+    FField.DisplayFormat := DisplayFormat;
+    FField.FieldIndex := FieldIndex;
+    FField.FieldName := FieldName;
+    FField.FieldSense := FieldSense;
+    FField.Precision := Precision;
+    FField.Size := Size;
+  end;
+end;}
+
+procedure TsmxFieldItem.SetFieldIndex(Value: Integer);
+begin
+  if Assigned(FField) then
+    FField.FieldIndex := Value;
+end;
+
+procedure TsmxFieldItem.SetFieldName(const Value: String);
+begin
+  if Assigned(FField) then
+    FField.FieldName := Value;
+end;
+
+procedure TsmxFieldItem.SetFieldSense(Value: TsmxFieldSense);
+begin
+  if Assigned(FField) then
+    FField.FieldSense := Value;
+end;
+
+procedure TsmxFieldItem.SetPrecision(Value: Integer);
+begin
+  if Assigned(FField) then
+    FField.Precision := Value;
+end;
+
+procedure TsmxFieldItem.SetSize(Value: Integer);
+begin
+  if Assigned(FField) then
+    FField.Size := Value;
+end;
+
+function TsmxFieldItem.GetDataType: TsmxDataType;
+begin
+  if Assigned(FField) then
+    Result := FField.DataType else
+    Result := ftUnknown;
+end;
+
+function TsmxFieldItem.GetDisplayFormat: String;
+begin
+  if Assigned(FField) then
+    Result := FField.DisplayFormat else
+    Result := '';
+end;
+
+function TsmxFieldItem.GetFieldIndex: Integer;
+begin
+  if Assigned(FField) then
+    Result := FField.FieldIndex else
+    Result := -1;
+end;
+
+function TsmxFieldItem.GetFieldName: String;
+begin
+  if Assigned(FField) then
+    Result := FField.FieldName else
+    Result := '';
+end;
+
+function TsmxFieldItem.GetFieldSense: TsmxFieldSense;
+begin
+  if Assigned(FField) then
+    Result := FField.FieldSense else
+    Result := fsGeneral;
+end;
+
+function TsmxFieldItem.GetPrecision: Integer;
+begin
+  if Assigned(FField) then
+    Result := FField.Precision else
+    Result := 0;
+end;
+
+function TsmxFieldItem.GetSize: Integer;
+begin
+  if Assigned(FField) then
+    Result := FField.Size else
+    Result := 0;
+end;
+
+{ TsmxFieldList }
+
+{constructor TsmxFieldList.Create(AItemClass: TsmxKitItemClass;
+  InternalDataSet: TsmxCustomDataSet);
+begin
+  Create(AItemClass);
+  FInternalDataSet := InternalDataSet;
+end;}
+
+function TsmxFieldList.Add: TsmxFieldItem;
+begin
+  Result := TsmxFieldItem(inherited Add);
+  //AddField(Result);
+end;
+
+{procedure TsmxFieldList.Delete(Index: Integer);
+begin
+  DelField(Items[Index]);
+  inherited Delete(Index);
+end;}
+
+{procedure TsmxFieldList.AddField(Item: TsmxFieldItem);
+var
+  Field: TsmxCustomField;
+begin
+  if Assigned(FInternalDataSet) then
+    if not Assigned(Item.Field) then
+    begin
+      Field := FInternalDataSet.GetFieldIntfClass.Create;
+      Field.InternalDataSet := FInternalDataSet;
+      Item.Field := Field as IsmxField;
+    end;
+end;
+
+procedure TsmxFieldList.DelField(Item: TsmxFieldItem);
+var
+  Field: TsmxCustomField;
+begin
+  if Assigned(FInternalDataSet) then
+    if Assigned(Item.Field) then
+    begin
+      Field := TsmxCustomField(Item.Field.GetReference);
+      Field.InternalDataSet := nil;
+      Item.Field := nil;
+    end;
+end;}
+
+{function TsmxFieldList.FindByField(const Field: IsmxField): TsmxFieldItem;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if Items[i].Field = Field then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;}
+
+{function TsmxFieldList.FindByName(const FieldName: String): TsmxFieldItem;
 var
   i: Integer;
 begin
@@ -484,21 +915,34 @@ begin
       Result := Items[i];
       Break;
     end;
-end;
+end;}
 
-function TsmxSenseList.GetItem(Index: Integer): TsmxSenseItem;
+function TsmxFieldList.GetItem(Index: Integer): TsmxFieldItem;
 begin
-  Result := TsmxSenseItem(inherited Items[Index]);
+  Result := TsmxFieldItem(inherited Items[Index]);
 end;
 
-procedure TsmxSenseList.SetItem(Index: Integer; Value: TsmxSenseItem);
+function TsmxFieldList.IndexOfField(const Field: IsmxField): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to Count - 1 do
+    if Items[i].Field = Field then
+    begin
+      Result := i;
+      Break;
+    end;
+end;
+
+procedure TsmxFieldList.SetItem(Index: Integer; Value: TsmxFieldItem);
 begin
   inherited Items[Index] := Value;
 end;
 
-{function TsmxSenseList.GetSense(const FieldName: String): TsmxFieldSense;
+{function TsmxFieldList.GetSense(const FieldName: String): TsmxFieldSense;
 var
-  Item: TsmxSenseItem;
+  Item: TsmxFieldItem;
 begin
   Item := FindByName(FieldName);
   if not Assigned(Item) then
@@ -509,9 +953,9 @@ begin
   Result := Item.FieldSense;
 end;
 
-procedure TsmxSenseList.SetSense(const FieldName: String; Value: TsmxFieldSense);
+procedure TsmxFieldList.SetSense(const FieldName: String; Value: TsmxFieldSense);
 var
-  Item: TsmxSenseItem;
+  Item: TsmxFieldItem;
 begin
   Item := FindByName(FieldName);
   if not Assigned(Item) then
@@ -522,7 +966,7 @@ begin
   Item.FieldSense := Value;
 end;}
 
-{function TsmxSenseList.IndexOfName(const FieldName: String): Integer;
+function TsmxFieldList.IndexOfFieldName(const FieldName: String): Integer;
 var
   i: Integer;
 begin
@@ -533,11 +977,24 @@ begin
       Result := i;
       Break;
     end;
+end;
+
+{function TsmxFieldList.IndexOfFieldIndex(FieldIndex: Integer): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to Count - 1 do
+    if Items[i].FieldIndex = FieldIndex then
+    begin
+      Result := i;
+      Break;
+    end;
 end;}
 
-{function TsmxSenseList.Insert(const FieldName: String): Integer;
+{function TsmxFieldList.Insert(const FieldName: String): Integer;
 var
-  Item: TsmxSenseItem;
+  Item: TsmxFieldItem;
 begin
   Result := IndexOfName(FieldName);
   if Result = -1 then
@@ -548,43 +1005,243 @@ begin
   end;
 end;
 
-function TsmxSenseList.Remove(const FieldName: String): Integer;
+function TsmxFieldList.Remove(const FieldName: String): Integer;
 begin
   Result := IndexOfName(FieldName);
   if Result <> -1 then
     Delete(Result);
 end;}
 
-{ TsmxLocationItem }
+{ TsmxParamItem }
 
-procedure TsmxLocationItem.Assign(Source: TsmxKitItem);
+constructor TsmxParamItem.Create(AKit: TsmxKit);
 begin
-  if Source is TsmxLocationItem then
+  inherited Create(AKit);
+  AddParam;
+end;
+
+destructor TsmxParamItem.Destroy;
+begin
+  DelParam;
+  inherited Destroy;
+end;
+
+procedure TsmxParamItem.AddParam;
+var
+  AParam: TsmxCustomParam;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.InternalDataSet) then
+      if not Assigned(FParam) then
+      begin
+        AParam := Kit.InternalDataSet.GetParamIntfClass.Create;
+        AParam.InternalDataSet := Kit.InternalDataSet;
+        FParam := AParam as IsmxParam;
+      end;
+end;
+
+procedure TsmxParamItem.DelParam;
+var
+  AParam: TsmxCustomParam;
+begin
+  if Assigned(Kit) then
+    if Assigned(Kit.InternalDataSet) then
+      if Assigned(FParam) then
+      begin
+        AParam := TsmxCustomParam(FParam.GetReference);
+        AParam.InternalDataSet := nil;
+        FParam := nil;
+      end;
+end;
+
+procedure TsmxParamItem.Assign(Source: TsmxKitItem);
+begin
+  if Source is TsmxParamItem then
   begin
-    ParamLocation := TsmxLocationItem(Source).ParamLocation;
-    ParamName := TsmxLocationItem(Source).ParamName;
+    DataType := TsmxParamItem(Source).DataType;
+    NumericScale := TsmxParamItem(Source).NumericScale;
+    ParamLocation := TsmxParamItem(Source).ParamLocation;
+    ParamName := TsmxParamItem(Source).ParamName;
+    ParamType := TsmxParamItem(Source).ParamType;
+    ParamValue := TsmxParamItem(Source).ParamValue;
+    Precision := TsmxParamItem(Source).Precision;
+    Size := TsmxParamItem(Source).Size;
   end else
     inherited Assign(Source);
 end;
 
-function TsmxLocationItem.GetKit: TsmxLocationList;
+function TsmxParamItem.GetDataType: TsmxDataType;
 begin
-  Result := TsmxLocationList(inherited Kit);
+  if Assigned(FParam) then
+    Result := FParam.DataType else
+    Result := ftUnknown;
 end;
 
-procedure TsmxLocationItem.SetKit(Value: TsmxLocationList);
+function TsmxParamItem.GetKit: TsmxParamList;
 begin
+  Result := TsmxParamList(inherited Kit);
+end;
+
+function TsmxParamItem.GetNumericScale: Integer;
+begin
+  if Assigned(FParam) then
+    Result := FParam.NumericScale else
+    Result := 0;
+end;
+
+function TsmxParamItem.GetParamLocation: TsmxParamLocation;
+begin
+  if Assigned(FParam) then
+    Result := FParam.ParamLocation else
+    Result := plConst;
+end;
+
+function TsmxParamItem.GetParamName: String;
+begin
+  if Assigned(FParam) then
+    Result := FParam.ParamName else
+    Result := '';
+end;
+
+function TsmxParamItem.GetParamType: TsmxParamType;
+begin
+  if Assigned(FParam) then
+    Result := FParam.ParamType else
+    Result := ptUnknown;
+end;
+
+function TsmxParamItem.GetParamValue: Variant;
+begin
+  if Assigned(FParam) then
+    Result := FParam.Value else
+    Result := Variants.Null;
+end;
+
+function TsmxParamItem.GetPrecision: Integer;
+begin
+  if Assigned(FParam) then
+    Result := FParam.Precision else
+    Result := 0;
+end;
+
+function TsmxParamItem.GetSize: Integer;
+begin
+  if Assigned(FParam) then
+    Result := FParam.Size else
+    Result := 0;
+end;
+
+procedure TsmxParamItem.SetDataType(Value: TsmxDataType);
+begin
+  if Assigned(FParam) then
+    FParam.DataType := Value;
+end;
+
+procedure TsmxParamItem.SetKit(Value: TsmxParamList);
+begin
+  if Assigned(Kit) then
+    DelParam;
   inherited Kit := Value;
+  if Assigned(Kit) then
+    AddParam;
 end;
 
-{ TsmxLocationList }
-
-function TsmxLocationList.Add: TsmxLocationItem;
+procedure TsmxParamItem.SetNumericScale(Value: Integer);
 begin
-  Result := TsmxLocationItem(inherited Add);
+  if Assigned(FParam) then
+    FParam.NumericScale := Value;
 end;
 
-function TsmxLocationList.FindByName(const ParamName: String): TsmxLocationItem;
+procedure TsmxParamItem.SetParamLocation(Value: TsmxParamLocation);
+begin
+  if Assigned(FParam) then
+    FParam.ParamLocation := Value;
+end;
+
+procedure TsmxParamItem.SetParamName(const Value: String);
+begin
+  if Assigned(FParam) then
+    FParam.ParamName := Value;
+end;
+
+procedure TsmxParamItem.SetParamType(Value: TsmxParamType);
+begin
+  if Assigned(FParam) then
+    FParam.ParamType := Value;
+end;
+
+procedure TsmxParamItem.SetParamValue(const Value: Variant);
+begin
+  if Assigned(FParam) then
+    FParam.Value := Value;
+end;
+
+procedure TsmxParamItem.SetPrecision(Value: Integer);
+begin
+  if Assigned(FParam) then
+    FParam.Precision := Value;
+end;
+
+procedure TsmxParamItem.SetSize(Value: Integer);
+begin
+  if Assigned(FParam) then
+    FParam.Size := Value;
+end;
+
+function TsmxParamItem.GetParamIndex: Integer;
+begin
+  if Assigned(FParam) then
+    Result := FParam.ParamIndex else
+    Result := -1;
+end;
+
+procedure TsmxParamItem.SetParamIndex(Value: Integer);
+begin
+  if Assigned(FParam) then
+    FParam.ParamIndex := Value;
+end;
+
+{ TsmxParamList }
+
+function TsmxParamList.Add: TsmxParamItem;
+begin
+  Result := TsmxParamItem(inherited Add);
+  //AddParam(Result);
+end;
+
+{procedure TsmxParamList.Delete(Index: Integer);
+begin
+  //DelParam(Items[Index]);
+  inherited Delete(Index);
+end;}
+
+{procedure TsmxParamList.AddParam(Item: TsmxParamItem);
+var
+  Param: TsmxCustomParam;
+begin
+  if Assigned(FInternalDataSet) then
+    if not Assigned(Item.Param) then
+    begin
+      Param := FInternalDataSet.GetParamIntfClass.Create;
+      Param.InternalDataSet := FInternalDataSet;
+      Item.Param := Param as IsmxParam;
+    end;
+end;
+
+procedure TsmxParamList.DelParam(Item: TsmxParamItem);
+var
+  Param: TsmxCustomParam;
+begin
+  if Assigned(FInternalDataSet) then
+    if Assigned(Item.Param) then
+    begin
+      Param := TsmxCustomParam(Item.Param.GetReference);
+      Param.InternalDataSet := nil;
+      Item.Param := nil;
+    end;
+end;}
+
+{function TsmxParamList.FindByName(const ParamName: String): TsmxParamItem;
 var
   i: Integer;
 begin
@@ -595,21 +1252,34 @@ begin
       Result := Items[i];
       Break;
     end;
-end;
+end;}
 
-function TsmxLocationList.GetItem(Index: Integer): TsmxLocationItem;
+function TsmxParamList.GetItem(Index: Integer): TsmxParamItem;
 begin
-  Result := TsmxLocationItem(inherited Items[Index]);
+  Result := TsmxParamItem(inherited Items[Index]);
 end;
 
-procedure TsmxLocationList.SetItem(Index: Integer; Value: TsmxLocationItem);
+function TsmxParamList.IndexOfParam(const Param: IsmxParam): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to Count - 1 do
+    if Items[i].Param = Param then
+    begin
+      Result := i;
+      Break;
+    end;
+end;
+
+procedure TsmxParamList.SetItem(Index: Integer; Value: TsmxParamItem);
 begin
   inherited Items[Index] := Value;
 end;
 
-{function TsmxLocationList.GetLocation(const ParamName: String): TsmxParamLocation;
+{function TsmxParamList.GetLocation(const ParamName: String): TsmxParamLocation;
 var
-  Item: TsmxLocationItem;
+  Item: TsmxParamItem;
 begin
   Item := FindByName(ParamName);
   if not Assigned(Item) then
@@ -620,9 +1290,9 @@ begin
   Result := Item.ParamLocation;
 end;
 
-procedure TsmxLocationList.SetLocation(const ParamName: String; Value: TsmxParamLocation);
+procedure TsmxParamList.SetLocation(const ParamName: String; Value: TsmxParamLocation);
 var
-  Item: TsmxLocationItem;
+  Item: TsmxParamItem;
 begin
   Item := FindByName(ParamName);
   if not Assigned(Item) then
@@ -633,7 +1303,7 @@ begin
   Item.ParamLocation := Value;
 end;}
 
-{function TsmxLocationList.IndexOfName(const ParamName: String): Integer;
+function TsmxParamList.IndexOfParamName(const ParamName: String): Integer;
 var
   i: Integer;
 begin
@@ -644,9 +1314,9 @@ begin
       Result := i;
       Break;
     end;
-end;}
+end;
 
-{procedure TsmxLocationList.Insert(const ParamName: String);
+{procedure TsmxParamList.Insert(const ParamName: String);
 var
   CurIndex: Integer;
 begin
@@ -655,7 +1325,7 @@ begin
     Add.ParamName := ParamName;
 end;
 
-procedure TsmxLocationList.Remove(const ParamName: String);
+procedure TsmxParamList.Remove(const ParamName: String);
 var
   CurIndex: Integer;
 begin
@@ -666,77 +1336,82 @@ end;}
 
 { TsmxCustomField }
 
-constructor TsmxCustomField.Create({AOwner: TComponent;} InternalDataSet: TsmxCustomDataSet);
+(*constructor TsmxCustomField.Create({AOwner: TComponent;} InternalDataSet: TsmxCustomDataSet);
 begin
   //inherited Create(AOwner);
   FInternalDataSet := InternalDataSet;
-  FDataSetIntf := InternalDataSet as IsmxDataSet;
-end;
+  // так нельзя, будет зацикливание ссылок
+  //if Assigned(FInternalDataSet) then
+    //FDataSetIntf := FInternalDataSet as IsmxDataSet;
+end;*)
 
 destructor TsmxCustomField.Destroy;
 begin
-  FDataSetIntf := nil;
-  SetInternalRef(nil);
+  //FDataSetIntf := nil;
+  //SetInternalRef(nil);
+  SetInternalDataSet(nil);
   inherited Destroy;
 end;
 
 procedure TsmxCustomField.AssignField(const Source: IsmxField);
 begin
   if Assigned(Source) then
-    FieldSense := Source.FieldSense
-  else
+  begin
+    DataType := Source.DataType;
+    DisplayFormat := Source.DisplayFormat;
+    FieldName := Source.FieldName;
+    FieldSense := Source.FieldSense;
+    Precision := Source.Precision;
+    Size := Source.Size;
+  end else
     Clear;
 end;
 
 procedure TsmxCustomField.Clear;
 begin
+  DataType := ftUnknown;
+  DisplayFormat := '';
+  FieldName := '';
   FieldSense := fsGeneral;
+  Precision := 0;
+  Size := 0;
 end;
 
 function TsmxCustomField.GetDataSet: IsmxDataSet;
 begin
-  Result := FDataSetIntf;
+  if Assigned(FInternalDataSet) then
+    Result := {FDataSetIntf; //}FInternalDataSet as IsmxDataSet
+  else
+    Result := nil;
 end;
 
 function TsmxCustomField.GetFieldName: String;
 begin
-  Result := '';
+  Result := FFieldName;
 end;
 
 procedure TsmxCustomField.SetFieldName(const Value: String);
-var
-  Item: TsmxSenseItem;
 begin
-  Item := FInternalDataSet.SenseList.FindByName(FieldName);
-  if not Assigned(Item) then
-    Item := FInternalDataSet.SenseList.Add;
-  Item.FieldName := Value;
+  FFieldName := Value;
 end;
 
 function TsmxCustomField.GetFieldSense: TsmxFieldSense;
-var
-  Item: TsmxSenseItem;
 begin
-  Item := FInternalDataSet.SenseList.FindByName(FieldName);
-  if not Assigned(Item) then
-  begin
-    Item := FInternalDataSet.SenseList.Add;
-    Item.FieldName := FieldName;
-  end;
-  Result := Item.FieldSense;
+  Result := FFieldSense;
 end;
 
 procedure TsmxCustomField.SetFieldSense(Value: TsmxFieldSense);
-var
-  Item: TsmxSenseItem;
 begin
-  Item := FInternalDataSet.SenseList.FindByName(FieldName);
-  if not Assigned(Item) then
-  begin
-    Item := FInternalDataSet.SenseList.Add;
-    Item.FieldName := FieldName;
-  end;
-  Item.FieldSense := Value;
+  FFieldSense := Value;
+end;
+
+procedure TsmxCustomField.SetInternalDataSet(Value: TsmxCustomDataSet);
+begin
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.DestroyInternalField(Self);
+  FInternalDataSet := Value;
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.CreateInternalField(Self);
 end;
 
 {procedure TsmxCustomField.SetIntfDataSet(Value: TsmxCustomDataSet);
@@ -744,34 +1419,104 @@ begin
   FIntfDataSet := Value;
 end;}
 
-function TsmxCustomField.GetInternalRef: Pointer;
+{function TsmxCustomField.GetInternalRef: Pointer;
 begin
   Result := FInternalRef;
+end;}
+
+{procedure TsmxCustomField.SetInternalRef(Value: Pointer);
+begin
+  //if Assigned(FInternalRef) then
+    //FInternalDataSet.FieldReferenceList.RemoveReference(Self, FInternalRef);
+  FInternalRef := Value;
+  //if Assigned(FInternalRef) then
+    //FInternalDataSet.FieldReferenceList.InsertReference(Self, FInternalRef);
+end;}
+
+function TsmxCustomField.GetDataType: TsmxDataType;
+begin
+  Result := FDataType;
 end;
 
-procedure TsmxCustomField.SetInternalRef(Value: Pointer);
+function TsmxCustomField.GetDisplayFormat: String;
 begin
-  if Assigned(FInternalRef) then
-    FInternalDataSet.FieldReferenceList.RemoveReference(Self, FInternalRef);
-  FInternalRef := Value;
-  if Assigned(FInternalRef) then
-    FInternalDataSet.FieldReferenceList.InsertReference(Self, FInternalRef);
+  Result := FDisplayFormat;
+end;
+
+function TsmxCustomField.GetFieldIndex: Integer;
+begin
+  //Result := FFieldIndex;
+  if Assigned(FInternalDataSet) then
+    Result := FInternalDataSet.FieldList.IndexOfField(Self as IsmxField)
+  else
+    Result := FFieldIndex;
+end;
+
+function TsmxCustomField.GetPrecision: Integer;
+begin
+  Result := FPrecision;
+end;
+
+function TsmxCustomField.GetSize: Integer;
+begin
+  Result := FSize;
+end;
+
+procedure TsmxCustomField.SetDataType(Value: TsmxDataType);
+begin
+  FDataType := Value;
+end;
+
+procedure TsmxCustomField.SetDisplayFormat(const Value: String);
+begin
+  FDisplayFormat := Value;
+end;
+
+procedure TsmxCustomField.SetFieldIndex(Value: Integer);
+begin
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.FieldList[
+      FInternalDataSet.FieldList.IndexOfField(Self as IsmxField)].ItemIndex := Value
+  else
+    FFieldIndex := Value;
+end;
+
+procedure TsmxCustomField.SetPrecision(Value: Integer);
+begin
+  FPrecision := Value;
+end;
+
+procedure TsmxCustomField.SetSize(Value: Integer);
+begin
+  FSize := Value;
 end;
 
 { TsmxField }
+
+{destructor TsmxField.Destroy;
+begin
+  if Assigned(FField) then
+    FField.Free;
+  inherited Destroy;
+end;}
 
 procedure TsmxField.AssignField(const Source: IsmxField);
 begin
   inherited AssignField(Source);
   if Assigned(Source) then
     Value := Source.Value;
+  //else
+    //Clear;
 end;
 
 procedure TsmxField.Clear;
 begin
   inherited Clear;
-  if Assigned(Field) then
-    Field.Clear;
+  //if Assigned(Field) then
+    //Field.Clear;
+  Value := Variants.Null;
+  //if Assigned(Field) then
+    //Field.Clear;
 end;
 
 {function TsmxField.GetDataSet: IsmxDataSet;
@@ -781,14 +1526,54 @@ begin
     Result := nil;
 end;}
 
-function TsmxField.GetDataType: TsmxDataType;
+{function TsmxField.GetDataType: TsmxDataType;
 begin
   if Assigned(Field) then
     Result := Field.DataType else
     Result := ftUnknown;
+end;}
+
+procedure TsmxField.SetDataType(Value: TsmxDataType);
+begin
+  if DataType <> Value then
+  begin
+    if Assigned(InternalDataSet) then
+      InternalDataSet.DestroyInternalField(Self);
+    inherited SetDataType(Value);
+    if Assigned(InternalDataSet) then
+    begin
+      InternalDataSet.CreateInternalField(Self);
+      if Assigned(FField) then
+      begin
+        InstallDisplayFormat(DisplayFormat);
+        //FField.Index := FieldIndex;
+        InstallFieldName(FieldName);
+        InstallPrecision(Precision);
+        FField.Size := Size;
+      end;
+    end;
+
+    {if Assigned(FField) then
+    begin
+      FField.Free;
+      FField := nil;
+    end;
+    if (Value <> ftUnknown) and Assigned(InternalDataSet) then
+    begin
+      FField := CreateField(Value);
+      if Assigned(FField) then
+      begin
+        InstallDisplayFormat(DisplayFormat);
+        FField.Index := FieldIndex;
+        FField.FieldName := FieldName;
+        InstallPrecision(Precision);
+        FField.Size := Size;
+      end;
+    end;}
+  end;
 end;
 
-function TsmxField.GetDisplayFormat: String;
+{function TsmxField.GetDisplayFormat: String;
 begin
   if Field is TAggregateField then
     Result := TAggregateField(Field).DisplayFormat else
@@ -799,80 +1584,77 @@ begin
   if Field is TSQLTimeStampField then
     Result := TSQLTimeStampField(Field).DisplayFormat else
     Result := '';
-end;
+end;}
 
 procedure TsmxField.SetDisplayFormat(const Value: String);
 begin
-  if Field is TAggregateField then
-    TAggregateField(Field).DisplayFormat := Value else
-  if Field is TDateTimeField then
-    TDateTimeField(Field).DisplayFormat := Value else
-  if Field is TNumericField then
-    TNumericField(Field).DisplayFormat := Value else
-  if Field is TSQLTimeStampField then
-    TSQLTimeStampField(Field).DisplayFormat := Value;
+  inherited SetDisplayFormat(Value);
+  if Assigned(Field) then
+    InstallDisplayFormat(Value);
 end;
 
-function TsmxField.GetField: TField;
+{function TsmxField.GetField: TField;
 begin
   if TObject(InternalRef) is TField then
     Result := TField(InternalRef) else
     Result := nil;
-end;
+end;}
 
-function TsmxField.GetFieldIndex: Integer;
+{function TsmxField.GetFieldIndex: Integer;
 begin
   if Assigned(Field) then
-    Result := Field.Index else
-    Result := -1;
-end;
+    Result := Field.Index
+  else
+    Result := inherited GetFieldIndex;
+end;}
 
 procedure TsmxField.SetFieldIndex(Value: Integer);
 begin
+  inherited SetFieldIndex(Value);
   if Assigned(Field) then
     Field.Index := Value;
 end;
 
-function TsmxField.GetFieldName: String;
+{function TsmxField.GetFieldName: String;
 begin
   Result := inherited GetFieldName;
   if Assigned(Field) then
     Result := Field.FieldName;
-end;
+end;}
 
 procedure TsmxField.SetFieldName(const Value: String);
 begin
   inherited SetFieldName(Value);
   if Assigned(Field) then
-    Field.FieldName := Value;
+    InstallFieldName(Value);
 end;
 
-function TsmxField.GetPrecision: Integer;
+{function TsmxField.GetPrecision: Integer;
 begin
   if Field is TBCDField then
     Result := TBCDField(Field).Precision else
   if Field is TFMTBCDField then
     Result := TFMTBCDField(Field).Precision else
     Result := 0;
-end;
+end;}
 
 procedure TsmxField.SetPrecision(Value: Integer);
 begin
-  if Field is TBCDField then
-    TBCDField(Field).Precision := Value else
-  if Field is TFMTBCDField then
-    TFMTBCDField(Field).Precision := Value;
+  inherited SetPrecision(Value);
+  if Assigned(Field) then
+    InstallPrecision(Value);
 end;
 
-function TsmxField.GetSize: Integer;
+{function TsmxField.GetSize: Integer;
 begin
   if Assigned(Field) then
     Result := Field.Size else
     Result := 0;
-end;
+end;}
 
 procedure TsmxField.SetSize(Value: Integer);
 begin
+  inherited SetSize(Value);
   if Assigned(Field) then
     Field.Size := Value;
 end;
@@ -903,10 +1685,10 @@ begin
     IntfDataSet.SenseList.Senses[FField.FieldName] := Value;
 end;}
 
-{function TsmxField.GetInternalRef: Pointer;
+function TsmxField.GetInternalRef: Pointer;
 begin
-  Result := Pointer(FField);
-end;}
+  Result := Pointer(Field);
+end;
 
 {procedure TsmxField.SetInternalRef(Value: Pointer);
 begin
@@ -961,48 +1743,119 @@ begin
     FField.FreeNotification(Self);
 end;}
 
+procedure TsmxField.InstallDisplayFormat(const Format: String);
+begin
+  if Field is TAggregateField then
+    TAggregateField(Field).DisplayFormat := Format else
+  if Field is TDateTimeField then
+    TDateTimeField(Field).DisplayFormat := Format else
+  if Field is TNumericField then
+    TNumericField(Field).DisplayFormat := Format else
+  if Field is TSQLTimeStampField then
+    TSQLTimeStampField(Field).DisplayFormat := Format;
+end;
+
+procedure TsmxField.InstallFieldName(const Name: String);
+begin
+  if Assigned(Field) and (Name <> '') then
+    Field.FieldName := Name;
+end;
+
+procedure TsmxField.InstallPrecision(Accuracy: Integer);
+begin
+  if Field is TBCDField then
+    TBCDField(Field).Precision := Accuracy else
+  if Field is TFMTBCDField then
+    TFMTBCDField(Field).Precision := Accuracy;
+end;
+
+{function TsmxField.CreateField(DataType: TsmxDataType): TField;
+var
+  FieldDef: TFieldDef;
+  Field: TField;
+begin
+  Result := nil;
+  if Assigned(InternalDataSet) then
+    if TObject(InternalDataSet.GetInternalRef) is TDataSet then
+    begin
+      FieldDef := TDataSet(InternalDataSet.GetInternalRef).FieldDefs.AddFieldDef;
+      FieldDef.DataType := DataType;
+      Field := FieldDef.CreateField(TDataSet(InternalDataSet.GetInternalRef));
+      Result := Field;
+    end;
+end;}
+
 { TsmxCustomParam }
 
-constructor TsmxCustomParam.Create(InternalDataSet: TsmxCustomDataSet);
+(*constructor TsmxCustomParam.Create(InternalDataSet: TsmxCustomDataSet);
 begin
   FInternalDataSet := InternalDataSet;
-  FDataSetIntf := InternalDataSet as IsmxDataSet;
-end;
+  {if Assigned(FInternalDataSet) then
+    FDataSetIntf := FInternalDataSet as IsmxDataSet;}
+end;*)
 
 destructor TsmxCustomParam.Destroy;
 begin
-  FDataSetIntf := nil;
-  SetInternalRef(nil);
+  //FDataSetIntf := nil;
+  //SetInternalRef(nil);
+  SetInternalDataSet(nil);
   inherited Destroy;
 end;
 
 procedure TsmxCustomParam.AssignParam(const Source: IsmxParam);
 begin
   if Assigned(Source) then
-    ParamLocation := Source.ParamLocation
-  else
+  begin
+    DataType := Source.DataType;
+    NumericScale := Source.NumericScale;
+    ParamLocation := Source.ParamLocation;
+    ParamName := Source.ParamName;
+    ParamType := Source.ParamType;
+    Precision := Source.Precision;
+    Size := Source.Size;
+    Value := Source.Value;
+  end else
     Clear;
 end;
 
 procedure TsmxCustomParam.AssignParam(const Source: IsmxField);
 begin
-  if not Assigned(Source) then
+  if Assigned(Source) then
+  begin
+    DataType := Source.DataType;
+    if Source.DataType in [ftBCD, ftFMTBcd] then
+      NumericScale := Source.Size;
+    ParamName := Source.FieldName;
+    Precision := Source.Precision;
+    Size := Source.Size;
+    Value := Source.Value;
+  end else
     Clear;
 end;
 
 procedure TsmxCustomParam.Clear;
 begin
+  DataType := ftUnknown;
+  NumericScale := 0;
   ParamLocation := plConst;
+  ParamName := '';
+  ParamType := ptUnknown;
+  Precision := 0;
+  Size := 0;
+  Value := Variants.Null;
 end;
 
 function TsmxCustomParam.GetDataSet: IsmxDataSet;
 begin
-  Result := FDataSetIntf;
+  if Assigned(FInternalDataSet) then
+    Result := {FDataSetIntf; //}FInternalDataSet as IsmxDataSet
+  else
+    Result := nil;
 end;
 
-function TsmxCustomParam.GetParamLocation: TsmxParamLocation;
+{function TsmxCustomParam.GetParamLocation: TsmxParamLocation;
 var
-  Item: TsmxLocationItem;
+  Item: TsmxParamItem;
 begin
   Item := FInternalDataSet.LocationList.FindByName(ParamName);
   if not Assigned(Item) then
@@ -1011,34 +1864,75 @@ begin
     Item.ParamName := ParamName;
   end;
   Result := Item.ParamLocation;
-end;
+end;}
 
 procedure TsmxCustomParam.SetParamLocation(Value: TsmxParamLocation);
-var
-  Item: TsmxLocationItem;
+//var
+  //Item: TsmxParamItem;
 begin
-  Item := FInternalDataSet.LocationList.FindByName(ParamName);
+  {Item := FInternalDataSet.LocationList.FindByName(ParamName);
   if not Assigned(Item) then
   begin
     Item := FInternalDataSet.LocationList.Add;
     Item.ParamName := ParamName;
   end;
-  Item.ParamLocation := Value;
+  Item.ParamLocation := Value;}
+  FParamLocation := Value;
 end;
 
-function TsmxCustomParam.GetParamName: String;
+{function TsmxCustomParam.GetParamName: String;
 begin
   Result := '';
-end;
+end;}
 
 procedure TsmxCustomParam.SetParamName(const Value: String);
-var
-  Item: TsmxLocationItem;
+//var
+  //Item: TsmxParamItem;
 begin
-  Item := FInternalDataSet.LocationList.FindByName(ParamName);
+  {Item := FInternalDataSet.LocationList.FindByName(ParamName);
   if not Assigned(Item) then
     Item := FInternalDataSet.LocationList.Add;
-  Item.ParamName := Value;
+  Item.ParamName := Value;}
+  FParamName := Value;
+end;
+
+procedure TsmxCustomParam.SetDataType(Value: TsmxDataType);
+begin
+  FDataType := Value;
+end;
+
+procedure TsmxCustomParam.SetInternalDataSet(Value: TsmxCustomDataSet);
+begin
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.DestroyInternalParam(Self);
+  FInternalDataSet := Value;
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.CreateInternalParam(Self);  
+end;
+
+procedure TsmxCustomParam.SetNumericScale(Value: Integer);
+begin
+  FNumericScale := Value;
+end;
+
+procedure TsmxCustomParam.SetParamType(Value: TsmxParamType);
+begin
+  FParamType := Value;
+end;
+
+procedure TsmxCustomParam.SetPrecision(Value: Integer);
+begin
+  FPrecision := Value;
+end;
+
+procedure TsmxCustomParam.SetSize(Value: Integer);
+begin
+  FSize := Value;
+end;
+
+procedure TsmxCustomParam.SetValue(const Value: Variant);
+begin
+  FValue := Value;
 end;
 
 {procedure TsmxCustomParam.SetIntfDataSet(Value: TsmxCustomDataSet);
@@ -1072,7 +1966,7 @@ begin
     Result := FFreeNotificationIntf.QueryInterface(IID, Obj);
 end;}
 
-function TsmxCustomParam.GetInternalRef: Pointer;
+{function TsmxCustomParam.GetInternalRef: Pointer;
 begin
   Result := FInternalRef;
 end;
@@ -1084,17 +1978,78 @@ begin
   FInternalRef := Value;
   if Assigned(FInternalRef) then
     FInternalDataSet.ParamReferenceList.InsertReference(Self, FInternalRef);
+end;}
+
+function TsmxCustomParam.GetDataType: TsmxDataType;
+begin
+  Result := FDataType;
+end;
+
+function TsmxCustomParam.GetNumericScale: Integer;
+begin
+  Result := FNumericScale;
+end;
+
+function TsmxCustomParam.GetParamIndex: Integer;
+begin
+  if Assigned(FInternalDataSet) then
+    Result := FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)
+  else
+    Result := FParamIndex;
+end;
+
+function TsmxCustomParam.GetParamLocation: TsmxParamLocation;
+begin
+  Result := FParamLocation;
+end;
+
+function TsmxCustomParam.GetParamName: String;
+begin
+  Result := FParamName;
+end;
+
+function TsmxCustomParam.GetParamType: TsmxParamType;
+begin
+  Result := FParamType;
+end;
+
+function TsmxCustomParam.GetPrecision: Integer;
+begin
+  Result := FPrecision;
+end;
+
+function TsmxCustomParam.GetSize: Integer;
+begin
+  Result := FSize;
+end;
+
+function TsmxCustomParam.GetValue: Variant;
+begin
+  Result := FValue; // может перенести в наследников?
+end;
+
+procedure TsmxCustomParam.SetParamIndex(Value: Integer);
+begin
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.ParamList[
+      FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)].ItemIndex := Value
+  else
+    FParamIndex := Value;
 end;
 
 { TsmxCustomDataSet }
 
 destructor TsmxCustomDataSet.Destroy;
 begin
-  if Assigned(FLocationList) then
-    FLocationList.Free;
-  if Assigned(FSenseList) then
-    FSenseList.Free;
-  if Assigned(FFieldReferenceList) then
+  if Assigned(FFieldList) then
+    FFieldList.Free;
+  if Assigned(FParamList) then
+    FParamList.Free;
+  {if Assigned(FFieldIntfList) then
+    FFieldIntfList.Free;
+  if Assigned(FParamIntfList) then
+    FParamIntfList.Free;}
+  {if Assigned(FFieldReferenceList) then
   begin
     ClearFieldReferences;
     FFieldReferenceList.Free;
@@ -1103,13 +2058,27 @@ begin
   begin
     ClearParamReferences;
     FParamReferenceList.Free;
-  end;
+  end;}
   inherited Destroy;
+end;
+
+function TsmxCustomDataSet.AddField: IsmxField;
+begin
+  {Result := GetFieldIntfClass.Create(Self) as IsmxField;
+  FieldIntfList.Add(Result);}
+  Result := FieldList.Add.Field;
+end;
+
+function TsmxCustomDataSet.AddParam: IsmxParam;
+begin
+  {Result := GetParamIntfClass.Create(Self) as IsmxParam;
+  ParamIntfList.Add(Result);}
+  Result := ParamList.Add.Param;
 end;
 
 {function TsmxCustomDataSet.AddField(const FieldName: String): IsmxField;
 var
-  Item: TsmxSenseItem;
+  Item: TsmxFieldItem;
 begin
   Result := nil;
   Item := SenseList.FindByName(FieldName);
@@ -1117,22 +2086,46 @@ begin
     SenseList.Add.FieldName := FieldName;
 end;}
 
+procedure TsmxCustomDataSet.ClearFields;
+begin
+  //FieldIntfList.Clear;
+  FieldList.Clear;
+  //ClearFieldReferences;
+end;
+
+procedure TsmxCustomDataSet.ClearParams;
+begin
+  //ParamIntfList.Clear;
+  ParamList.Clear;
+  //ClearParamReferences;
+end;
+
 procedure TsmxCustomDataSet.DeleteField(const Field: IsmxField);
 var
-  Item: TsmxSenseItem;
+  //Item: TsmxFieldItem;
+  i: Integer;
 begin
-  if Assigned(Field) then
+  i := FieldList.IndexOfField(Field);
+  if i <> -1 then
+    FieldList.Delete(i);
+  {i := FieldIntfList.IndexOf(Field);
+  if i <> -1 then
+  begin
+    FieldIntfList.Delete(i);
+    FieldList.Delete(i);
+  end;}
+  {if Assigned(Field) then
   begin
     Item := SenseList.FindByName(Field.FieldName);
     if Assigned(Item) then
       SenseList.Delete(Item.ItemIndex);
     ResetFieldReference(Field.InternalRef);
-  end;
+  end;}
 end;
 
 {function TsmxCustomDataSet.AddParam(const ParamName: String): IsmxParam;
 var
-  Item: TsmxLocationItem;
+  Item: TsmxParamItem;
 begin
   Result := nil;
   Item := LocationList.FindByName(ParamName);
@@ -1142,42 +2135,40 @@ end;}
 
 procedure TsmxCustomDataSet.DeleteParam(const Param: IsmxParam);
 var
-  Item: TsmxLocationItem;
+  //Item: TsmxParamItem;
+  i: Integer;
 begin
-  if Assigned(Param) then
+  i := ParamList.IndexOfParam(Param);
+  if i <> -1 then
+    ParamList.Delete(i);
+  {i := ParamIntfList.IndexOf(Param);
+  if i <> -1 then
+  begin
+    ParamIntfList.Delete(i);
+    ParamList.Delete(i);
+  end;}
+  {if Assigned(Param) then
   begin
     Item := LocationList.FindByName(Param.ParamName);
     if Assigned(Item) then
       LocationList.Delete(Item.ItemIndex);
     ResetParamReference(Param.InternalRef);
-  end;
+  end;}
 end;
 
-procedure TsmxCustomDataSet.ClearFieldReferences;
+{procedure TsmxCustomDataSet.ClearFieldReferences;
 begin
   while FieldReferenceList.Count > 0 do
     TsmxCustomField(FieldReferenceList[FieldReferenceList.Count - 1].Owner).InternalRef := nil;
-end;
+end;}
 
-procedure TsmxCustomDataSet.ClearFields;
-begin
-  SenseList.Clear;
-  ClearFieldReferences;
-end;
-
-procedure TsmxCustomDataSet.ClearParamReferences;
+{procedure TsmxCustomDataSet.ClearParamReferences;
 begin
   while ParamReferenceList.Count > 0 do
     TsmxCustomParam(ParamReferenceList[ParamReferenceList.Count - 1].Owner).InternalRef := nil;
-end;
+end;}
 
-procedure TsmxCustomDataSet.ClearParams;
-begin
-  LocationList.Clear;
-  ClearParamReferences;
-end;
-
-function TsmxCustomDataSet.GetFieldReferenceList: TsmxReferenceList;
+{function TsmxCustomDataSet.GetFieldReferenceList: TsmxReferenceList;
 begin
   if not Assigned(FFieldReferenceList) then
     FFieldReferenceList := TsmxReferenceList.Create(TsmxReferenceItem);
@@ -1187,21 +2178,24 @@ end;
 procedure TsmxCustomDataSet.SetFieldReferenceList(Value: TsmxReferenceList);
 begin
   FieldReferenceList.Assign(Value);
-end;
+end;}
 
-function TsmxCustomDataSet.GetLocationList: TsmxLocationList;
+function TsmxCustomDataSet.GetParamList: TsmxParamList;
 begin
-  if not Assigned(FLocationList) then
-    FLocationList := TsmxLocationList.Create(TsmxLocationItem);
-  Result := FLocationList;
+  if not Assigned(FParamList) then
+  begin
+    FParamList := TsmxParamList.Create(TsmxParamItem);
+    FParamList.InternalDataSet := Self;
+  end;
+  Result := FParamList;
 end;
 
-procedure TsmxCustomDataSet.SetLocationList(Value: TsmxLocationList);
+procedure TsmxCustomDataSet.SetParamList(Value: TsmxParamList);
 begin
-  LocationList.Assign(Value);
+  ParamList.Assign(Value);
 end;
 
-function TsmxCustomDataSet.GetParamReferenceList: TsmxReferenceList;
+{function TsmxCustomDataSet.GetParamReferenceList: TsmxReferenceList;
 begin
   if not Assigned(FParamReferenceList) then
     FParamReferenceList := TsmxReferenceList.Create(TsmxReferenceItem);
@@ -1211,21 +2205,24 @@ end;
 procedure TsmxCustomDataSet.SetParamReferenceList(Value: TsmxReferenceList);
 begin
   ParamReferenceList.Assign(Value);
-end;
+end;}
 
-function TsmxCustomDataSet.GetSenseList: TsmxSenseList;
+function TsmxCustomDataSet.GetFieldList: TsmxFieldList;
 begin
-  if not Assigned(FSenseList) then
-    FSenseList := TsmxSenseList.Create(TsmxSenseItem);
-  Result := FSenseList;
+  if not Assigned(FFieldList) then
+  begin
+    FFieldList := TsmxFieldList.Create(TsmxFieldItem);
+    FFieldList.InternalDataSet := Self;
+  end;
+  Result := FFieldList;
 end;
 
-procedure TsmxCustomDataSet.SetSenseList(Value: TsmxSenseList);
+procedure TsmxCustomDataSet.SetFieldList(Value: TsmxFieldList);
 begin
-  SenseList.Assign(Value);
+  FieldList.Assign(Value);
 end;
 
-procedure TsmxCustomDataSet.ResetFieldReference(Reference: Pointer);
+{procedure TsmxCustomDataSet.ResetFieldReference(Reference: Pointer);
 var
   i: Integer;
 begin
@@ -1241,6 +2238,153 @@ begin
   for i := ParamReferenceList.Count - 1 downto 0 do
     if ParamReferenceList[i].Reference = Reference then
       TsmxCustomParam(ParamReferenceList[i].Owner).InternalRef := nil;
+end;}
+
+{function TsmxCustomDataSet.GetFieldIntfList: TInterfaceList;
+begin
+  if not Assigned(FFieldIntfList) then
+    FFieldIntfList := TInterfaceList.Create;
+  Result := FFieldIntfList;
+end;}
+
+{function TsmxCustomDataSet.GetParamIntfList: TInterfaceList;
+begin
+  if not Assigned(FParamIntfList) then
+    FParamIntfList := TInterfaceList.Create;
+  Result := FParamIntfList;
+end;}
+
+function TsmxCustomDataSet.GetFieldIntfClass: TsmxCustomFieldClass;
+begin
+  Result := TsmxCustomField;
+end;
+
+function TsmxCustomDataSet.GetParamIntfClass: TsmxCustomParamClass;
+begin
+  Result := TsmxCustomParam;
+end;
+
+{function TsmxCustomDataSet.CreateField(DataType: TsmxDataType): TObject;
+begin
+  Result := nil;
+end;
+
+function TsmxCustomDataSet.CreateParam(DataType: TsmxDataType): TObject;
+begin
+  Result := nil;
+end;}
+
+procedure TsmxCustomDataSet.CreateInternalField(Field: TsmxCustomField);
+begin
+end;
+
+procedure TsmxCustomDataSet.CreateInternalParam(Param: TsmxCustomParam);
+begin
+end;
+
+procedure TsmxCustomDataSet.DestroyInternalField(Field: TsmxCustomField);
+begin
+end;
+
+procedure TsmxCustomDataSet.DestroyInternalParam(Param: TsmxCustomParam);
+begin
+end;
+
+function TsmxCustomDataSet.FieldByName(const FieldName: String): IsmxField;
+var
+  i: Integer;
+begin
+  i := FieldList.IndexOfFieldName(FieldName);
+  if i <> -1 then
+    Result := FieldList[i].Field
+  else
+    raise EsmxListError.CreateFmt(smxConsts.rsListItemNotFound, [FieldName]);
+end;
+
+function TsmxCustomDataSet.FindField(const FieldName: String): IsmxField;
+var
+  i: Integer;
+begin
+  i := FieldList.IndexOfFieldName(FieldName);
+  if i <> -1 then
+    Result := FieldList[i].Field else
+    Result := nil;
+end;
+
+function TsmxCustomDataSet.FindParam(const ParamName: String): IsmxParam;
+var
+  i: Integer;
+begin
+  i := ParamList.IndexOfParamName(ParamName);
+  if i <> -1 then
+    Result := ParamList[i].Param else
+    Result := nil;
+end;
+
+function TsmxCustomDataSet.GetField(Index: Integer): IsmxField;
+begin
+  Result := FieldList[Index].Field;
+end;
+
+function TsmxCustomDataSet.GetFieldCount: Integer;
+begin
+  Result := FieldList.Count;
+end;
+
+function TsmxCustomDataSet.GetParam(Index: Integer): IsmxParam;
+begin
+  Result := ParamList[Index].Param;
+end;
+
+function TsmxCustomDataSet.GetParamCount: Integer;
+begin
+  Result := ParamList.Count;
+end;
+
+function TsmxCustomDataSet.ParamByName(const ParamName: String): IsmxParam;
+var
+  i: Integer;
+begin
+  i := ParamList.IndexOfParamName(ParamName);
+  if i <> -1 then
+    Result := ParamList[i].Param
+  else
+    raise EsmxListError.CreateFmt(smxConsts.rsListItemNotFound, [ParamName]);
+end;
+
+procedure TsmxCustomDataSet.SetField(Index: Integer; const Value: IsmxField);
+begin
+  FieldList[Index].Field.AssignField(Value);
+end;
+
+procedure TsmxCustomDataSet.SetParam(Index: Integer; const Value: IsmxParam);
+begin
+  ParamList[Index].Param.AssignParam(Value);
+end;
+
+procedure TsmxCustomDataSet.AssignDataSet(const Source: IsmxDataSet);
+var
+  i: Integer;
+begin
+  ClearFields;
+  ClearParams;
+  if Assigned(Source) then
+  begin
+    for i := 0 to Source.FieldCount - 1 do
+      AddField.AssignField(Source.Fields[i]);
+    for i := 0 to Source.ParamCount - 1 do
+      AddParam.AssignParam(Source.Params[i]);
+  end;
+end;
+
+procedure TsmxCustomDataSet.SetDatabase(const Value: IsmxDatabase);
+begin
+  FDatabaseIntf := Value;
+end;
+
+function TsmxCustomDataSet.GetDatabase: IsmxDatabase;
+begin
+  Result := FDatabaseIntf;
 end;
 
 { TsmxDataSet }
@@ -1250,6 +2394,16 @@ begin
   FDatabaseIntf := nil;
   {if Assigned(FInternalDataSet) then
     FInternalDataSet.Free;}
+  //if Assigned(FFieldIntfList) then
+  //begin
+    //ClearFieldRef;
+    //FFieldIntfList.Free;
+  //end;
+  //if Assigned(FParamIntfList) then
+  //begin
+    //ClearParamRef;
+    //FParamIntfList.Free;
+  //end;
   inherited Destroy;
 end;
 
@@ -1263,11 +2417,11 @@ begin
   TDataSet(GetInternalRef).Delete;
 end;
 
-function TsmxDataSet.AddField(DataType: TsmxDataType): IsmxField;
-var
-  AField: TField;
-  AFieldDef: TFieldDef;
-begin
+//function TsmxDataSet.AddField{(DataType: TsmxDataType)}: IsmxField;
+//var
+  //AField: TField;
+  //AFieldDef: TFieldDef;
+//begin
   //inherited AddField(FieldName);
   {if not TDataSet(GetInternalRef).FieldDefs.Updated then
     TDataSet(GetInternalRef).FieldDefs.Update;
@@ -1275,19 +2429,30 @@ begin
   {if not TDataSet(GetInternalRef).FieldDefs.Updated then
     TDataSet(GetInternalRef).FieldDefs.Update;
   AField := TDataSet(GetInternalRef).FieldDefList.FieldByName(FieldName).CreateField(TDataSet(GetInternalRef));}
-  AFieldDef := TDataSet(GetInternalRef).FieldDefs.AddFieldDef;
-  AFieldDef.DataType := DataType;
-  AField := AFieldDef.CreateField(TDataSet(GetInternalRef));
-  Result := GetFieldIntf(AField);
-end;
 
-procedure TsmxDataSet.DeleteField(const Field: IsmxField);
-var
-  AField: TField;
-  //Item: TsmxSenseItem;
+
+
+  //AFieldDef := TDataSet(GetInternalRef).FieldDefs.AddFieldDef;
+  //AFieldDef.DataType := DataType;
+  //AField := AFieldDef.CreateField(TDataSet(GetInternalRef));
+  //Result := GetFieldIntf(AField);
+
+
+
+  //inherited AddField;
+  //Result := GetFieldIntf;
+  //FieldIntfList.Add(Result);
+//end;
+
+(*procedure TsmxDataSet.DeleteField(const Field: IsmxField);
+//var
+  //AField: TField;
+  //Item: TsmxFieldItem;
 begin
   inherited DeleteField(Field);
-  if Assigned(Field) then
+  //FieldIntfList.Delete(Field.FieldIndex);
+  TDataSet(GetInternalRef).Fields.Remove(TField(Field.InternalRef));
+  {if Assigned(Field) then
   begin
     AField := TDataSet(GetInternalRef).Fields.FindField(Field.FieldName);
     if Assigned(AField) then
@@ -1297,8 +2462,8 @@ begin
       //if Assigned(Item) then
         //SenseList.Delete(Item.ItemIndex);
     //end;
-  end;
-end;
+  end;}
+end;*)
 
 function TsmxDataSet.Bof: Boolean;
 begin
@@ -1320,13 +2485,14 @@ begin
   TDataSet(GetInternalRef).Post;
 end;
 
-procedure TsmxDataSet.ClearFields;
+{procedure TsmxDataSet.ClearFields;
 begin
   inherited ClearFields;
+  //FieldIntfList.Clear;
   if TDataSet(GetInternalRef).Active then
     TDataSet(GetInternalRef).ClearFields;
   //SenseList.Clear;
-end;
+end;}
 
 procedure TsmxDataSet.Close;
 begin
@@ -1353,12 +2519,16 @@ begin
   TDataSet(GetInternalRef).Edit;
 end;
 
-function TsmxDataSet.FieldByName(const FieldName: String): IsmxField;
+{function TsmxDataSet.FieldByName(const FieldName: String): IsmxField;
 var
-  Field: TField;
+  //Field: TField;
+  i: Integer;
 begin
-  Field := TDataSet(GetInternalRef).Fields.FieldByName(FieldName);
-  Result := GetFieldIntf(Field);
+  i := FieldList.IndexOfFieldName(FieldName);
+  if i <> -1 then
+    Result := FieldList[i].Field;
+  //Field := TDataSet(GetInternalRef).Fields.FieldByName(FieldName);
+  //Result := GetFieldIntf(Field);
 end;
 
 function TsmxDataSet.FindField(const FieldName: String): IsmxField;
@@ -1369,7 +2539,7 @@ begin
   if Assigned(Field) then
     Result := GetFieldIntf(Field) else
     Result := nil;
-end;
+end;}
 
 procedure TsmxDataSet.First;
 begin
@@ -1407,7 +2577,7 @@ begin
   TDataSet(GetInternalRef).Active := Value;
 end;
 
-function TsmxDataSet.GetDatabase: IsmxDatabase;
+{function TsmxDataSet.GetDatabase: IsmxDatabase;
 begin
   Result := FDatabaseIntf;
 end;
@@ -1415,9 +2585,9 @@ end;
 procedure TsmxDataSet.SetDatabase(const Value: IsmxDatabase);
 begin
   FDatabaseIntf := Value;
-end;
+end;}
 
-function TsmxDataSet.GetField(Index: Integer): IsmxField;
+{function TsmxDataSet.GetField(Index: Integer): IsmxField;
 var
   Field: TField;
 begin
@@ -1436,13 +2606,13 @@ end;
 function TsmxDataSet.GetFieldCount: Integer;
 begin
   Result := TDataSet(GetInternalRef).FieldCount;
-end;
+end;}
 
-function TsmxDataSet.GetFieldIntf(Field: TField): IsmxField;
+{function TsmxDataSet.GetFieldIntf(Field: TField): IsmxField;
 begin
   Result := TsmxField.Create(Self) as IsmxField;
   Result.InternalRef := Pointer(Field);
-end;
+end;}
 
 {function TsmxDataSet.GetInternalDataSet: TDataSet;
 begin
@@ -1456,10 +2626,10 @@ begin
   Result := TDataSet;
 end;}
 
-function TsmxDataSet.GetInternalRef: Pointer;
+{function TsmxDataSet.GetInternalRef: Pointer;
 begin
   Result := nil; //Pointer(InternalDataSet);
-end;
+end;}
 
 function TsmxDataSet.GetRecordCount: Integer;
 begin
@@ -1497,9 +2667,91 @@ begin
   TDataSet(GetInternalRef).Prior;
 end;
 
+{function TsmxDataSet.AddParam: IsmxParam;
+begin
+  inherited AddParam;
+  Result := GetParamIntf;
+  ParamIntfList.Add(Result);
+end;
+
+procedure TsmxDataSet.ClearParams;
+begin
+  inherited ClearParams;
+  ParamIntfList.Clear;
+end;
+
+procedure TsmxDataSet.DeleteParam(const Param: IsmxParam);
+begin
+  inherited DeleteParam(Param);
+  ParamIntfList.Delete(Param.ParamIndex);
+end;}
+
+{function TsmxDataSet.GetFieldIntfList: TInterfaceList;
+begin
+  if not Assigned(FFieldIntfList) then
+    FFieldIntfList := TInterfaceList.Create;
+  Result := FFieldIntfList;
+end;
+
+function TsmxDataSet.GetParamIntfList: TInterfaceList;
+begin
+  if not Assigned(FParamIntfList) then
+    FParamIntfList := TInterfaceList.Create;
+  Result := FParamIntfList;
+end;}
+
+{function TsmxDataSet.GetFieldIntf: IsmxField;
+begin
+  Result := TsmxField.Create(Self) as IsmxField;
+end;
+
+function TsmxDataSet.GetParamIntf: IsmxParam;
+begin
+  Result := nil;
+end;}
+
+{function TsmxDataSet.CreateField(DataType: TsmxDataType): TObject;
+var
+  FieldDef: TFieldDef;
+  Field: TField;
+begin
+  FieldDef := TDataSet(GetInternalRef).FieldDefs.AddFieldDef;
+  FieldDef.DataType := DataType;
+  Field := FieldDef.CreateField(TDataSet(GetInternalRef));
+  Result := Field;
+end;}
+
+procedure TsmxDataSet.CreateInternalField(Field: TsmxCustomField);
+var
+  AFieldDef: TFieldDef;
+begin
+  if Field is TsmxField then
+    if not Assigned(TsmxField(Field).Field) and (Field.DataType <> ftUnknown) then
+    begin
+      AFieldDef := TDataSet(GetInternalRef).FieldDefs.AddFieldDef;
+      AFieldDef.DataType := Field.DataType;
+      TsmxField(Field).Field := AFieldDef.CreateField(TDataSet(GetInternalRef));
+    end;
+end;
+
+procedure TsmxDataSet.DestroyInternalField(Field: TsmxCustomField);
+begin
+  if Field is TsmxField then
+    if Assigned(TsmxField(Field).Field) then
+    begin
+      TsmxField(Field).Field.Free;
+      TsmxField(Field).Field := nil;
+    end;
+end;
+
+function TsmxDataSet.GetFieldIntfClass: TsmxCustomFieldClass;
+begin
+  Result := TsmxField;
+end;
+
 { TsmxReferenceItem }
 
-procedure TsmxReferenceItem.Assign(Source: TsmxKitItem);
+{procedure TsmxReferenceItem.Assign(Source: TsmxKitItem);
 begin
   if Source is TsmxReferenceItem then
   begin
@@ -1517,11 +2769,11 @@ end;
 procedure TsmxReferenceItem.SetKit(Value: TsmxReferenceList);
 begin
   inherited Kit := Value;
-end;
+end;}
 
 { TsmxReferenceList }
 
-function TsmxReferenceList.Add: TsmxReferenceItem;
+{function TsmxReferenceList.Add: TsmxReferenceItem;
 begin
   Result := TsmxReferenceItem(inherited Add);
 end;
@@ -1570,6 +2822,55 @@ end;
 procedure TsmxReferenceList.SetItem(Index: Integer; Value: TsmxReferenceItem);
 begin
   inherited Items[Index] := Value;
+end;}
+
+{function TsmxDataSet.GetSQL: TStrings;
+begin
+  Result := nil;
+end;
+
+procedure TsmxDataSet.SetSQL(Value: TStrings);
+begin
+end;}
+
+{procedure TsmxDataSet.AssignDataSet(const Source: IsmxDataSet);
+begin
+  inherited AssignDataSet(Source);
+  if Assigned(SQL) then
+  begin
+    SQL.Clear;
+    if Assigned(Source) then
+      SQL.Assign(Source.SQL);
+  end;
+end;}
+
+procedure TsmxDataSet.Execute;
+begin
+end;
+
+function TsmxDataSet.GetPerformanceMode: TsmxPerformanceMode;
+begin
+  Result := FPerformanceMode;
+end;
+
+procedure TsmxDataSet.Perform;
+begin
+  case FPerformanceMode of
+    pmOpen: Open;
+    pmExecute: Execute;
+  end;
+end;
+
+procedure TsmxDataSet.SetPerformanceMode(Value: TsmxPerformanceMode);
+begin
+  FPerformanceMode := Value;
+end;
+
+procedure TsmxDataSet.AssignDataSet(const Source: IsmxDataSet);
+begin
+  inherited AssignDataSet(Source);
+  if Assigned(Source) then
+    PerformanceMode := Source.PerformanceMode;
 end;
 
 { TsmxTargetRequest }
@@ -1599,9 +2900,10 @@ begin
   end else
     FDataSetIntf := NewRequest('', RequestType);
 
-  if FDataSetIntf.SQL.Text <> SQLText then
-    FDataSetIntf.SQL.Text := SQLText;
-  PrepRequest(FDataSetIntf, True, pmExecute, DSFrom);
+  if FDataSetIntf.SQLText <> SQLText then
+    FDataSetIntf.SQLText := SQLText;
+  FDataSetIntf.PerformanceMode := pmExecute;
+  PrepRequest(FDataSetIntf, True, {pmExecute,} DSFrom);
 end;
 
 function TsmxTargetRequest.DoRequest(const SQLText: String; RequestType: TsmxDataSetType = dstQuery;
@@ -1628,9 +2930,10 @@ begin
   end else
     FDataSetIntf := NewRequest('', RequestType);
 
-  if FDataSetIntf.SQL.Text <> SQLText then
-    FDataSetIntf.SQL.Text := SQLText;
-  PrepRequest(FDataSetIntf, Get, Perform, DSFrom);
+  if FDataSetIntf.SQLText <> SQLText then
+    FDataSetIntf.SQLText := SQLText;
+  FDataSetIntf.PerformanceMode := Perform;
+  PrepRequest(FDataSetIntf, Get, {Perform,} DSFrom);
   Result := FDataSetIntf;
 end;
 
@@ -1676,15 +2979,16 @@ begin
   else
     raise EsmxComponentError.CreateResFmt(@smxConsts.rsActionError, [ClassName, 'NewRequest']);
   Result.Database := Database;
+  Result.PerformanceMode := pmOpen;
   if SQLText <> '' then
   begin
-    Result.SQL.Text := SQLText;
-    PrepRequest(Result, False, pmOpen, DSFrom);
+    Result.SQLText := SQLText;
+    PrepRequest(Result, False, {pmOpen,} DSFrom);
   end;
 end;
 
 function TsmxTargetRequest.PrepRequest(const Request: IsmxDataSet; Get: Boolean = True;
-  Perform: TsmxPerformanceMode = pmOpen; const DSFrom: IsmxDataSet = nil): Boolean;
+  {Perform: TsmxPerformanceMode = pmOpen;} const DSFrom: IsmxDataSet = nil): Boolean;
 var
   i: Integer;
   Field: IsmxField;
@@ -1711,10 +3015,11 @@ begin
       end;
     if Get then
     begin
-      case Perform of
+      {case Perform of
         pmOpen: Open;
         pmExecute: Execute;
-      end;
+      end;}
+      Perform;
       Res := 0;
       for i := 0 to ParamCount - 1 do
         if Params[i].ParamType in [ptOutput, ptInputOutput] then
@@ -1727,7 +3032,7 @@ begin
           Res := Params[i].Value;
         end;
 
-      case Perform of
+      case PerformanceMode of
         pmOpen: Result := RecordCount > 0;
         pmExecute: Result := Res = 0;
       end;
@@ -1766,10 +3071,10 @@ begin
     FDatabaseIntf.Connected := False;
 end;
 
-procedure TsmxConnection.FreeConnection;
+{procedure TsmxConnection.FreeConnection;
 begin
   Free;
-end;
+end;}
 
 function TsmxConnection.GetConnected: Boolean;
 begin

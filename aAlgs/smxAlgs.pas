@@ -6,12 +6,15 @@ uses
   smxBaseClasses;
 
 procedure ApplyForm(Sender: TsmxComponent);
+procedure CancelForm(Sender: TsmxComponent);
 procedure PrepareForm(Sender: TsmxComponent);
 procedure RefreshForm(Sender: TsmxComponent);
+procedure ShowForm(Sender: TsmxComponent);
+procedure ShowUniForm(Sender: TsmxComponent);
 procedure ShowModalForm(Sender: TsmxComponent);
 procedure CloseModalForm(Sender: TsmxComponent);
-procedure GetCfgPropsGrid(Sender: TsmxComponent);
-procedure SetCfgPropsGrid(Sender: TsmxComponent);
+//procedure GetPropsTree(Sender: TsmxComponent);
+//procedure SetPropsTree(Sender: TsmxComponent);
 //procedure GetTypeKindNameGrid(Sender: TsmxComponent);
 procedure CloseOkForm(Sender: TsmxComponent);
 procedure CloseCancelForm(Sender: TsmxComponent);
@@ -22,11 +25,11 @@ procedure ClickColumnPropsGrid(Sender: TsmxComponent);
 implementation
 
 uses
-  Classes, Controls, SysUtils, TypInfo, Variants, smxClasses, smxFuncs,
-  smxClassProcs, smxClassFuncs, smxTypes;
+  Classes, Controls, SysUtils, TypInfo, Variants, smxStdCtrls, smxClasses,
+  smxFuncs, smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxManagerIntf;
 
-var
-  Cfg: TsmxBaseCfg = nil;
+//var
+  //Cfg: TsmxBaseCfg = nil;
 
 procedure ApplyForm(Sender: TsmxComponent);
 var
@@ -39,12 +42,29 @@ begin
       List := TList.Create;
       try
         smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
-          List, [TsmxCustomGrid, TsmxCustomFilterDesk]);
+          List, [TsmxWorkCell]);
         for i := 0 to List.Count - 1 do
-          if TObject(List[i]) is TsmxCustomGrid then
-            TsmxCustomGrid(List[i]).Apply else
-          if TObject(List[i]) is TsmxCustomFilterDesk then
-            TsmxCustomFilterDesk(List[i]).Apply;
+          TsmxWorkCell(List[i]).Apply;
+      finally
+        List.Free;
+      end;
+    end;
+end;
+
+procedure CancelForm(Sender: TsmxComponent);
+var
+  List: TList;
+  i: Integer;
+begin
+  if Sender is TsmxCustomAlgorithm then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomForm then
+    begin
+      List := TList.Create;
+      try
+        smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
+          List, [TsmxWorkCell]);
+        for i := 0 to List.Count - 1 do
+          TsmxWorkCell(List[i]).Cancel;
       finally
         List.Free;
       end;
@@ -62,13 +82,9 @@ begin
       List := TList.Create;
       try
         smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
-          List, [TsmxCustomGrid, TsmxCustomFilterDesk],
-          TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).CellVisible);
+          List, [TsmxWorkCell], TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).CellVisible);
         for i := 0 to List.Count - 1 do
-          if TObject(List[i]) is TsmxCustomGrid then
-            TsmxCustomGrid(List[i]).Prepare else
-          if TObject(List[i]) is TsmxCustomFilterDesk then
-            TsmxCustomFilterDesk(List[i]).Prepare;
+          TsmxWorkCell(List[i]).Prepare;
       finally
         List.Free;
       end;
@@ -86,16 +102,65 @@ begin
       List := TList.Create;
       try
         smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
-          List, [TsmxCustomGrid, TsmxCustomFilterDesk], True);
+          List, [TsmxWorkCell], True);
         for i := 0 to List.Count - 1 do
-          if TObject(List[i]) is TsmxCustomGrid then
-            TsmxCustomGrid(List[i]).Refresh else
-          if TObject(List[i]) is TsmxCustomFilterDesk then
-            TsmxCustomFilterDesk(List[i]).Refresh;
+          TsmxWorkCell(List[i]).Refresh;
       finally
         List.Free;
       end;
     end;
+end;
+
+procedure ShowForm(Sender: TsmxComponent);
+var
+  CfgID, ID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    if CfgID <> 0 then
+    begin
+      AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+      try
+        Form.CellParent := AccessoryForm;
+        Form.Initialize;
+        Form.IntfID := AccessoryForm.IntfID;
+        Form.Show;
+      finally
+        //Form.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure ShowUniForm(Sender: TsmxComponent);
+var
+  CfgID, ID: Integer;
+  AccessoryForm, Form: TsmxCustomForm;
+  FormIntf: IsmxForm;
+begin
+  if Sender is TsmxCustomAlgorithm then
+  begin
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    if CfgID <> 0 then
+    begin
+      FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(CfgID, ID);
+      if not Assigned(FormIntf) then
+      begin
+        AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+        Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+        Form.CellParent := AccessoryForm;
+        Form.Initialize;
+        Form.IntfID := AccessoryForm.IntfID;
+        FormIntf := Form as IsmxForm;
+      end;
+      FormIntf.Show;
+    end;
+  end;
 end;
 
 procedure ShowModalForm(Sender: TsmxComponent);
@@ -129,6 +194,7 @@ begin
       Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
       try
         Form.CellParent := AccessoryForm;
+        //Form.IsNewInitialize := True;
         Form.Initialize;
         Form.IntfID := AccessoryForm.IntfID;
         Form.ShowModal;
@@ -172,136 +238,237 @@ begin
       end;
 end;
 
-procedure GetCfgPropsGrid(Sender: TsmxComponent);
+(*procedure GetPropsTree(Sender: TsmxComponent);
 
-  function GetParentObj(ParentPropName: String): TObject;
-  var
-    List: TStrings;
-    i: Integer;
-  begin
-    Result := nil;
-    if Assigned(Cfg) and (ParentPropName <> '') then
+  procedure AddProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer;
+    AFindList: TList);
+
+    procedure AddValue(APropInfo: PPropInfo; ARow: Pointer; AEditorType: TsmxEditorType);
+    var
+      V: Variant;
     begin
-      List := TStringList.Create;
+      V := Variants.VarArrayOf([Integer(Pointer(AObject)),
+        Integer(Pointer(APropInfo)), Integer(AEditorType)]);
+      ATree.TreeValues[1, ARow] := V;
+    end;
+
+    procedure AddClass(APropInfo: PPropInfo; ARow: Pointer);
+    var
+      Cls: TClass;
+      Obj: TObject;
+    begin
+      // добавление контрола для редактирования
+      Cls := TypInfo.GetTypeData(APropInfo^.PropType^)^.ClassType;
+      Obj := TypInfo.GetObjectProp(AObject, APropInfo);
+      if Cls.InheritsFrom(TsmxKit) then
+      begin
+        // add ...
+        AddValue(APropInfo, ARow, etButtonString);
+        if Assigned(Obj) then
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+      end else
+      if Cls.InheritsFrom(TsmxBaseCell) then
+      begin
+        // add box
+        AddValue(APropInfo, ARow, etPickString);
+        if Assigned(Obj) then
+          ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
+      end else
+      begin
+        // add blank
+        AddValue(APropInfo, ARow, etNone);
+        if Assigned(Obj) then
+        begin
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+          AddProps(Obj, ATree, ARow, AFindList);
+        end;
+      end;
+    end;
+
+    procedure AddIntf(APropInfo: PPropInfo; ARow: Pointer);
+
+      function IsImplIntf(const AIntf: IsmxRefPersistent): Boolean;
+      var
+        Intf: IsmxRefPersistent;
+      begin
+        Result := AObject.GetInterface(IsmxRefPersistent, Intf)
+          and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference);
+      end;
+
+      function FindImplObj(const AIntf: IsmxRefPersistent): TObject;
+      var
+        i: Integer;
+        Intf: IInterface;
+      begin
+        Result := nil;
+        if Assigned(AIntf) and Assigned(AFindList) then
+        begin
+          for i := 0 to AFindList.Count - 1 do
+            if TObject(AFindList[i]).GetInterface(IsmxRefPersistent, Intf)
+                and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference) then
+            begin
+              Result := AFindList[i];
+              Break;
+            end;
+        end;
+      end;
+
+    var
+      Intf: IInterface;
+      GUID: TGUID;
+      Obj: TObject;
+    begin
+      GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
+      Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
+      if SysUtils.Supports(Intf, IsmxRefPersistent) then
+      begin
+        if IsImplIntf(IsmxRefPersistent(Intf)) then
+        begin
+          AddValue(APropInfo, ARow, etNone);
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
+          AddProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow, AFindList);
+        end else
+        begin
+          AddValue(APropInfo, ARow, etPickString);
+          Obj := FindImplObj(IsmxRefPersistent(Intf));
+          if Obj is TsmxBaseCell then
+            ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
+        end;
+      end;
+    end;
+
+    procedure AddEnumeration(APropInfo: PPropInfo; ARow: Pointer);
+    begin
+      AddValue(APropInfo, ARow, etPickString);
+      ATree.TreeCaptions[1, ARow] := TypInfo.GetEnumProp(AObject, APropInfo);
+    end;
+
+    procedure AddSet(APropInfo: PPropInfo; ARow: Pointer);
+    var
+      SetStr, EnumStr: String;
+      TypeInfo: PTypeInfo;
+      TypeData: PTypeData;
+      i: Integer;
+    begin
+      AddValue(APropInfo, ARow, etNone);
+      SetStr := TypInfo.GetSetProp(AObject, APropInfo, True);
+      ATree.TreeCaptions[1, ARow] := SetStr;
+      TypeInfo := TypInfo.GetTypeData(APropInfo^.PropType^)^.CompType^;
+      TypeData := TypInfo.GetTypeData(TypeInfo);
+      ATree.RowCount[ARow] := TypeData^.MaxValue - TypeData^.MinValue + 1;
+      for i := TypeData^.MinValue to TypeData^.MaxValue do
+      begin
+        AddValue(APropInfo, ATree.Rows[ARow, i], etPickString);
+        EnumStr := TypInfo.GetEnumName(TypeInfo, i);
+        ATree.TreeCaptions[0, ATree.Rows[ARow, i]] := EnumStr;
+        ATree.TreeCaptions[1, ATree.Rows[ARow, i]] := SysUtils.BoolToStr(Pos(EnumStr, SetStr) > 0, True);
+      end;
+    end;
+
+  var
+    PropList: PPropList;
+    Count: Integer;
+    i: Integer;
+    PropInfo: PPropInfo;
+  begin
+    if not Assigned(AObject) then
+      Exit;
+    Count := TypInfo.GetPropList(PTypeInfo(AObject.ClassInfo), TypInfo.tkProperties, nil);
+    if Count <> 0 then
+    begin
+      GetMem(PropList, Count * SizeOf(Pointer));
       try
-        List.Delimiter := '.';
-        List.DelimitedText := ParentPropName;
-        Result := Cfg;
-        for i := 0 to List.Count - 1 do
-          Result := TypInfo.GetObjectProp(Result, List[i]);
+        TypInfo.GetPropList(PTypeInfo(AObject.ClassInfo), TypInfo.tkProperties, PropList);
+        ATree.RowCount[AParentRow] := Count;
+        for i := 0 to Count - 1 do
+        begin
+          PropInfo := PropList^[i];
+          ATree.TreeCaptions[0, ATree.Rows[AParentRow, i]] := PropInfo^.Name;
+          case PropInfo^.PropType^^.Kind of
+            tkClass:
+              AddClass(PropInfo, ATree.Rows[AParentRow, i]);
+            tkInterface:
+              AddIntf(PropInfo, ATree.Rows[AParentRow, i]);
+            tkEnumeration:
+              AddEnumeration(PropInfo, ATree.Rows[AParentRow, i]);
+            tkSet:
+              AddSet(PropInfo, ATree.Rows[AParentRow, i]);
+            else
+            begin
+              AddValue(PropInfo, ATree.Rows[AParentRow, i], etString);
+              ATree.TreeCaptions[1, ATree.Rows[AParentRow, i]] :=
+                Variants.VarToStr(TypInfo.GetPropValue(AObject, PropInfo^.Name));
+            end;
+          end;
+        end;
       finally
-        List.Free;
+        FreeMem(PropList);
       end;
     end;
   end;
 
 var
   CfgID, CfgType: Integer;
-  //Cfg: TsmxBaseCfg;
-  PropList: PPropList;
-  Count: Integer;
-  Grid: TsmxCustomGrid;
-  //PropNameColumn, PropValueColumn: String;
-  i{, j}: Integer;
-  s: String;
-  TypeData: PTypeData;
-  ParentPropKit: Integer;
-  ParentPropName, ParentPropValue: String;
-  TypeInfo: PTypeInfo;
+  Tree: TsmxCustomTree;
   Obj: TObject;
+  FindList: TList;
+  Form: TsmxCustomForm;
+  //CellClass: TsmxBaseCellClass;
+  //IntfClass: TsmxInterfacedPersistentClass;
 begin
   if Sender is TsmxCustomAlgorithm then
-    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
+    if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomTree then
     begin
-      //s := '';
-      //for i := 0 to Grid.SlaveCount - 1 do
-        //s := s + Grid.Slaves[i].SlaveName + ' ';
-      //inf('s=' + s);  
-      Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
+      Tree := TsmxCustomTree(TsmxCustomAlgorithm(Sender).CellEvent);
       CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
       CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
-      //ParentPropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropKit', 0);
-      //ParentPropName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropName', '');
-      //ParentPropValue := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ParentPropValue', '');
-         inf('cfgid=' + inttostr(cfgid) + ' cfgtype=' + inttostr(cfgtype));
-      //PropNameColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropNameColumn', '');
-      //PropValueColumn := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropValueColumn', '');
-      if (CfgID <> 0) {and (PropNameColumn <> '') and (PropValueColumn <> '')} then
+      if CfgID <> 0 then
       begin
-        //Obj := nil;
-        //TypeInfo := nil;
-        //if ParentPropKit = 0 then
-        //begin
-          if Assigned(Cfg) then
-            SysUtils.FreeAndNil(Cfg);
+        Obj := nil;
+        FindList := TList.Create;
+        try
           if CfgType = 100 then // типы
           begin
-            Cfg := TsmxTypeCfg.Create(nil);
-            Cfg.CfgID := CfgID;
-            Cfg.SelectRequest := smxClassProcs.gSelectRequest;
+            Obj := TsmxTypeCfg.Create(nil);
+            TsmxTypeCfg(Obj).CfgID := CfgID;
+            TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gCfgSelectDataSet;
+            TsmxTypeCfg(Obj).Load;
+            TsmxTypeCfg(Obj).Read;
           end else
-            Cfg := smxClassFuncs.NewCfg(nil, CfgID);
-        //try
-          Cfg.Receive;
-          Obj := Cfg;
-        //end else
-        //if (ParentPropKit = 2) and (ParentPropName <> '') then
-        //begin
-          //Obj := GetParentObj(ParentPropName);
-        //end;
-        if Assigned(Obj) then
-        begin
-          TypeInfo := PTypeInfo(Obj.ClassInfo);
-          Count := TypInfo.GetPropList(TypeInfo, TypInfo.tkProperties, nil);
-          if Count <> 0 then
           begin
-            GetMem(PropList, Count * SizeOf(Pointer));
-            try
-              TypInfo.GetPropList(TypeInfo, TypInfo.tkProperties, PropList);
-              Grid.RowCount := Count;
-              for i := 0 to Grid.RowCount - 1 do
-              begin
-                {for j := 0 to Grid.SlaveCount - 1 do
-                begin
-                  if Grid.Slaves[j].SlaveName = PropNameColumn then
-                    s := PropList^[i]^.Name else
-                  if Grid.Slaves[j].SlaveName = PropValueColumn then
-                  begin
-                    if PropList^[i]^.PropType^^.Kind = tkClass then
-                      s := PropList^[i]^.PropType^^.Name else
-                      s := Variants.VarToStr(TypInfo.GetPropValue(Cfg, PropList^[i]^.Name))
-                  end else
-                    s := '';
-                  Grid.GridCaptions[j, i] := s;
-                end;}
-                Grid.GridCaptions[0, i] := PropList^[i]^.Name;
-                if PropList^[i]^.PropType^^.Kind = tkClass then
-                  Grid.GridCaptions[1, i] := PropList^[i]^.PropType^^.Name else
-                  Grid.GridCaptions[1, i] := Variants.VarToStr(TypInfo.GetPropValue(Obj, PropList^[i]^.Name));
-                {if PropList^[i]^.PropType^^.Kind = tkClass then
-                begin
-                  TypeData := TypInfo.GetTypeData(PropList^[i]^.PropType^);
-                  if TypeData.ClassType.InheritsFrom(TsmxSimpleKit) then
-                    Grid.GridCaptions[2, i] := '3' else
-                    Grid.GridCaptions[2, i] := '2';
-                  if ParentPropName <> '' then
-                    Grid.GridCaptions[3, i] := ParentPropName + '.' + PropList^[i]^.Name else
-                    Grid.GridCaptions[3, i] := PropList^[i]^.Name;
-                end else
-                  Grid.GridCaptions[2, i] := '1';}
-              end;
-            finally
-              FreeMem(PropList);
-            end;
+            //CellClass := smxClassFuncs.CfgIDToCellClass(CfgID);
+            //IntfClass := smxClassFuncs.CfgIDToIntfClass(CfgID);
+            Form := smxClassFuncs.GetAccessoryForm(Tree);
+            {if Assigned(Form) and CellClass.InheritsFrom(TsmxControlCell) then
+            begin
+              Obj := Form.Slaves[1].Slaves[0].Slaves[0].AddSlaveAsClass(TsmxOwnerCellClass(CellClass), IntfClass);
+              TsmxControlCell(Obj).CellVisible := True;
+            end else
+              //Obj := smxClassFuncs.NewCell(nil, CfgID);
+              Obj := CellClass.Create(nil, IntfClass);
+              TsmxBaseCell(Obj).CellParent := Tree;
+            end;}
+            Obj := smxClassFuncs.NewCell(nil, CfgID);
+            TsmxBaseCell(Obj).CellParent := Form.Slaves[1].Slaves[0].Slaves[0];
+            TsmxBaseCell(Obj).CfgID := CfgID;
+            TsmxBaseCell(Obj).Initialize;
+            smxClassProcs.AllCells(TsmxBaseCell(Obj), FindList, []);
+            FindList.Add(Obj);
+            if Obj is TsmxControlCell then
+              TsmxControlCell(Obj).CellVisible := True;
           end;
-        //finally
-          //Cfg.Free;
+          if Assigned(Obj) then
+            AddProps(Obj, Tree, Tree.RootRow, FindList);
+        finally
+          FindList.Free;
+          if Assigned(Obj) and (CfgType = 100) then
+            Obj.Free;
         end;
       end;
-    end;
+    end;  
 end;
 
-procedure SetCfgPropsGrid(Sender: TsmxComponent);
+procedure SetPropsTree(Sender: TsmxComponent);
 var
   //CfgID, CfgType: Integer;
   //Cfg: TsmxBaseCfg;
@@ -311,6 +478,7 @@ var
   //PropName: String;
   //PropValue: Variant;
   PropKit: Integer;
+  Cfg: TsmxBaseCfg;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomGrid then
@@ -323,10 +491,12 @@ begin
       if (CfgID <> 0) and (PropNameColumn <> '') and (PropValueColumn <> '') then
       begin}
       PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);
-
+      Exit;
         if Assigned(Cfg) and (PropKit = 0) then
         begin
-          Cfg.Return;
+          //Cfg.Return;
+          Cfg.Write;
+          Cfg.Save;
         end;
 
         {if CfgType = 100 then // типы
@@ -362,7 +532,7 @@ begin
         end;
       end;}
     end;
-end;
+end;*)
 
 procedure GetTypeKindNameGrid(Sender: TsmxComponent);
 var
@@ -380,7 +550,7 @@ begin
       CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
       if CfgID <> 0 then
       begin
-        Cfg := smxClassFuncs.NewCfg(nil, CfgID);
+        {Cfg := smxClassFuncs.NewCfg(nil, CfgID);
         try
           Cfg.Receive;
           s := TypInfo.GetEnumName(TypeInfo(TTypeKind), Integer(TypInfo.GetPropInfo(Cfg, Column.ColumnCaption)^.PropType^.Kind));
@@ -398,7 +568,7 @@ begin
           smxFuncs.Inf(s);
         finally
           Cfg.Free;
-        end;
+        end;}
       end;
     end;
 end;
@@ -455,10 +625,12 @@ var
   PropKit: Integer;
   FormCfgID: Integer;
   AccessoryForm, Form: TsmxCustomForm;
+  Cfg: TsmxBaseCfg;
 begin
   if Sender is TsmxCustomAlgorithm then
     if TsmxCustomAlgorithm(Sender).CellEvent is TsmxCustomColumn then
     begin
+      Exit;
       Column := TsmxCustomColumn(TsmxCustomAlgorithm(Sender).CellEvent);
       if Assigned(Column.CellOwner) and Assigned(Cfg) then
       begin
@@ -481,11 +653,11 @@ begin
     end;
 end;
 
-initialization
+{initialization
 
 finalization
   if Assigned(Cfg) then
-    Cfg.Free;
+    Cfg.Free;}
 
 end.
 

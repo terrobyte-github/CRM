@@ -3,17 +3,8 @@ library cCells;
 uses
   smxLibProcs,
   smxLibTypes,
-  smxCfgs in 'smxCfgs.pas',
   smxCells in 'smxCells.pas',
-  smxExtCells in 'smxExtCells.pas',
-  smxStdCtrls in 'smxStdCtrls.pas',
-  VirtualTrees in '..\VT\VirtualTrees.pas',
-  MSAAIntf in '..\VT\MSAAIntf.pas',
-  ThemeSrv in '..\VT\ThemeSrv.pas',
-  UxTheme in '..\VT\UxTheme.pas',
-  TmSchema in '..\VT\TmSchema.pas',
-  VTAccessibilityFactory in '..\VT\VTAccessibilityFactory.pas',
-  smxVTCells in 'smxVTCells.pas';
+  smxExtCells in 'smxExtCells.pas';
 
 {$R *.res}
 

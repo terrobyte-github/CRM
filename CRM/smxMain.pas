@@ -12,7 +12,7 @@ implementation
 uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, ComObj,
   Graphics, IniFiles, StrUtils, Variants, smxBaseClasses, smxClasses,
-  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxDBIntf, smxConsts,
+  smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxBaseIntf, smxDBIntf, smxConsts,
   smxManagerClasses, smxManagerIntf, smxDBClasses, smxPConsts, smxClassProcs,
   smxDBTypes, smxDBFuncs, smxLibTypes, smxLogIn;
 
@@ -32,6 +32,7 @@ var
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
   gMainConnection: TsmxConnection = nil;
+  gCfgRequest: TsmxCustomRequest = nil;
   gMainForm: TsmxCustomForm = nil;
 
 procedure CreateGlobalObjects;
@@ -114,8 +115,8 @@ begin
     end;
   end;}
   gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
-  gImageListManager.DelimiterName :=
-    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiterName];
+  gImageListManager.Delimiter :=
+    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
 end;
 
 procedure LoadClassLibraries;
@@ -202,39 +203,72 @@ end;
 
 procedure CreateMainObjects;
 var
+  ReqClsName, IReqClsName: String;
+  ReqLibName{, ReqProcName}: String;
   CellClass: TsmxBaseCellClass;
+  IntfClass: TsmxInterfacedPersistentClass;
+  //FuncNewDataSet: TsmxFuncNewDataSet;
 begin
-  if gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName] <> '' then
-    CellClass := TsmxBaseCellClass(Classes.FindClass(
-      gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName]))
+  ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName];
+  IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
+  ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestLibName];
+  //ReqProcName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestProcName];
+  if ReqClsName <> '' then
+    CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName))
   else
     CellClass := nil;
-  if Assigned(CellClass) then
-    if CellClass.InheritsFrom(TsmxCustomRequest) then
-      smxClassProcs.gSelectRequest := TsmxCustomRequest(CellClass.Create(nil));
+  if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomRequest) then
+  begin
+    if (IReqClsName <> '') and (ReqLibName <> '') then
+    begin
+      if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
+      begin
+        IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
+        if Assigned(IntfClass) then
+          gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, IntfClass));
+      end;
+    end{ else
+    if (ReqLibName <> '') and (ReqProcName <> '') then
+    begin
+      FuncNewDataSet := gLibraryManager.GetProcedure(ReqLibName, ReqProcName);
+      if Assigned(FuncNewDataSet) then
+        gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, FuncNewDataSet));
+    end};
+    if Assigned(gCfgRequest) then
+      smxClassProcs.gCfgSelectDataSet := gCfgRequest.DataSet;
+    //smxClassProcs.gCfgDeleteDataSet := gCfgRequest.DeleteDataSet;
+    //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
+    //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
+  end;
 end;
 
 procedure DestroyMainObjects;
 begin
-  if Assigned(smxClassProcs.gSelectRequest) then
-    SysUtils.FreeAndNil(smxClassProcs.gSelectRequest);
+  if Assigned(gCfgRequest) then
+  begin
+    SysUtils.FreeAndNil(gCfgRequest);
+    smxClassProcs.gCfgSelectDataSet := nil;
+    smxClassProcs.gCfgDeleteDataSet := nil;
+    smxClassProcs.gCfgInsertDataSet := nil;
+    smxClassProcs.gCfgUpdateDataSet := nil;
+  end;
 end;
 
 procedure AssignMainObjects;
 begin
-  if Assigned(smxClassProcs.gSelectRequest) then
+  if Assigned(gCfgRequest) then
   begin
-    _TsmxBaseCell(smxClassProcs.gSelectRequest).Cfg.XMLText :=
+    _TsmxBaseCell(gCfgRequest).Cfg.XMLText :=
       Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestXMLText]);
-    smxClassProcs.gSelectRequest.IsRecieveCfg := False;
-    smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
-    smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
-    smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
-    smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
-    smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
-    smxClassProcs.gSelectRequest.Database := gMainConnection.Database;
-    smxClassProcs.gSelectRequest.Initialize;
-    smxClassProcs.gSelectRequest.Prepare;
+    gCfgRequest.IsRecieveCfg := False;
+    //smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
+    //smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
+    //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+    //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
+    //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
+    gCfgRequest.Database := gMainConnection.Database;
+    gCfgRequest.Initialize;
+    gCfgRequest.Prepare;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
   end;
@@ -393,7 +427,7 @@ function LogIn: Boolean;
     case Connection.Generation of
       gmFunction:
       begin
-        @FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
+        FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
         if Assigned(FuncNewDatabase) then
           Database := FuncNewDatabase;
       end;
@@ -410,7 +444,7 @@ function LogIn: Boolean;
       begin
         if gLibraryManager.AddLibrary(Connection.LibraryName) <> -1 then
         begin
-          IntfClass := TsmxInterfacedPersistentClass(Classes.FindClass(Connection.FuncOrClassNameOrProgID));
+          IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(Connection.FuncOrClassNameOrProgID));
           if Assigned(IntfClass) then
             Database := IntfClass.Create as IsmxDatabase;
         end;
@@ -420,7 +454,7 @@ function LogIn: Boolean;
     begin
       Database.DatabaseName := Connection.DatabaseName;
       Database.DriverName := Connection.DriverName;
-      Database.Params.Text :=
+      Database.ParamText :=
         SysUtils.StringReplace(
           SysUtils.StringReplace(
             Connection.Params,
@@ -523,7 +557,7 @@ function LogIn: Boolean;
     if CfgID > 0 then
     begin
       Forms.Application.ShowMainForm := False;
-      gMainForm := smxClassFuncs.NewForm(nil, CfgID, smxClassProcs.gSelectRequest);
+      gMainForm := smxClassFuncs.NewForm(nil, CfgID);
       {gMainForm.StorageManager := gStorageManager as IsmxStorageManager;
       gMainForm.LibraryManager := gLibraryManager as IsmxLibraryManager;
       gMainForm.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;

@@ -5,7 +5,7 @@ uses
   smxLibTypes;
 
 {$R *.res}
-{$R ..\Resource\pic.res}
+{$R pic.res}
 
 exports
   smxLibProcs.LibInfo;

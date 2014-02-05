@@ -5,13 +5,16 @@ interface
 uses
   Classes, SysUtils, smxBaseIntf;
 
+const
+  IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+
 type
   { TsmxComponent }
 
   EsmxBaseError = class(Exception);
 
   EsmxComponentError = class(EsmxBaseError)
-  private
+  {private
     FOriginMessage: String;
   public
     constructor CreateByOrigin(Ident: Integer; const Args: array of const;
@@ -19,12 +22,14 @@ type
     constructor CreateByOrigin(ResStringRec: PResStringRec; const Args: array of const;
       const OriginMessage: String); overload;
 
-    property OriginMessage: String read FOriginMessage write FOriginMessage;
+    property OriginMessage: String read FOriginMessage write FOriginMessage;}
   end;
 
-  TsmxComponent = class(TComponent, IsmxBaseInterface)
+  TsmxComponent = class(TComponent, IsmxBaseInterface, IsmxRefComponent)
   protected
     function GetDescription: String; virtual;
+    function GetInternalRef: Pointer; virtual;
+    function GetReference: TComponent;
     function GetVersion: String; virtual;
   public
     property Description: String read GetDescription;
@@ -32,8 +37,6 @@ type
   end;
 
   TsmxComponentClass = class of TsmxComponent;
-
-  TsmxComponentEvent = procedure(Sender: TsmxComponent) of object;
 
   { TsmxInterfacedObject }
 
@@ -48,22 +51,42 @@ type
 
   TsmxInterfacedObjectClass = class of TsmxInterfacedObject;
 
+  { IsmxRefInterface }
+
+  (*TsmxInterfacedPersistent = class;
+
+  IsmxRefInterface = interface(IsmxBaseInterface)
+    ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
+    function GetInternalRef: Pointer;
+    function GetReference: TsmxInterfacedPersistent;
+  end;*)
+
   { TsmxInterfacedPersistent }
 
-  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface)
+  TsmxInterfacedPersistent = class(TPersistent, IInterface, IsmxBaseInterface, IsmxRefPersistent)
+  private
+    //FName: String;
+    FController: Pointer;
+    function GetController: IsmxRefComponent;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetDescription: String; virtual;
+    function GetInternalRef: Pointer; virtual;
+    function GetReference: TPersistent;
     function GetVersion: String; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
+    //procedure SetName(const Value: String); virtual;
   public
+    constructor Create(const Controller: IsmxRefComponent); overload;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
 
+    property Controller: IsmxRefComponent read GetController;
     property Description: String read GetDescription;
+    //property Name: String read FName write SetName;
     property RefCount: Integer read FRefCount;
     property Version: String read GetVersion;
   end;
@@ -113,17 +136,26 @@ type
 
   TsmxFreeNotificationObjectClass = class of TsmxFreeNotificationObject;}
 
+  { TsmxInfoObject }
+
+{$M+}
+  TsmxInfoObject = class(TObject)
+  end;
+{$M-}
+
   { TsmxKitItem }
 
   EsmxListError = class(EsmxBaseError);
 
   TsmxKit = class;
-
-  TsmxKitItem = class(TObject)
+   // может унаследываться от persistent
+  TsmxKitItem = class(TsmxInfoObject)
   private
     FKit: TsmxKit;
     procedure SetKit(Value: TsmxKit);
   protected
+    function GetDisplayName: String; virtual;
+    function GetDisplayObject: TObject; virtual;
     function GetIndex: Integer; virtual;
     procedure SetIndex(Value: Integer); virtual;
   public
@@ -131,6 +163,8 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TsmxKitItem); virtual;
 
+    property DisplayName: String read GetDisplayName;
+    property DisplayObject: TObject read GetDisplayObject;
     property ItemIndex: Integer read GetIndex write SetIndex;
     property Kit: TsmxKit read FKit write SetKit;
   end;
@@ -139,27 +173,33 @@ type
 
   { TsmxKit }
 
-  TsmxKit = class(TObject)
+  TsmxKit = class(TsmxInfoObject)
   private
     FKitItemClass: TsmxKitItemClass;
     FKitList: TList;
+    FOwner: TObject;
     function GetCount: Integer;
     function GetItem(Index: Integer): TsmxKitItem;
     function GetKitList: TList;
     procedure SetItem(Index: Integer; Value: TsmxKitItem);
   protected
-    property KitItemClass: TsmxKitItemClass read FKitItemClass;
+    //function GetOwner: TPersistent; virtual;
+
     property KitList: TList read GetKitList;
   public
-    constructor Create(AItemClass: TsmxKitItemClass); virtual;
+    constructor Create(AItemClass: TsmxKitItemClass); overload; virtual;
+    constructor Create(AOwner: TObject; AItemClass: TsmxKitItemClass); overload; virtual;
     destructor Destroy; override;
     procedure Assign(Source: TsmxKit); virtual;
     function Add: TsmxKitItem;
     procedure Clear;
     procedure Delete(Index: Integer);
+    //function IndexOf(Item: TsmxKitItem): Integer;
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
+    property KitItemClass: TsmxKitItemClass read FKitItemClass;
+    property Owner: TObject read FOwner;
   end;
 
   TsmxKitClass = class of TsmxKit;
@@ -168,7 +208,7 @@ type
 
   TsmxHKit = class;
 
-  TsmxHKitItem = class(TObject)
+  TsmxHKitItem = class(TsmxInfoObject)
   private
     FHKit: TsmxHKit;
     FHKitItemList: TList;
@@ -192,6 +232,7 @@ type
     procedure Delete(Index: Integer);
     function HasChilds: Boolean;
     function HasParent: Boolean;
+    //function IndexOf(Item: TsmxHKitItem): Integer;
 
     property Count: Integer read GetCount;
     property HKit: TsmxHKit read FHKit;
@@ -204,19 +245,18 @@ type
 
   { TsmxHKit }
 
-  TsmxHKit = class(TObject)
+  TsmxHKit = class(TsmxInfoObject)
   private
     FHKitItemClass: TsmxHKitItemClass;
     FRoot: TsmxHKitItem;
     function GetRoot: TsmxHKitItem;
     procedure SetRoot(Value: TsmxHKitItem);
-  protected
-    property HKitItemClass: TsmxHKitItemClass read FHKitItemClass;
   public
     constructor Create(AItemClass: TsmxHKitItemClass); virtual;
     destructor Destroy; override;
     procedure Assign(Source: TsmxHKit); virtual;
 
+    property HKitItemClass: TsmxHKitItemClass read FHKitItemClass;
     property Root: TsmxHKitItem read GetRoot write SetRoot;
   end;
 
@@ -269,7 +309,7 @@ uses
 
 { EsmxComponentError }
 
-constructor EsmxComponentError.CreateByOrigin(Ident: Integer;
+{constructor EsmxComponentError.CreateByOrigin(Ident: Integer;
   const Args: array of const; const OriginMessage: String);
 begin
   CreateResFmt(Ident, Args);
@@ -281,13 +321,23 @@ constructor EsmxComponentError.CreateByOrigin(ResStringRec: PResStringRec;
 begin
   CreateResFmt(ResStringRec, Args);
   FOriginMessage := OriginMessage;
-end;
+end;}
 
 { TsmxComponent }
 
 function TsmxComponent.GetDescription: String;
 begin
   Result := ClassName;
+end;
+
+function TsmxComponent.GetInternalRef: Pointer;
+begin
+  Result := nil;
+end;
+
+function TsmxComponent.GetReference: TComponent;
+begin
+  Result := Self;
 end;
 
 function TsmxComponent.GetVersion: String;
@@ -309,14 +359,25 @@ end;
 
 { TsmxInterfacedPersistent }
 
+constructor TsmxInterfacedPersistent.Create(const Controller: IsmxRefComponent);
+begin
+  FController := Pointer(Controller);
+end;
+
 function TsmxInterfacedPersistent._AddRef: Integer;
 begin
-  Result := Windows.InterlockedIncrement(FRefCount);
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._AddRef
+  else
+    Result := Windows.InterlockedIncrement(FRefCount);
 end;
 
 function TsmxInterfacedPersistent._Release: Integer;
 begin
-  Result := Windows.InterlockedDecrement(FRefCount);
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._Release
+  else
+    Result := Windows.InterlockedDecrement(FRefCount);
   if Result = 0 then
     Destroy;
 end;
@@ -332,9 +393,24 @@ begin
     System.Error(reInvalidPtr);
 end;
 
+function TsmxInterfacedPersistent.GetController: IsmxRefComponent;
+begin
+  Result := IsmxRefComponent(FController);
+end;
+
 function TsmxInterfacedPersistent.GetDescription: String;
 begin
   Result := ClassName;
+end;
+
+function TsmxInterfacedPersistent.GetInternalRef: Pointer;
+begin
+  Result := nil;
+end;
+
+function TsmxInterfacedPersistent.GetReference: TPersistent;
+begin
+  Result := Self;
 end;
 
 function TsmxInterfacedPersistent.GetVersion: String;
@@ -350,10 +426,17 @@ end;
 
 function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
+  //if Assigned(FController) then
+    //Result := IsmxRefComponent(FController).QueryInterface(IID, Obj) else
   if GetInterface(IID, Obj) then
     Result := S_OK else
     Result := E_NOINTERFACE;
 end;
+
+{procedure TsmxInterfacedPersistent.SetName(const Value: String);
+begin
+  FName := Value;
+end;}
 
 { TsmxInterfacedComponent }
 
@@ -484,6 +567,16 @@ begin
   raise EsmxListError.CreateResFmt(@smxConsts.rsAssignError, [Name, ClassName]);
 end;
 
+function TsmxKitItem.GetDisplayName: String;
+begin
+  Result := ClassName;
+end;
+
+function TsmxKitItem.GetDisplayObject: TObject;
+begin
+  Result := Self;
+end;
+
 function TsmxKitItem.GetIndex: Integer;
 begin
   if Assigned(FKit) then
@@ -514,6 +607,12 @@ end;
 constructor TsmxKit.Create(AItemClass: TsmxKitItemClass);
 begin
   FKitItemClass := AItemClass;
+end;
+
+constructor TsmxKit.Create(AOwner: TObject; AItemClass: TsmxKitItemClass);
+begin
+  Create(AItemClass);
+  FOwner := AOwner;
 end;
 
 destructor TsmxKit.Destroy;
@@ -576,6 +675,16 @@ begin
     FKitList := TList.Create;
   Result := FKitList;
 end;
+
+{function TsmxKit.GetOwner: TPersistent;
+begin
+  Result := nil;
+end;}
+
+{function TsmxKit.IndexOf(Item: TsmxKitItem): Integer;
+begin
+  Result := KitList.IndexOf(Item);
+end;}
 
 { TsmxHKitItem }
 
@@ -672,6 +781,11 @@ function TsmxHKitItem.HasParent: Boolean;
 begin
   Result := FParent <> FHKit.Root;
 end;
+
+{function TsmxHKitItem.IndexOf(Item: TsmxHKitItem): Integer;
+begin
+  Result := HKitItemList.IndexOf(Item);
+end;}
 
 procedure TsmxHKitItem.SetParent(Value: TsmxHKitItem);
 begin

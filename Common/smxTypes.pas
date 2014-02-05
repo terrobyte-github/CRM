@@ -20,8 +20,6 @@ type
     Font: TsmxCellFont;
   end;}
 
-  TsmxPerformanceMode = (pmOpen, pmExecute);
-
   TsmxOperationMode = (omManual, omAutomatic);
 
   {TsmxRequestSetting = record
@@ -31,7 +29,7 @@ type
   end;}
 
   TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
-    goOwnerDrawHeader, goEditing);
+    {goOwnerDrawHeader,} goEditing);
 
   TsmxGridOptions = set of TsmxGridOption;
 
@@ -86,25 +84,43 @@ type
 
   TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
 
-  TsmxColumnOption = (coEditing, coSetValue);
+  TsmxColumnOption = (coEditing, coHasValue);
 
   TsmxColumnOptions = set of TsmxColumnOption;
 
-  TsmxFilterOption = (foApply, foPrepare, foEditing, foSetValue);
+  TsmxTreeOption = (toColLines, toRowLines, toRowSelect, toShowHeader,
+    {toOwnerDrawHeader,} toEditing, toTreeLines);
+
+  TsmxTreeOptions = set of TsmxTreeOption;
+
+  TsmxFilterOption = (foApply, foPrepare, foEditing, foHasValue);
 
   TsmxFilterOptions = set of TsmxFilterOption;
 
-  TsmxFormPosition = (fpDesigned, fpDesktopCenter, fpOwnerFormCenter);
+  TsmxFormPosition = (fpDesigned, fpScreenCenter, fpOwnerFormCenter);
 
   TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
 
+  TsmxFormOption = (foFrameForm, foFreeOnClose);
+
+  TsmxFormOptions = set of TsmxFormOption;
+
   TsmxPageManagerStyle = (pmsTab, pmsFlat);
+
+  TsmxPagePosition = (ppTop, ppButtom, ppLeft, ppRight);
 
   TsmxMenuItemStyle = (misPoint, misDivider);
 
   TsmxToolItemStyle = (tisButton, tisCheck, tisDivider);
 
   TsmxStatusItemStyle = (sisText, sisDraw);
+
+  TsmxEditorType = (etNone, etString, etNumber, etDate, etPickString,
+    etButtonString);
+
+  TsmxCellState = (csInitialized, csFinalized, csEventParam{, csDesigning});
+
+  TsmxCellStates = set of TsmxCellState;
 
 implementation
 

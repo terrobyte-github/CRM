@@ -16,6 +16,9 @@ const
   cConfigurationFileName = '..\Cfg\conf.ini';
   cInitSectionName = 'Init';
   cInitRequestClassName = 'RequestClassName';
+  cInitIRequestClassName = 'IRequestClassName';
+  cInitRequestLibName = 'RequestLibName';
+  cInitRequestProcName = 'RequestProcName';
   cInitRequestXMLText = 'RequestXMLText';
   cInitCheckUserReqCfgID = 'CheckUserReqCfgID';
   cInitCheckIntfReqCfgID = 'CheckIntfReqCfgID';
@@ -34,7 +37,7 @@ const
   cLibraryLibInfoProcName = 'LibInfoProcName';
   cLibraryCheckComp = 'CheckComp';
   cImageListSectionName = 'ImageList';
-  cImageListDelimiterName = 'DelimiterName';
+  cImageListDelimiter = 'Delimiter';
   cParamSectionName = 'Param';
   cParamDatabaseName = 'DatabaseName';
   cParamUserName = 'UserName';

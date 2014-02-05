@@ -61,7 +61,7 @@ type
     procedure SetItem(Index: Integer; Value: TsmxProjectItem);
   public
     function Add: TsmxProjectItem;
-    function FindByName(ProjectName: String): TsmxProjectItem;
+    function FindByName(const ProjectName: String): TsmxProjectItem;
 
     property Items[Index: Integer]: TsmxProjectItem read GetItem write SetItem; default;
   end;
@@ -131,7 +131,7 @@ type
     FProgVersMinor: Word;
     function CheckLibraryComp(LibHandle: THandle): Boolean;
     procedure ClearLibInfo(var LibInfo: TsmxLibInfo);
-    procedure FreeLibraries;
+    procedure ClearLibraries;
     function GetLibraryList: TsmxParams;
     procedure PrepareLibrary(LibHandle: THandle);
   protected
@@ -176,7 +176,7 @@ type
   TsmxDatabaseManager = class(TsmxComponent, IsmxDatabaseManager)
   private
     FConnectionList: TInterfaceList;
-    procedure FreeConnections;
+    procedure ClearConnections;
     function GetConnectionList: TInterfaceList;
   protected
     function GetConnectionCount: Integer;
@@ -198,7 +198,7 @@ type
   TsmxFormManager = class(TsmxComponent, IsmxFormManager)
   private
     FFormList: TInterfaceList;
-    procedure FreeForms;
+    procedure ClearForms;
     function GetFormList: TInterfaceList;
   protected
     function GetFormCount: Integer;
@@ -219,20 +219,20 @@ type
 
   TsmxImageListManager = class(TsmxComponent, IsmxImageListManager)
   private
-    FDelimiterName: String;
+    FDelimiter: String;
     FImageListRegister: TsmxParams;
     FLibraryManagerIntf: IsmxLibraryManager;
     //FNewResourceFuncName: String;
-    procedure FreeImageListRegister;
+    procedure ClearImageListRegister;
     function GetImageListRegister: TsmxParams;
     function LoadImageList(const ImageListName: String): TCustomImageList;
   protected
-    function GetDelimiterName: String;
+    function GetDelimiter: String;
     function GetImageListCount: Integer;
     function GetImageList(Index: Integer): TCustomImageList;
     function GetLibraryManager: IsmxLibraryManager;
     //function GetNewResourceFuncName: String;
-    procedure SetDelimiterName(const Value: String);
+    procedure SetDelimiter(const Value: String);
     procedure SetLibraryManager(const Value: IsmxLibraryManager);
     //procedure SetNewResourceFuncName(const Value: String);
 
@@ -243,7 +243,7 @@ type
     procedure DeleteImageList(const ImageListName: String);
     function FindByName(const ImageListName: String): TCustomImageList;
 
-    property DelimiterName: String read GetDelimiterName write SetDelimiterName;
+    property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
     property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
@@ -293,7 +293,7 @@ begin
   Result := TsmxProjectItem(inherited Add);
 end;
 
-function TsmxProjectList.FindByName(ProjectName: String): TsmxProjectItem;
+function TsmxProjectList.FindByName(const ProjectName: String): TsmxProjectItem;
 var
   i: Integer;
 begin
@@ -495,7 +495,7 @@ destructor TsmxLibraryManager.Destroy;
 begin
   if Assigned(FLibraryList) then
   begin
-    FreeLibraries;
+    ClearLibraries;
     FLibraryList.Free;
   end;
   FCallBackManagerIntf := nil;
@@ -583,7 +583,7 @@ begin
   end;
 end;
 
-procedure TsmxLibraryManager.FreeLibraries;
+procedure TsmxLibraryManager.ClearLibraries;
 var
   i: Integer;
 begin
@@ -814,10 +814,18 @@ destructor TsmxDatabaseManager.Destroy;
 begin
   if Assigned(FConnectionList) then
   begin
-    FreeConnections;
+    ClearConnections;
     FConnectionList.Free;
   end;
   inherited Destroy;
+end;
+
+procedure TsmxDatabaseManager.ClearConnections;
+var
+  i: Integer;
+begin
+  for i := ConnectionList.Count - 1 downto 0 do
+    (ConnectionList[i] as IsmxConnection).GetReference.Free; //FreeConnection;
 end;
 
 function TsmxDatabaseManager.FindByName(const DatabaseName: String): IsmxConnection;
@@ -831,14 +839,6 @@ begin
       Result := ConnectionList[i] as IsmxConnection;
       Break;
     end;
-end;
-
-procedure TsmxDatabaseManager.FreeConnections;
-var
-  i: Integer;
-begin
-  for i := ConnectionList.Count - 1 downto 0 do
-    (ConnectionList[i] as IsmxConnection).FreeConnection;
 end;
 
 function TsmxDatabaseManager.GetConnection(Index: Integer): IsmxConnection;
@@ -876,10 +876,18 @@ destructor TsmxFormManager.Destroy;
 begin
   if Assigned(FFormList) then
   begin
-    FreeForms;
+    ClearForms;
     FFormList.Free;
   end;
   inherited Destroy;
+end;
+
+procedure TsmxFormManager.ClearForms;
+var
+  i: Integer;
+begin
+  for i := FormList.Count - 1 downto 0 do
+    (FormList[i] as IsmxForm).GetReference.Free; //FreeForm;
 end;
 
 function TsmxFormManager.FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxForm;
@@ -893,14 +901,6 @@ begin
       Result := FormList[i] as IsmxForm;
       Break;
     end;
-end;
-
-procedure TsmxFormManager.FreeForms;
-var
-  i: Integer;
-begin
-  for i := FormList.Count - 1 downto 0 do
-    (FormList[i] as IsmxForm).FreeForm;
 end;
 
 function TsmxFormManager.GetForm(Index: Integer): IsmxForm;
@@ -938,7 +938,7 @@ destructor TsmxImageListManager.Destroy;
 begin
   if Assigned(FImageListRegister) then
   begin
-    FreeImageListRegister;
+    ClearImageListRegister;
     FImageListRegister.Free;
   end;
   inherited Destroy;
@@ -977,17 +977,7 @@ begin
   end;
 end;
 
-function TsmxImageListManager.FindByName(const ImageListName: String): TCustomImageList;
-var
-  Item: TsmxParam;
-begin
-  Item := ImageListRegister.FindByName(ImageListName);
-  if Assigned(Item) then
-    Result := TCustomImageList(Integer(Item.ParamValue)) else
-    Result := nil;
-end;
-
-procedure TsmxImageListManager.FreeImageListRegister;
+procedure TsmxImageListManager.ClearImageListRegister;
 var
   i: Integer;
 begin
@@ -998,14 +988,24 @@ begin
   end;
 end;
 
-function TsmxImageListManager.GetDelimiterName: String;
+function TsmxImageListManager.FindByName(const ImageListName: String): TCustomImageList;
+var
+  Item: TsmxParam;
 begin
-  Result := FDelimiterName;
+  Item := ImageListRegister.FindByName(ImageListName);
+  if Assigned(Item) then
+    Result := TCustomImageList(Integer(Item.ParamValue)) else
+    Result := nil;
 end;
 
-procedure TsmxImageListManager.SetDelimiterName(const Value: String);
+function TsmxImageListManager.GetDelimiter: String;
 begin
-  FDelimiterName := Value;
+  Result := FDelimiter;
+end;
+
+procedure TsmxImageListManager.SetDelimiter(const Value: String);
+begin
+  FDelimiter := Value;
 end;
 
 function TsmxImageListManager.GetImageList(Index: Integer): TCustomImageList;
@@ -1053,11 +1053,11 @@ function TsmxImageListManager.LoadImageList(const ImageListName: String): TCusto
   begin
     LibName := '';
     ResName := '';
-    i := Pos(FDelimiterName, ImageListName);
+    i := Pos(FDelimiter, ImageListName);
     if i > 0 then
     begin
       LibName := Copy(ImageListName, 1, i - 1);
-      ResName := Copy(ImageListName, i + Length(FDelimiterName), MaxInt);
+      ResName := Copy(ImageListName, i + Length(FDelimiter), MaxInt);
     end;
   end;
 
