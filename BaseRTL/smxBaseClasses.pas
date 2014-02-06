@@ -38,6 +38,28 @@ type
 
   TsmxComponentClass = class of TsmxComponent;
 
+  { TsmxInterfacedComponent }
+
+  TsmxInterfacedComponent = class(TsmxComponent)
+  private
+    FController: Pointer;
+    function GetController: IsmxRefComponent;
+  protected
+    FRefCount: Integer;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+  public
+    constructor Create(const AController: IsmxRefComponent); reintroduce; overload; virtual;
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+    class function NewInstance: TObject; override;
+
+    property Controller: IsmxRefComponent read GetController;
+    property RefCount: Integer read FRefCount;
+  end;
+
+  TsmxInterfacedComponentClass = class of TsmxInterfacedComponent;
+
   { TsmxInterfacedObject }
 
   TsmxInterfacedObject = class(TInterfacedObject, IsmxBaseInterface)
@@ -79,7 +101,7 @@ type
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
-    constructor Create(const Controller: IsmxRefComponent); overload;
+    constructor Create(const AController: IsmxRefComponent); overload;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
@@ -345,6 +367,55 @@ begin
   Result := cVersion;
 end;
 
+{ TsmxInterfacedComponent }
+
+constructor TsmxInterfacedComponent.Create(const AController: IsmxRefComponent);
+begin
+  Create(AController.GetReference);
+  FController := Pointer(AController);
+end;
+
+function TsmxInterfacedComponent._AddRef: Integer;
+begin
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._AddRef
+  else
+    Result := Windows.InterlockedIncrement(FRefCount);
+end;
+
+function TsmxInterfacedComponent._Release: Integer;
+begin
+  if Assigned(FController) then
+    Result := IsmxRefComponent(FController)._Release
+  else
+    Result := Windows.InterlockedDecrement(FRefCount);
+  if Result = 0 then
+    Destroy;
+end;
+
+procedure TsmxInterfacedComponent.AfterConstruction;
+begin
+  Windows.InterlockedDecrement(FRefCount);
+end;
+
+procedure TsmxInterfacedComponent.BeforeDestruction;
+begin
+  if RefCount <> 0 then
+    System.Error(reInvalidPtr);
+  inherited BeforeDestruction;
+end;
+
+function TsmxInterfacedComponent.GetController: IsmxRefComponent;
+begin
+  Result := IsmxRefComponent(FController);
+end;
+
+class function TsmxInterfacedComponent.NewInstance: TObject;
+begin
+  Result := inherited NewInstance;
+  TsmxInterfacedComponent(Result).FRefCount := 1;
+end;
+
 { TsmxInterfacedObject }
 
 function TsmxInterfacedObject.GetDescription: String;
@@ -359,9 +430,9 @@ end;
 
 { TsmxInterfacedPersistent }
 
-constructor TsmxInterfacedPersistent.Create(const Controller: IsmxRefComponent);
+constructor TsmxInterfacedPersistent.Create(const AController: IsmxRefComponent);
 begin
-  FController := Pointer(Controller);
+  FController := Pointer(AController);
 end;
 
 function TsmxInterfacedPersistent._AddRef: Integer;

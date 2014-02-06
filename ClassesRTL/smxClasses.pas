@@ -141,7 +141,7 @@ type
     //procedure ResetProps; virtual;
     //procedure ResetAttrs; virtual;
     //procedure SetCellDesigning(Value: Boolean);
-    procedure SetCellEventParam(Value: Boolean);
+    procedure SetCellStateEventParam(Value: Boolean);
     procedure SetCellFeedback; virtual;
     procedure SetCellParent(Value: TsmxBaseCell); virtual;
     //procedure SetCellProps; virtual;
@@ -197,7 +197,7 @@ type
     //property StorageManager: IsmxStorageManager read FStorageManagerIntf write SetStorageManager;
   published
     property Name stored True;
-    property Tag stored False;
+    //property Tag stored False;
 
     property OnFinalize: TsmxComponentEvent read FOnFinalize write FOnFinalize;
     property OnInitialize: TsmxComponentEvent read FOnInitialize write FOnInitialize;
@@ -2677,7 +2677,7 @@ begin
     Exclude(FCellStates, csDesigning);
 end;}
 
-procedure TsmxBaseCell.SetCellEventParam(Value: Boolean);
+procedure TsmxBaseCell.SetCellStateEventParam(Value: Boolean);
 begin
   if Value and (csEventParam in FCellStates) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
