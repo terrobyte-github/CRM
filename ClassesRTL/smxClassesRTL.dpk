@@ -32,6 +32,7 @@ contains
   smxClasses in 'smxClasses.pas',
   smxClassFuncs in '..\Common\smxClassFuncs.pas',
   smxClassTypes in '..\Common\smxClassTypes.pas',
-  smxClassProcs in '..\Common\smxClassProcs.pas';
+  smxClassProcs in '..\Common\smxClassProcs.pas',
+  smxCells in 'smxCells.pas';
 
 end.

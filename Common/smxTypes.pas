@@ -3,7 +3,7 @@ unit smxTypes;
 interface
 
 uses
-  Classes, Controls, Graphics, Types;
+  Classes, Controls, Graphics, DB, Types;
 
 type
   {TsmxCellFont = record
@@ -121,6 +121,23 @@ type
   TsmxCellState = (csInitialized, csFinalized, csEventParam{, csDesigning});
 
   TsmxCellStates = set of TsmxCellState;
+
+  TsmxDataSetType = (dstQuery, dstStoredProc);
+
+  TsmxDataType = TFieldType;
+
+  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
+    fsForeignKey);
+
+  TsmxParamType = TParamType;
+
+  TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
+    plForeignKey, plInput, plOutput, plInOutput, plStorageParam,
+    plParentParam, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
+
+  TsmxLocateOptions = TLocateOptions;
+
+  TsmxPerformanceMode = (pmOpen, pmExecute);
 
 implementation
 

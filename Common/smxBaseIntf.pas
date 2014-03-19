@@ -27,7 +27,7 @@ type
   IsmxRefComponent = interface(IsmxBaseInterface)
     ['{48732C0C-F577-4061-9B97-926BA4B715DA}']
     function GetInternalRef: Pointer;
-    function GetReference: TComponent;
+    function GetReference: TComponent; 
   end;
 
   { IsmxRefPersistent }

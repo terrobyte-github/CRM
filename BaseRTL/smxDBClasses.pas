@@ -207,7 +207,7 @@ type
 
   { TsmxCustomDatabase }
 
-  TsmxCustomDatabase = class(TsmxInterfacedPersistent)
+  TsmxCustomDatabase = class(TsmxInterfacedComponent)
   end;
 
   { TsmxCustomField }
@@ -434,7 +434,7 @@ type
 
   { TsmxCustomDataSet }
 
-  TsmxCustomDataSet = class(TsmxInterfacedPersistent)
+  TsmxCustomDataSet = class(TsmxInterfacedComponent)
   private
     FDatabaseIntf: IsmxDatabase;
     //FFieldReferenceList: TsmxReferenceList;

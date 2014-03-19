@@ -203,39 +203,45 @@ end;
 
 procedure CreateMainObjects;
 var
-  ReqClsName, IReqClsName: String;
+  ReqClsName{, IReqClsName}: String;
   ReqLibName{, ReqProcName}: String;
   CellClass: TsmxBaseCellClass;
-  IntfClass: TsmxInterfacedPersistentClass;
+  //IntfClass: TsmxInterfacedPersistentClass;
   //FuncNewDataSet: TsmxFuncNewDataSet;
 begin
   ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName];
-  IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
+  //IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
   ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestLibName];
   //ReqProcName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestProcName];
-  if ReqClsName <> '' then
+  CellClass := nil;
+  if {(IReqClsName <> '') and (}ReqLibName <> ''{)} then
+    if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
+      CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName));
+  {if ReqClsName <> '' then
     CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName))
   else
-    CellClass := nil;
+    CellClass := nil;}
   if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomRequest) then
   begin
-    if (IReqClsName <> '') and (ReqLibName <> '') then
-    begin
-      if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
-      begin
-        IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
-        if Assigned(IntfClass) then
-          gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, IntfClass));
-      end;
-    end{ else
+    //if {(IReqClsName <> '') and (}ReqLibName <> ''{)} then
+    //begin
+      //if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
+      //begin
+        //IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
+        //if Assigned(IntfClass) then
+          //gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, IntfClass));
+        gCfgRequest := TsmxCustomRequest(CellClass.Create(nil));
+      //end;
+    //end
+    { else
     if (ReqLibName <> '') and (ReqProcName <> '') then
     begin
       FuncNewDataSet := gLibraryManager.GetProcedure(ReqLibName, ReqProcName);
       if Assigned(FuncNewDataSet) then
         gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, FuncNewDataSet));
-    end};
-    if Assigned(gCfgRequest) then
-      smxClassProcs.gCfgSelectDataSet := gCfgRequest.DataSet;
+    end}//;
+    //if Assigned(gCfgRequest) then
+      smxClassProcs.gCfgSelectDataSet := gCfgRequest as IsmxDataSet; //gCfgRequest.DataSet;
     //smxClassProcs.gCfgDeleteDataSet := gCfgRequest.DeleteDataSet;
     //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
     //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;

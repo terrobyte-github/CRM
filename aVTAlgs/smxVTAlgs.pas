@@ -72,17 +72,19 @@ procedure AddProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer;
         and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference);
     end;}
 
-    function FindImplObj(const AIntf: IsmxRefPersistent): TObject;
+    function FindImplObj(const AIntf: IsmxRefComponent{IsmxRefPersistent}): TObject;
     var
       i: Integer;
-      Intf: IInterface;
+      //Intf: IInterface;
     begin
       Result := nil;
       if Assigned(AIntf) and Assigned(AFindList) then
       begin
         for i := 0 to AFindList.Count - 1 do
-          if TObject(AFindList[i]).GetInterface(IsmxRefPersistent, Intf)
-              and (IsmxRefPersistent(Intf).GetReference = AIntf.GetReference) then
+          //if TObject(AFindList[i]).GetInterface(IsmxRefComponent{IsmxRefPersistent}, Intf)
+              //and (IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference = AIntf.GetReference) then
+          if (TObject(AFindList[i]) is TsmxBaseCell)
+              and (TsmxBaseCell(AFindList[i]).IsImplIntf(AIntf)) then
           begin
             Result := AFindList[i];
             Break;
@@ -97,19 +99,21 @@ procedure AddProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer;
   begin
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
-    if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefPersistent) then
+    if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
     begin
-      if {SysUtils.Supports(Intf, IsmxRefPersistent)} {then
-      begin
-        if} {and} smxFuncs.IsImplIntf(AObject, IsmxRefPersistent(Intf)) then
+      //if {SysUtils.Supports(Intf, IsmxRefPersistent)} {then
+      //begin
+        //if} {and} smxFuncs.IsImplIntf(AObject, IsmxRefComponent{IsmxRefPersistent}(Intf)) then
+        if (AObject is TsmxBaseCell)
+            and (TsmxBaseCell(AObject).IsImplIntf(IsmxRefComponent(Intf))) then
         begin
           AddValue(APropInfo, ARow, etNone);
-          ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
-          AddProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow, AFindList);
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference.ClassName]);
+          AddProps(IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference, ATree, ARow, AFindList);
         end else
-        begin
+        begin    
           AddValue(APropInfo, ARow, etPickString);
-          Obj := FindImplObj(IsmxRefPersistent(Intf));
+          Obj := FindImplObj(IsmxRefComponent{IsmxRefPersistent}(Intf));
           if Obj is TsmxBaseCell then
             ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
         end;
@@ -1076,7 +1080,7 @@ procedure BeforeEditPropTree(Sender: TsmxComponent);
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     if ATree.Editor.Control is TComboBox then
     begin
-      if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefPersistent) then
+      if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
       begin
         FindList := TList.Create;
         try

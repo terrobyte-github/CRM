@@ -13,8 +13,8 @@ unit smxExtCells;
 interface
 
 uses
-  Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, Graphics,
-  XMLIntf, smxBaseClasses, smxClasses, {smxCfgs,} smxCells, smxDBIntf, smxTypes;
+  Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, Graphics, XMLIntf,
+  smxBaseClasses, smxClasses, smxCells, smxStdCells, smxDBIntf, smxTypes;
 
 type
   { TsmxLibAlgorithmCfg }

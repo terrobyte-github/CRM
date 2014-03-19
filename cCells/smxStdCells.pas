@@ -1,26 +1,26 @@
 {**************************************}
 {                                      }
 {            SalesMan v1.0             }
-{            Cells classes             }
+{        StandardCells classes         }
 {                                      }
 {          Copyright (c) 2010          }
 {          Polyakov Àleksandr          }
 {                                      }
 {**************************************}
 
-unit smxCells;
+unit smxStdCells;
 
 interface
 
 uses
   Classes, Controls, ComCtrls, DB, DBGrids, Forms, ExtCtrls, StdCtrls, Menus,
-  ActnList, Windows, ImgList, Graphics, smxBaseClasses, smxClasses, {smxCfgs,}
+  {ActnList,} Windows, ImgList, Graphics, smxBaseClasses, smxClasses, {smxCfgs,}
   smxStdCtrls, smxDBIntf, smxTypes, smxClassTypes, smxManagerIntf, smxBaseTypes;
 
 type
   { TsmxAction }
 
-  TsmxAction = class(TsmxCustomAlgorithm)
+  {TsmxAction = class(TsmxCustomAlgorithm)
   private
     FAction: TAction;
     function GetAction: TAction;
@@ -70,11 +70,11 @@ type
     property AlgorithmVisible;
 
     property OnRefreshParams;
-  end;
+  end;}
 
   { TsmxActionList }
 
-  TsmxActionList = class(TsmxCustomAlgorithmList)
+  {TsmxActionList = class(TsmxCustomAlgorithmList)
   private
     FActionList: TActionList;
     function GetActionList: TActionList;
@@ -102,11 +102,11 @@ type
   published
     property ImageListName;
     property SlaveList;
-  end;
+  end;}
 
   { TsmxRequest }
 
-  TsmxRequest = class(TsmxCustomRequest)
+  {TsmxRequest = class(TsmxCustomRequest)
   //private
     //function GetParamValue(const ParamName: String): Variant;
   protected
@@ -137,11 +137,11 @@ type
     property OnPrepare;
     property OnRefreshParams;
     property OnUpdate;
-  end;
+  end;}
 
   { TsmxRequestList }
 
-  TsmxRequestList = class(TsmxCustomRequestList)
+  {TsmxRequestList = class(TsmxCustomRequestList)
   protected
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
@@ -155,7 +155,7 @@ type
     //property IsOwnerIsParent default True;
   published
     property SlaveList;
-  end;
+  end;}
 
   { TsmxColumn }
 
@@ -1244,7 +1244,7 @@ begin
   //AddParams;
 end;}
 
-destructor TsmxAction.Destroy;
+{destructor TsmxAction.Destroy;
 begin
   inherited Destroy;
   if Assigned(FAction) then
@@ -1254,9 +1254,9 @@ end;
 procedure TsmxAction.ActionExecute(Sender: TObject);
 begin
   Execute;
-end;
+end;}
 
-procedure TsmxAction.DoRefreshParams;
+(*procedure TsmxAction.DoRefreshParams;
 //var
   //AlgCfgID: Integer;
 begin
@@ -1267,9 +1267,9 @@ begin
       AlgCfgID := 0;
     DoEvent(OnRefreshParams, AlgCfgID);
   end;}
-end;
+end;*)
 
-function TsmxAction.GetAction: TAction;
+(*function TsmxAction.GetAction: TAction;
 begin
   if not Assigned(FAction) then
   begin
@@ -1529,7 +1529,7 @@ begin
     if Obj is TCustomActionList then
       Action.ActionList := TCustomActionList(Obj);
   end;
-end;
+end;*)
 
 (*procedure TsmxAction.SetCellProps;
 var
@@ -1577,11 +1577,11 @@ begin
     @FLibProc := LibraryManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
 end;}
 
-procedure TsmxAction.ChangeSlaveIndex(Value: Integer);
+{procedure TsmxAction.ChangeSlaveIndex(Value: Integer);
 begin
   //inherited SetSlaveIndex(Value);
   Action.Index := Value;
-end;
+end;}
 
 { TsmxActionList }
 
@@ -1591,7 +1591,7 @@ begin
   IsAltSlaveClass := True;
 end;}
 
-destructor TsmxActionList.Destroy;
+{destructor TsmxActionList.Destroy;
 begin
   //UnInstallParent;
   inherited Destroy;
@@ -1604,7 +1604,7 @@ begin
   if not Assigned(FActionList) then
     FActionList := TActionList.Create(nil);
   Result := FActionList;
-end;
+end;}
 
 (*function TsmxActionList.GetAlgorithmParamValue(CfgID: Integer;
   const ParamName: String; var ParamValue: Variant): Boolean;
@@ -1655,7 +1655,7 @@ begin
   Result := TsmxAlgorithmListCfg;
 end;}
 
-function TsmxActionList.GetInternalRef: Pointer;
+{function TsmxActionList.GetInternalRef: Pointer;
 begin
   Result := Pointer(ActionList);
 end;
@@ -1672,7 +1672,7 @@ begin
   inherited SetImageList(Value);
   if Assigned(ImageList) then
     ActionList.Images := ImageList;
-end;
+end;}
 
 {procedure TsmxActionList.SetParentCell(Value: TsmxBaseCell);
 begin
@@ -1903,7 +1903,7 @@ begin
   end;
 end;}
 
-procedure TsmxRequest.InternalRefreshParams;
+(*procedure TsmxRequest.InternalRefreshParams;
 var
   i, j: integer;
   Form: TsmxCustomForm;
@@ -2014,7 +2014,7 @@ begin
   finally
     List.Free;
   end;
-end;
+end;*)
 
 {procedure TsmxRequest.ResetCellProps;
 begin
@@ -2151,10 +2151,10 @@ begin
   end;
 end;}
 
-function TsmxRequestList.GetSlaveClass: TsmxOwnerCellClass;
+{function TsmxRequestList.GetSlaveClass: TsmxOwnerCellClass;
 begin
   Result := TsmxRequest;
-end;
+end;}
 
 {procedure TsmxRequestList.SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem);
 var
@@ -7668,8 +7668,8 @@ begin
 end;}
 
 initialization
-  Classes.RegisterClasses([TsmxAction, TsmxActionList, TsmxRequest,
-    TsmxRequestList, TsmxColumn, TsmxDBGrid, TsmxPanelFilter,
+  Classes.RegisterClasses([{TsmxAction, TsmxActionList, TsmxRequest,
+    TsmxRequestList,} TsmxColumn, TsmxDBGrid, TsmxPanelFilter,
     TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet, TsmxPageControl,
     TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList, TsmxToolItem,
     TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar, TsmxForm]);

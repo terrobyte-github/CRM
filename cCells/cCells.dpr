@@ -3,8 +3,8 @@ library cCells;
 uses
   smxLibProcs,
   smxLibTypes,
-  smxCells in 'smxCells.pas',
-  smxExtCells in 'smxExtCells.pas';
+  smxExtCells in 'smxExtCells.pas',
+  smxStdCells in 'smxStdCells.pas';
 
 {$R *.res}
 

@@ -3,7 +3,7 @@ unit smxDBTypes;
 interface
 
 uses
-  smxDBIntf;
+  smxDBIntf, smxTypes;
 
 type
   TsmxFuncNewDatabase = function: IsmxDatabase;

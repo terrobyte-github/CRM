@@ -149,7 +149,7 @@ function NewCell(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCell;
 var
   CellClass: TsmxBaseCellClass;
-  IntfClass: TsmxInterfacedPersistentClass;
+  //IntfClass: TsmxInterfacedPersistentClass;
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
@@ -158,9 +158,9 @@ begin
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) then
   begin
-    IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
+    //IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
     //if Assigned(IntfClass) then
-      Result := CellClass.Create(AOwner, IntfClass);
+      Result := CellClass.Create(AOwner{, IntfClass});
     //else
       //Result := CellClass.Create(AOwner);
     Result.CfgID := ACfgID;
@@ -195,7 +195,7 @@ function NewForm(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0): TsmxCustomForm;
 var
   CellClass: TsmxBaseCellClass;
-  IntfClass: TsmxInterfacedPersistentClass;
+  //IntfClass: TsmxInterfacedPersistentClass;
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
@@ -204,8 +204,8 @@ begin
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if CellClass.InheritsFrom(TsmxCustomForm) then
   begin
-    IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-    Result := TsmxCustomFormClass(CellClass).Create(AOwner, IntfClass, AID);
+    //IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
+    Result := TsmxCustomFormClass(CellClass).Create(AOwner{, IntfClass}, AID);
     {if AID = 0 then
     begin
       if Assigned(IntfClass) then

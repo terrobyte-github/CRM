@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, Windows, ActiveX, ComObj, DB, DBTables, smxBaseClasses, smxDBClasses,
-  smxDBIntf, smxBaseIntf {, smxTypes};
+  smxCells, smxDBIntf, smxBaseIntf, smxTypes;
 
 const
   CLSID_smxCoBDEDatabase: TGUID = '{61272B45-B747-473C-8ECA-8148E607B057}';
@@ -340,6 +340,20 @@ type
     property SQLText: String read GetSQLText write SetSQLText;
   end;
 
+  { TsmxReqBDEQuery }
+
+  TsmxReqBDEQuery = class(TsmxRequest)
+  protected
+    function GetDataSetClass: TsmxInterfacedComponentClass; override;
+  end;
+
+  { TsmxReqBDEStoredProc }
+
+  TsmxReqBDEStoredProc = class(TsmxRequest)
+  protected
+    function GetDataSetClass: TsmxInterfacedComponentClass; override;
+  end;
+
 function DatabaseCLSID: TGUID;
 function NewDatabase: IsmxDatabase;
 function NewQuery: IsmxDataSet;
@@ -366,17 +380,17 @@ end;
 
 function NewDatabase: IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil) as IsmxDatabase;
 end;
 
 function NewQuery: IsmxDataSet;
 begin
-  Result := TsmxBDEQuery.Create as IsmxDataSet;
+  Result := TsmxBDEQuery.Create(nil) as IsmxDataSet;
 end;
 
 function NewProcedure: IsmxDataSet;
 begin
-  Result := TsmxBDEStoredProc.Create as IsmxDataSet;
+  Result := TsmxBDEStoredProc.Create(nil) as IsmxDataSet;
 end;
 
 { TsmxBDEDatabase }
@@ -497,8 +511,8 @@ function TsmxBDEDatabase.NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
 begin
   //Result := nil;
   case DataSetType of
-    dstQuery: Result := TsmxBDEQuery.Create as IsmxDataSet;
-    dstStoredProc: Result := TsmxBDEStoredProc.Create as IsmxDataSet;
+    dstQuery: Result := TsmxBDEQuery.Create(nil) as IsmxDataSet;
+    dstStoredProc: Result := TsmxBDEStoredProc.Create(nil) as IsmxDataSet;
     //else
       //raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetUnknown);
   end;
@@ -1661,7 +1675,7 @@ end;}
 
 function TsmxCoBDEDatabase.GetDatabaseIntf: IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil) as IsmxDatabase;
 end;
 
 { TsmxParam }
@@ -2321,12 +2335,26 @@ function TsmxBDEStoredProc.GetInternalParams: TParams;
 begin
   if not Assigned(FParams) then
     FParams := TParams.Create;
-  Result := FParams;  
+  Result := FParams;
+end;
+
+{ TsmxReqBDEQuery }
+
+function TsmxReqBDEQuery.GetDataSetClass: TsmxInterfacedComponentClass;
+begin
+  Result := TsmxBDEQuery;
+end;
+
+{ TsmxReqBDEStoredProc }
+
+function TsmxReqBDEStoredProc.GetDataSetClass: TsmxInterfacedComponentClass;
+begin
+  Result := TsmxBDEStoredProc;
 end;
 
 initialization
   Classes.RegisterClasses([TsmxBDEDatabase, TsmxBDEParam, TsmxBDEQuery,
-    TsmxBDEStoredProc]);
+    TsmxBDEStoredProc, TsmxReqBDEQuery, TsmxReqBDEStoredProc]);
   TComObjectFactory.Create(ComServer, TsmxCoBDEDatabase, CLSID_smxCoBDEDatabase,
     'smxCoBDEDatabase', '', ciMultiInstance, tmApartment);
 
