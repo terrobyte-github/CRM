@@ -43,7 +43,7 @@ type
     FField: IsmxField;
     {FFieldIndex: Integer;
     FFieldName: String;
-    FFieldSense: TsmxFieldSense;
+    FFieldSense: TsmxDataSense;
     FPrecision: Integer;
     FSize: Integer;}
     function GetKit: TsmxFieldList;
@@ -55,7 +55,7 @@ type
     function GetDisplayFormat: String; virtual;
     function GetFieldIndex: Integer; virtual;
     function GetFieldName: String; virtual;
-    function GetFieldSense: TsmxFieldSense; virtual;
+    function GetDataSense: TsmxDataSense; virtual;
     function GetPrecision: Integer; virtual;
     function GetSize: Integer; virtual;
     procedure SetDataType(Value: TsmxDataType); virtual;
@@ -63,7 +63,7 @@ type
     //procedure SetField(Value: TsmxCustomField); virtual;
     procedure SetFieldIndex(Value: Integer); virtual;
     procedure SetFieldName(const Value: String); virtual;
-    procedure SetFieldSense(Value: TsmxFieldSense); virtual;
+    procedure SetDataSense(Value: TsmxDataSense); virtual;
     //procedure SetIndex(Value: Integer); override;
     procedure SetPrecision(Value: Integer); virtual;
     procedure SetSize(Value: Integer); virtual;
@@ -76,11 +76,11 @@ type
 
     property Kit: TsmxFieldList read GetKit write SetKit;
   published
+    property DataSense: TsmxDataSense read GetDataSense write SetDataSense;
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     property FieldName: String read GetFieldName write SetFieldName;
-    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
   end;
@@ -95,9 +95,9 @@ type
   private
     FInternalDataSet: TsmxCustomDataSet;
     function GetItem(Index: Integer): TsmxFieldItem;
-    //function GetSense(const FieldName: String): TsmxFieldSense;
+    //function GetSense(const FieldName: String): TsmxDataSense;
     procedure SetItem(Index: Integer; Value: TsmxFieldItem);
-    //procedure SetSense(const FieldName: String; Value: TsmxFieldSense);
+    //procedure SetSense(const FieldName: String; Value: TsmxDataSense);
   protected
     //procedure AddField(Item: TsmxFieldItem); virtual;
     //procedure DelField(Item: TsmxFieldItem); virtual;
@@ -115,7 +115,7 @@ type
     //function Insert(const FieldName: String): Integer;
     //function Remove(const FieldName: String): Integer;
 
-    //property Senses[const FieldName: String]: TsmxFieldSense read GetSense write SetSense;
+    //property Senses[const FieldName: String]: TsmxDataSense read GetSense write SetSense;
     property Items[Index: Integer]: TsmxFieldItem read GetItem write SetItem; default;
   end;
 
@@ -129,7 +129,7 @@ type
     FParam: IsmxParam;
     {FDataType: TsmxDataType;
     FNumericScale: Integer;
-    FParamLocation: TsmxParamLocation;
+    FParamLocation: TsmxDataLocation;
     FParamName: String;
     FParamType: TsmxParamType;
     FParamValue: Variant;
@@ -140,19 +140,21 @@ type
   protected
     procedure AddParam; virtual;
     procedure DelParam; virtual;
+    function GetDataLocation: TsmxDataLocation; virtual;
+    function GetDataSense: TsmxDataSense; virtual;
     function GetDataType: TsmxDataType; virtual;
     function GetNumericScale: Integer; virtual;
     function GetParamIndex: Integer; virtual;
-    function GetParamLocation: TsmxParamLocation; virtual;
     function GetParamName: String; virtual;
     function GetParamType: TsmxParamType; virtual;
     function GetParamValue: Variant; virtual;
     function GetPrecision: Integer; virtual;
     function GetSize: Integer; virtual;
+    procedure SetDataLocation(Value: TsmxDataLocation); virtual;
+    procedure SetDataSense(Value: TsmxDataSense); virtual;
     procedure SetDataType(Value: TsmxDataType); virtual;
     procedure SetNumericScale(Value: Integer); virtual;
     procedure SetParamIndex(Value: Integer); virtual;
-    procedure SetParamLocation(Value: TsmxParamLocation); virtual;
     procedure SetParamName(const Value: String); virtual;
     procedure SetParamType(Value: TsmxParamType); virtual;
     procedure SetParamValue(const Value: Variant); virtual;
@@ -167,10 +169,11 @@ type
 
     property Kit: TsmxParamList read GetKit write SetKit;
   published
+    property DataLocation: TsmxDataLocation read GetDataLocation write SetDataLocation;
+    property DataSense: TsmxDataSense read GetDataSense write SetDataSense;
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     property ParamIndex: Integer read GetParamIndex write SetParamIndex;
-    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
     property ParamName: String read GetParamName write SetParamName;
     property ParamType: TsmxParamType read GetParamType write SetParamType;
     property ParamValue: Variant read GetParamValue write SetParamValue;
@@ -184,9 +187,9 @@ type
   private
     FInternalDataSet: TsmxCustomDataSet;
     function GetItem(Index: Integer): TsmxParamItem;
-    //function GetLocation(const ParamName: String): TsmxParamLocation;
+    //function GetLocation(const ParamName: String): TsmxDataLocation;
     procedure SetItem(Index: Integer; Value: TsmxParamItem);
-    //procedure SetLocation(const ParamName: String; Value: TsmxParamLocation);
+    //procedure SetLocation(const ParamName: String; Value: TsmxDataLocation);
   protected
     //procedure AddParam(Item: TsmxParamItem); virtual;
     //procedure DelParam(Item: TsmxParamItem); virtual;
@@ -198,10 +201,10 @@ type
     function IndexOfParam(const Param: IsmxParam): Integer;
     //function FindByName(const ParamName: String): TsmxParamItem;
     function IndexOfParamName(const ParamName: String): Integer;
-    //function InsertLocation(const ParamName: String; Location: TsmxParamLocation): Integer;
-    //function RemoveLocation(const ParamName: String; Location: TsmxParamLocation): Integer;
+    //function InsertLocation(const ParamName: String; Location: TsmxDataLocation): Integer;
+    //function RemoveLocation(const ParamName: String; Location: TsmxDataLocation): Integer;
 
-    //property Locations[const ParamName: String]: TsmxParamLocation read GetLocation write SetLocation;
+    //property Locations[const ParamName: String]: TsmxDataLocation read GetLocation write SetLocation;
     property Items[Index: Integer]: TsmxParamItem read GetItem write SetItem; default;
   end;
 
@@ -219,27 +222,27 @@ type
     FDisplayFormat: String;
     FFieldIndex: Integer;
     FFieldName: String;
-    FFieldSense: TsmxFieldSense;
+    FDataSense: TsmxDataSense;
     FInternalDataSet: TsmxCustomDataSet;
     //FInternalRef: Pointer;
     FPrecision: Integer;
     //FSenseItem: TsmxFieldItem;
     FSize: Integer;
   protected
+    function GetDataSense: TsmxDataSense; virtual;
     function GetDataSet: IsmxDataSet;
     function GetDataType: TsmxDataType; virtual;
     function GetDisplayFormat: String; virtual;
     function GetFieldIndex: Integer; virtual;
     function GetFieldName: String; virtual;
-    function GetFieldSense: TsmxFieldSense; virtual;
     //function GetInternalRef: Pointer; override;
     function GetPrecision: Integer; virtual;
     function GetSize: Integer; virtual;
+    procedure SetDataSense(Value: TsmxDataSense); virtual;
     procedure SetDataType(Value: TsmxDataType); virtual;
     procedure SetDisplayFormat(const Value: String); virtual;
     procedure SetFieldIndex(Value: Integer); virtual;
     procedure SetFieldName(const Value: String); virtual;
-    procedure SetFieldSense(Value: TsmxFieldSense); virtual;
     procedure SetInternalDataSet(Value: TsmxCustomDataSet); virtual;
     //procedure SetInternalRef(Value: Pointer); virtual;
     procedure SetPrecision(Value: Integer); virtual;
@@ -253,12 +256,12 @@ type
     procedure AssignField(const Source: IsmxField); virtual;
     procedure Clear; virtual;
 
+    property DataSense: TsmxDataSense read GetDataSense write SetDataSense;
     property DataSet: IsmxDataSet read GetDataSet;
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     property FieldName: String read GetFieldName write SetFieldName;
-    property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
     property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write SetInternalDataSet;
     //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
     property Precision: Integer read GetPrecision write SetPrecision;
@@ -283,7 +286,7 @@ type
     //function GetDisplayFormat: String;
     //function GetFieldIndex: Integer; override;
     //function GetFieldName: String; override;
-    //function GetFieldSense: TsmxFieldSense;
+    //function GetDataSense: TsmxDataSense;
     function GetInternalRef: Pointer; override;
     //function GetPrecision: Integer;
     //function GetSize: Integer;
@@ -294,7 +297,7 @@ type
     //procedure SetField(Value: TField); virtual;
     procedure SetFieldIndex(Value: Integer); override;
     procedure SetFieldName(const Value: String); override;
-    //procedure SetFieldSense(Value: TsmxFieldSense);
+    //procedure SetDataSense(Value: TsmxDataSense);
     //procedure SetInternalRef(Value: Pointer); override;
     procedure SetPrecision(Value: Integer); override;
     procedure SetSize(Value: Integer); override;
@@ -316,7 +319,7 @@ type
     //property Field: TField read FField write SetField;
     //property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
     //property FieldName: String read GetFieldName write SetFieldName;
-    //property FieldSense: TsmxFieldSense read GetFieldSense write SetFieldSense;
+    //property FieldSense: TsmxDataSense read GetDataSense write SetDataSense;
     //property Precision: Integer read GetPrecision write SetPrecision;
     //property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
@@ -329,10 +332,11 @@ type
     //FDataSetIntf: IsmxDataSet;
     FInternalDataSet: TsmxCustomDataSet;
     //FInternalRef: Pointer;
+    FDataSense: TsmxDataSense;
     FDataType: TsmxDataType;
     FNumericScale: Integer;
     FParamIndex: Integer;
-    FParamLocation: TsmxParamLocation;
+    FDataLocation: TsmxDataLocation;
     FParamName: String;
     FParamType: TsmxParamType;
     FPrecision: Integer;
@@ -341,21 +345,23 @@ type
   protected
     function GetDataSet: IsmxDataSet;
     //function GetInternalRef: Pointer; override;
+    function GetDataLocation: TsmxDataLocation; virtual;
+    function GetDataSense: TsmxDataSense; virtual;
     function GetDataType: TsmxDataType; virtual;
     function GetNumericScale: Integer; virtual;
     function GetParamIndex: Integer; virtual;
-    function GetParamLocation: TsmxParamLocation; virtual;
     function GetParamName: String; virtual;
     function GetParamType: TsmxParamType; virtual;
     function GetPrecision: Integer; virtual;
     function GetSize: Integer; virtual;
     function GetValue: Variant; virtual;
     //procedure SetInternalRef(Value: Pointer); virtual;
+    procedure SetDataLocation(Value: TsmxDataLocation); virtual;
+    procedure SetDataSense(Value: TsmxDataSense); virtual;
     procedure SetDataType(Value: TsmxDataType); virtual;
     procedure SetInternalDataSet(Value: TsmxCustomDataSet); virtual;
     procedure SetNumericScale(Value: Integer); virtual;
     procedure SetParamIndex(Value: Integer); virtual;
-    procedure SetParamLocation(Value: TsmxParamLocation); virtual;
     procedure SetParamName(const Value: String); virtual;
     procedure SetParamType(Value: TsmxParamType); virtual;
     procedure SetPrecision(Value: Integer); virtual;
@@ -369,12 +375,13 @@ type
     procedure AssignParam(const Source: IsmxField); overload; virtual;
     procedure Clear; virtual;
 
+    property DataLocation: TsmxDataLocation read GetDataLocation write SetDataLocation;
+    property DataSense: TsmxDataSense read GetDataSense write SetDataSense;
     property DataSet: IsmxDataSet read GetDataSet;
     property DataType: TsmxDataType read GetDataType write SetDataType;
     property InternalDataSet: TsmxCustomDataSet read FInternalDataSet write SetInternalDataSet;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     property ParamIndex: Integer read GetParamIndex write SetParamIndex;
-    property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
     property ParamName: String read GetParamName write SetParamName;
     property ParamType: TsmxParamType read GetParamType write SetParamType;
     property Precision: Integer read GetPrecision write SetPrecision;
@@ -711,10 +718,10 @@ procedure TsmxFieldItem.Assign(Source: TsmxKitItem);
 begin
   if Source is TsmxFieldItem then
   begin
+    DataSense := TsmxFieldItem(Source).DataSense;
     DataType := TsmxFieldItem(Source).DataType;
     DisplayFormat := TsmxFieldItem(Source).DisplayFormat;
     FieldName := TsmxFieldItem(Source).FieldName;
-    FieldSense := TsmxFieldItem(Source).FieldSense;
     Precision := TsmxFieldItem(Source).Precision;
     Size := TsmxFieldItem(Source).Size;
   end else
@@ -777,10 +784,10 @@ begin
     FField.FieldName := Value;
 end;
 
-procedure TsmxFieldItem.SetFieldSense(Value: TsmxFieldSense);
+procedure TsmxFieldItem.SetDataSense(Value: TsmxDataSense);
 begin
   if Assigned(FField) then
-    FField.FieldSense := Value;
+    FField.DataSense := Value;
 end;
 
 procedure TsmxFieldItem.SetPrecision(Value: Integer);
@@ -823,11 +830,11 @@ begin
     Result := '';
 end;
 
-function TsmxFieldItem.GetFieldSense: TsmxFieldSense;
+function TsmxFieldItem.GetDataSense: TsmxDataSense;
 begin
   if Assigned(FField) then
-    Result := FField.FieldSense else
-    Result := fsGeneral;
+    Result := FField.DataSense else
+    Result := dsGeneral;
 end;
 
 function TsmxFieldItem.GetPrecision: Integer;
@@ -940,7 +947,7 @@ begin
   inherited Items[Index] := Value;
 end;
 
-{function TsmxFieldList.GetSense(const FieldName: String): TsmxFieldSense;
+{function TsmxFieldList.GetSense(const FieldName: String): TsmxDataSense;
 var
   Item: TsmxFieldItem;
 begin
@@ -953,7 +960,7 @@ begin
   Result := Item.FieldSense;
 end;
 
-procedure TsmxFieldList.SetSense(const FieldName: String; Value: TsmxFieldSense);
+procedure TsmxFieldList.SetSense(const FieldName: String; Value: TsmxDataSense);
 var
   Item: TsmxFieldItem;
 begin
@@ -1058,9 +1065,10 @@ procedure TsmxParamItem.Assign(Source: TsmxKitItem);
 begin
   if Source is TsmxParamItem then
   begin
+    DataLocation := TsmxParamItem(Source).DataLocation;
+    DataSense := TsmxParamItem(Source).DataSense;
     DataType := TsmxParamItem(Source).DataType;
     NumericScale := TsmxParamItem(Source).NumericScale;
-    ParamLocation := TsmxParamItem(Source).ParamLocation;
     ParamName := TsmxParamItem(Source).ParamName;
     ParamType := TsmxParamItem(Source).ParamType;
     ParamValue := TsmxParamItem(Source).ParamValue;
@@ -1089,11 +1097,11 @@ begin
     Result := 0;
 end;
 
-function TsmxParamItem.GetParamLocation: TsmxParamLocation;
+function TsmxParamItem.GetDataLocation: TsmxDataLocation;
 begin
   if Assigned(FParam) then
-    Result := FParam.ParamLocation else
-    Result := plConst;
+    Result := FParam.DataLocation else
+    Result := dlAssigned;
 end;
 
 function TsmxParamItem.GetParamName: String;
@@ -1152,10 +1160,10 @@ begin
     FParam.NumericScale := Value;
 end;
 
-procedure TsmxParamItem.SetParamLocation(Value: TsmxParamLocation);
+procedure TsmxParamItem.SetDataLocation(Value: TsmxDataLocation);
 begin
   if Assigned(FParam) then
-    FParam.ParamLocation := Value;
+    FParam.DataLocation := Value;
 end;
 
 procedure TsmxParamItem.SetParamName(const Value: String);
@@ -1199,6 +1207,19 @@ procedure TsmxParamItem.SetParamIndex(Value: Integer);
 begin
   if Assigned(FParam) then
     FParam.ParamIndex := Value;
+end;
+
+function TsmxParamItem.GetDataSense: TsmxDataSense;
+begin
+  if Assigned(FParam) then
+    Result := FParam.DataSense else
+    Result := dsGeneral;
+end;
+
+procedure TsmxParamItem.SetDataSense(Value: TsmxDataSense);
+begin
+  if Assigned(FParam) then
+    FParam.DataSense := Value;
 end;
 
 { TsmxParamList }
@@ -1277,7 +1298,7 @@ begin
   inherited Items[Index] := Value;
 end;
 
-{function TsmxParamList.GetLocation(const ParamName: String): TsmxParamLocation;
+{function TsmxParamList.GetLocation(const ParamName: String): TsmxDataLocation;
 var
   Item: TsmxParamItem;
 begin
@@ -1290,7 +1311,7 @@ begin
   Result := Item.ParamLocation;
 end;
 
-procedure TsmxParamList.SetLocation(const ParamName: String; Value: TsmxParamLocation);
+procedure TsmxParamList.SetLocation(const ParamName: String; Value: TsmxDataLocation);
 var
   Item: TsmxParamItem;
 begin
@@ -1357,10 +1378,10 @@ procedure TsmxCustomField.AssignField(const Source: IsmxField);
 begin
   if Assigned(Source) then
   begin
+    DataSense := Source.DataSense;
     DataType := Source.DataType;
     DisplayFormat := Source.DisplayFormat;
     FieldName := Source.FieldName;
-    FieldSense := Source.FieldSense;
     Precision := Source.Precision;
     Size := Source.Size;
   end else
@@ -1369,10 +1390,10 @@ end;
 
 procedure TsmxCustomField.Clear;
 begin
+  DataSense := dsGeneral;
   DataType := ftUnknown;
   DisplayFormat := '';
   FieldName := '';
-  FieldSense := fsGeneral;
   Precision := 0;
   Size := 0;
 end;
@@ -1395,14 +1416,14 @@ begin
   FFieldName := Value;
 end;
 
-function TsmxCustomField.GetFieldSense: TsmxFieldSense;
+function TsmxCustomField.GetDataSense: TsmxDataSense;
 begin
-  Result := FFieldSense;
+  Result := FDataSense;
 end;
 
-procedure TsmxCustomField.SetFieldSense(Value: TsmxFieldSense);
+procedure TsmxCustomField.SetDataSense(Value: TsmxDataSense);
 begin
-  FFieldSense := Value;
+  FDataSense := Value;
 end;
 
 procedure TsmxCustomField.SetInternalDataSet(Value: TsmxCustomDataSet);
@@ -1672,14 +1693,14 @@ begin
     Field.Value := Value;
 end;
 
-{function TsmxField.GetFieldSense: TsmxFieldSense;
+{function TsmxField.GetDataSense: TsmxDataSense;
 begin
   if Assigned(FField) and Assigned(IntfDataSet) then
     Result := IntfDataSet.SenseList.Senses[FField.FieldName] else
     Result := fsGeneral;
 end;
 
-procedure TsmxField.SetFieldSense(Value: TsmxFieldSense);
+procedure TsmxField.SetDataSense(Value: TsmxDataSense);
 begin
   if Assigned(FField) and Assigned(IntfDataSet) then
     IntfDataSet.SenseList.Senses[FField.FieldName] := Value;
@@ -1806,9 +1827,10 @@ procedure TsmxCustomParam.AssignParam(const Source: IsmxParam);
 begin
   if Assigned(Source) then
   begin
+    DataLocation := Source.DataLocation;
+    DataSense := Source.DataSense;
     DataType := Source.DataType;
     NumericScale := Source.NumericScale;
-    ParamLocation := Source.ParamLocation;
     ParamName := Source.ParamName;
     ParamType := Source.ParamType;
     Precision := Source.Precision;
@@ -1822,6 +1844,7 @@ procedure TsmxCustomParam.AssignParam(const Source: IsmxField);
 begin
   if Assigned(Source) then
   begin
+    DataSense := Source.DataSense;
     DataType := Source.DataType;
     if Source.DataType in [ftBCD, ftFMTBcd] then
       NumericScale := Source.Size;
@@ -1835,9 +1858,10 @@ end;
 
 procedure TsmxCustomParam.Clear;
 begin
+  DataLocation := dlAssigned;
+  DataSense := dsGeneral;
   DataType := ftUnknown;
   NumericScale := 0;
-  ParamLocation := plConst;
   ParamName := '';
   ParamType := ptUnknown;
   Precision := 0;
@@ -1853,7 +1877,7 @@ begin
     Result := nil;
 end;
 
-{function TsmxCustomParam.GetParamLocation: TsmxParamLocation;
+{function TsmxCustomParam.GetDataLocation: TsmxDataLocation;
 var
   Item: TsmxParamItem;
 begin
@@ -1866,7 +1890,74 @@ begin
   Result := Item.ParamLocation;
 end;}
 
-procedure TsmxCustomParam.SetParamLocation(Value: TsmxParamLocation);
+function TsmxCustomParam.GetDataSense: TsmxDataSense;
+begin
+  Result := FDataSense;
+end;
+
+procedure TsmxCustomParam.SetDataSense(Value: TsmxDataSense);
+begin
+  FDataSense := Value;
+end;
+
+function TsmxCustomParam.GetDataType: TsmxDataType;
+begin
+  Result := FDataType;
+end;
+
+function TsmxCustomParam.GetNumericScale: Integer;
+begin
+  Result := FNumericScale;
+end;
+
+function TsmxCustomParam.GetParamIndex: Integer;
+begin
+  if Assigned(FInternalDataSet) then
+    Result := FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)
+  else
+    Result := FParamIndex;
+end;
+
+function TsmxCustomParam.GetDataLocation: TsmxDataLocation;
+begin
+  Result := FDataLocation;
+end;
+
+function TsmxCustomParam.GetParamName: String;
+begin
+  Result := FParamName;
+end;
+
+function TsmxCustomParam.GetParamType: TsmxParamType;
+begin
+  Result := FParamType;
+end;
+
+function TsmxCustomParam.GetPrecision: Integer;
+begin
+  Result := FPrecision;
+end;
+
+function TsmxCustomParam.GetSize: Integer;
+begin
+  Result := FSize;
+end;
+
+function TsmxCustomParam.GetValue: Variant;
+begin
+  Result := FValue; // может перенести в наследников?
+end;
+
+procedure TsmxCustomParam.SetParamIndex(Value: Integer);
+begin
+  if Assigned(FInternalDataSet) then
+    FInternalDataSet.ParamList[
+      FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)].ItemIndex := Value
+  else
+    FParamIndex := Value;
+end;
+
+procedure TsmxCustomParam.SetDataLocation(Value: TsmxDataLocation);
 //var
   //Item: TsmxParamItem;
 begin
@@ -1877,7 +1968,7 @@ begin
     Item.ParamName := ParamName;
   end;
   Item.ParamLocation := Value;}
-  FParamLocation := Value;
+  FDataLocation := Value;
 end;
 
 {function TsmxCustomParam.GetParamName: String;
@@ -1907,7 +1998,7 @@ begin
     FInternalDataSet.DestroyInternalParam(Self);
   FInternalDataSet := Value;
   if Assigned(FInternalDataSet) then
-    FInternalDataSet.CreateInternalParam(Self);  
+    FInternalDataSet.CreateInternalParam(Self);
 end;
 
 procedure TsmxCustomParam.SetNumericScale(Value: Integer);
@@ -1979,63 +2070,6 @@ begin
   if Assigned(FInternalRef) then
     FInternalDataSet.ParamReferenceList.InsertReference(Self, FInternalRef);
 end;}
-
-function TsmxCustomParam.GetDataType: TsmxDataType;
-begin
-  Result := FDataType;
-end;
-
-function TsmxCustomParam.GetNumericScale: Integer;
-begin
-  Result := FNumericScale;
-end;
-
-function TsmxCustomParam.GetParamIndex: Integer;
-begin
-  if Assigned(FInternalDataSet) then
-    Result := FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)
-  else
-    Result := FParamIndex;
-end;
-
-function TsmxCustomParam.GetParamLocation: TsmxParamLocation;
-begin
-  Result := FParamLocation;
-end;
-
-function TsmxCustomParam.GetParamName: String;
-begin
-  Result := FParamName;
-end;
-
-function TsmxCustomParam.GetParamType: TsmxParamType;
-begin
-  Result := FParamType;
-end;
-
-function TsmxCustomParam.GetPrecision: Integer;
-begin
-  Result := FPrecision;
-end;
-
-function TsmxCustomParam.GetSize: Integer;
-begin
-  Result := FSize;
-end;
-
-function TsmxCustomParam.GetValue: Variant;
-begin
-  Result := FValue; // может перенести в наследников?
-end;
-
-procedure TsmxCustomParam.SetParamIndex(Value: Integer);
-begin
-  if Assigned(FInternalDataSet) then
-    FInternalDataSet.ParamList[
-      FInternalDataSet.ParamList.IndexOfParam(Self as IsmxParam)].ItemIndex := Value
-  else
-    FParamIndex := Value;
-end;
 
 { TsmxCustomDataSet }
 

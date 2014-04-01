@@ -126,14 +126,14 @@ type
 
   TsmxDataType = TFieldType;
 
-  TsmxFieldSense = (fsGeneral, fsKey, fsValue, fsResult, fsMessage,
-    fsForeignKey);
+  TsmxDataSense = (dsGeneral, dsKey, dsValue, dsResult, dsMessage,
+    dsForeignKey);
 
   TsmxParamType = TParamType;
 
-  TsmxParamLocation = (plConst, plKey, plValue, plResult, plMessage,
-    plForeignKey, plInput, plOutput, plInOutput, plStorageParam,
-    plParentParam, plFilterDesk, plGrid, plParentFilterDesk, plParentGrid);
+  TsmxDataLocation = (dlAssigned{, plKey, plValue, plResult, plMessage,
+    plForeignKey, plInput, plOutput, plInOutput}, dlStorageParam,
+    dlParentParam, dlFilterDesk, dlGrid, dlParentFilterDesk, dlParentGrid);
 
   TsmxLocateOptions = TLocateOptions;
 

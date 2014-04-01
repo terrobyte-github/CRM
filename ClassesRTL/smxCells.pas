@@ -356,7 +356,7 @@ begin
     for i := 0 to AlgorithmParams.Count - 1 do
     begin
       //Value := Variants.Null;
-      case AlgorithmParams[i].ParamLocation of
+      case AlgorithmParams[i].DataLocation of
         {plConst .. plOutput, plFilterDesk .. plParentGrid:
         begin
           Value := Variants.Null; //AlgorithmParams[i].ParamValue;
@@ -368,7 +368,7 @@ begin
             if CellOwner.GetAlgorithmParamValue(CfgID, AlgorithmParams[i].ParamName, Value) then
               AlgorithmParams[i].ParamValue := Value;
         end;}
-        plFilterDesk:
+        dlFilterDesk:
         begin
           if CellAction is TsmxCustomFilterDesk then
           begin
@@ -379,7 +379,7 @@ begin
           if smxClassFuncs.FindFilterOnForm(Form, AlgorithmParams[i].ParamName, Value) then
             AlgorithmParams[i].ParamValue := Value;
         end;
-        plGrid:
+        dlGrid:
         begin
           if CellAction is TsmxCustomGrid then
           begin
@@ -390,7 +390,7 @@ begin
           if smxClassFuncs.FindColumnOnForm(Form, AlgorithmParams[i].ParamName, Value) then
             AlgorithmParams[i].ParamValue := Value;
         end;
-        plParentFilterDesk:
+        dlParentFilterDesk:
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
@@ -400,7 +400,7 @@ begin
               Break;
             end;
         end;
-        plParentGrid:
+        dlParentGrid:
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
@@ -410,12 +410,12 @@ begin
               Break;
             end;
         end;
-        plStorageParam:
+        dlStorageParam:
         begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             AlgorithmParams[i].ParamValue := smxClassProcs.gStorageManagerIntf.Values[AlgorithmParams[i].ParamName];
         end;
-        plParentParam:
+        dlParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
@@ -851,7 +851,7 @@ begin
     for i := 0 to CurDataSet.ParamCount - 1 do
     begin
       //Value := Variants.Null;
-      case CurDataSet.Params[i].ParamLocation of
+      case CurDataSet.Params[i].DataLocation of
         {plConst .. plOutput, plFilterDesk .. plParentGrid:
         begin
           Value := Variants.Null; //FCurDataSetIntf.Params[i].Value;
@@ -863,7 +863,7 @@ begin
             if CellOwner.GetRequestParamValue(CfgID, CurDataSet.Params[i].ParamName, Value) then
               CurDataSet.Params[i].Value := Value;
         end;}
-        plFilterDesk:
+        dlFilterDesk:
         begin
           {smxClassProcs.AllParents(Self, List, [TsmxCustomSection]);
           if List.Count > 0 then
@@ -879,7 +879,7 @@ begin
           if smxClassFuncs.FindFilterOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
             CurDataSet.Params[i].Value := Value;
         end;
-        plGrid:
+        dlGrid:
         begin
           {smxClassProcs.AllParents(Self, List, [TsmxCustomPage]);
           if List.Count > 0 then
@@ -904,7 +904,7 @@ begin
           if smxClassFuncs.FindColumnOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
             CurDataSet.Params[i].Value := Value;
         end;
-        plParentFilterDesk:
+        dlParentFilterDesk:
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
@@ -914,7 +914,7 @@ begin
               Break;
             end;
         end;
-        plParentGrid:
+        dlParentGrid:
         begin
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
@@ -924,12 +924,12 @@ begin
               Break;
             end;
         end;
-        plStorageParam:
+        dlStorageParam:
         begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             CurDataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[CurDataSet.Params[i].ParamName];
         end;
-        plParentParam:
+        dlParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do

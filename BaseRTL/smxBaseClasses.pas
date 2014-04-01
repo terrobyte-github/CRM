@@ -234,6 +234,7 @@ type
   private
     FKitItemClass: TsmxKitItemClass;
     FKitList: TList;
+    FOnChange: TNotifyEvent;
     FOwner: TObject;
     function GetCount: Integer;
     function GetItem(Index: Integer): TsmxKitItem;
@@ -241,6 +242,8 @@ type
     procedure SetItem(Index: Integer; Value: TsmxKitItem);
   protected
     //function GetOwner: TPersistent; virtual;
+    procedure DoChange; virtual;
+    procedure InternalChange; virtual;
 
     property KitList: TList read GetKitList;
   public
@@ -249,6 +252,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TsmxKit); virtual;
     function Add: TsmxKitItem;
+    procedure Change;
     procedure Clear;
     procedure Delete(Index: Integer);
     //function IndexOf(Item: TsmxKitItem): Integer;
@@ -257,6 +261,8 @@ type
     property Items[Index: Integer]: TsmxKitItem read GetItem write SetItem; default;
     property KitItemClass: TsmxKitItemClass read FKitItemClass;
     property Owner: TObject read FOwner;
+
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
   TsmxKitClass = class of TsmxKit;
@@ -704,8 +710,11 @@ var
   CurIndex: Integer;
 begin
   CurIndex := GetIndex;
-  if (CurIndex >= 0) and (CurIndex <> Value) then
+  if (CurIndex >= 0) and (CurIndex <> Value) and Assigned(FKit) then
+  begin
     FKit.KitList.Move(CurIndex, Value);
+    FKit.Change;
+  end;
 end;
 
 procedure TsmxKitItem.SetKit(Value: TsmxKit);
@@ -767,6 +776,22 @@ end;
 procedure TsmxKit.Delete(Index: Integer);
 begin
   TsmxKitItem(KitList[Index]).Free;
+end;
+
+procedure TsmxKit.DoChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
+procedure TsmxKit.InternalChange;
+begin
+end;
+
+procedure TsmxKit.Change;
+begin
+  InternalChange;
+  DoChange;
 end;
 
 function TsmxKit.GetCount: Integer;
@@ -873,7 +898,7 @@ var
   CurIndex: Integer;
 begin
   CurIndex := GetIndex;
-  if (CurIndex >= 0) and (CurIndex <> Value) then
+  if (CurIndex >= 0) and (CurIndex <> Value) and Assigned(FParent) then
     FParent.HKitItemList.Move(CurIndex, Value);
 end;
 

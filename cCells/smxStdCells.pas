@@ -4068,13 +4068,13 @@ begin
   List := TList.Create;
   try
     for i := 0 to DataSet.ParamCount - 1 do
-      case DataSet.Params[i].ParamLocation of
-        plStorageParam:
+      case DataSet.Params[i].DataLocation of
+        dlStorageParam:
         begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             DataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
         end;
-        plParentParam:
+        dlParentParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do

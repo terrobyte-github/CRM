@@ -2,7 +2,6 @@ const
   cIni =
     '[Init]'#13#10 +
     'RequestClassName='#13#10 +
-    'IRequestClassName='#13#10 +
     'RequestLibName='#13#10 +
     'RequestProcName='#13#10 +
     'RequestXMLText='#13#10 +

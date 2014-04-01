@@ -5,31 +5,37 @@ interface
 uses
   smxDBIntf, smxDBTypes, smxTypes;
 
-function FindFieldBySense(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function FindFieldBySense(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   var AFields: TsmxFieldArray): Integer;
-function GetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function GetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const ADefValues: Variant; var AValues: Variant): Boolean;
-function SetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function SetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const AValues: Variant): Boolean;
-function FindParamByLocation(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function FindParamBySense(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   var AParams: TsmxParamArray): Integer;
-function GetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function GetParamSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const ADefValues: Variant; var AValues: Variant): Boolean;
-function SetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function SetParamSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const AValues: Variant): Boolean;
+{function FindParamByLocation(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
+  var AParams: TsmxParamArray): Integer;
+function GetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
+  const ADefValues: Variant; var AValues: Variant): Boolean;
+function SetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
+  const AValues: Variant): Boolean;}
 function GetValueByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
   var AValues: Variant; {APerformance: TsmxPerformanceMode;}
-  AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  AKeySense: TsmxDataSense = dsKey; AValueSense: TsmxDataSense = dsValue): Boolean;
 function SetValueByKey(const ADataSet: IsmxDataSet; var AKeys: Variant;
   const AValues: Variant; {APerformance: TsmxPerformanceMode;}
-  AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
-function GetFieldNameList(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): String;
+  AKeySense: TsmxDataSense = dsKey; AValueSense: TsmxDataSense = dsValue): Boolean;
+function GetFieldNameList(const ADataSet: IsmxDataSet; ASense: TsmxDataSense): String;
 function LocateByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
-  AKeySense: TsmxBaseSense = fsKey): Boolean;
+  AKeySense: TsmxDataSense = dsKey): Boolean;
 function GetCurrentValue(const ADataSet: IsmxDataSet; var AValues: Variant;
-  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxDataSense = dsValue): Boolean;
 function SetCurrentValue(const ADataSet: IsmxDataSet; const AValues: Variant;
-  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxDataSense = dsValue): Boolean;
 function IsBlobType(ADataType: TsmxDataType; ALength: Integer = 0): Boolean;
 function DataTypeToVarType(ADataType: TsmxDataType): Integer;
 function SetNumberOfRecord(const ADataSet: IsmxDataSet; ARecordNo: Integer): Boolean;
@@ -39,11 +45,11 @@ implementation
 uses
   Variants, DB;
 
-const
-  SenseToLocation: Array[TsmxBaseSense] of TsmxParamLocation =
-    (plKey, plValue, plResult, plMessage, plForeignKey);
+{const
+  SenseToLocation: Array[TsmxDataSense] of TsmxDataLocation =
+    (plKey, plValue, plResult, plMessage, plForeignKey);}
 
-function FindFieldBySense(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function FindFieldBySense(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   var AFields: TsmxFieldArray): Integer;
 var
   i: Integer;
@@ -52,7 +58,7 @@ begin
   SetLength(AFields, 0);
   if Assigned(ADataSet) then
     for i := 0 to ADataSet.FieldCount - 1 do
-      if ADataSet.Fields[i].FieldSense = ASense then
+      if ADataSet.Fields[i].DataSense = ASense then
       begin
         Inc(Result);
         SetLength(AFields, Result);
@@ -60,7 +66,7 @@ begin
       end;
 end;
 
-function GetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function GetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const ADefValues: Variant; var AValues: Variant): Boolean;
 var
   Fields: TsmxFieldArray;
@@ -83,7 +89,7 @@ begin
   end;
 end;
 
-function SetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense;
+function SetFieldSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   const AValues: Variant): Boolean;
 var
   Fields: TsmxFieldArray;
@@ -110,7 +116,7 @@ begin
     end;
 end;
 
-function FindParamByLocation(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function FindParamBySense(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
   var AParams: TsmxParamArray): Integer;
 var
   i: Integer;
@@ -119,7 +125,7 @@ begin
   SetLength(AParams, 0);
   if Assigned(ADataSet) then
     for i := 0 to ADataSet.ParamCount - 1 do
-      if ADataSet.Params[i].ParamLocation = ALocation then
+      if ADataSet.Params[i].DataSense = ASense then
       begin
         Inc(Result);
         SetLength(AParams, Result);
@@ -127,7 +133,70 @@ begin
       end;
 end;
 
-function GetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function GetParamSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
+  const ADefValues: Variant; var AValues: Variant): Boolean;
+var
+  Params: TsmxParamArray;
+  i, Count: Integer;
+begin
+  Result := False;
+  AValues := ADefValues;
+  Count := FindParamBySense(ADataSet, ASense, Params);
+  if Count = 1 then
+  begin
+    AValues := Params[0].Value;
+    Result := True;
+  end else
+  if Count > 1 then
+  begin
+    AValues := Variants.VarArrayCreate([0, Count - 1], varVariant);
+    for i := 0 to Count - 1 do
+      AValues[i] := Params[i].Value;
+    Result := True;
+  end;
+end;
+
+function SetParamSenseValue(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
+  const AValues: Variant): Boolean;
+var
+  Params: TsmxParamArray;
+  i, Count: Integer;
+begin
+  Result := False;
+  Count := FindParamBySense(ADataSet, ASense, Params);
+  if not Variants.VarIsArray(AValues) then
+    if Count = 1 then
+    begin
+      Params[0].Value := AValues;
+      Result := True;
+    end
+  else
+    if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
+    begin
+      for i := 0 to Count - 1 do
+        Params[i].Value := AValues[i];
+      Result := True;
+    end;
+end;
+
+{function FindParamByLocation(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
+  var AParams: TsmxParamArray): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  SetLength(AParams, 0);
+  if Assigned(ADataSet) then
+    for i := 0 to ADataSet.ParamCount - 1 do
+      if ADataSet.Params[i].DataLocation = ALocation then
+      begin
+        Inc(Result);
+        SetLength(AParams, Result);
+        AParams[Result - 1] := ADataSet.Params[i];
+      end;
+end;
+
+function GetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
   const ADefValues: Variant; var AValues: Variant): Boolean;
 var
   Params: TsmxParamArray;
@@ -150,7 +219,7 @@ begin
   end;
 end;
 
-function SetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxParamLocation;
+function SetParamLocationValue(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
   const AValues: Variant): Boolean;
 var
   Params: TsmxParamArray;
@@ -171,17 +240,17 @@ begin
         Params[i].Value := AValues[i];
       Result := True;
     end;
-end;
+end;}
 
 function GetValueByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
   var AValues: Variant; {APerformance: TsmxPerformanceMode;}
-  AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  AKeySense: TsmxDataSense = dsKey; AValueSense: TsmxDataSense = dsValue): Boolean;
 begin
   Result := False;
   AValues := Variants.Null;
   if Assigned(ADataSet) then
     ADataSet.Close;
-  if SetParamLocationValue(ADataSet, SenseToLocation[AKeySense], AKeys) then
+  if SetParamSenseValue(ADataSet, {SenseToLocation[}AKeySense{]}, AKeys) then
   begin
     case ADataSet.PerformanceMode of
       pmOpen:
@@ -192,7 +261,7 @@ begin
       pmExecute:
       begin
         ADataSet.Execute;
-        Result := GetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues, AValues);
+        Result := GetParamSenseValue(ADataSet, {SenseToLocation[}AValueSense{]}, AValues, AValues);
       end;
     end;
   end;
@@ -200,13 +269,13 @@ end;
 
 function SetValueByKey(const ADataSet: IsmxDataSet; var AKeys: Variant;
   const AValues: Variant; {APerformance: TsmxPerformanceMode;}
-  AKeySense: TsmxBaseSense = fsKey; AValueSense: TsmxBaseSense = fsValue): Boolean;
+  AKeySense: TsmxDataSense = dsKey; AValueSense: TsmxDataSense = dsValue): Boolean;
 begin
   Result := False;
   if Assigned(ADataSet) then
     ADataSet.Close;
-  if SetParamLocationValue(ADataSet, SenseToLocation[AKeySense], AKeys)
-      and SetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues) then
+  if SetParamSenseValue(ADataSet, {SenseToLocation[}AKeySense{]}, AKeys)
+      and SetParamSenseValue(ADataSet, {SenseToLocation[}AValueSense{]}, AValues) then
   begin
     case ADataSet.PerformanceMode of
       pmOpen:
@@ -217,13 +286,13 @@ begin
       pmExecute:
       begin
         ADataSet.Execute;
-        Result := GetParamLocationValue(ADataSet, SenseToLocation[AKeySense], AKeys, AKeys);
+        Result := GetParamSenseValue(ADataSet, {SenseToLocation[}AKeySense{]}, AKeys, AKeys);
       end;
     end;
   end;
 end;
 
-function GetFieldNameList(const ADataSet: IsmxDataSet; ASense: TsmxFieldSense): String;
+function GetFieldNameList(const ADataSet: IsmxDataSet; ASense: TsmxDataSense): String;
 var
   Fields: TsmxFieldArray;
   i, Count: Integer;
@@ -235,30 +304,30 @@ begin
 end;
 
 function LocateByKey(const ADataSet: IsmxDataSet; const AKeys: Variant;
-  AKeySense: TsmxBaseSense = fsKey): Boolean;
+  AKeySense: TsmxDataSense = dsKey): Boolean;
 begin
   Result := ADataSet.Locate(GetFieldNameList(ADataSet, AKeySense), AKeys);
 end;
 
 function GetCurrentValue(const ADataSet: IsmxDataSet; var AValues: Variant;
-  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxDataSense = dsValue): Boolean;
 begin
   Result := False;
   if Assigned(ADataSet) then
     case ADataSet.PerformanceMode of
       pmOpen: Result := GetFieldSenseValue(ADataSet, AValueSense, AValues, AValues);
-      pmExecute: Result := GetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues, AValues);
+      pmExecute: Result := GetParamSenseValue(ADataSet, {SenseToLocation[}AValueSense{]}, AValues, AValues);
     end;
 end;
 
 function SetCurrentValue(const ADataSet: IsmxDataSet; const AValues: Variant;
-  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxBaseSense = fsValue): Boolean;
+  {APerformance: TsmxPerformanceMode;} AValueSense: TsmxDataSense = dsValue): Boolean;
 begin
   Result := False;
   if Assigned(ADataSet) then
     case ADataSet.PerformanceMode of
       pmOpen: Result := SetFieldSenseValue(ADataSet, AValueSense, AValues);
-      pmExecute: Result := SetParamLocationValue(ADataSet, SenseToLocation[AValueSense], AValues);
+      pmExecute: Result := SetParamSenseValue(ADataSet, {SenseToLocation[}AValueSense{]}, AValues);
     end;
 end;
 

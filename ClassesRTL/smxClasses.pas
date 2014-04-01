@@ -892,8 +892,8 @@ type
 
   TsmxAlgorithmParam = class(TsmxParam)
   private
+    FDataLocation: TsmxDataLocation;
     FDataType: TsmxDataType;
-    FParamLocation: TsmxParamLocation;
     FParamType: TsmxParamType;
     function GetKit: TsmxAlgorithmParams;
     procedure SetKit(Value: TsmxAlgorithmParams);
@@ -904,8 +904,8 @@ type
 
     property Kit: TsmxAlgorithmParams read GetKit write SetKit;
   published
+    property DataLocation: TsmxDataLocation read FDataLocation write FDataLocation;
     property DataType: TsmxDataType read FDataType write SetDataType;
-    property ParamLocation: TsmxParamLocation read FParamLocation write FParamLocation;
     property ParamName;
     property ParamType: TsmxParamType read FParamType write FParamType;
     property ParamValue;
@@ -4735,8 +4735,8 @@ begin
   inherited Assign(Source);
   if Source is TsmxAlgorithmParam then
   begin
+    DataLocation := TsmxAlgorithmParam(Source).DataLocation;
     DataType := TsmxAlgorithmParam(Source).DataType;
-    ParamLocation := TsmxAlgorithmParam(Source).ParamLocation;
     ParamType := TsmxAlgorithmParam(Source).ParamType;
   end;
 end;
@@ -7100,7 +7100,7 @@ end;
 procedure TsmxStateCfg.Load;
 var
   Key, Value: Variant;
-  KeySense: TsmxBaseSense;
+  KeySense: TsmxDataSense;
 begin
   if not Assigned(FSelectDataSetIntf)
       or not ((FRecID <> 0) or ((FCfgID <> 0) and (FIntfID <> 0))) then
@@ -7109,11 +7109,11 @@ begin
   if FRecID = 0 then
   begin
     Key := Variants.VarArrayOf([FCfgID, FIntfID]);
-    KeySense := fsForeignKey;
+    KeySense := dsForeignKey;
   end else
   begin
     Key := FRecID;
-    KeySense := fsKey;
+    KeySense := dsKey;
   end;
   if smxDBFuncs.GetValueByKey(FSelectDataSetIntf, Key, Value,
       {FSelectRequest.PerformanceMode,} KeySense) then
@@ -7121,7 +7121,7 @@ begin
     if smxDBFuncs.LocateByKey(FSelectDataSetIntf, Key, KeySense) then
     begin
       if smxDBFuncs.GetCurrentValue(FSelectDataSetIntf, Value,
-          {FSelectRequest.PerformanceMode,} fsKey) then
+          {FSelectRequest.PerformanceMode,} dsKey) then
         FRecID := Value else
         FRecID := 0;
       if smxDBFuncs.GetCurrentValue(FSelectDataSetIntf, Value{,
@@ -7145,7 +7145,7 @@ var
   //Request: IsmxDataSet;
   //Performance: TsmxPerformanceMode;
   Key, Value: Variant;
-  KeySense: TsmxBaseSense;
+  KeySense: TsmxDataSense;
 begin
   if ((((FRecID = 0) and not Assigned(FInsertDataSetIntf))
         or ((FRecID <> 0) and not Assigned(FUpdateDataSetIntf)))
@@ -7157,13 +7157,13 @@ begin
     DataSet := FInsertDataSetIntf; // ModifyRequests[mrInsert];
     //Performance := FSelectRequest.InsertPerformance; // ModifyPerformances[mrInsert];
     Key := Variants.VarArrayOf([FCfgID, FIntfID]);
-    KeySense := fsForeignKey;
+    KeySense := dsForeignKey;
   end else
   begin
     DataSet := FUpdateDataSetIntf; // ModifyRequests[mrUpdate];
     //Performance := FSelectRequest.UpdatePerformance; // ModifyPerformances[mrUpdate];
     Key := FRecID;
-    KeySense := fsKey;
+    KeySense := dsKey;
   end;
   {if not Assigned(Request) then
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
@@ -7178,7 +7178,7 @@ begin
     KeySense := fsKey;
   end;}
   if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text, {Performance,} KeySense) then
-    if smxDBFuncs.GetCurrentValue(DataSet, Value, {Performance,} fsKey) then
+    if smxDBFuncs.GetCurrentValue(DataSet, Value, {Performance,} dsKey) then
       FRecID := Value;
 end;
 
@@ -7198,7 +7198,7 @@ begin
       if smxDBFuncs.GetCurrentValue(FSelectDataSetIntf, Value{, FSelectRequest.PerformanceMode}) then
         XMLDoc.XML.Text := Value else
         XMLDoc.XML.Text := '';
-      if smxDBFuncs.GetCurrentValue(FSelectDataSetIntf, Value, {FSelectRequest.PerformanceMode,} fsForeignKey) then
+      if smxDBFuncs.GetCurrentValue(FSelectDataSetIntf, Value, {FSelectRequest.PerformanceMode,} dsForeignKey) then
         CurIntfID := smxFuncs.GetSingleValue(Value, 0, 1) else
         CurIntfID := 0;
       try
@@ -7242,7 +7242,7 @@ var
   //Request: IsmxDataSet;
   //Performance: TsmxPerformanceMode;
   Key: Variant;
-  KeySense: TsmxBaseSense;
+  KeySense: TsmxDataSense;
 begin
   if not Assigned(FDeleteDataSetIntf)
       or not ((FRecID <> 0) or ((FCfgID <> 0) and (FIntfID <> 0))) then
@@ -7256,11 +7256,11 @@ begin
   if FRecID = 0 then
   begin
     Key := Variants.VarArrayOf([FCfgID, FIntfID]);
-    KeySense := fsForeignKey;
+    KeySense := dsForeignKey;
   end else
   begin
     Key := FRecID;
-    KeySense := fsKey;
+    KeySense := dsKey;
   end;
   if smxDBFuncs.SetValueByKey(FDeleteDataSetIntf, Key, Variants.Null, KeySense) then
     FRecID := 0;

@@ -14,7 +14,7 @@ type
 
   TsmxFieldArray = array of IsmxField;
 
-  TsmxBaseSense = fsKey .. fsForeignKey;
+  //TsmxBaseSense = fsKey .. fsForeignKey;
 
 implementation
 
