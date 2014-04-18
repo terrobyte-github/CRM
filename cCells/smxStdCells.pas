@@ -895,6 +895,8 @@ type
     property CellImageIndex;
     property IsChecked;
     property ToolItemStyle;
+
+    property OnSnap;
   end;
 
   { TsmxToolBar }
@@ -5887,7 +5889,10 @@ end;
 function TsmxToolItem.GetToolButton: TToolButton;
 begin
   if not Assigned(FToolButton) then
+  begin
     FToolButton := TToolButton.Create(nil);
+    FToolButton.OnClick := ControlClick;
+  end;
   Result := FToolButton;
 end;
 

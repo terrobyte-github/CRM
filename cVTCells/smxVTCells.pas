@@ -182,6 +182,7 @@ type
     procedure VTGridColumnClick(Sender: TBaseVirtualTree; Column: TColumnIndex; Shift: TShiftState);
     procedure VTGridEditing(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
       var Allowed: Boolean);
+    procedure VTGridFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure VTGridGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var Text: WideString);
     procedure VTGridHeaderClick(Sender: TVTHeader; Column: TColumnIndex;
@@ -276,6 +277,7 @@ type
       var Allowed: Boolean);
     procedure VTTreeEdited(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure VTTreeExpanded(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VTTreeFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure VTTreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var Text: WideString);
     procedure VTTreeHeaderClick(Sender: TVTHeader; Column: TColumnIndex;
@@ -1336,6 +1338,7 @@ begin
     FVTGrid.OnColumnClick := VTGridColumnClick;
     FVTGrid.OnDblClick := ControlDblClick;
     FVTGrid.OnEditing := VTGridEditing;
+    FVTGrid.OnFreeNode := VTGridFreeNode;
     FVTGrid.OnGetText := VTGridGetText;
     FVTGrid.OnHeaderClick := VTGridHeaderClick;
     FVTGrid.OnHeaderDrawQueryElements := VTGridHeaderDrawQueryElements;
@@ -1499,6 +1502,20 @@ begin
   Wrapper := TObject(TVirtualStringTree(Sender).Header.Columns[Column].Tag);
   if Wrapper is TsmxCustomColumn then
     Allowed := coEditing in TsmxCustomColumn(Wrapper).ColumnOptions;
+end;
+
+procedure TsmxVTGrid.VTGridFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+var
+  i: Integer;
+  VTNode: TsmxVTNode;
+begin
+  if not Assigned(Request) then
+    for i := 0 to SlaveCount - 1 do
+    begin
+      VTNode := VTNodes.FindNodeByIndex(i, Node);
+      if Assigned(VTNode) then
+        VTNodes.Delete(VTNode.ItemIndex);
+    end;
 end;
 
 procedure TsmxVTGrid.VTGridGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -2044,6 +2061,7 @@ begin
     FVTTree.OnEdited := VTTreeEdited;
     FVTTree.OnEditing := VTTreeEditing;
     FVTTree.OnExpanded := VTTreeExpanded;
+    FVTTree.OnFreeNode := VTTreeFreeNode;
     FVTTree.OnGetText := VTTreeGetText;
     FVTTree.OnHeaderClick := VTTreeHeaderClick;
     FVTTree.OnHeaderDrawQueryElements := VTTreeHeaderDrawQueryElements;
@@ -2251,6 +2269,20 @@ end;
 procedure TsmxVTTree.VTTreeExpanded(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
   Expand;
+end;
+
+procedure TsmxVTTree.VTTreeFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+var
+  i: Integer;
+  VTNode: TsmxVTNode;
+begin
+  if not Assigned(Request) then
+    for i := 0 to SlaveCount - 1 do
+    begin
+      VTNode := VTNodes.FindNodeByIndex(i, Node);
+      if Assigned(VTNode) then
+        VTNodes.Delete(VTNode.ItemIndex);
+    end;
 end;
 
 procedure TsmxVTTree.VTTreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;

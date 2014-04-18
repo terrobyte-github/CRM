@@ -720,10 +720,16 @@ end;
 procedure TsmxKitItem.SetKit(Value: TsmxKit);
 begin
   if Assigned(FKit) then
+  begin
     FKit.KitList.Remove(Self);
+    FKit.Change;
+  end;
   FKit := Value;
   if Assigned(FKit) then
+  begin
     FKit.KitList.Add(Self);
+    FKit.Change;
+  end;
 end;
 
 { TsmxKit }
@@ -753,6 +759,7 @@ function TsmxKit.Add: TsmxKitItem;
 begin
   Result := FKitItemClass.Create(Self);
   KitList.Add(Result);
+  Change;
 end;
 
 procedure TsmxKit.Assign(Source: TsmxKit);
