@@ -133,7 +133,8 @@ type
 
   TsmxDataLocation = (dlAssigned{, plKey, plValue, plResult, plMessage,
     plForeignKey, plInput, plOutput, plInOutput}, dlStorageParam,
-    dlParentParam, dlFilterDesk, dlGrid, dlParentFilterDesk, dlParentGrid);
+    dlParentParam, dlWorkCell, dlParentWorkCell, dlFilterDesk,
+    dlParentFilterDesk, dlGrid, dlParentGrid, dlTree, dlParentTree);
 
   TsmxLocateOptions = TLocateOptions;
 
