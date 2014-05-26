@@ -122,6 +122,10 @@ type
 
   TsmxCellStates = set of TsmxCellState;
 
+  TsmxCellStyle = (csRecieveCfg, csIsDesigning);
+
+  TsmxCellStyles = set of TsmxCellStyle;
+
   TsmxDataSetType = (dstQuery, dstStoredProc);
 
   TsmxDataType = TFieldType;
@@ -132,9 +136,10 @@ type
   TsmxParamType = TParamType;
 
   TsmxDataLocation = (dlAssigned{, plKey, plValue, plResult, plMessage,
-    plForeignKey, plInput, plOutput, plInOutput}, dlStorageParam,
-    dlParentParam, dlWorkCell, dlParentWorkCell, dlFilterDesk,
-    dlParentFilterDesk, dlGrid, dlParentGrid, dlTree, dlParentTree);
+    plForeignKey, plInput, plOutput, plInOutput}, dlStorageParam, dlCellParam,
+    dlParentCellParam, dlEventParam, dlParentEventParam, dlWorkCell,
+    dlParentWorkCell, dlFilterDesk, dlParentFilterDesk, dlGrid, dlParentGrid,
+    dlTree, dlParentTree);
 
   TsmxLocateOptions = TLocateOptions;
 

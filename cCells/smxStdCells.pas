@@ -1084,6 +1084,7 @@ type
     procedure SetImageList(Value: TCustomImageList); override;
     //procedure SetIsFrameForm(Value: Boolean); override;
     //procedure SetIsMainForm(Value: Boolean); override;
+    //procedure SetIsDesigning(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
     procedure SetModalResult(Value: TModalResult); override;
     procedure SetPopupMenu(Value: TsmxCustomPopupMenu); override;
@@ -1235,6 +1236,11 @@ type
 
   {_TWinControl = class(TWinControl)
   end;}
+
+  { _TComponent }
+
+  //_TComponent = class(TComponent)
+  //end;
 
 { TsmxAction }
 
@@ -4076,7 +4082,7 @@ begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             DataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
         end;
-        dlParentParam:
+        dlParentCellParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
@@ -4467,7 +4473,7 @@ begin
   //UnInstallParent;
   inherited Destroy;
   if Assigned(FTabSheet) then
-    FTabSheet.Free;
+    FTabSheet.Free; 
   //if Assigned(FWinControl) then
     //FWinControl.Free;
 end;
@@ -4570,16 +4576,20 @@ procedure TsmxTabSheet.SetCellVisible(Value: Boolean);
 var
   PageControl: TPageControl;
   Form: TForm;
+  RootControl: TWinControl;
 begin
   if GetCellVisible <> Value then
   begin
     PageControl := TabSheet.PageControl;
+    RootControl := smxFuncs.GetRootControl(PageControl);
     Form := nil;
     try
-      if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      //if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      if Assigned(PageControl) and not (RootControl is TCustomForm) then
       begin
         Form := TForm.Create(nil);
-        PageControl.Parent := Form;
+        //PageControl.Parent := Form;
+        RootControl.Parent := Form;
       end;
       TabSheet.PageControl := nil;
       TabSheet.TabVisible := Value;
@@ -4587,7 +4597,8 @@ begin
     finally
       if Assigned(Form) then
       begin
-        PageControl.Parent := nil;
+        //PageControl.Parent := nil;
+        RootControl.Parent := nil;
         Form.Free;
       end;
     end;
@@ -4693,22 +4704,27 @@ var
   Obj: TObject;
   Form: TForm;
   PageControl: TPageControl;
-begin
+  RootControl: TWinControl;
+begin   
   if Assigned(CellParent) then
   begin
     PageControl := TabSheet.PageControl;
+    RootControl := smxFuncs.GetRootControl(PageControl);
     Form := nil;
     try
-      if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      //if Assigned(PageControl) and not Assigned(PageControl.Parent) then
+      if Assigned(PageControl) and not (RootControl is TCustomForm) then
       begin
         Form := TForm.Create(nil);
-        PageControl.Parent := Form;
+        //PageControl.Parent := Form;
+        RootControl.Parent := Form;
       end;
       TabSheet.PageControl := nil;
     finally
       if Assigned(Form) then
       begin
-        PageControl.Parent := nil;
+        //PageControl.Parent := nil;
+        RootControl.Parent := nil;
         Form.Free;
       end;
     end;
@@ -4720,18 +4736,22 @@ begin
     if Obj is TPageControl then
     begin
       PageControl := TPageControl(Obj);
+      RootControl := smxFuncs.GetRootControl(PageControl);
       Form := nil;
       try
-        if not Assigned(PageControl.Parent) then
+        //if not Assigned(PageControl.Parent) then
+        if Assigned(PageControl) and not (RootControl is TCustomForm) then
         begin
           Form := TForm.Create(nil);
-          PageControl.Parent := Form;
+          //PageControl.Parent := Form;
+          RootControl.Parent := Form;
         end;
         TabSheet.PageControl := PageControl;
       finally
         if Assigned(Form) then
         begin
-          PageControl.Parent := nil;
+          //PageControl.Parent := nil;
+          RootControl.Parent := nil;
           Form.Free;
         end;
       end;
@@ -4799,7 +4819,7 @@ begin
   //UnInstallParent;
   //if Assigned(FPageControl) then
     //FPageControl.Free;
-  inherited Destroy;
+  inherited Destroy; 
   if Assigned(FPageControl) then
   //begin
     //if not Assigned(FPageControl.Parent) then
@@ -7670,6 +7690,16 @@ begin
   SetImageList(nil);
   UnInstallParent;
   FForm.Menu := nil;
+end;}
+
+{procedure TsmxForm.SetIsDesigning(Value: Boolean);
+begin
+  inherited SetIsDesigning(Value);
+  _TComponent(Form).SetDesigning(Value);
+  //Form.Invalidate;
+  Form.Repaint;
+  //Form.Refresh;
+  //Form.Visible
 end;}
 
 initialization

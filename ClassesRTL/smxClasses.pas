@@ -1024,7 +1024,8 @@ type
     FCurDataSetIntf: IsmxDataSet;
     FDatabaseIntf: IsmxDatabase;
     FDatabaseName: String;
-    FDataSetIntf: IsmxDataSet;
+    FDataSet: TsmxInterfacedComponent;
+    //FDataSetIntf: IsmxDataSet;
     //FDeletePerformance: TsmxPerformanceMode;
     //FDeleteRequestIntf: IsmxDataSet;
     FIsManualRefreshParams: Boolean;
@@ -1731,6 +1732,8 @@ type
     FOnShow: TsmxComponentEvent;
     FPopupList: TsmxCustomPopupList;
     FRequestList: TsmxCustomRequestList;
+    function GetSlave(Index: Integer): TsmxCustomPageManager;
+    procedure SetSlave(Index: Integer; Value: TsmxCustomPageManager);
   protected
     procedure DoActivate; virtual;
     procedure DoClose; virtual;
@@ -1745,6 +1748,7 @@ type
     //function GetIsApplicationForm: Boolean; virtual;
     function GetIsMaximize: Boolean; virtual;
     function GetModalResult: TModalResult; virtual;
+    function GetSlaveClass: TsmxOwnerCellClass; override;
     procedure InternalActivate; virtual;
     procedure InternalClose; virtual;
     procedure InternalDeactivate; virtual;
@@ -1768,6 +1772,7 @@ type
     {constructor Create(AOwner: TComponent; AImplementorClass: TsmxInterfacedPersistentClass;
       AID: Integer); reintroduce; overload; virtual;}
     destructor Destroy; override;
+    function AddSlave: TsmxCustomPageManager;
     procedure Assign(Source: TPersistent); override;
     function CellParams(const Name: String; var Value: Variant): Boolean; override;
     procedure Activate;
@@ -1790,6 +1795,7 @@ type
     property ModalResult: TModalResult read GetModalResult write SetModalResult;
     property PopupList: TsmxCustomPopupList read FPopupList write SetPopupList;
     property RequestList: TsmxCustomRequestList read FRequestList write SetRequestList;
+    property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
 
     property OnActivate: TsmxComponentEvent read FOnActivate write FOnActivate;
     property OnClose: TsmxComponentEvent read FOnClose write FOnClose;
@@ -3256,7 +3262,7 @@ begin
     FSlaveList.Free;
   end;}
   if Assigned(FSlaveList) then
-    FSlaveList.Free;
+    FSlaveList.Free;  
   inherited Destroy;
 end;
 
@@ -4394,18 +4400,18 @@ end;
 procedure TsmxOwnerCell.CreateSlave(Item: TsmxSlaveItem{var Slave: TsmxOwnerCell}{;
   ImplementorClass: TsmxInterfacedPersistentClass}; CellClass: TsmxOwnerCellClass = nil);
 var
-  //AOwner: TComponent;
+  AOwner: TComponent;
   Slave: TsmxOwnerCell;
 begin
-  {if Assigned(Owner) then
+  if Assigned(Owner) then
     AOwner := Owner else
-    AOwner := Self;}
+    AOwner := Self;
   if Assigned(Item) then
     if not Assigned(Item.FSlave) then
     begin
       if not Assigned(CellClass) then
         CellClass := GetSlaveClass;
-      Slave := CellClass.Create(Self{AOwner}{, ImplementorClass});
+      Slave := CellClass.Create({Self}AOwner{, ImplementorClass});
       Slave.FCellOwner := Self;
       if FIsOwnerIsParent then
         Slave.CellParent := Self;
@@ -5080,7 +5086,13 @@ begin
   SetModifyDataSet(mrInsert, nil);
   SetModifyDataSet(mrUpdate, nil);
   FCurDataSetIntf := nil;
-  //FDataSetIntf := nil;
+  {if Assigned(FDataSetIntf) then
+  begin
+    FDataSetIntf.GetReference.Free;
+    FDataSetIntf := nil;
+  end;}
+  if Assigned(FDataSet) then
+    FDataSet.Free;
   inherited Destroy;
 end;
 
@@ -5302,14 +5314,18 @@ begin
     Result := Implementor as IsmxDataSet
   else
     Result := nil;*)
-  if not Assigned(FDataSetIntf) and Assigned(GetDataSetClass()) then
+
+  {if not Assigned(FDataSetIntf) and Assigned(GetDataSetClass()) then
     FDataSetIntf := GetDataSetClass.Create(nil, Self as IsmxRefComponent) as IsmxDataSet;
-  Result := FDataSetIntf;
+  Result := FDataSetIntf;}
+  if not Assigned(FDataSet) then
+    FDataSet := GetDataSetClass.Create(nil, Self as IsmxRefComponent);
+  Result := FDataSet as IsmxDataSet;  
 end;
 
 function TsmxCustomRequest.GetDataSetClass: TsmxInterfacedComponentClass;
 begin
-  Result := nil;
+  Result := TsmxInterfacedComponent;
 end;
 
 {procedure TsmxCustomRequest.SetDataSet(const Value: IsmxDataSet);
@@ -7764,6 +7780,26 @@ begin
   if {FIsSetOwner and (}Owner is TsmxOwnerCell{)} then
     Result := TsmxOwnerCell(Owner) else
     Result := nil;
+end;
+
+function TsmxCustomForm.AddSlave: TsmxCustomPageManager;
+begin
+  Result := TsmxCustomPageManager(inherited AddSlave);
+end;
+
+function TsmxCustomForm.GetSlave(Index: Integer): TsmxCustomPageManager;
+begin
+  Result := TsmxCustomPageManager(inherited Slaves[Index]);
+end;
+
+function TsmxCustomForm.GetSlaveClass: TsmxOwnerCellClass;
+begin
+  Result := TsmxCustomPageManager;
+end;
+
+procedure TsmxCustomForm.SetSlave(Index: Integer; Value: TsmxCustomPageManager);
+begin
+  inherited Slaves[Index] := Value;
 end;
 
 initialization

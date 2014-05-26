@@ -3,7 +3,7 @@ library smxVTCellCls;
 uses
   smxLibProcs,
   smxLibTypes,
-  smxVTCells in '..\VTCellsCls\smxVTCells.pas';
+  smxVTCells in 'smxVTCells.pas';
 
 {$R *.res}
 

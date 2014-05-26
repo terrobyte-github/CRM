@@ -12,7 +12,8 @@ exports
   smxVTAlgs.GetPropsTree,
   smxVTAlgs.SetPropsTree,
   smxVTAlgs.AfterEditPropTree,
-  smxVTAlgs.BeforeEditPropTree;
+  smxVTAlgs.BeforeEditPropTree,
+  smxVTAlgs.ShowObjectProps;
 
 begin
   smxLibProcs.FillInfo(1, 0, smxLibProcs.InitLib);

@@ -252,11 +252,11 @@ procedure DestroyMainObjects;
 begin
   if Assigned(gCfgRequest) then
   begin
-    SysUtils.FreeAndNil(gCfgRequest);
     smxClassProcs.gCfgSelectDataSet := nil;
     smxClassProcs.gCfgDeleteDataSet := nil;
     smxClassProcs.gCfgInsertDataSet := nil;
     smxClassProcs.gCfgUpdateDataSet := nil;
+    SysUtils.FreeAndNil(gCfgRequest);
   end;
 end;
 

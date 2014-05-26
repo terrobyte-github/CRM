@@ -415,7 +415,7 @@ begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             AlgorithmParams[i].ParamValue := smxClassProcs.gStorageManagerIntf.Values[AlgorithmParams[i].ParamName];
         end;
-        dlParentParam:
+        dlParentCellParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
@@ -929,7 +929,7 @@ begin
           if Assigned(smxClassProcs.gStorageManagerIntf) then
             CurDataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[CurDataSet.Params[i].ParamName];
         end;
-        dlParentParam:
+        dlParentCellParam:
         begin
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do

@@ -532,8 +532,8 @@ type
     FMainMenu: TsmxCustomMainMenu;
     //FRequestList: TsmxCustomRequestList;
     FStatusBoard: TsmxCustomStatusBoard;
-    function GetSlave(Index: Integer): TsmxCustomPageManager;
-    procedure SetSlave(Index: Integer; Value: TsmxCustomPageManager);
+    //function GetSlave(Index: Integer): TsmxCustomPageManager;
+    //procedure SetSlave(Index: Integer; Value: TsmxCustomPageManager);
   protected
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetSlaveClass: TsmxOwnerCellClass; override;
@@ -548,11 +548,11 @@ type
     procedure SetMainMenu(Value: TsmxCustomMainMenu); virtual;
     //procedure SetRequestList(Value: TsmxCustomRequestList); virtual;
     procedure SetStatusBoard(Value: TsmxCustomStatusBoard); virtual;
-  public
+  //public
     //constructor Create(AOwner: TComponent); override;
-    function AddSlave: TsmxCustomPageManager;
+    //function AddSlave: TsmxCustomPageManager;
 
-    property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
+    //property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
   published
     property AlgorithmList;
     //property AlgorithmList: TsmxCustomAlgorithmList read FAlgorithmList write SetAlgorithmList;
@@ -2024,7 +2024,7 @@ end;}
 destructor TsmxStateForm.Destroy;
 begin
   if Assigned(FStateCfg) then
-    FStateCfg.Free;
+    FStateCfg.Free;  
   inherited Destroy;
 end;
 
@@ -2478,17 +2478,17 @@ begin
   IsAltSlaveClass := True;
 end;}
 
-function TsmxStandardForm.AddSlave: TsmxCustomPageManager;
+{function TsmxStandardForm.AddSlave: TsmxCustomPageManager;
 begin
   Result := TsmxCustomPageManager(inherited AddSlave);
-end;
+end;}
 
 {function TsmxStandardForm.GetCfgClass: TsmxBaseCfgClass;
 begin
   Result := TsmxStandardFormCfg;
 end;}
 
-function TsmxStandardForm.GetSlave(Index: Integer): TsmxCustomPageManager;
+{function TsmxStandardForm.GetSlave(Index: Integer): TsmxCustomPageManager;
 begin
   Result := TsmxCustomPageManager(inherited Slaves[Index]);
 end;
@@ -2496,7 +2496,7 @@ end;
 procedure TsmxStandardForm.SetSlave(Index: Integer; Value: TsmxCustomPageManager);
 begin
   inherited Slaves[Index] := Value;
-end;
+end;}
 
 function TsmxStandardForm.GetSlaveClass: TsmxOwnerCellClass;
 begin

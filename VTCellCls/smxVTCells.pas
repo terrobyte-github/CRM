@@ -2554,6 +2554,7 @@ begin      //inf('PrepareEdit');
   //FTree := TsmxCustomTree(Tree.Tag);
   //FRowIndex := Pointer(Node);
   //FColIndex := Column;
+  FEditorType := etNone;
   if Assigned(FControl) then
   begin
     FControl.Free;

@@ -40,6 +40,11 @@ const
   cImageListManager = 5;
   //cMainConnection = 6;
 
+  { Constructor }
+  cFormObjectPropsID = -100;
+  cFormSlaveListID = -101;
+  cFormCellViewID = -102;
+
 resourcestring
   rsActionError = 'A ClassName %s %s error';
   rsAssignError = 'Cannot assign a ClassName %s to a ClassName %s';

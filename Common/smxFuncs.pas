@@ -3,7 +3,8 @@ unit smxFuncs;
 interface
 
 uses
-  Classes, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes, smxBaseIntf;
+  Classes, Controls, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes,
+  smxBaseIntf;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -34,12 +35,12 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 //function IsImplIntf(AObject: TObject; const AIntf: IsmxRefComponent{IsmxRefPersistent}): Boolean;
 //function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
 function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
+function GetRootControl(AControl: TWinControl): TWinControl;
 
 implementation
 
 uses
-  Controls, Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc,
-  smxConsts;
+  Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc, smxConsts;
 
 function HotKeyToStr(AKey: Integer): String;
 begin
@@ -332,6 +333,14 @@ begin
     Result := SysUtils.IsEqualGUID(IntfTypeData^.Guid, IID);
     IntfTypeData := TypInfo.GetTypeData(IntfTypeData^.IntfParent^);
   end;
+end;
+
+function GetRootControl(AControl: TWinControl): TWinControl;
+begin
+  Result := AControl;
+  if Assigned(Result) then
+    while Assigned(Result.Parent) do
+      Result := Result.Parent;
 end;
 
 end.
