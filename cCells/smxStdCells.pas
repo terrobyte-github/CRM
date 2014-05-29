@@ -4683,11 +4683,12 @@ end;
 function TsmxTabSheet.GetTabSheet: TTabSheet;
 begin
   if not Assigned(FTabSheet) then
-  //begin
+  begin
     //FWinControl := TForm.Create(nil);
     FTabSheet := TTabSheet.Create(nil);
+    FTabSheet.ImageIndex := -1;
     //FTabSheet.ControlStyle := FTabSheet.ControlStyle - [csAcceptsControls];
-  //end;
+  end;
   Result := FTabSheet;
 end;
 
@@ -5874,6 +5875,7 @@ end;
 procedure TsmxToolItem.SetCellHint(const Value: String);
 begin
   ToolButton.Hint := Value;
+  ToolButton.ShowHint := Value <> '';
 end;
 
 function TsmxToolItem.GetCellImageIndex: Integer;
@@ -5960,7 +5962,12 @@ begin
   begin
     Obj := TObject({_TsmxBaseCell}(CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
+    begin
+      if Obj is TToolBar then
+        if TToolBar(Obj).ButtonCount > 0 then
+          ToolButton.Left := TToolBar(Obj).Buttons[TToolBar(Obj).ButtonCount - 1].Left + 1;
       ToolButton.Parent := TWinControl(Obj);
+    end;
   end;
 end;
 

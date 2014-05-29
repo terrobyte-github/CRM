@@ -19,13 +19,14 @@ uses
   smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes, smxManagerIntf, smxConsts;
 
 type
-  TsmxRefreshPage = (rpObjectProps, rpObjectEvents, rpTreeCells);
+  TsmxObjectPage = (opProperties, opEvents, opTreeView);
 
-  TsmxRefreshPages = set of TsmxRefreshPage;
+  TsmxObjectPages = set of TsmxObjectPage;
 
 const
-  cAllRefreshPages = [Low(TsmxRefreshPage) .. High(TsmxRefreshPage)];
-  cObjectRefreshPages = cAllRefreshPages - [rpTreeCells];
+  cAllObjectPages = [Low(TsmxObjectPage) .. High(TsmxObjectPage)];
+  cObjectInspectorPages = cAllObjectPages - [opTreeView];
+  cObjectTreeViewPages = [opTreeView];
 
 procedure AddValue(AObject: TObject; APropInfo: PPropInfo; ATree: TsmxCustomTree;
   ACol: Integer; ARow: Pointer; AEditorType: TsmxEditorType);
@@ -218,7 +219,7 @@ begin
 end;
 
 procedure AddCells(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer;
-  AAddSelf: Boolean = False);
+  AIsAddSelf: Boolean = False);
 var
   Cell: TsmxBaseCell;
   i: Integer;
@@ -226,7 +227,7 @@ begin
   if AObject is TsmxBaseCell then
   begin
     Cell := TsmxBaseCell(AObject);
-    if AAddSelf then
+    if AIsAddSelf then
     begin
       ATree.RowCount[AParentRow] := 1;
       ATree.TreeCaptions[0, ATree.Rows[AParentRow, 0]] := Format('%s(%s) [%d]', [Cell.Name, Cell.ClassName, Cell.CfgID]);
@@ -255,45 +256,48 @@ begin
     Result := nil;
 end;
 
-procedure RefreshFormObjectProps(AObject: TObject; ARefreshPages: TsmxRefreshPages);
+procedure RefreshFormObjectProps(AObject: TObject; AObjectPages: TsmxObjectPages);
 var
   FormObjectProps: TsmxCustomForm;
   Tree: TsmxCustomTree;
-  FindList: TList;
 begin
   FormObjectProps := GetForm(0, smxConsts.cFormObjectPropsID);
-  if Assigned(FormObjectProps) and Assigned(AObject) then
+  if Assigned(FormObjectProps) then
   begin
-    FindList := TList.Create;
-    try
-      if rpObjectProps in ARefreshPages then
-      begin  
-        Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[0].Cells[0]);
-        Tree.RowCount[Tree.RootRow] := 0;
+    if opProperties in AObjectPages then
+    begin
+      Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[0].Cells[0]);
+      Tree.RowCount[Tree.RootRow] := 0;
+      if Assigned(AObject) then
+      begin
         Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
         AddObjectProps(AObject, Tree, Tree.RootRow);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing]; 
+        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
       end;
+    end;
 
-      if rpObjectEvents in ARefreshPages then
-      begin 
-        Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[1].Cells[0]);
-        Tree.RowCount[Tree.RootRow] := 0;
+    if opEvents in AObjectPages then
+    begin
+      Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[1].Cells[0]);
+      Tree.RowCount[Tree.RootRow] := 0;
+      if Assigned(AObject) then
+      begin
         Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
         AddObjectEvents(AObject, Tree, Tree.RootRow);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing]; 
+        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
       end;
+    end;
 
-      if rpTreeCells in ARefreshPages then
-      begin 
-        Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[1].Cells[0]);
-        Tree.RowCount[Tree.RootRow] := 0;
+    if opTreeView in AObjectPages then
+    begin
+      Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[1].Cells[0]);
+      Tree.RowCount[Tree.RootRow] := 0;
+      if Assigned(AObject) then
+      begin
         Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
         AddCells(AObject, Tree, Tree.RootRow, True);
         Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
       end;
-    finally
-      FindList.Free;
     end;
   end;
 end;
@@ -303,12 +307,12 @@ var
   FormObjectProps: TsmxCustomForm;
   Tree: TsmxCustomTree;
   V: Variant;
-begin      
+begin
   Result := nil;
   FormObjectProps := GetForm(0, smxConsts.cFormObjectPropsID);
   if Assigned(FormObjectProps) then
   begin
-    Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[0].Cells[0]); 
+    Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[0].Cells[0]);
     if Tree.RowCount[Tree.RootRow] <> 0 then
     begin
       V := Tree.TreeValues[1, Tree.Rows[Tree.RootRow, 0]]; 
@@ -330,13 +334,18 @@ begin
     NewObj := Form.Cells[0];
     CurObj := GetObjectFormObjectProps;
     if CurObj <> NewObj then
-      RefreshFormObjectProps(NewObj, cAllRefreshPages);
-  end;                                         
+      RefreshFormObjectProps(NewObj, cAllObjectPages);
+  end;
 end;
 
 procedure DeactiveFormCellView(Sender: TsmxComponent);
 begin
   //Inf('DeactiveFormCellView');
+end;
+
+procedure CloseFormCellView(Sender: TsmxComponent);
+begin
+  Inf('CloseFormCellView');
 end;
 
 function CreateFormCellView(AFormParent: TsmxCustomForm; ACfgID: Integer): TsmxCustomForm;
@@ -359,6 +368,9 @@ begin
     Method.Code := @DeactiveFormCellView;
     Method.Data := Result;
     Result.OnDeactivate := TsmxComponentEvent(Method);
+    Method.Code := @CloseFormCellView;
+    Method.Data := Result;
+    Result.OnClose := TsmxComponentEvent(Method);
     Result.FormOptions := [foFreeOnClose];
     Result.CfgID := ACfgID;
   end;
@@ -371,7 +383,7 @@ var
   CurObj: TObject;
   NewObj: TObject;
   KitItem: TsmxKitItem;
-begin
+begin     
   if Sender is TsmxCustomForm then
   begin
     Form := TsmxCustomForm(Sender);
@@ -386,7 +398,7 @@ begin
       NewObj := nil;
     CurObj := GetObjectFormObjectProps;
     if CurObj <> NewObj then
-      RefreshFormObjectProps(NewObj, cObjectRefreshPages);
+      RefreshFormObjectProps(NewObj, cObjectInspectorPages);
   end;
 end;
 
@@ -401,7 +413,7 @@ var
   NewObj: TObject;
   CurObj: TObject;
   KitItem: TsmxKitItem;
-begin
+begin 
   if Sender is TsmxCustomGrid then
   begin
     Grid := TsmxCustomGrid(Sender);
@@ -415,7 +427,7 @@ begin
       NewObj := nil;
     CurObj := GetObjectFormObjectProps;
     if CurObj <> NewObj then
-      RefreshFormObjectProps(NewObj, cObjectRefreshPages);
+      RefreshFormObjectProps(NewObj, cObjectInspectorPages);
   end;
 end;
 
@@ -440,29 +452,48 @@ end;
 procedure AddSlaveFormSlaveList(Sender: TsmxComponent);
 var
   Form: TsmxCustomForm;
+  Grid: TsmxCustomGrid;
   Kit: TsmxKit;
+  NewObj: TObject;
 begin
   if Sender is TsmxCustomToolItem then
   begin
     Form := smxClassFuncs.GetAccessoryForm(TsmxCustomToolItem(Sender));
+    Grid := TsmxCustomGrid(Form.Cells[0]);
     Kit := TsmxKit(Form.Tag);
-    Kit.Add;
+    with Kit.Add do
+    begin
+      Grid.FocusedRowIndex := ItemIndex;
+      NewObj := DisplayObject;
+    end;
+    RefreshFormObjectProps(NewObj, cObjectInspectorPages);
+    if NewObj is TsmxBaseCell then
+      RefreshFormObjectProps(TsmxBaseCell(NewObj).Owner, cObjectTreeViewPages);
   end;
 end;
 
 procedure DelSlaveFormSlaveList(Sender: TsmxComponent);
 var
   Form: TsmxCustomForm;
-  Kit: TsmxKit;
   Grid: TsmxCustomGrid;
+  Kit: TsmxKit;
+  NewObj: TObject;
 begin
   if Sender is TsmxCustomToolItem then
   begin
     Form := smxClassFuncs.GetAccessoryForm(TsmxCustomToolItem(Sender));
-    Kit := TsmxKit(Form.Tag);
     Grid := TsmxCustomGrid(Form.Cells[0]);
+    Kit := TsmxKit(Form.Tag);
     if Grid.FocusedRowIndex <> -1 then
-      Kit.Delete(TsmxKitItem(Integer(Grid.GridValues[0, Grid.FocusedRowIndex])).ItemIndex);
+    begin
+      Kit.Delete(Grid.FocusedRowIndex);
+      if Grid.FocusedRowIndex <> -1 then
+        NewObj := Kit[Grid.FocusedRowIndex].DisplayObject else
+        NewObj := nil;
+      RefreshFormObjectProps(NewObj, cObjectInspectorPages);
+      if NewObj is TsmxBaseCell then
+        RefreshFormObjectProps(TsmxBaseCell(NewObj).Owner, cObjectTreeViewPages);
+    end;
   end;
 end;
 
@@ -520,10 +551,12 @@ begin
       ToolBar.CellVisible := True;
       ToolBar.CellAlign := alTop;
       ToolItem := ToolBar.AddSlave;
+      ToolItem.CellHint := 'Add Slave';
       Method.Code := @AddSlaveFormSlaveList;
       Method.Data := ToolItem;
       ToolItem.OnSnap := TsmxComponentEvent(Method);
       ToolItem := ToolBar.AddSlave;
+      ToolItem.CellHint := 'Del Slave';
       Method.Code := @DelSlaveFormSlaveList;
       Method.Data := ToolItem;
       ToolItem.OnSnap := TsmxComponentEvent(Method);
@@ -546,7 +579,7 @@ begin
       NewObj := nil;
     CurObj := GetObjectFormObjectProps;
     if CurObj <> NewObj then
-      RefreshFormObjectProps(NewObj, cObjectRefreshPages);
+      RefreshFormObjectProps(NewObj, cObjectInspectorPages);
   end;
 end;
 
@@ -594,7 +627,7 @@ var
   CfgName: String;
   Kit: TsmxKit;
   Method: TMethod;
-begin
+begin       
   Tree := TsmxCustomTree(TsmxButtonMaskEdit(Sender).Parent.Tag);
   V := Tree.TreeValues[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
   if not Variants.VarIsArray(V) then
@@ -1100,6 +1133,11 @@ begin
     begin
       Obj := nil;
       try
+        FormParent := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
+        Form := GetForm(0, smxConsts.cFormObjectPropsID);
+        if not Assigned(Form) then
+          Form := CreateFormObjectProps(FormParent);
+        Form.Show;
         if CfgType = 100 then // типы
         begin
           Obj := TsmxTypeCfg.Create(nil);
@@ -1107,13 +1145,9 @@ begin
           TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gCfgSelectDataSet;
           TsmxTypeCfg(Obj).Load;
           TsmxTypeCfg(Obj).Read;
+          RefreshFormObjectProps(Obj, cObjectInspectorPages);
         end else
         begin
-          FormParent := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
-          Form := GetForm(0, smxConsts.cFormObjectPropsID);
-          if not Assigned(Form) then
-            Form := CreateFormObjectProps(FormParent);
-          Form.Show;
           Form := GetForm(CfgID, smxConsts.cFormCellViewID);
           if not Assigned(Form) then
           begin  
@@ -1840,7 +1874,7 @@ var
   List: TList;
   Item: TsmxKitItem;
   Kit: TsmxKit;
-begin
+begin  
   if Sender is TsmxCustomToolItem then
   begin
     Form := smxClassFuncs.GetAccessoryForm(TsmxCustomToolItem(Sender));
