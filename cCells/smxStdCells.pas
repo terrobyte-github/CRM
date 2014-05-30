@@ -6672,7 +6672,28 @@ end;}
 procedure TsmxForm.InternalClose;
 begin
   //Form.OnClose := nil;
-  Form.Close;
+
+  //Form.Close;
+
+  if not FIsMainForm then
+  begin
+    if not (fsModal in (Form.FormState)) then
+    begin
+      if (foFreeOnClose in FormOptions) and not IsDesigning then
+      begin
+        //Action := caNone;
+        Free;
+      end else
+        //Action := caHide;
+        Form.Hide;
+    end;
+  end else
+  begin
+    //FForm.Hide;
+    FForm := nil;
+    Free;
+  end;
+
 
   {if not FIsMainForm then
   begin
@@ -6735,10 +6756,10 @@ end;
 procedure TsmxForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   //Action := caNone;
-  //Close;
+  Close;
 
   //DoClose;
-  if not FIsMainForm then
+  {if not FIsMainForm then
   begin
     if not (fsModal in (Form.FormState)) then
     begin
@@ -6753,7 +6774,7 @@ begin
   begin
     FForm := nil;
     Free;
-  end;
+  end;}
 end;
 
 {procedure TsmxForm.FormDestroy(Sender: TObject);
