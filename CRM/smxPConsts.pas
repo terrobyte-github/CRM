@@ -15,15 +15,17 @@ const
   { Ini }
   cConfigurationFileName = '..\Cfg\conf.ini';
   cInitSectionName = 'Init';
-  cInitRequestClassName = 'RequestClassName';
-  cInitIRequestClassName = 'IRequestClassName';
-  cInitRequestLibName = 'RequestLibName';
-  cInitRequestProcName = 'RequestProcName';
-  cInitRequestXMLText = 'RequestXMLText';
+  cInitCfgSelectReqClassName = 'CfgSelectReqClassName';
+  cInitCfgSelectReqLibName = 'CfgSelectReqLibName';
+  cInitCfgSelectReqProcName = 'CfgSelectReqProcName';
+  cInitCfgSelectReqXMLText = 'CfgSelectReqXMLText';
   cInitCheckUserReqCfgID = 'CheckUserReqCfgID';
   cInitCheckIntfReqCfgID = 'CheckIntfReqCfgID';
   cInitMainFormCfgID = 'MainFormCfgID';
   cInitConfFormCfgID = 'ConfFormCfgID';
+  cInitCfgDeleteReqCfgID = 'CfgDeleteReqCfgID';
+  cInitCfgInsertReqCfgID = 'CfgInsertReqCfgID';
+  cInitCfgUpdateReqCfgID = 'CfgUpdateReqCfgID';
   cPathSectionName = 'Path';
   cPathBin = 'Bin';
   cPathCfg = 'Cfg';

@@ -9,10 +9,6 @@ uses
 
 exports
   smxLibProcs.LibInfo,
-  smxVTAlgs.GetPropsTree,
-  smxVTAlgs.SetPropsTree,
-  smxVTAlgs.AfterEditPropTree,
-  smxVTAlgs.BeforeEditPropTree,
   smxVTAlgs.ShowObjectProps;
 
 begin

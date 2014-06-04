@@ -1,14 +1,17 @@
 const
   cIni =
     '[Init]'#13#10 +
-    'RequestClassName='#13#10 +
-    'RequestLibName='#13#10 +
-    'RequestProcName='#13#10 +
-    'RequestXMLText='#13#10 +
+    'CfgSelectReqClassName='#13#10 +
+    'CfgSelectReqLibName='#13#10 +
+    'CfgSelectReqProcName='#13#10 +
+    'CfgSelectReqXMLText='#13#10 +
     'CheckUserReqCfgID=0'#13#10 +
     'CheckIntfReqCfgID=0'#13#10 +
     'MainFormCfgID=0'#13#10 +
-    'ConfFormCfgID=0'#13#10 + #13#10 +
+    'ConfFormCfgID=0'#13#10 +
+    'CfgDeleteReqCfgID=0'#13#10 +
+    'CfgInsertReqCfgID=0'#13#10 +
+    'CfgUpdateReqCfgID=0'#13#10 + #13#10 +
     '[Path]'#13#10 +
     'Bin=..\Bin\'#13#10 +
     'Cfg=..\Cfg\'#13#10 +

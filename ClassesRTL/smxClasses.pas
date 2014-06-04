@@ -49,7 +49,7 @@ type
   protected
     procedure AssignTo(Dest: TPersistent); override;
     function GetXMLText: String; virtual;
-    //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure SetCfgID(Value: Integer); virtual;
     procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
     procedure SetSelectDataSet(const Value: IsmxDataSet); virtual;
@@ -1882,6 +1882,10 @@ end;
 destructor TsmxBaseCfg.Destroy;
 begin
   FXMLDocIntf := nil;
+  SetSelectDataSet(nil);
+  SetModifyDataSet(mrDelete, nil);
+  SetModifyDataSet(mrInsert, nil);
+  SetModifyDataSet(mrUpdate, nil);
   inherited Destroy;
 end;
 
@@ -2006,12 +2010,25 @@ begin
     FCfgID := Key;
 end;
 
-{procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (AComponent = SelectRequest) and (Operation = opRemove) then
-    SelectRequest := nil;
-end;}
+  if Operation = opRemove then
+  begin
+    if Assigned(SelectDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = SelectDataSet.GetReference) then
+      SelectDataSet := nil;
+    if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
+      DeleteDataSet := nil else
+    if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
+      InsertDataSet := nil else
+    if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
+      UpdateDataSet := nil;
+  end;
+end;
 
 procedure TsmxBaseCfg.Read;
 begin
@@ -2191,11 +2208,15 @@ begin
     mrInsert: FInsertDataSetIntf := Value;
     mrUpdate: FUpdateDataSetIntf := Value;
   end;
+  if Assigned(Value) then
+    Value.GetReference.FreeNotification(Self);
 end;
 
 procedure TsmxBaseCfg.SetSelectDataSet(const Value: IsmxDataSet);
 begin
   FSelectDataSetIntf := Value;
+  if Assigned(FSelectDataSetIntf) then
+    FSelectDataSetIntf.GetReference.FreeNotification(Self);
 end;
 
 { TsmxResolvedItem }
@@ -2808,8 +2829,9 @@ begin
     if FIsRecieveCfg then
     begin
       Cfg.CfgID := FCfgID;
-      Cfg.SelectDataSet := smxClassProcs.gCfgSelectDataSet;
-      //Cfg.Save;
+      Cfg.InsertDataSet := smxClassProcs.gCfgInsertDataSet;
+      Cfg.UpdateDataSet := smxClassProcs.gCfgUpdateDataSet;
+      Cfg.Save;
     end;
     //SetCellProps;
     //SetAttrs;
@@ -5391,6 +5413,8 @@ begin
   begin
     if AComponent = CellRequest then
       CellRequest := nil else
+    if Assigned(Database) and (AComponent = Database.GetReference) then
+      Database := nil else
     if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
         and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
       DeleteDataSet := nil else
@@ -5432,6 +5456,8 @@ end;
 procedure TsmxCustomRequest.SetDatabase(const Value: IsmxDatabase);
 begin
   FDatabaseIntf := Value;
+  if Assigned(FDatabaseIntf) then
+    FDatabaseIntf.GetReference.FreeNotification(Self);
 end;
 
 {procedure TsmxCustomRequest.SetDatabaseManager(const Value: IsmxDatabaseManager);

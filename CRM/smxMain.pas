@@ -32,8 +32,11 @@ var
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
   gMainConnection: TsmxConnection = nil;
-  gCfgRequest: TsmxCustomRequest = nil;
   gMainForm: TsmxCustomForm = nil;
+  gCfgSelectRequest: TsmxCustomRequest = nil;
+  gCfgDeleteRequest: TsmxCustomRequest = nil;
+  gCfgInsertRequest: TsmxCustomRequest = nil;
+  gCfgUpdateRequest: TsmxCustomRequest = nil;
 
 procedure CreateGlobalObjects;
 begin
@@ -209,9 +212,9 @@ var
   //IntfClass: TsmxInterfacedPersistentClass;
   //FuncNewDataSet: TsmxFuncNewDataSet;
 begin
-  ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestClassName];
+  ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqClassName];
   //IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
-  ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestLibName];
+  ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqLibName];
   //ReqProcName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestProcName];
   CellClass := nil;
   if {(IReqClsName <> '') and (}ReqLibName <> ''{)} then
@@ -230,7 +233,7 @@ begin
         //IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
         //if Assigned(IntfClass) then
           //gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, IntfClass));
-        gCfgRequest := TsmxCustomRequest(CellClass.Create(nil));
+        gCfgSelectRequest := TsmxCustomRequest(CellClass.Create(nil));
       //end;
     //end
     { else
@@ -241,7 +244,7 @@ begin
         gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, FuncNewDataSet));
     end}//;
     //if Assigned(gCfgRequest) then
-      smxClassProcs.gCfgSelectDataSet := gCfgRequest as IsmxDataSet; //gCfgRequest.DataSet;
+      //smxClassProcs.gCfgSelectDataSet := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
     //smxClassProcs.gCfgDeleteDataSet := gCfgRequest.DeleteDataSet;
     //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
     //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
@@ -250,33 +253,73 @@ end;
 
 procedure DestroyMainObjects;
 begin
-  if Assigned(gCfgRequest) then
+  if Assigned(gCfgSelectRequest) then
   begin
     smxClassProcs.gCfgSelectDataSet := nil;
     smxClassProcs.gCfgDeleteDataSet := nil;
     smxClassProcs.gCfgInsertDataSet := nil;
     smxClassProcs.gCfgUpdateDataSet := nil;
-    SysUtils.FreeAndNil(gCfgRequest);
+    if Assigned(gCfgDeleteRequest) then
+      SysUtils.FreeAndNil(gCfgDeleteRequest);
+    if Assigned(gCfgInsertRequest) then
+      SysUtils.FreeAndNil(gCfgInsertRequest);
+    if Assigned(gCfgUpdateRequest) then
+      SysUtils.FreeAndNil(gCfgUpdateRequest);
+    SysUtils.FreeAndNil(gCfgSelectRequest);
   end;
 end;
 
 procedure AssignMainObjects;
 begin
-  if Assigned(gCfgRequest) then
+  if Assigned(gCfgSelectRequest) then
   begin
-    _TsmxBaseCell(gCfgRequest).Cfg.XMLText :=
-      Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestXMLText]);
-    gCfgRequest.IsRecieveCfg := False;
+    _TsmxBaseCell(gCfgSelectRequest).Cfg.XMLText :=
+      Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqXMLText]);
+    gCfgSelectRequest.IsRecieveCfg := False;
     //smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
     //smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
     //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
-    gCfgRequest.Database := gMainConnection.Database;
-    gCfgRequest.Initialize;
-    gCfgRequest.Prepare;
+    gCfgSelectRequest.Database := gMainConnection.Database;
+    gCfgSelectRequest.Initialize;
+    gCfgSelectRequest.Prepare;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
+    smxClassProcs.gCfgSelectDataSet := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
+
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID], 0) <> 0 then
+    begin
+      gCfgDeleteRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID],
+        smxClassProcs.gCfgSelectDataSet));
+      gCfgDeleteRequest.Initialize;
+      gCfgDeleteRequest.Prepare;
+      smxClassProcs.gCfgDeleteDataSet := gCfgDeleteRequest as IsmxDataSet;
+    end;
+
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID], 0) <> 0 then
+    begin
+      gCfgInsertRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID],
+        smxClassProcs.gCfgSelectDataSet));
+      gCfgInsertRequest.Initialize;
+      gCfgInsertRequest.Prepare;
+      smxClassProcs.gCfgInsertDataSet := gCfgInsertRequest as IsmxDataSet;
+    end;
+
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID], 0) <> 0 then
+    begin
+      gCfgUpdateRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID],
+        smxClassProcs.gCfgSelectDataSet));
+      gCfgUpdateRequest.Initialize;
+      gCfgUpdateRequest.Prepare;
+      smxClassProcs.gCfgUpdateDataSet := gCfgUpdateRequest as IsmxDataSet;
+    end;
   end;
 end;
 
@@ -426,7 +469,7 @@ function LogIn: Boolean;
   var
     Database: IsmxDatabase;
     FuncNewDatabase: TsmxFuncNewDatabase;
-    IntfClass: TsmxInterfacedPersistentClass;
+    IntfClass: TsmxInterfacedComponentClass;
   begin
     Result := False;
     Database := nil;
@@ -450,9 +493,9 @@ function LogIn: Boolean;
       begin
         if gLibraryManager.AddLibrary(Connection.LibraryName) <> -1 then
         begin
-          IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(Connection.FuncOrClassNameOrProgID));
+          IntfClass := TsmxInterfacedComponentClass(Classes.GetClass(Connection.FuncOrClassNameOrProgID));
           if Assigned(IntfClass) then
-            Database := IntfClass.Create as IsmxDatabase;
+            Database := IntfClass.Create(nil) as IsmxDatabase;
         end;
       end;
     end;
@@ -650,4 +693,3 @@ finalization
   DestroyGlobalObjects;
 
 end.
-
