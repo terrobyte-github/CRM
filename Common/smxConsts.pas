@@ -2,6 +2,9 @@ unit smxConsts;
 
 interface
 
+uses
+  xmldom;
+
 const
   { XML }
   cRootNodeName = 'Root';
@@ -22,10 +25,10 @@ const
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =
-    '<?xml version="' + cXMLDocVersion + '"' +
-    ' encoding="' + cXMLDocEncoding + '"?>' +
-    '<' + cRootNodeName + '>' +
-    '</' + cRootNodeName + '>';
+    '<?' + xmldom.SXML +
+    ' ' + xmldom.SVersion + '="' + cXMLDocVersion + '"' +
+    ' ' + xmldom.SEncoding + '="' + cXMLDocEncoding + '"?>' +
+    '<' + cRootNodeName + '/>';
 
   { Consts }
   cSuffixTextFieldName = 'Text';

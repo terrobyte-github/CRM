@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Controls, Windows, TypInfo, XMLIntf, smxBaseClasses, smxTypes,
-  smxBaseIntf;
+  smxBaseIntf, smxConsts;
 
 function HotKeyToStr(AKey: Integer): String;
 function StrToHotKey(const AStr: String): Integer;
@@ -13,7 +13,8 @@ function Ask(const AMsg: String; AType: Cardinal): Integer; overload;
 function Ask(const AMsg: String): Boolean; overload;
 function Inf(const AMsg: String; AType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 function StrToVar(const AValue: String): Variant;
-function NewXML(const AEncoding: String = 'UTF-8'): IXMLDocument;
+function NewXML(const AVersion: String = smxConsts.cXMLDocVersion;
+  const AEncoding: String = smxConsts.cXMLDocEncoding): IXMLDocument;
 function FormatXMLText(const AText: String): String;
 function UnFormatXMLText(const AText: String): String;
 //function NewResource(const AName: String): TResourceStream;
@@ -40,7 +41,7 @@ function GetRootControl(AControl: TWinControl): TWinControl;
 implementation
 
 uses
-  Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc, smxConsts;
+  Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc{, smxConsts};
 
 function HotKeyToStr(AKey: Integer): String;
 begin
@@ -93,11 +94,15 @@ begin
     Result := AValue;
 end;
 
-function NewXML(const AEncoding: String = 'UTF-8'): IXMLDocument;
+function NewXML(const AVersion: String = smxConsts.cXMLDocVersion;
+  const AEncoding: String = smxConsts.cXMLDocEncoding): IXMLDocument;
 begin
   Result := XMLDoc.NewXMLDocument;
-  Result.Encoding := WideString(AEncoding);
   Result.XML.Text := smxConsts.cXMLDocTextDef;
+  if AVersion <> smxConsts.cXMLDocVersion then
+    Result.Version := WideString(AVersion);
+  if AEncoding <> smxConsts.cXMLDocEncoding then
+    Result.Encoding := WideString(AEncoding);
 end;
 
 function FormatXMLText(const AText: String): String;

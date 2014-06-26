@@ -543,8 +543,13 @@ begin
       FreeMem(PropList);
     end;
   end;
-  if AObject is TsmxBaseCell then
-    ReadChild(TsmxBaseCell(AObject), ANode);
+  {if (AObject is TsmxBaseCell) then
+  begin
+    if not Assigned(ACfg) then
+      ReadChild(TsmxBaseCell(AObject), ANode)
+    else
+      TsmxBaseCell(AObject).SetProperties(ACfg);
+  end;}
 end;
 
 procedure WriteProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode; AFindList: TList);
@@ -824,8 +829,13 @@ begin
       FreeMem(PropList);
     end;
   end;
-  if AObject is TsmxBaseCell then
-    WriteChild(TsmxBaseCell(AObject), ANode);
+  {if AObject is TsmxBaseCell then
+  begin
+    if not Assigned(ACfg) then
+      WriteChild(TsmxBaseCell(AObject), ANode)
+    else
+      TsmxBaseCell(AObject).GetProperties(ACfg);
+  end;}
 end;
 
 procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);

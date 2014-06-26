@@ -61,7 +61,8 @@ type
   public
     destructor Destroy; override;
     //procedure Assign(Source: TPersistent); override;
-    procedure Clear; virtual;
+    procedure ClearCfg; virtual;
+    procedure ClearXML; virtual;
     procedure Load; virtual;
     procedure Read; virtual;
     //procedure Receive;
@@ -164,7 +165,7 @@ type
     property Cfg: TsmxBaseCfg read GetCfg;
     //property ImplementorClass: TsmxInterfacedPersistentClass read FImplementorClass;
   public
-    constructor Create(AOwner: TComponent); overload; override;
+    constructor Create(AOwner: TComponent); {overload;} override;
     //constructor Create(AOwner: TComponent; AImplementorClass: TsmxInterfacedPersistentClass); reintroduce; overload; virtual;
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
@@ -172,7 +173,9 @@ type
     procedure Finalize;
     function FindChildByCfgID(CfgID: Integer): TsmxBaseCell;
     function FindChildByName(const Name: String): TsmxBaseCell;
+    procedure GetProperties(DestCfg: TsmxBaseCfg); virtual;
     procedure Initialize;
+    procedure SetProperties(SrcCfg: TsmxBaseCfg); virtual;
 
     property CellCount: Integer read GetCellCount;
     property CellIndex: Integer read GetCellIndex;
@@ -254,22 +257,41 @@ type
   private
     //FImageListName: String;
     //FInitializeAlgCfgID: Integer;
-    FCell: TsmxBaseCell;
+    //FCell: TsmxBaseCell;
+    FCurNode: IXMLNode;
+    FFindList: TList;
+    FResolvedList: TsmxResolvedKit;
+    function GetCellOwner: TsmxBaseCell;
+    function GetResolvedList: TsmxResolvedKit;
+    function GetFindList: TList;
   protected
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure ReadCell(const Node: IXMLNode); virtual;
-    procedure SetCell(Value: TsmxBaseCell); virtual;
+    function GetCurNode: IXMLNode; virtual;
+    //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    //procedure ReadCell(const Node: IXMLNode); virtual;
+    //procedure SetCell(Value: TsmxBaseCell); virtual;
+    procedure SetCurNode(const Value: IXMLNode); virtual;
+    procedure SetFindList(Value: TList); virtual;
     //procedure SetImageListName(const Value: String); virtual;
     //procedure SetInitializeAlgCfgID(Value: Integer); virtual;
-    procedure WriteCell(const Node: IXMLNode); virtual;
-  public
-    //procedure Assign(Source: TPersistent); override;
-    procedure Clear; override;
-    procedure Read; override;
-    procedure Write; override;
+    procedure SetResolvedList(Value: TsmxResolvedKit); virtual;
+    //procedure WriteCell(const Node: IXMLNode); virtual;
 
-    property Cell: TsmxBaseCell read FCell write SetCell;
+    property CellOwner: TsmxBaseCell read GetCellOwner;// write SetCell;
+  public
+    destructor Destroy; override;
+    //procedure Assign(Source: TPersistent); override;
+    //procedure Clear; override;
+    procedure ClearCfg; override;
+    procedure ClearXML; override;
+    procedure Read; override;
+    procedure ReadCell(Cell: TsmxBaseCell); virtual;
+    procedure Write; override;
+    procedure WriteCell(Cell: TsmxBaseCell); virtual;
+
+    property CurNode: IXMLNode read GetCurNode write SetCurNode;
+    property FindList: TList read GetFindList write SetFindList;
     //property ImageListName: String read FImageListName write SetImageListName;
+    property ResolvedList: TsmxResolvedKit read GetResolvedList write SetResolvedList;
   //published
     //property InitializeAlgCfgID: Integer read FInitializeAlgCfgID write SetInitializeAlgCfgID;
   end;
@@ -295,7 +317,7 @@ type
     procedure WriteType(const Node: IXMLNode); virtual;
   public
     procedure Assign(Source: TPersistent); override;
-    procedure Clear; override;
+    procedure ClearCfg; override;
     procedure Read; override;
     procedure Write; override;
 
@@ -553,6 +575,8 @@ type
     procedure DeleteSlave(Index: Integer);
     function FindSlaveByCfgID(CfgID: Integer): TsmxOwnerCell;
     function FindSlaveByName(const Name: String): TsmxOwnerCell;
+    procedure GetProperties(DestCfg: TsmxBaseCfg); override;
+    procedure SetProperties(SrcCfg: TsmxBaseCfg); override;
 
     property CellOwner: TsmxOwnerCell read FCellOwner write SetCellOwner;
     //property IsAltSlaveClass: Boolean read FIsAltSlaveClass write SetIsAltSlaveClass;
@@ -1905,8 +1929,14 @@ begin
     inherited AssignTo(Dest);
 end;
 
-procedure TsmxBaseCfg.Clear;
+procedure TsmxBaseCfg.ClearCfg;
 begin
+end;
+
+procedure TsmxBaseCfg.ClearXML;
+begin
+  RootNode.ChildNodes.Clear;
+  RootNode.AttributeNodes.Clear;
 end;
 
 function TsmxBaseCfg.GetRootNode: IXMLNode;
@@ -2032,13 +2062,12 @@ end;
 
 procedure TsmxBaseCfg.Read;
 begin
-  Clear;
+  ClearCfg;
 end;
 
 procedure TsmxBaseCfg.Write;
 begin
-  RootNode.ChildNodes.Clear;
-  RootNode.AttributeNodes.Clear;
+  ClearXML;
 end;
 
 {procedure TsmxBaseCfg.Receive;
@@ -2090,6 +2119,16 @@ end;}
 
 { TsmxCellCfg }
 
+destructor TsmxCellCfg.Destroy;
+begin
+  SetCurNode(nil);
+  if Assigned(FResolvedList) then
+    FResolvedList.Free;
+  if Assigned(FFindList) then
+    FFindList.Free;
+  inherited Destroy;
+end;
+
 {procedure TsmxCellCfg.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
@@ -2100,7 +2139,7 @@ begin
   end;
 end;}
 
-procedure TsmxCellCfg.Clear;
+(*procedure TsmxCellCfg.Clear;
 begin
   inherited Clear;
   {ImageListName := '';
@@ -2111,23 +2150,90 @@ begin
     if Cell is TsmxOwnerCell then
       TsmxOwnerCell(Cell).ClearSlaves;
   end;
+end;*)
+
+procedure TsmxCellCfg.ClearCfg;
+begin
+  inherited ClearCfg;
+  if Assigned(FFindList) then
+    FFindList.Clear;
+  if Assigned(FResolvedList) then
+    FResolvedList.Clear;
 end;
 
-procedure TsmxCellCfg.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TsmxCellCfg.ClearXML;
+begin
+  inherited ClearXML;
+  CurNode := nil;
+end;
+
+function TsmxCellCfg.GetCellOwner: TsmxBaseCell;
+begin
+  if Owner is TsmxBaseCell then
+    Result := TsmxBaseCell(Owner) else
+    Result := nil;
+end;
+
+function TsmxCellCfg.GetCurNode: IXMLNode;
+begin
+  if not Assigned(FCurNode) then
+    FCurNode := RootNode;
+  Result := FCurNode;
+end;
+
+procedure TsmxCellCfg.SetCurNode(const Value: IXMLNode);
+begin
+  FCurNode := Value;
+end;
+
+function TsmxCellCfg.GetFindList: TList;
+begin
+  if not Assigned(FFindList) then
+    FFindList := TList.Create;
+  Result := FFindList;
+end;
+
+procedure TsmxCellCfg.SetFindList(Value: TList);
+begin
+  FindList.Assign(Value);
+end;
+
+function TsmxCellCfg.GetResolvedList: TsmxResolvedKit;
+begin
+  if not Assigned(FResolvedList) then
+    FResolvedList := TsmxResolvedKit.Create(TsmxResolvedItem);
+  Result := FResolvedList;
+end;
+
+procedure TsmxCellCfg.SetResolvedList(Value: TsmxResolvedKit);
+begin
+  ResolvedList.Assign(Value);
+end;
+
+{procedure TsmxCellCfg.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
   if (AComponent = Cell) and (Operation = opRemove) then
     Cell := nil;
-end;
+end;}
 
 procedure TsmxCellCfg.Read;
 var
   n: IXMLNode;
 begin
   inherited Read;
-  n := RootNode.ChildNodes.FindNode(smxConsts.cCellNodeName);
-  if Assigned(n) then
-    ReadCell(n);
+  if Assigned(CellOwner) then
+  begin
+    n := RootNode.ChildNodes.FindNode(smxConsts.cCellNodeName);
+    if Assigned(n) then
+    begin
+      //ReadCell(n);
+      CurNode := n;
+      ReadCell(CellOwner);
+      smxClassProcs.AllCells(CellOwner, FindList, []);
+      smxClassProcs.ResolvedProps(ResolvedList, FindList);
+    end;
+  end;
 end;
 
 procedure TsmxCellCfg.Write;
@@ -2135,11 +2241,35 @@ var
   n: IXMLNode;
 begin
   inherited Write;
-  n := RootNode.AddChild(smxConsts.cCellNodeName);
-  WriteCell(n);
+  if Assigned(CellOwner) then
+  begin
+    n := RootNode.AddChild(smxConsts.cCellNodeName);
+    //WriteCell(n);
+    CurNode := n;
+    smxClassProcs.AllCells(CellOwner, FindList, []);
+    WriteCell(CellOwner);
+  end;
 end;
 
-procedure TsmxCellCfg.ReadCell(const Node: IXMLNode);
+procedure TsmxCellCfg.ReadCell(Cell: TsmxBaseCell);
+begin
+  if Assigned(Cell) then
+  begin
+    smxClassProcs.ReadProps(CellOwner, Cell, CurNode, ResolvedList);
+    Cell.SetProperties(Self);
+  end;
+end;
+
+procedure TsmxCellCfg.WriteCell(Cell: TsmxBaseCell);
+begin
+  if Assigned(Cell) then
+  begin
+    smxClassProcs.WriteProps(CellOwner, Cell, CurNode, FindList);
+    Cell.GetProperties(Self);
+  end;
+end;
+
+(*procedure TsmxCellCfg.ReadCell(const Node: IXMLNode);
 var
   ResolvedList: TsmxResolvedKit;
   FindList: TList;
@@ -2163,9 +2293,9 @@ begin
       ResolvedList.Free;
     end;
   end;
-end;
+end;*)
 
-procedure TsmxCellCfg.WriteCell(const Node: IXMLNode);
+(*procedure TsmxCellCfg.WriteCell(const Node: IXMLNode);
 var
   FindList: TList;
 begin
@@ -2182,14 +2312,14 @@ begin
       FindList.Free;
     end;
   end;
-end;
+end;*)
 
-procedure TsmxCellCfg.SetCell(Value: TsmxBaseCell);
+{procedure TsmxCellCfg.SetCell(Value: TsmxBaseCell);
 begin
   FCell := Value;
   if Assigned(FCell) then
     FCell.FreeNotification(Self);
-end;
+end; }
 
 {procedure TsmxCellCfg.SetImageListName(const Value: String);
 begin
@@ -2568,11 +2698,11 @@ end;
 function TsmxBaseCell.GetCfg: TsmxBaseCfg;
 begin
   if not Assigned(FCfg) then
-  begin
+  //begin
     FCfg := GetCfgClass.Create(Self);
-    if FCfg is TsmxCellCfg then
-      TsmxCellCfg(FCfg).Cell := Self;
-  end;
+    //if FCfg is TsmxCellCfg then
+      //TsmxCellCfg(FCfg).Cell := Self;
+  //end;
   Result := FCfg;
 end;
 
@@ -2623,6 +2753,73 @@ begin
     FImageList := FCellParent.ImageList;
   Result := FImageList;
 end;}
+
+procedure TsmxBaseCell.GetProperties(DestCfg: TsmxBaseCfg);
+var
+  i: Integer;
+  CurNode, n: IXMLNode;
+  Cell: TsmxBaseCell;
+begin
+  if DestCfg is TsmxCellCfg then
+  begin
+    CurNode := TsmxCellCfg(DestCfg).CurNode;
+    try
+      CurNode.Attributes[smxConsts.cCfgIDAttributeName] := CfgID;
+      CurNode.Attributes[smxConsts.cClassNameAttributeName] := ClassName;
+      for i := 0 to CellCount - 1 do
+      begin
+        Cell := Cells[i];
+        if not ((Cell is TsmxOwnerCell) and Assigned(TsmxOwnerCell(Cell).CellOwner)) then
+        begin
+          n := CurNode.AddChild(smxConsts.cCellNodeName);
+          TsmxCellCfg(DestCfg).CurNode := n;
+          TsmxCellCfg(DestCfg).WriteCell(Cell);
+        end;
+      end;
+    finally
+      TsmxCellCfg(DestCfg).CurNode := CurNode;
+    end;
+  end;
+end;
+
+procedure TsmxBaseCell.SetProperties(SrcCfg: TsmxBaseCfg);
+var
+  i: Integer;
+  CurNode, n: IXMLNode;
+  ClsName: String;
+  Cell: TsmxBaseCell;
+begin
+  //CfgID := 0;
+  ClearCells;
+  if SrcCfg is TsmxCellCfg then
+  begin
+    CurNode := TsmxCellCfg(SrcCfg).CurNode;
+    try
+      if CurNode.HasAttribute(smxConsts.cCfgIDAttributeName) then
+        CfgID := SysUtils.StrToIntDef(CurNode.Attributes[smxConsts.cCfgIDAttributeName], 0);
+      for i := 0 to CurNode.ChildNodes.Count - 1 do
+      begin
+        n := CurNode.ChildNodes[i];
+        if n.NodeName = smxConsts.cCellNodeName then
+        begin
+          if n.HasAttribute(smxConsts.cClassNameAttributeName) then
+            ClsName := Variants.VarToStr(n.Attributes[smxConsts.cClassNameAttributeName])
+          else
+            ClsName := '';
+          if ClsName <> '' then
+          begin
+            Cell := TsmxBaseCellClass(Classes.FindClass(ClsName)).Create(TsmxCellCfg(SrcCfg).CellOwner);
+            Cell.CellParent := Self;
+            TsmxCellCfg(SrcCfg).CurNode := n;
+            TsmxCellCfg(SrcCfg).ReadCell(Cell);
+          end;
+        end;
+      end;
+    finally
+      TsmxCellCfg(SrcCfg).CurNode := CurNode;
+    end;
+  end;
+end;
 
 procedure TsmxBaseCell.SetImageList(Value: TCustomImageList);
 begin
@@ -2915,9 +3112,9 @@ begin
   end;
 end;
 
-procedure TsmxTypeCfg.Clear;
+procedure TsmxTypeCfg.ClearCfg;
 begin
-  inherited Clear;
+  inherited ClearCfg;
   CellClassName := '';
   CfgClassName := '';
   IntfClassName := '';
@@ -4499,6 +4696,66 @@ begin
     FSlaveItem.FSlave := Self;
   end;
   Result := FSlaveItem;
+end;
+
+procedure TsmxOwnerCell.GetProperties(DestCfg: TsmxBaseCfg);
+var
+  i: Integer;
+  CurNode, n: IXMLNode;
+  Cell: TsmxOwnerCell;
+begin
+  inherited GetProperties(DestCfg);
+  if DestCfg is TsmxCellCfg then
+  begin
+    CurNode := TsmxCellCfg(DestCfg).CurNode;
+    try
+      for i := 0 to SlaveCount - 1 do
+      begin
+        Cell := Slaves[i];
+        n := CurNode.AddChild(smxConsts.cSlaveNodeName);
+        TsmxCellCfg(DestCfg).CurNode := n;
+        TsmxCellCfg(DestCfg).WriteCell(Cell);
+      end;
+    finally
+      TsmxCellCfg(DestCfg).CurNode := CurNode;
+    end;
+  end;
+end;
+
+procedure TsmxOwnerCell.SetProperties(SrcCfg: TsmxBaseCfg);
+var
+  i: Integer;
+  CurNode, n: IXMLNode;
+  ClsName: String;
+  Cell: TsmxOwnerCell;
+begin
+  inherited SetProperties(SrcCfg);
+  ClearSlaves;
+  if SrcCfg is TsmxCellCfg then
+  begin
+    CurNode := TsmxCellCfg(SrcCfg).CurNode;
+    try
+      for i := 0 to CurNode.ChildNodes.Count - 1 do
+      begin
+        n := CurNode.ChildNodes[i];
+        if n.NodeName = smxConsts.cSlaveNodeName then
+        begin
+          if n.HasAttribute(smxConsts.cClassNameAttributeName) then
+            ClsName := Variants.VarToStr(n.Attributes[smxConsts.cClassNameAttributeName])
+          else
+            ClsName := '';
+          if ClsName <> '' then
+          begin
+            Cell := AddSlaveAsClass(TsmxOwnerCellClass(Classes.FindClass(ClsName)));
+            TsmxCellCfg(SrcCfg).CurNode := n;
+            TsmxCellCfg(SrcCfg).ReadCell(Cell);
+          end;
+        end;
+      end;
+    finally
+      TsmxCellCfg(SrcCfg).CurNode := CurNode;
+    end;
+  end;
 end;
 
 { TsmxActionCell }

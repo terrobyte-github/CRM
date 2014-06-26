@@ -434,7 +434,7 @@ type
   public
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
-    procedure Clear; override;
+    procedure ClearCfg; override;
   
     property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
   end;
@@ -1877,9 +1877,9 @@ begin
     CellStates := TsmxSimpleStateCfg(Source).CellStates;
 end;
 
-procedure TsmxSimpleStateCfg.Clear;
+procedure TsmxSimpleStateCfg.ClearCfg;
 begin
-  inherited Clear;
+  inherited ClearCfg;
   if Assigned(FCellStates) then
     FCellStates.Clear;
 end;
@@ -2137,7 +2137,7 @@ begin
       //PutState;
     end else
     begin
-      StateCfg.Clear;
+      StateCfg.ClearCfg;
       //LockState;
     end;
 end;
