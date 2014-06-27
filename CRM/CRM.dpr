@@ -14,10 +14,17 @@ begin
   Application.Initialize;
   smxMain.Initialize;
   try
-    if smxMain.LogIn {and smxMain.CreateMainForm} then
-      Application.Run
-    {else
-      Application.Terminate};
+    if smxMain.LogIn then
+      try
+        if smxMain.Start then
+          try
+            Application.Run;
+          finally
+            smxMain.Finish;
+          end;
+      finally
+        smxMain.LogOut;
+      end;
   finally
     smxMain.Finalize;
   end;

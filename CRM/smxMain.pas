@@ -6,6 +6,9 @@ procedure Initialize;
 procedure Finalize;
 //function CreateMainForm: Boolean;
 function LogIn: Boolean;
+procedure LogOut;
+function Start: Boolean;
+procedure Finish;
 
 implementation
 
@@ -37,6 +40,7 @@ var
   gCfgDeleteRequest: TsmxCustomRequest = nil;
   gCfgInsertRequest: TsmxCustomRequest = nil;
   gCfgUpdateRequest: TsmxCustomRequest = nil;
+  gIsConstructor: Boolean = False;
 
 procedure CreateGlobalObjects;
 begin
@@ -595,7 +599,7 @@ function LogIn: Boolean;
     end;}
   end;
 
-  function CreateMainForm(IsConf: Boolean; IntfID: Integer): Boolean;
+  (*function CreateMainForm(IsConf: Boolean; IntfID: Integer): Boolean;
   var
     CfgID: Integer;
   begin
@@ -616,7 +620,7 @@ function LogIn: Boolean;
       gMainForm.IntfID := IntfID;
       Result := True;
     end;
-  end;
+  end;*)
 
   procedure SaveDefValues(const UserName, ProjectName: String);
   var
@@ -638,7 +642,7 @@ function LogIn: Boolean;
 var
   Connection: TsmxProjectConnection;
   UserName, Password: String;
-  IsConf: Boolean;
+  //IsConf: Boolean;
   UserID: Integer;
   IntfID: Integer;
   IntfName: String;
@@ -652,7 +656,7 @@ begin
         gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectFileName],
       gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroUserName],
       gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
-      Connection, UserName, Password, IsConf) then
+      Connection, UserName, Password, gIsConstructor) then
   begin
     SaveDefValues(UserName, Connection.ProjectName);
     gStorageManager[smxPConsts.cDefValueSectionName + '.' + smxPConsts.cDefValueUserName] := UserName;
@@ -671,19 +675,65 @@ begin
         begin
           gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamIntfName] := IntfName;
           gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamIntfID] := IntfID;
-          if CreateMainForm(IsConf, IntfID) then
-          begin
-            gMainForm.Show;
+          //if CreateMainForm(IsConf, IntfID) then
+          //begin
+            //gMainForm.Show;
             Result := True;
-          end else
-            smxFuncs.Inf('Невозможно создать главную форму.');
+          //end else
+            //smxFuncs.Inf('Невозможно создать главную форму.');
         end else
           smxFuncs.Inf('Интерфейс пользователя неопределен.');
       end else
         smxFuncs.Inf('Пользователь неопределен.');
     end else
       smxFuncs.Inf('Невозможно подключиться к БД.');
-  end;    
+  end;
+end;
+
+procedure LogOut;
+begin
+  if gMainConnection.Connected then
+  begin
+    if gMainConnection.Database.InTransaction then
+      gMainConnection.Database.RollbackTransaction;
+    gMainConnection.Disconnect;
+  end;
+end;
+
+function Start: Boolean;
+
+  function CreateMainForm(CfgID, IntfID: Integer): Boolean;
+  begin
+    Result := False;
+    if CfgID > 0 then
+    begin
+      Forms.Application.ShowMainForm := False;
+      gMainForm := smxClassFuncs.NewForm(nil, CfgID);
+      gMainForm.Initialize;
+      gMainForm.IntfID := IntfID;
+      Result := True;
+    end;
+  end;
+
+var
+  CfgID, IntfID: Integer;
+begin
+  Result := False;
+  if gIsConstructor then
+    CfgID := SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitConfFormCfgID], 0)
+  else
+    CfgID := SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitMainFormCfgID], 0);
+  IntfID := gStorageManager[smxPConsts.cParamSectionName + '.' + smxPConsts.cParamIntfID];
+  if CreateMainForm(CfgID, IntfID) then
+  begin
+    gMainForm.Show;
+    Result := True;
+  end else
+    smxFuncs.Inf('Невозможно создать главную форму.');
+end;
+
+procedure Finish;
+begin
 end;
 
 initialization
