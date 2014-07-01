@@ -118,14 +118,14 @@ type
   TsmxEditorType = (etNone, etString, etNumber, etDate, etPickString,
     etButtonString);
 
-  TsmxCellState = (csInitialized, csFinalized, {csModified, }csEventParam{, csDesigning});
+  TsmxCellState = ({Created, }csInitialized, csFinalized, {csModified, }csEventParam{, csDesigning});
 
   TsmxCellStates = set of TsmxCellState; {not need if csModified will}
 
-  //TsmxCellStyle = (csRecieveCfg, csIsDesigning);
-  TsmxCellOption = (coRecieveCfg, coIsDesigning); //, coEventParam must be alone
-  //TsmxCellStyles = set of TsmxCellStyle;
-  TsmxCellOptions = set of TsmxCellOption;
+  TsmxCellStyle = (csRecieveCfg, csIsDesigning);
+  //TsmxCellOption = (coRecieveCfg, coIsDesigning); //, coEventParam must be alone
+  TsmxCellStyles = set of TsmxCellStyle;
+  //TsmxCellOptions = set of TsmxCellOption;
 
   TsmxDataSetType = (dstQuery, dstStoredProc);
 

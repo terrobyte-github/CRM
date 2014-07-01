@@ -402,7 +402,7 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
 
   procedure ReadMethod(APropInfo: PPropInfo; const Node: IXMLNode);
 
-    procedure GetObjAndMethName(const Text: String; var ObjName, MethName: String);
+    {procedure GetObjAndMethName(const Text: String; var ObjName, MethName: String);
     var
       i: Integer;
     begin
@@ -414,16 +414,19 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
         ObjName := Copy(Text, 1, i - 1);
         MethName := Copy(Text, i + 1, Length(Text) - i);
       end;
-    end;
+    end;}
 
   var
     //n: IXMLNode;
-    ObjName, MethName: String;
+    //ObjName, MethName: String;
+    s: String;
   begin
     //n := Node.ChildNodes.FindNode(PropInfo^.Name);
-    GetObjAndMethName(Variants.VarToStr(Node.Attributes[APropInfo^.Name]), ObjName, MethName);
+    //GetObjAndMethName(Variants.VarToStr(Node.Attributes[APropInfo^.Name]), ObjName, MethName);
+    s := Variants.VarToStr(Node.Attributes[APropInfo^.Name]);
     //if Assigned(n) and (AObject is TsmxBaseCell) then
-    if (ObjName <> '') and (MethName <> '') then
+    //if (ObjName <> '') and (MethName <> '') then
+    if s <> '' then
     begin
       if Assigned(AResolvedList) then
         //if ((n.Attributes[smxConsts.cCfgIDAttributeName] <> 0)
@@ -442,8 +445,9 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
               //TVarData(PropValue).VType := vtString;
               PropValue := n.Attributes[smxConsts.cNameAttributeName];
             end;}
-            PropValue := ObjName;
-            ProcName := MethName; //n.Attributes[smxConsts.cProcNameAttributeName];
+            //PropValue := ObjName;
+            PropValue := s;
+            //ProcName := MethName; //n.Attributes[smxConsts.cProcNameAttributeName];
           end;
     end;
   end;
@@ -881,24 +885,41 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
   end;
 
   procedure ResolvedMethod(Item: TsmxResolvedItem);
+
+    procedure GetObjAndMethName(const Text: String; var ObjName, MethName: String);
+    var
+      i: Integer;
+    begin
+      ObjName := '';
+      MethName := '';
+      i := Pos(smxConsts.cDelimiterObjAndMethName, Text);
+      if i <> 0 then
+      begin
+        ObjName := Copy(Text, 1, i - 1);
+        MethName := Copy(Text, i + 1, Length(Text) - i);
+      end;
+    end;
+
   var
     Method: TMethod;
     i: Integer;
+    ObjName, MethName: String;
   begin
     if Assigned(AFindList) then
-     begin
-       //Method := TypInfo.GetTypeData(Item.PropInfo^.PropType^)^.Guid;
-       for i := 0 to AFindList.Count - 1 do
-         if TObject(AFindList[i]) is TsmxBaseCell then
-           if ((TsmxBaseCell(AFindList[i]).CfgID = Item.PropValue)
-                 or (TsmxBaseCell(AFindList[i]).Name = Item.PropValue))
-               and Assigned(TObject(AFindList[i]).MethodAddress(Item.ProcName)) then
-           begin
-             Method.Data := AFindList[i];
-             Method.Code := TObject(AFindList[i]).MethodAddress(Item.ProcName);
-             TypInfo.SetMethodProp(Item.Instance, Item.PropInfo, Method);
-             Break;
-           end;
+    begin
+      GetObjAndMethName(Variants.VarToStr(Item.PropValue), ObjName, MethName);
+      if (ObjName <> '') and (MethName <> '') then
+        for i := 0 to AFindList.Count - 1 do
+          if TObject(AFindList[i]) is TsmxBaseCell then
+            if ((TsmxBaseCell(AFindList[i]).CfgID = SysUtils.StrToIntDef(ObjName, -1))
+                  or (TsmxBaseCell(AFindList[i]).Name = ObjName))
+                and Assigned(TObject(AFindList[i]).MethodAddress(MethName)) then
+            begin
+              Method.Data := AFindList[i];
+              Method.Code := TObject(AFindList[i]).MethodAddress(MethName);
+              TypInfo.SetMethodProp(Item.Instance, Item.PropInfo, Method);
+              Break;
+            end;
      end;
   end;
 

@@ -14,7 +14,8 @@ interface
 
 uses
   Classes, Controls, StdCtrls, ComCtrls, Buttons, ImgList, Graphics, XMLIntf,
-  smxBaseClasses, smxClasses, smxCells, smxStdCells, smxDBIntf, smxTypes;
+  smxBaseClasses, smxClasses, smxCells, smxCfgs, smxStdCells, smxDBIntf,
+  smxTypes;
 
 type
   { TsmxLibAlgorithmCfg }
@@ -462,7 +463,7 @@ type
 
   TsmxStateForm = class(TsmxForm)
   private
-    FStateCfg: TsmxStateCfg;
+    FStateCfg: TsmxBaseCfg;
     //FStateCfgClass: TsmxStateCfgClass;
     FStateID: Integer;
     FStateRequest: TsmxCustomRequest;
@@ -470,7 +471,7 @@ type
     //procedure SetStateCfg(Value: TsmxStateCfg);
   protected
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetStateCfgClass: TsmxStateCfgClass; virtual;
+    function GetStateCfgClass: TsmxBaseCfgClass; virtual;
     //procedure LockState; virtual;
     //procedure InternalInitialize; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -2063,10 +2064,10 @@ begin
     FStateCfg.SelectRequest := StateRequest;
     RefreshStateCfg;
   end;}
-  Result := FStateCfg;
+  Result := TsmxStateCfg(FStateCfg);
 end;
 
-function TsmxStateForm.GetStateCfgClass: TsmxStateCfgClass;
+function TsmxStateForm.GetStateCfgClass: TsmxBaseCfgClass;
 begin
   Result := TsmxStateCfg;
 end;

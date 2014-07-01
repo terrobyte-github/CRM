@@ -3,26 +3,34 @@ unit smxBaseClasses;
 interface
 
 uses
-  Classes, SysUtils, smxBaseIntf;
+  Classes, SysUtils, smxBaseIntf, smxDBIntf, XMLIntf, smxTypes;
 
-const
-  IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
+//const
+  //IID_IsmxRefInterface: TGUID = '{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}';
 
 type
   { TsmxComponent }
 
   EsmxBaseError = class(Exception);
 
-  EsmxComponentError = class(EsmxBaseError)
-  {private
-    FOriginMessage: String;
-  public
-    constructor CreateByOrigin(Ident: Integer; const Args: array of const;
-      const OriginMessage: String); overload;
-    constructor CreateByOrigin(ResStringRec: PResStringRec; const Args: array of const;
-      const OriginMessage: String); overload;
+  TsmxComponent = class;
 
-    property OriginMessage: String read FOriginMessage write FOriginMessage;}
+  EsmxComponentError = class(EsmxBaseError)
+  private
+    //FOriginMessage: String;
+    FComponent: TsmxComponent;
+  public
+    //constructor CreateByOrigin(Ident: Integer; const Args: array of const;
+      //const OriginMessage: String); overload;
+    //constructor CreateByOrigin(ResStringRec: PResStringRec; const Args: array of const;
+      //const OriginMessage: String); overload;
+    constructor CreateByComponent(Ident: Integer; const Args: array of const;
+      Component: TsmxComponent); overload;
+    constructor CreateByComponent(ResStringRec: PResStringRec; const Args: array of const;
+      Component: TsmxComponent); overload;
+
+    //property OriginMessage: String read FOriginMessage write FOriginMessage;
+    property Component: TsmxComponent read FComponent;
   end;
 
   TsmxComponent = class(TComponent, IsmxBaseInterface, IsmxRefComponent)
@@ -363,10 +371,77 @@ type
     //property Values[const Name: String]: Variant read GetValue write SetValue;
   end;
 
+  { EsmxCfgError }
+
+  EsmxCfgError = class(EsmxComponentError)
+  //private
+    //FCfgID: Integer;
+  protected
+    function GetCfgID: Integer; virtual;
+  public
+    {constructor CreateByComponent(Ident: Integer;
+      const Args: array of const; CfgID: Integer); overload;
+    constructor CreateByComponent(ResStringRec: PResStringRec;
+      const Args: array of const; CfgID: Integer); overload;}
+
+    property CfgID: Integer read GetCfgID;// write FCfgID;
+  end;
+
+  { TsmxBaseCfg }
+
+  //TsmxCustomRequest = class;
+
+  TsmxBaseCfg = class(TsmxComponent)
+  private
+    FCfgID: Integer;
+    FDeleteDataSetIntf: IsmxDataSet;
+    FInsertDataSetIntf: IsmxDataSet;
+    FSelectDataSetIntf: IsmxDataSet;
+    FUpdateDataSetIntf: IsmxDataSet;
+    //FSelectRequest: TsmxCustomRequest;
+    FXMLDocIntf: IXMLDocument;
+    function GetRootNode: IXMLNode;
+    function GetXMLDoc: IXMLDocument;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+    function GetXMLText: String; virtual;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure SetCfgID(Value: Integer); virtual;
+    procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
+    procedure SetSelectDataSet(const Value: IsmxDataSet); virtual;
+    //procedure SetSelectRequest(Value: TsmxCustomRequest); virtual;
+    procedure SetXMLText(const Value: String); virtual;
+
+    property RootNode: IXMLNode read GetRootNode;
+    property XMLDoc: IXMLDocument read GetXMLDoc;
+  public
+    destructor Destroy; override;
+    //procedure Assign(Source: TPersistent); override;
+    procedure ClearCfg; virtual;
+    procedure ClearXML; virtual;
+    procedure Load; virtual;
+    procedure Read; virtual;
+    //procedure Receive;
+    procedure Remove; virtual;
+    //procedure Return;
+    procedure Save; virtual;
+    procedure Write; virtual;
+
+    property CfgID: Integer read FCfgID write SetCfgID;
+    property DeleteDataSet: IsmxDataSet index mrDelete read FDeleteDataSetIntf write SetModifyDataSet;
+    property InsertDataSet: IsmxDataSet index mrInsert read FInsertDataSetIntf write SetModifyDataSet;
+    property SelectDataSet: IsmxDataSet read FSelectDataSetIntf write SetSelectDataSet;
+    property UpdateDataSet: IsmxDataSet index mrUpdate read FUpdateDataSetIntf write SetModifyDataSet;
+    //property SelectRequest: TsmxCustomRequest read FSelectRequest write SetSelectRequest;
+    property XMLText: String read GetXMLText write SetXMLText;
+  end;
+
+  TsmxBaseCfgClass = class of TsmxBaseCfg;
+
 implementation
 
 uses
-  Windows, Variants, smxConsts;
+  Windows, Variants, smxFuncs, smxDBFuncs, smxConsts;
 
 {$I ..\Resource\smxVers.inc}
 
@@ -385,6 +460,43 @@ begin
   CreateResFmt(ResStringRec, Args);
   FOriginMessage := OriginMessage;
 end;}
+
+constructor EsmxComponentError.CreateByComponent(Ident: Integer;
+  const Args: array of const; Component: TsmxComponent);
+begin
+  CreateResFmt(Ident, Args);
+  FComponent := Component;
+end;
+
+constructor EsmxComponentError.CreateByComponent(ResStringRec: PResStringRec;
+  const Args: array of const; Component: TsmxComponent);
+begin
+  CreateResFmt(ResStringRec, Args);
+  FComponent := Component;
+end;
+
+{ EsmxCfgError }
+
+{constructor EsmxCfgError.CreateByComponent(Ident: Integer;
+  const Args: array of const; CfgID: Integer);
+begin
+  CreateResFmt(Ident, Args);
+  FCfgID := CfgID;
+end;
+
+constructor EsmxCfgError.CreateByComponent(ResStringRec: PResStringRec;
+  const Args: array of const; CfgID: Integer);
+begin
+  CreateResFmt(ResStringRec, Args);
+  FCfgID := CfgID;
+end;}
+
+function EsmxCfgError.GetCfgID: Integer;
+begin
+  if FComponent is TsmxBaseCfg then
+    Result := TsmxBaseCfg(FComponent).CfgID else
+    Result := 0;
+end;
 
 { TsmxComponent }
 
@@ -1127,6 +1239,240 @@ begin
   Result := Assigned(Intf)
     and SysUtils.Supports(Intf, IsmxRefPersistent, AIntf)
     and (AIntf.GetReference = Self);
+end;
+
+{ TsmxBaseCfg }
+
+destructor TsmxBaseCfg.Destroy;
+begin
+  FXMLDocIntf := nil;
+  SetSelectDataSet(nil);
+  SetModifyDataSet(mrDelete, nil);
+  SetModifyDataSet(mrInsert, nil);
+  SetModifyDataSet(mrUpdate, nil);
+  inherited Destroy;
+end;
+
+{procedure TsmxBaseCfg.Assign(Source: TPersistent);
+begin
+  if Source is TsmxBaseCfg then
+    CfgID := TsmxBaseCfg(Source).CfgID
+  else
+    inherited Assign(Source);
+end;}
+
+procedure TsmxBaseCfg.AssignTo(Dest: TPersistent);
+begin
+  if Dest is TsmxBaseCfg then
+    TsmxBaseCfg(Dest).CfgID := CfgID
+  else
+    inherited AssignTo(Dest);
+end;
+
+procedure TsmxBaseCfg.ClearCfg;
+begin
+end;
+
+procedure TsmxBaseCfg.ClearXML;
+begin
+  RootNode.ChildNodes.Clear;
+  RootNode.AttributeNodes.Clear;
+end;
+
+function TsmxBaseCfg.GetRootNode: IXMLNode;
+begin
+  XMLDoc.Active := True;
+  Result := XMLDoc.ChildNodes.FindNode(smxConsts.cRootNodeName);
+  if not Assigned(Result) then
+    Result := XMLDoc.AddChild(smxConsts.cRootNodeName);
+end;
+
+function TsmxBaseCfg.GetXMLDoc: IXMLDocument;
+begin
+  if not Assigned(FXMLDocIntf) then
+    FXMLDocIntf := smxFuncs.NewXML;
+  Result := FXMLDocIntf;
+end;
+
+function TsmxBaseCfg.GetXMLText: String;
+begin
+  try
+    XMLDoc.Active := True;
+    { TODO -oПоляков Александр : временно закомментировал }
+    //Write;
+    Result := smxFuncs.UnFormatXMLText(XMLDoc.XML.Text);
+  except
+    on E: Exception do
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'write', E.Message], Self);
+  end;
+end;
+
+procedure TsmxBaseCfg.SetXMLText(const Value: String);
+begin
+  try
+    XMLDoc.XML.Text := smxFuncs.FormatXMLText(Value);
+    XMLDoc.Active := True;
+    { TODO -oПоляков Александр : временно закомментировал }
+    //Read;
+  except
+    on E: Exception do
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'load', E.Message], Self);
+  end;
+end;
+
+procedure TsmxBaseCfg.Load;
+var
+  Value: Variant;
+begin
+  if not Assigned(FSelectDataSetIntf) or (FCfgID = 0) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'load'], Self);
+  if smxDBFuncs.GetValueByKey(FSelectDataSetIntf,
+      FCfgID, Value{, FSelectRequest.PerformanceMode}) then
+    XMLDoc.XML.Text := Value else
+    XMLDoc.XML.Text := '';
+  try
+    XMLDoc.Active := True;
+  except
+    on E: Exception do
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'load', E.Message], Self);
+  end;
+end;
+
+procedure TsmxBaseCfg.Save;
+var
+  //Request: IsmxDataSet;
+  //Performance: TsmxPerformanceMode;
+  DataSet: IsmxDataSet;
+  Key: Variant;
+begin
+  if ((FCfgID = 0) and not Assigned(FInsertDataSetIntf))
+      or ((FCfgID <> 0) and not Assigned(FUpdateDataSetIntf)) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'save'], Self);
+  try
+    XMLDoc.Active := True;
+  except
+    on E: Exception do
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'save', E.Message], Self);
+  end;
+  if FCfgID = 0 then
+  begin
+    DataSet := FInsertDataSetIntf;
+    Key := Variants.Null;
+    //Request := FSelectRequest.InsertDataSet; //ModifyRequests[mrInsert];
+    //Performance := FSelectRequest.InsertPerformance; //ModifyPerformances[mrInsert];
+  end else
+  begin
+    DataSet := FUpdateDataSetIntf;
+    Key := FCfgID;
+    //Request := FSelectRequest.UpdateDataSet; //ModifyRequests[mrUpdate];
+    //Performance := FSelectRequest.UpdatePerformance; //ModifyPerformances[mrUpdate];
+  end;
+  {if not Assigned(Request) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'save'], FCfgID);}
+  if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text{, Performance}) then
+    FCfgID := Key;
+end;
+
+procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    if Assigned(SelectDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = SelectDataSet.GetReference) then
+      SelectDataSet := nil;
+    if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
+      DeleteDataSet := nil else
+    if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
+      InsertDataSet := nil else
+    if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+        and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
+      UpdateDataSet := nil;
+  end;
+end;
+
+procedure TsmxBaseCfg.Read;
+begin
+  ClearCfg;
+end;
+
+procedure TsmxBaseCfg.Write;
+begin
+  ClearXML;
+end;
+
+{procedure TsmxBaseCfg.Receive;
+begin
+  Load;
+  Read;
+end;}
+
+{procedure TsmxBaseCfg.Return;
+begin
+  Write;
+  Save;
+end;}
+
+procedure TsmxBaseCfg.Remove;
+var
+  //DataSet: IsmxDataSet;
+  //Request: IsmxDataSet;
+  //Performance: TsmxPerformanceMode;
+  Key: Variant;
+begin
+  if not Assigned(FDeleteDataSetIntf) or (FCfgID = 0) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'remove'], Self);
+  //Request := FSelectRequest.DeleteDataSet; //ModifyRequests[mrDelete];
+  //Performance := FSelectRequest.DeletePerformance; //ModifyPerformances[mrDelete];
+  {if not Assigned(FDeleteDataSetIntf) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'remove'], FCfgID);}
+  Key := FCfgID;
+  if smxDBFuncs.SetValueByKey(FDeleteDataSetIntf, Key, Variants.Null{, Performance}) then
+  begin
+    FCfgID := 0;
+    XMLDoc.XML.Text := smxConsts.cXMLDocTextDef;
+  end;
+end;
+
+procedure TsmxBaseCfg.SetCfgID(Value: Integer);
+begin
+  FCfgID := Value;
+end;
+
+{procedure TsmxBaseCfg.SetSelectRequest(Value: TsmxCustomRequest);
+begin
+  FSelectRequest := Value;
+  if Assigned(FSelectRequest) then
+    FSelectRequest.FreeNotification(Self);
+end;}
+
+procedure TsmxBaseCfg.SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet);
+begin
+  case Index of
+    mrDelete: FDeleteDataSetIntf := Value;
+    mrInsert: FInsertDataSetIntf := Value;
+    mrUpdate: FUpdateDataSetIntf := Value;
+  end;
+  if Assigned(Value) then
+    Value.GetReference.FreeNotification(Self);
+end;
+
+procedure TsmxBaseCfg.SetSelectDataSet(const Value: IsmxDataSet);
+begin
+  FSelectDataSetIntf := Value;
+  if Assigned(FSelectDataSetIntf) then
+    FSelectDataSetIntf.GetReference.FreeNotification(Self);
 end;
 
 end.

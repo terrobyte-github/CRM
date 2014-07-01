@@ -8,12 +8,12 @@ uses
 
 function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
 function CfgIDToCellClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
-function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
+//function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCell;
-function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
+//function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0): TsmxCustomForm;
 function ExistsParent(ACell, ACellParent: TsmxBaseCell): Boolean;
@@ -37,8 +37,8 @@ function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPop
 implementation
 
 uses
-  Variants, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes, smxDBFuncs,
-  SysUtils;
+  Variants, smxCfgs, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes,
+  smxDBFuncs;
 
 function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
 var
@@ -97,7 +97,7 @@ begin
     end;
 end;
 
-function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
+(*function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
 var
   TypeCfg: TsmxTypeCfg;
   ForeignKey: Variant;
@@ -123,7 +123,7 @@ begin
         TypeCfg.Free;
       end;
     end;
-end;
+end;*)
 
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfg;
@@ -141,8 +141,8 @@ begin
     Result.CfgID := ACfgID;
     Result.SelectDataSet := DataSet;
   end else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCfgActionError,
-      ['nil', ACfgID, 'create'], ACfgID);
+    raise EsmxCfgError.CreateResFmt(@smxConsts.rsCfgActionError,
+      ['nil', ACfgID, 'create']);
 end;
 
 function NewCell(AOwner: TComponent; ACfgID: Integer;
@@ -171,11 +171,11 @@ begin
     //Result.FormManager := smxClassProcs.gFormManagerIntf;
     //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
-      ['nil', ACfgID, 'create'], ACfgID);
+    raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,
+      ['nil', ACfgID, 'create']);
 end;
 
-function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
+{function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
 var
   IntfClass: TsmxInterfacedPersistentClass;
   DataSet: IsmxDataSet;
@@ -189,7 +189,7 @@ begin
   else
     raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
       ['nil', ACfgID, 'create'], ACfgID);
-end;
+end;}
 
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0): TsmxCustomForm;
@@ -202,7 +202,7 @@ begin
     DataSet := smxClassProcs.gCfgSelectDataSet else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
-  if CellClass.InheritsFrom(TsmxCustomForm) then
+  if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomForm) then
   begin
     //IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
     Result := TsmxCustomFormClass(CellClass).Create(AOwner{, IntfClass}, AID);
@@ -227,8 +227,8 @@ begin
     Result.FormManager := smxClassProcs.gFormManagerIntf;
     //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
-      ['nil', ACfgID, 'create'], ACfgID);
+    raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,
+      ['nil', ACfgID, 'create']);
 end;
 
 function ExistsParent(ACell, ACellParent: TsmxBaseCell): Boolean;

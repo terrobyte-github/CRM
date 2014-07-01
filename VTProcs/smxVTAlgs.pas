@@ -11,7 +11,7 @@ implementation
 
 uses
   Classes, Controls, Windows, Messages, TypInfo, Variants, StdCtrls, SysUtils,
-  {VirtualTrees,} smxClasses, smxStdCtrls, smxFuncs, smxClassProcs,
+  {VirtualTrees,} smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxClassProcs,
   smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes, smxManagerIntf, smxConsts;
 
 type
