@@ -3,12 +3,12 @@ unit smxDBTypes;
 interface
 
 uses
-  smxDBIntf, smxTypes;
+  smxBaseIntf, smxDBIntf, smxTypes;
 
 type
-  TsmxFuncNewDatabase = function: IsmxDatabase;
+  TsmxFuncNewDatabase = function(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
 
-  TsmxFuncNewDataSet = function: IsmxDataSet;
+  TsmxFuncNewDataSet = function(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
 
   TsmxParamArray = array of IsmxParam;
 

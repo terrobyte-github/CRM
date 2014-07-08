@@ -11,8 +11,9 @@ implementation
 
 uses
   Classes, Controls, Windows, Messages, TypInfo, Variants, StdCtrls, SysUtils,
-  {VirtualTrees,} smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxClassProcs,
-  smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes, smxManagerIntf, smxConsts;
+  {VirtualTrees,} smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxProcs,
+  smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes,
+  smxManagerIntf, smxConsts;
 
 type
   TsmxObjectPage = (opProperties, opEvents, opTreeView);
@@ -245,7 +246,7 @@ function GetForm(ACfgID, AID: Integer): TsmxCustomForm;
 var
   FormIntf: IsmxForm;
 begin
-  FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(ACfgID, AID);
+  FormIntf := smxProcs.gFormManagerIntf.FindByComboID(ACfgID, AID);
   if Assigned(FormIntf) then
     Result := TsmxCustomForm(FormIntf.GetReference)
   else
@@ -359,7 +360,7 @@ begin
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormCellViewID);
-    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.FormManager := smxProcs.gFormManagerIntf;
     Result.CellParent := AFormParent;
     Result.CellLeft := 500;
     Result.CellTop := 100;
@@ -438,9 +439,9 @@ var
   Form: TsmxCustomForm;
 begin
   Result := nil;
-  for i := 0 to smxClassProcs.gFormManagerIntf.FormCount - 1 do
+  for i := 0 to smxProcs.gFormManagerIntf.FormCount - 1 do
   begin
-    Form := TsmxCustomForm(smxClassProcs.gFormManagerIntf.Forms[i].GetReference);
+    Form := TsmxCustomForm(smxProcs.gFormManagerIntf.Forms[i].GetReference);
     if (Form.ID = smxConsts.cFormSlaveListID)
         and (TsmxKit(Form.Tag) = AKit) then
     begin
@@ -512,7 +513,7 @@ begin
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormSlaveListID);
-    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.FormManager := smxProcs.gFormManagerIntf;
     Result.CellParent := AFormParent;
     Result.CellLeft := 300;
     Result.CellTop := 50;
@@ -1011,7 +1012,7 @@ begin
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormObjectPropsID);
-    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.FormManager := smxProcs.gFormManagerIntf;
     Result.CellParent := AFormParent;
     Result.CellLeft := 0;
     Result.CellTop := 50;
@@ -1143,7 +1144,7 @@ begin
         begin
           Obj := TsmxTypeCfg.Create(nil);
           TsmxTypeCfg(Obj).CfgID := CfgID;
-          TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gCfgSelectDataSet;
+          TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gCfgSelectDataSetIntf;
           TsmxTypeCfg(Obj).Load;
           TsmxTypeCfg(Obj).Read;
           RefreshFormObjectProps(Obj, cObjectInspectorPages);

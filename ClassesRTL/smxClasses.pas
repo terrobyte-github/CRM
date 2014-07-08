@@ -1884,8 +1884,8 @@ type
 implementation
 
 uses
-  DB, Variants, SysUtils, smxCfgs, smxConsts, smxDBTypes, smxFuncs, smxDBFuncs,
-  smxClassProcs, smxClassFuncs;
+  DB, Variants, SysUtils, smxCfgs, smxConsts, smxDBTypes, smxProcs, smxFuncs,
+  smxDBFuncs, smxClassProcs, smxClassFuncs;
 
 { EsmxCellError }
 
@@ -2608,7 +2608,7 @@ begin
       Cfg.CfgID := FCfgID;
       ////Cfg.SelectRequest := FSelectRequest;
       //Cfg.SelectRequest := smxClassProcs.gSelectRequest;
-      Cfg.SelectDataSet := smxClassProcs.gCfgSelectDataSet;
+      Cfg.SelectDataSet := smxClassProcs.gCfgSelectDataSetIntf;
       //Cfg.Receive;
       Cfg.Load;
     end;
@@ -2969,14 +2969,14 @@ procedure TsmxBaseCell.SetImageListName(const Value: String);
 var
   i: Integer;
 begin
-  if Assigned(smxClassProcs.gImageListManagerIntf) and (FImageListName <> '') then
+  if Assigned(smxProcs.gImageListManagerIntf) and (FImageListName <> '') then
     ImageList := nil;
   FImageListName := Value;
-  if Assigned(smxClassProcs.gImageListManagerIntf) and (FImageListName <> '') then
+  if Assigned(smxProcs.gImageListManagerIntf) and (FImageListName <> '') then
   begin
-    i := smxClassProcs.gImageListManagerIntf.AddImageList(FImageListName);
+    i := smxProcs.gImageListManagerIntf.AddImageList(FImageListName);
     if i <> -1 then
-      ImageList := smxClassProcs.gImageListManagerIntf.ImageLists[i];
+      ImageList := smxProcs.gImageListManagerIntf.ImageLists[i];
   end;
 end;
 
@@ -3036,8 +3036,8 @@ begin
     if FIsRecieveCfg then
     begin
       Cfg.CfgID := FCfgID;
-      Cfg.InsertDataSet := smxClassProcs.gCfgInsertDataSet;
-      Cfg.UpdateDataSet := smxClassProcs.gCfgUpdateDataSet;
+      Cfg.InsertDataSet := smxClassProcs.gCfgInsertDataSetIntf;
+      Cfg.UpdateDataSet := smxClassProcs.gCfgUpdateDataSetIntf;
       Cfg.Save;
     end;
     //SetCellProps;
@@ -5607,7 +5607,7 @@ begin
     FDataSetIntf := GetDataSetClass.Create(nil, Self as IsmxRefComponent) as IsmxDataSet;
   Result := FDataSetIntf;}
   if not Assigned(FDataSet) then
-    FDataSet := GetDataSetClass.Create(nil, Self as IsmxRefComponent);
+    FDataSet := GetDataSetClass.Create(nil, Self as IsmxBaseInterface);
   Result := FDataSet as IsmxDataSet;  
 end;
 
@@ -5745,12 +5745,14 @@ procedure TsmxCustomRequest.SetDatabaseName(const Value: String);
 var
   Connection: IsmxConnection;
 begin
-  if Assigned(smxClassProcs.gDatabaseManagerIntf) and (FDatabaseName <> '') then
+  if Assigned(smxProcs.gDatabaseManagerIntf) and (FDatabaseName <> '') then
     Database := nil;
   FDatabaseName := Value;
-  if Assigned(smxClassProcs.gDatabaseManagerIntf) and (FDatabaseName <> '') then
+  if Assigned(smxProcs.gDatabaseManagerIntf) and (FDatabaseName <> '') then
+    //Database := smxProcs.gDatabaseManagerIntf.FindByName(FDatabaseName);
   begin
-    Connection := smxClassProcs.gDatabaseManagerIntf.FindByName(FDatabaseName);
+    Connection := smxProcs.gDatabaseManagerIntf.FindByName(FDatabaseName);
+    //if Assigned(Connection) and SysUtils.Supports(IInterface(Connection.GetInternalRef), IsmxDatabase) then
     if Assigned(Connection) then
       Database := Connection.Database;
   end;

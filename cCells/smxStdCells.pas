@@ -1218,7 +1218,7 @@ implementation
 uses
   SysUtils, Variants, ToolWin, Messages, {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,} smxFuncs,
-  smxDBFuncs, smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs,
+  smxProcs, smxDBFuncs, smxClassFuncs, {smxLibFuncs,} smxConsts, smxClassProcs,
   smxBaseIntf;
 
 type
@@ -4079,8 +4079,8 @@ begin
       case DataSet.Params[i].DataLocation of
         dlStorageParam:
         begin
-          if Assigned(smxClassProcs.gStorageManagerIntf) then
-            DataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
+          if Assigned(smxProcs.gStorageManagerIntf) then
+            DataSet.Params[i].Value := smxProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
         end;
         dlParentCellParam:
         begin

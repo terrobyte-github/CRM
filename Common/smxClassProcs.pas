@@ -21,16 +21,12 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
 
 var
   //gSelectRequest: TsmxCustomRequest = nil;
-  gCfgSelectDataSet: IsmxDataSet = nil;
-  gCfgDeleteDataSet: IsmxDataSet = nil;
-  gCfgInsertDataSet: IsmxDataSet = nil;
-  gCfgUpdateDataSet: IsmxDataSet = nil;
-  gStorageManagerIntf: IsmxStorageManager = nil;
-  gLibraryManagerIntf: IsmxLibraryManager = nil;
-  gDatabaseManagerIntf: IsmxDatabaseManager = nil;
-  gFormManagerIntf: IsmxFormManager = nil;
-  gImageListManagerIntf: IsmxImageListManager = nil;
-
+  gMainDatabaseIntf: IsmxDatabase = nil;
+  gCfgSelectDataSetIntf: IsmxDataSet = nil;
+  gCfgDeleteDataSetIntf: IsmxDataSet = nil;
+  gCfgInsertDataSetIntf: IsmxDataSet = nil;
+  gCfgUpdateDataSetIntf: IsmxDataSet = nil;
+  
 implementation
 
 uses

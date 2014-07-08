@@ -26,7 +26,8 @@ implementation
 
 uses
   Classes, Controls, SysUtils, TypInfo, Variants, smxStdCtrls, smxClasses,
-  smxFuncs, smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxManagerIntf;
+  smxFuncs, smxProcs, smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf,
+  smxManagerIntf;
 
 //var
   //Cfg: TsmxBaseCfg = nil;
@@ -148,17 +149,19 @@ begin
     ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
     if CfgID <> 0 then
     begin
-      FormIntf := smxClassProcs.gFormManagerIntf.FindByComboID(CfgID, ID);
-      if not Assigned(FormIntf) then
+      FormIntf := smxProcs.gFormManagerIntf.FindByComboID(CfgID, ID);
+      if FormIntf.GetReference is TsmxCustomForm then
+        Form := TsmxCustomForm(FormIntf.GetReference) else
+        Form := nil;
+      if not Assigned(Form) then
       begin
         AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
         Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
         Form.CellParent := AccessoryForm;
         Form.Initialize;
         Form.IntfID := AccessoryForm.IntfID;
-        FormIntf := Form as IsmxForm;
       end;
-      FormIntf.Show;
+      Form.Show;
     end;
   end;
 end;
@@ -534,7 +537,7 @@ begin
     end;
 end;*)
 
-procedure GetTypeKindNameGrid(Sender: TsmxComponent);
+(*procedure GetTypeKindNameGrid(Sender: TsmxComponent);
 var
   Column: TsmxCustomColumn;
   CfgID: Integer;
@@ -571,7 +574,7 @@ begin
         end;}
       end;
     end;
-end;
+end;*)
 
 procedure CloseOkForm(Sender: TsmxComponent);
 var
@@ -632,6 +635,7 @@ begin
     begin
       Exit;
       Column := TsmxCustomColumn(TsmxCustomAlgorithm(Sender).CellEvent);
+      Cfg := nil;
       if Assigned(Column.CellOwner) and Assigned(Cfg) then
       begin
         PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);

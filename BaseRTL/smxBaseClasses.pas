@@ -35,6 +35,7 @@ type
 
   TsmxComponent = class(TComponent, IsmxBaseInterface, IsmxRefComponent)
   protected
+    function GetController: IsmxBaseInterface; virtual;
     function GetDescription: String; virtual;
     function GetInternalRef: Pointer; virtual;
     function GetReference: TComponent;
@@ -53,11 +54,12 @@ type
   TsmxInterfacedComponent = class(TsmxComponent, IInterface)
   private
     FController: Pointer;
-    function GetController: IsmxBaseInterface;//IsmxRefComponent;
+    //function GetController: IsmxBaseInterface;//IsmxRefComponent;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
+    function GetController: IsmxBaseInterface; override;
   public
     constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
     procedure AfterConstruction; override;
@@ -72,16 +74,16 @@ type
 
   { TsmxInterfacedObject }
 
-  TsmxInterfacedObject = class(TInterfacedObject, IsmxBaseInterface)
+  {TsmxInterfacedObject = class(TInterfacedObject, IsmxBaseInterface)
   protected
     function GetDescription: String; virtual;
     function GetVersion: String; virtual;
   public
     property Description: String read GetDescription;
     property Version: String read GetVersion;
-  end;
+  end;}
 
-  TsmxInterfacedObjectClass = class of TsmxInterfacedObject;
+  //TsmxInterfacedObjectClass = class of TsmxInterfacedObject;
 
   { IsmxRefInterface }
 
@@ -104,6 +106,7 @@ type
     //FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
+    function GetController: IsmxBaseInterface; virtual;
     function GetDescription: String; virtual;
     function GetInternalRef: Pointer; virtual;
     function GetReference: TPersistent;
@@ -132,11 +135,12 @@ type
   private
     //FName: String;
     FController: Pointer;
-    function GetController: IsmxBaseInterface;//IsmxRefComponent;
+    //function GetController: IsmxBaseInterface;//IsmxRefComponent;
   protected
     FRefCount: Integer;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
+    function GetController: IsmxBaseInterface; override;
     //function GetDescription: String; virtual;
     //function GetInternalRef: Pointer; virtual;
     //function GetReference: TPersistent;
@@ -500,6 +504,11 @@ end;
 
 { TsmxComponent }
 
+function TsmxComponent.GetController: IsmxBaseInterface;
+begin
+  Result := nil;
+end;
+
 function TsmxComponent.GetDescription: String;
 begin
   Result := ClassName;
@@ -580,7 +589,7 @@ end;
 
 { TsmxInterfacedObject }
 
-function TsmxInterfacedObject.GetDescription: String;
+{function TsmxInterfacedObject.GetDescription: String;
 begin
   Result := ClassName;
 end;
@@ -588,7 +597,7 @@ end;
 function TsmxInterfacedObject.GetVersion: String;
 begin
   Result := cVersion;
-end;
+end;}
 
 { TsmxInterfacedPersistent }
 
@@ -1203,6 +1212,11 @@ end;
 function TsmxPersistent._Release: Integer;
 begin
   Result := -1;
+end;
+
+function TsmxPersistent.GetController: IsmxBaseInterface;
+begin
+  Result := nil;
 end;
 
 function TsmxPersistent.GetDescription: String;

@@ -35,6 +35,7 @@ var
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
   gMainConnection: TsmxConnection = nil;
+  //gMainDatabase: TsmxCustomDatabase = nil;
   gMainForm: TsmxCustomForm = nil;
   gCfgSelectRequest: TsmxCustomRequest = nil;
   gCfgDeleteRequest: TsmxCustomRequest = nil;
@@ -46,30 +47,30 @@ procedure CreateGlobalObjects;
 begin
   gCallBackManager := TsmxCallBackManager.Create(nil);
   gStorageManager := TsmxStorageManager.Create(nil);
-  smxClassProcs.gStorageManagerIntf := gStorageManager as IsmxStorageManager;
+  smxProcs.gStorageManagerIntf := gStorageManager as IsmxStorageManager;
   gLibraryManager := TsmxLibraryManager.Create(nil);
-  smxClassProcs.gLibraryManagerIntf := gLibraryManager as IsmxLibraryManager;
+  smxProcs.gLibraryManagerIntf := gLibraryManager as IsmxLibraryManager;
   gDatabaseManager := TsmxDatabaseManager.Create(nil);
-  smxClassProcs.gDatabaseManagerIntf := gDatabaseManager as IsmxDatabaseManager;
+  smxProcs.gDatabaseManagerIntf := gDatabaseManager as IsmxDatabaseManager;
   gFormManager := TsmxFormManager.Create(nil);
-  smxClassProcs.gFormManagerIntf := gFormManager as IsmxFormManager;
+  smxProcs.gFormManagerIntf := gFormManager as IsmxFormManager;
   gImageListManager := TsmxImageListManager.Create(nil);
-  smxClassProcs.gImageListManagerIntf := gImageListManager as IsmxImageListManager;
-  gMainConnection := TsmxConnection.Create(nil);
+  smxProcs.gImageListManagerIntf := gImageListManager as IsmxImageListManager;
+  //gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyGlobalObjects;
 begin
-  gMainConnection.Free;
-  smxClassProcs.gImageListManagerIntf := nil;
+  //gMainConnection.Free;
+  smxProcs.gImageListManagerIntf := nil;
   gImageListManager.Free;
-  smxClassProcs.gFormManagerIntf := nil;
+  smxProcs.gFormManagerIntf := nil;
   gFormManager.Free;
-  smxClassProcs.gDatabaseManagerIntf := nil;
+  smxProcs.gDatabaseManagerIntf := nil;
   gDatabaseManager.Free;
-  smxClassProcs.gLibraryManagerIntf := nil;
+  smxProcs.gLibraryManagerIntf := nil;
   gLibraryManager.Free;
-  smxClassProcs.gStorageManagerIntf := nil;
+  smxProcs.gStorageManagerIntf := nil;
   gStorageManager.Free;
   gCallBackManager.Free;
 end;
@@ -253,16 +254,17 @@ begin
     //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
     //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
   end;
+  gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyMainObjects;
 begin
   if Assigned(gCfgSelectRequest) then
   begin
-    smxClassProcs.gCfgSelectDataSet := nil;
-    smxClassProcs.gCfgDeleteDataSet := nil;
-    smxClassProcs.gCfgInsertDataSet := nil;
-    smxClassProcs.gCfgUpdateDataSet := nil;
+    smxClassProcs.gCfgSelectDataSetIntf := nil;
+    smxClassProcs.gCfgDeleteDataSetIntf := nil;
+    smxClassProcs.gCfgInsertDataSetIntf := nil;
+    smxClassProcs.gCfgUpdateDataSetIntf := nil;
     if Assigned(gCfgDeleteRequest) then
       SysUtils.FreeAndNil(gCfgDeleteRequest);
     if Assigned(gCfgInsertRequest) then
@@ -271,10 +273,14 @@ begin
       SysUtils.FreeAndNil(gCfgUpdateRequest);
     SysUtils.FreeAndNil(gCfgSelectRequest);
   end;
+  smxClassProcs.gMainDatabaseIntf := nil;
+  gMainConnection.Free;
 end;
 
 procedure AssignMainObjects;
 begin
+  //if Assigned(gMainConnection) then
+    //gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
   if Assigned(gCfgSelectRequest) then
   begin
     _TsmxBaseCell(gCfgSelectRequest).Cfg.XMLText :=
@@ -285,22 +291,22 @@ begin
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
     //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
-    gCfgSelectRequest.Database := gMainConnection.Database;
+    gCfgSelectRequest.Database := smxClassProcs.gMainDatabaseIntf;
     gCfgSelectRequest.Initialize;
     gCfgSelectRequest.Prepare;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
-    smxClassProcs.gCfgSelectDataSet := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
+    smxClassProcs.gCfgSelectDataSetIntf := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
 
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID], 0) <> 0 then
     begin
       gCfgDeleteRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID],
-        smxClassProcs.gCfgSelectDataSet));
+        smxClassProcs.gCfgSelectDataSetIntf));
       gCfgDeleteRequest.Initialize;
       gCfgDeleteRequest.Prepare;
-      smxClassProcs.gCfgDeleteDataSet := gCfgDeleteRequest as IsmxDataSet;
+      smxClassProcs.gCfgDeleteDataSetIntf := gCfgDeleteRequest as IsmxDataSet;
     end;
 
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID], 0) <> 0 then
@@ -308,10 +314,10 @@ begin
       gCfgInsertRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID],
-        smxClassProcs.gCfgSelectDataSet));
+        smxClassProcs.gCfgSelectDataSetIntf));
       gCfgInsertRequest.Initialize;
       gCfgInsertRequest.Prepare;
-      smxClassProcs.gCfgInsertDataSet := gCfgInsertRequest as IsmxDataSet;
+      smxClassProcs.gCfgInsertDataSetIntf := gCfgInsertRequest as IsmxDataSet;
     end;
 
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID], 0) <> 0 then
@@ -319,10 +325,10 @@ begin
       gCfgUpdateRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID],
-        smxClassProcs.gCfgSelectDataSet));
+        smxClassProcs.gCfgSelectDataSetIntf));
       gCfgUpdateRequest.Initialize;
       gCfgUpdateRequest.Prepare;
-      smxClassProcs.gCfgUpdateDataSet := gCfgUpdateRequest as IsmxDataSet;
+      smxClassProcs.gCfgUpdateDataSetIntf := gCfgUpdateRequest as IsmxDataSet;
     end;
   end;
 end;
@@ -517,10 +523,17 @@ function LogIn: Boolean;
           gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
           StrUtils.IfThen(Connection.IsUseUser, Connection.Password, Password),
           [rfReplaceAll, rfIgnoreCase]);
-      gMainConnection.Database := Database;
-      gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
-      gMainConnection.Connect;
-      Result := gMainConnection.Connected;
+      //gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+      //gMainConnection.Connect;
+      //Result := gMainConnection.Connected;
+      Database.Connected := True;
+      if Database.Connected then
+      begin
+        gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+        gMainConnection.Database := Database;
+        smxClassProcs.gMainDatabaseIntf := Database;
+        Result := True;
+      end;
     end;
   end;
 
@@ -692,12 +705,13 @@ end;
 
 procedure LogOut;
 begin
-  if gMainConnection.Connected then
-  begin
-    if gMainConnection.Database.InTransaction then
-      gMainConnection.Database.RollbackTransaction;
-    gMainConnection.Disconnect;
-  end;
+  if Assigned(gMainConnection.Database) then
+    if gMainConnection.Database.Connected then
+    begin
+      if gMainConnection.Database.InTransaction then
+        gMainConnection.Database.RollbackTransaction;
+      gMainConnection.Database.Connected := False;
+    end;
 end;
 
 function Start: Boolean;

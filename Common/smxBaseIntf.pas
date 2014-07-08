@@ -15,8 +15,9 @@ type
 
   IsmxBaseInterface = interface(IInterface)
     ['{6785BD02-C530-4E8D-9001-A814F06B5045}']
-    function GetVersion: String;
+    function GetController: IsmxBaseInterface;
     function GetDescription: String;
+    function GetVersion: String;
 
     property Description: String read GetDescription;
     property Version: String read GetVersion;
@@ -27,7 +28,7 @@ type
   IsmxRefComponent = interface(IsmxBaseInterface)
     ['{48732C0C-F577-4061-9B97-926BA4B715DA}']
     function GetInternalRef: Pointer;
-    function GetReference: TComponent; 
+    function GetReference: TComponent;
   end;
 
   { IsmxRefPersistent }

@@ -355,9 +355,9 @@ type
   end;
 
 function DatabaseCLSID: TGUID;
-function NewDatabase: IsmxDatabase;
-function NewQuery: IsmxDataSet;
-function NewProcedure: IsmxDataSet;
+function NewDatabase(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
+function NewQuery(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
+function NewProcedure(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
 
 implementation
 
@@ -378,19 +378,19 @@ begin
   Result := CLSID_smxCoBDEDatabase;
 end;
 
-function NewDatabase: IsmxDatabase;
+function NewDatabase(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create(nil) as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil, Controller) as IsmxDatabase;
 end;
 
-function NewQuery: IsmxDataSet;
+function NewQuery(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
 begin
-  Result := TsmxBDEQuery.Create(nil) as IsmxDataSet;
+  Result := TsmxBDEQuery.Create(nil, Controller) as IsmxDataSet;
 end;
 
-function NewProcedure: IsmxDataSet;
+function NewProcedure(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
 begin
-  Result := TsmxBDEStoredProc.Create(nil) as IsmxDataSet;
+  Result := TsmxBDEStoredProc.Create(nil, Controller) as IsmxDataSet;
 end;
 
 { TsmxBDEDatabase }

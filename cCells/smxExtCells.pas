@@ -570,7 +570,7 @@ implementation
 
 uses
   Variants, Forms, SysUtils, TypInfo, smxBaseTypes, smxDBTypes, smxFuncs,
-  smxClassFuncs, smxClassProcs;
+  smxProcs, smxClassFuncs, smxClassProcs;
 
 //type
   { _TsmxBaseCell }
@@ -628,10 +628,10 @@ var
   ProcExecute: TsmxProcExecuteEvent;
 begin
   //if Assigned(LibraryManager) then
-  if Assigned(smxClassProcs.gLibraryManagerIntf) then
+  if Assigned(smxProcs.gLibraryManagerIntf) then
   begin
     //ProcExecute := LibraryManager.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
-    ProcExecute := smxClassProcs.gLibraryManagerIntf.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
+    ProcExecute := smxProcs.gLibraryManagerIntf.GetProcedure(FAlgorithmLibrary, FAlgorithmProcName);
     if Assigned(ProcExecute) then
     begin
       if Sender is TsmxBaseCell then

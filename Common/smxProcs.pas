@@ -3,7 +3,7 @@ unit smxProcs;
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxBaseClasses, smxTypes;
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxTypes, smxManagerIntf;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
@@ -15,6 +15,14 @@ procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
 procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);}
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
+
+var
+  gStorageManagerIntf: IsmxStorageManager = nil;
+  gLibraryManagerIntf: IsmxLibraryManager = nil;
+  gDatabaseManagerIntf: IsmxDatabaseManager = nil;
+  gFormManagerIntf: IsmxFormManager = nil;
+  gImageListManagerIntf: IsmxImageListManager = nil;
+  gClassManagerIntf: IsmxClassManager = nil;
 
 implementation
 

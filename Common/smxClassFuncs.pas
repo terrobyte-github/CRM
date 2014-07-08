@@ -48,7 +48,7 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
+    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
     if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
@@ -77,7 +77,7 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
+    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
     if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
@@ -132,7 +132,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
+    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CfgClass := CfgIDToCfgClass(ACfgID, DataSet);
   if Assigned(CfgClass) then
@@ -153,7 +153,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
+    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) then
@@ -199,7 +199,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
+    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomForm) then
@@ -224,7 +224,7 @@ begin
     //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
     //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
     //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
-    Result.FormManager := smxClassProcs.gFormManagerIntf;
+    Result.FormManager := smxProcs.gFormManagerIntf;
     //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,

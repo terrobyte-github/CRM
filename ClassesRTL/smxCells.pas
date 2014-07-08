@@ -162,8 +162,8 @@ implementation
 uses
   {SysUtils,} {Variants,} {ToolWin,} {Messages,} {smxCommonStorage, smxLibManager,
   smxDBManager, smxFormManager, smxGlobalVariables, smxDBConnection,}{ smxFuncs,}
-  {smxDBFuncs,} smxClassFuncs, {smxLibFuncs,} {smxConsts,} smxClassProcs,
-  smxBaseIntf;
+  {smxDBFuncs,} smxProcs, smxClassFuncs, {smxLibFuncs,} {smxConsts,}
+  smxClassProcs, smxBaseIntf;
 
 { TsmxAction }
 
@@ -412,8 +412,8 @@ begin
         end;
         dlStorageParam:
         begin
-          if Assigned(smxClassProcs.gStorageManagerIntf) then
-            AlgorithmParams[i].ParamValue := smxClassProcs.gStorageManagerIntf.Values[AlgorithmParams[i].ParamName];
+          if Assigned(smxProcs.gStorageManagerIntf) then
+            AlgorithmParams[i].ParamValue := smxProcs.gStorageManagerIntf.Values[AlgorithmParams[i].ParamName];
         end;
         dlParentCellParam:
         begin
@@ -926,8 +926,8 @@ begin
         end;
         dlStorageParam:
         begin
-          if Assigned(smxClassProcs.gStorageManagerIntf) then
-            CurDataSet.Params[i].Value := smxClassProcs.gStorageManagerIntf.Values[CurDataSet.Params[i].ParamName];
+          if Assigned(smxProcs.gStorageManagerIntf) then
+            CurDataSet.Params[i].Value := smxProcs.gStorageManagerIntf.Values[CurDataSet.Params[i].ParamName];
         end;
         dlParentCellParam:
         begin

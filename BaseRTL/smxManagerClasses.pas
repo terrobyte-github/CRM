@@ -142,6 +142,7 @@ type
     function GetLibPath: String;
     function GetLibrary(Index: Integer): THandle;
     function GetLibraryCount: Integer;
+    function IndexOf(LibHandle: THandle): Integer;
     procedure SetCallBackManager(const Value: IsmxCallBackManager);
     procedure SetCheckHandle(Value: LongWord);
     procedure SetIsCheckComp(Value: Boolean);
@@ -153,12 +154,13 @@ type
     destructor Destroy; override;
     function AddLibrary(const LibName: String): Integer;
     procedure DeleteLibrary(const LibName: String);
+    function FindByName(const LibName: String): THandle;
     function GetLibraryInfo(LibHandle: THandle; var LibInfo: TsmxLibInfo): Boolean; overload;
     function GetLibraryInfo(const LibName: String; var LibInfo: TsmxLibInfo): Boolean; overload;
     function GetProcedure(LibHandle: THandle; const ProcName: String): Pointer; overload;
     function GetProcedure(const LibName, ProcName: String): Pointer; overload;
-    function IndexOfName(const LibName: String): Integer;
-    function IndexOfHandle(LibHandle: THandle): Integer;
+    //function IndexOfName(const LibName: String): Integer;
+    //function IndexOfHandle(LibHandle: THandle): Integer;
     function InsertLibrary(LibHandle: THandle): Integer;
     procedure RemoveLibrary(LibHandle: THandle);
 
@@ -186,8 +188,8 @@ type
   public
     destructor Destroy; override;
     function FindByName(const DatabaseName: String): IsmxConnection;
-    procedure InsertConnection(Connection: IsmxConnection);
-    procedure RemoveConnection(Connection: IsmxConnection);
+    procedure InsertConnection(const Connection: IsmxConnection);
+    procedure RemoveConnection(const Connection: IsmxConnection);
 
     property ConnectionCount: Integer read GetConnectionCount;
     property Connections[Index: Integer]: IsmxConnection read GetConnection; default;
@@ -208,8 +210,8 @@ type
   public
     destructor Destroy; override;
     function FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxForm;
-    procedure InsertForm(Form: IsmxForm);
-    procedure RemoveForm(Form: IsmxForm);
+    procedure InsertForm(const Form: IsmxForm);
+    procedure RemoveForm(const Form: IsmxForm);
 
     property FormCount: Integer read GetFormCount;
     property Forms[Index: Integer]: IsmxForm read GetForm; default;
@@ -232,6 +234,7 @@ type
     function GetImageList(Index: Integer): TCustomImageList;
     function GetLibraryManager: IsmxLibraryManager;
     //function GetNewResourceFuncName: String;
+    function IndexOf(ImageList: TCustomImageList): Integer;
     procedure SetDelimiter(const Value: String);
     procedure SetLibraryManager(const Value: IsmxLibraryManager);
     //procedure SetNewResourceFuncName(const Value: String);
@@ -242,6 +245,8 @@ type
     function AddImageList(const ImageListName: String): Integer;
     procedure DeleteImageList(const ImageListName: String);
     function FindByName(const ImageListName: String): TCustomImageList;
+    procedure InsertImageList(ImageList: TCustomImageList);
+    procedure RemoveImageList(ImageList: TCustomImageList);
 
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
@@ -505,9 +510,10 @@ end;
 function TsmxLibraryManager.AddLibrary(const LibName: String): Integer;
 var
   Handle: THandle;
+  Item: TsmxParam;
 begin
-  Result := IndexOfName(LibName);
-  if (Result = -1) and (LibName <> '') then
+  Item := LibraryList.FindByName(LibName);
+  if not Assigned(Item) and (LibName <> '') then
   begin
     Handle := Windows.LoadLibrary(PChar(LibPath + LibName));
     if Handle > Windows.HINSTANCE_ERROR then
@@ -515,27 +521,30 @@ begin
       if CheckLibraryComp(Handle) then
       begin
         PrepareLibrary(Handle);
-        with LibraryList.Add do
+        Item := LibraryList.Add;
+        with Item do
         begin
           ParamName := LibName;
           ParamValue := Handle;
-          Result := ItemIndex;
         end;
       end else
         Windows.FreeLibrary(Handle);
     end;
   end;
+  if Assigned(Item) then
+    Result := Item.ItemIndex else
+    Result := -1;
 end;
 
 procedure TsmxLibraryManager.DeleteLibrary(const LibName: String);
 var
-  Index: Integer;
+  Item: TsmxParam;
 begin
-  Index := IndexOfName(LibName);
-  if Index <> -1 then
+  Item := LibraryList.FindByName(LibName);
+  if Assigned(Item) then
   begin
-    Windows.FreeLibrary(THandle(LibraryList[Index].ParamValue));
-    LibraryList.Delete(Index);
+    Windows.FreeLibrary(THandle(LibraryList[Item.ItemIndex].ParamValue));
+    LibraryList.Delete(Item.ItemIndex);
   end;
 end;
 
@@ -734,7 +743,7 @@ begin
   end;
 end;
 
-function TsmxLibraryManager.IndexOfHandle(LibHandle: THandle): Integer;
+function TsmxLibraryManager.IndexOf(LibHandle: THandle): Integer;
 var
   i: Integer;
 begin
@@ -742,12 +751,12 @@ begin
   for i := 0 to LibraryList.Count - 1 do
     if THandle(LibraryList[i].ParamValue) = LibHandle then
     begin
-      Result := LibraryList[i].ItemIndex;
+      Result := i;
       Break;
     end;
 end;
 
-function TsmxLibraryManager.IndexOfName(const LibName: String): Integer;
+{function TsmxLibraryManager.IndexOfName(const LibName: String): Integer;
 var
   i: Integer;
 begin
@@ -758,15 +767,26 @@ begin
       Result := LibraryList[i].ItemIndex;
       Break;
     end;
+end;}
+
+function TsmxLibraryManager.FindByName(const LibName: String): THandle;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 0 to LibraryList.Count - 1 do
+    if SysUtils.AnsiCompareText(LibraryList[i].ParamName, LibName) = 0 then
+    begin
+      Result := THandle(LibraryList[i].ParamValue);
+      Break;
+    end;
 end;
 
 function TsmxLibraryManager.InsertLibrary(LibHandle: THandle): Integer;
 begin
-  Result := IndexOfHandle(LibHandle);
+  Result := IndexOf(LibHandle);
   if Result = -1 then
-  begin
     if LibHandle > Windows.HINSTANCE_ERROR then
-    begin
       if CheckLibraryComp(LibHandle) then
       begin
         PrepareLibrary(LibHandle);
@@ -777,15 +797,13 @@ begin
           Result := ItemIndex;
         end;
       end;
-    end;
-  end;
 end;
 
 procedure TsmxLibraryManager.RemoveLibrary(LibHandle: THandle);
 var
   Index: Integer;
 begin
-  Index := IndexOfHandle(LibHandle);
+  Index := IndexOf(LibHandle);
   if Index <> -1 then
     LibraryList.Delete(Index);
 end;
@@ -825,7 +843,11 @@ var
   i: Integer;
 begin
   for i := ConnectionList.Count - 1 downto 0 do
-    (ConnectionList[i] as IsmxConnection).GetReference.Free; //FreeConnection;
+    //(DatabaseList[i] as IsmxDatabase).
+    //if (ConnectionList[i] as IsmxConnection).GetReference is TsmxCustomConnection then
+      (ConnectionList[i] as IsmxConnection).GetReference.Free; //FreeConnection;
+    //else
+      //(ConnectionList[i] as IsmxConnection).DatabaseManager := nil;
 end;
 
 function TsmxDatabaseManager.FindByName(const DatabaseName: String): IsmxConnection;
@@ -834,11 +856,12 @@ var
 begin
   Result := nil;
   for i := 0 to ConnectionList.Count - 1 do
-    if SysUtils.AnsiCompareText((ConnectionList[i] as IsmxConnection).Database.DatabaseName, DatabaseName) = 0 then
-    begin
-      Result := ConnectionList[i] as IsmxConnection;
-      Break;
-    end;
+    if Assigned((ConnectionList[i] as IsmxConnection).Database) then
+      if SysUtils.AnsiCompareText((ConnectionList[i] as IsmxConnection).Database.DatabaseName, DatabaseName) = 0 then
+      begin
+        Result := ConnectionList[i] as IsmxConnection;
+        Break;
+      end;
 end;
 
 function TsmxDatabaseManager.GetConnection(Index: Integer): IsmxConnection;
@@ -858,16 +881,16 @@ begin
   Result := FConnectionList;
 end;
 
-procedure TsmxDatabaseManager.InsertConnection(Connection: IsmxConnection);
+procedure TsmxDatabaseManager.InsertConnection(const Connection: IsmxConnection);
 begin
   if ConnectionList.IndexOf(Connection) = -1 then
     ConnectionList.Add(Connection);
 end;
 
-procedure TsmxDatabaseManager.RemoveConnection(Connection: IsmxConnection);
+procedure TsmxDatabaseManager.RemoveConnection(const Connection: IsmxConnection);
 begin
   if ConnectionList.IndexOf(Connection) <> -1 then
-    ConnectionList.Remove(Connection)
+    ConnectionList.Remove(Connection);
 end;
 
 { TsmxFormManager }
@@ -920,13 +943,13 @@ begin
   Result := FFormList;
 end;
 
-procedure TsmxFormManager.InsertForm(Form: IsmxForm);
+procedure TsmxFormManager.InsertForm(const Form: IsmxForm);
 begin
   if FormList.IndexOf(Form) = -1 then
     FormList.Add(Form);
 end;
 
-procedure TsmxFormManager.RemoveForm(Form: IsmxForm);
+procedure TsmxFormManager.RemoveForm(const Form: IsmxForm);
 begin
   if FormList.IndexOf(Form) <> -1 then
     FormList.Remove(Form);
@@ -990,12 +1013,15 @@ end;
 
 function TsmxImageListManager.FindByName(const ImageListName: String): TCustomImageList;
 var
-  Item: TsmxParam;
+  i: Integer;
 begin
-  Item := ImageListRegister.FindByName(ImageListName);
-  if Assigned(Item) then
-    Result := TCustomImageList(Integer(Item.ParamValue)) else
-    Result := nil;
+  Result := nil;
+  for i := 0 to ImageListRegister.Count - 1 do
+    if SysUtils.AnsiCompareText(ImageListRegister[i].ParamName, ImageListName) = 0 then
+    begin
+      Result := TCustomImageList(Integer(ImageListRegister[i].ParamValue));
+      Break;
+    end;
 end;
 
 function TsmxImageListManager.GetDelimiter: String;
@@ -1045,38 +1071,84 @@ begin
 
 end;}
 
+function TsmxImageListManager.IndexOf(ImageList: TCustomImageList): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to ImageListCount - 1 do
+    if ImageLists[i] = ImageList then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
+procedure TsmxImageListManager.InsertImageList(ImageList: TCustomImageList);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(ImageList);
+  if Index = -1 then
+    if Assigned(ImageList) then
+      with ImageListRegister.Add do
+      begin
+        ParamName := ImageList.Name;
+        ParamValue := Integer(ImageList);
+      end;
+end;
+
+procedure TsmxImageListManager.RemoveImageList(ImageList: TCustomImageList);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(ImageList);
+  if Index <> -1 then
+    ImageListRegister.Delete(Index);
+end;
+
 function TsmxImageListManager.LoadImageList(const ImageListName: String): TCustomImageList;
 
-  procedure ParseImageListName(var LibName, ResName: String);
+  procedure ParseImageListName(var ResName, LibName: String);
   var
     i: Integer;
   begin
-    LibName := '';
-    ResName := '';
     i := Pos(FDelimiter, ImageListName);
     if i > 0 then
     begin
-      LibName := Copy(ImageListName, 1, i - 1);
-      ResName := Copy(ImageListName, i + Length(FDelimiter), MaxInt);
+      ResName := Copy(ImageListName, 1, i - 1);
+      LibName := Copy(ImageListName, i + Length(FDelimiter), MaxInt);
+    end else
+    begin
+      ResName := ImageListName;
+      LibName := '';
     end;
   end;
 
 var
-  LibName, ResName: String;
+  ResName, LibName: String;
   rs: TResourceStream;
   i: Integer;
+  Handle: Longword;
   //FuncNewResource: TsmxFuncNewResource;
 begin
   Result := nil;
   if Assigned(FLibraryManagerIntf) {and (FNewResourceFuncName <> '')} then
   begin
-    ParseImageListName(LibName, ResName);
-    if (LibName <> '') and (ResName <> '') then
+    ParseImageListName(ResName, LibName);
+    if ResName <> '' then
     begin
-      i := FLibraryManagerIntf.AddLibrary(LibName);
-      if i <> -1 then
+      Handle := 0;
+      if LibName <> '' then
       begin
-        rs := TResourceStream.Create(FLibraryManagerIntf[i]{Windows.GetModuleHandle(PChar(LibName))}, ResName, RT_RCDATA);
+        i := FLibraryManagerIntf.AddLibrary(LibName);
+        if i <> -1 then
+          Handle := FLibraryManagerIntf[i];
+      end else
+        Handle := HInstance;
+      if Handle <> 0 then
+      begin
+        rs := TResourceStream.Create(Handle, ResName, RT_RCDATA);
         try
           Result := TImageList.Create(nil);
           smxProcs.LoadImagesFromStream(Result, rs);
