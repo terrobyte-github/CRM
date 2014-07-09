@@ -98,6 +98,109 @@ type
     property RecID: Integer read FRecID write SetRecID;
   end;
 
+  { TsmxStateKitItem }
+
+  TsmxStateKit = class;
+
+  TsmxStateKitItem = class(TsmxHKitItem)
+  private
+    FCfgID: Integer;
+    FCurrentIntfID: Integer;
+    FItemEnabled: Boolean;
+    FItemVisible: Boolean;
+    FPriorIntfID: Integer;
+    function GetHKit: TsmxStateKit;
+    function GetItem(Index: Integer): TsmxStateKitItem;
+    function GetParent: TsmxStateKitItem;
+    procedure SetCurrentIntfID(Value: Integer);
+    procedure SetItem(Index: Integer; Value: TsmxStateKitItem);
+    procedure SetParent(Value: TsmxStateKitItem);
+    procedure SwitchIntfID;
+  protected
+    procedure SetItemEnabled(Value: Boolean); virtual;
+    procedure SetItemVisible(Value: Boolean); virtual;
+
+    property PriorIntfID: Integer read FPriorIntfID write FPriorIntfID;
+  public
+    function Add: TsmxStateKitItem;
+    procedure Assign(Source: TsmxHKitItem); override;
+    function FindByCfgID(CfgID: Integer; AmongAll: Boolean = False): TsmxStateKitItem;
+
+    property CfgID: Integer read FCfgID write FCfgID;
+    property CurrentIntfID: Integer read FCurrentIntfID write SetCurrentIntfID;
+    property HKit: TsmxStateKit read GetHKit;
+    property Items[Index: Integer]: TsmxStateKitItem read GetItem write SetItem; default;
+    property ItemEnabled: Boolean read FItemEnabled write SetItemEnabled;
+    property ItemVisible: Boolean read FItemVisible write SetItemVisible;
+    property Parent: TsmxStateKitItem read GetParent write SetParent;
+  end;
+
+  { TsmxStateKit }
+
+  TsmxStateKit = class(TsmxHKit)
+  private
+    FIntfID: Integer;
+    function GetRoot: TsmxStateKitItem;
+    procedure SetRoot(Value: TsmxStateKitItem);
+  public
+    procedure Assign(Source: TsmxHKit); override;
+
+    property IntfID: Integer read FIntfID write FIntfID;
+    property Root: TsmxStateKitItem read GetRoot write SetRoot;
+  end;
+
+  { TsmxCellState }
+
+  TsmxCellStates = class;
+
+  TsmxCellState = class(TsmxKitItem)
+  private
+    FStateID: Integer;
+    FStateKit: TsmxStateKit;
+    function GetKit: TsmxCellStates;
+    procedure SetKit(Value: TsmxCellStates);
+    function GetStateKit: TsmxStateKit;
+    procedure SetStateKit(Value: TsmxStateKit);
+  public
+    destructor Destroy; override;
+    procedure Assign(Source: TsmxKitItem); override;
+
+    property Kit: TsmxCellStates read GetKit write SetKit;
+    property StateID: Integer read FStateID write FStateID;
+    property StateKit: TsmxStateKit read GetStateKit write SetStateKit;
+  end;
+
+  { TsmxCellStates }
+
+  TsmxCellStates = class(TsmxKit)
+  private
+    function GetItem(Index: Integer): TsmxCellState;
+    procedure SetItem(Index: Integer; Value: TsmxCellState);
+  public
+    function Add: TsmxCellState;
+    function FindByStateID(StateID: Integer): TsmxCellState;
+
+    property Items[Index: Integer]: TsmxCellState read GetItem write SetItem; default;
+  end;
+
+  { TsmxSimpleStateCfg }
+
+  TsmxSimpleStateCfg = class(TsmxStateCfg)
+  private
+    FCellStates: TsmxCellStates;
+    function GetCellStates: TsmxCellStates;
+    procedure SetCellStates(Value: TsmxCellStates);
+  protected
+    procedure ReadIntf(const Node: IXMLNode; ID: Integer); override;
+    procedure WriteIntf(const Node: IXMLNode; ID: Integer); override;
+  public
+    destructor Destroy; override;
+    procedure Assign(Source: TPersistent); override;
+    procedure ClearCfg; override;
+  
+    property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
+  end;
+
 implementation
 
 uses
@@ -509,6 +612,312 @@ end;
 procedure TsmxStateCfg.SetRecID(Value: Integer);
 begin
   FRecID := Value;
+end;
+
+{ TsmxStateKitItem }
+
+function TsmxStateKitItem.Add: TsmxStateKitItem;
+begin
+  Result := TsmxStateKitItem(inherited Add);
+end;
+
+procedure TsmxStateKitItem.Assign(Source: TsmxHKitItem);
+begin
+  inherited Assign(Source);
+  if Source is TsmxStateKitItem then
+  begin
+    CfgID := TsmxStateKitItem(Source).CfgID;
+    CurrentIntfID := TsmxStateKitItem(Source).CurrentIntfID;
+    ItemEnabled := TsmxStateKitItem(Source).ItemEnabled;
+    ItemVisible := TsmxStateKitItem(Source).ItemVisible;
+  end;
+end;
+
+function TsmxStateKitItem.FindByCfgID(CfgID: Integer; AmongAll: Boolean = False): TsmxStateKitItem;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+  begin
+    if Items[i].CfgID = CfgID then
+      Result := Items[i] else
+    if AmongAll then
+      Result := Items[i].FindByCfgID(CfgID, AmongAll);
+    if Assigned(Result) then
+      Break;
+  end;
+end;
+
+function TsmxStateKitItem.GetHKit: TsmxStateKit;
+begin
+  Result := TsmxStateKit(inherited HKit);
+end;
+
+function TsmxStateKitItem.GetItem(Index: Integer): TsmxStateKitItem;
+begin
+  Result := TsmxStateKitItem(inherited Items[Index]);
+end;
+
+procedure TsmxStateKitItem.SetItem(Index: Integer; Value: TsmxStateKitItem);
+begin
+  inherited Items[Index] := Value;
+end;
+
+function TsmxStateKitItem.GetParent: TsmxStateKitItem;
+begin
+  Result := TsmxStateKitItem(inherited Parent);
+end;
+
+procedure TsmxStateKitItem.SetParent(Value: TsmxStateKitItem);
+begin
+  inherited Parent := Value;
+end;
+
+procedure TsmxStateKitItem.SetCurrentIntfID(Value: Integer);
+begin
+  if FCurrentIntfID <> Value then
+  begin
+    FPriorIntfID := FCurrentIntfID;
+    FCurrentIntfID := Value;
+  end;
+end;
+
+procedure TsmxStateKitItem.SetItemEnabled(Value: Boolean);
+begin
+  if FItemEnabled <> Value then
+  begin
+    FItemEnabled := Value;
+    SwitchIntfID;
+  end;
+end;
+
+procedure TsmxStateKitItem.SetItemVisible(Value: Boolean);
+begin
+  if FItemVisible <> Value then
+  begin
+    FItemVisible := Value;
+    SwitchIntfID;
+  end;
+end;
+
+procedure TsmxStateKitItem.SwitchIntfID;
+var
+  StateUnit: TsmxStateKitItem;
+  IntfID: Integer;
+begin
+  if FCurrentIntfID = FPriorIntfID then
+    IntfID := HKit.IntfID else
+    IntfID := FPriorIntfID;
+  StateUnit := Self;
+  repeat
+    StateUnit.CurrentIntfID := IntfID;
+    StateUnit := StateUnit.Parent;
+  until not StateUnit.HasParent;
+end;
+
+{ TsmxStateKit }
+
+procedure TsmxStateKit.Assign(Source: TsmxHKit);
+begin
+  inherited Assign(Source);
+  if Source is TsmxStateKit then
+    IntfID := TsmxStateKit(Source).IntfID;
+end;
+
+function TsmxStateKit.GetRoot: TsmxStateKitItem;
+begin
+  Result := TsmxStateKitItem(inherited Root);
+end;
+
+procedure TsmxStateKit.SetRoot(Value: TsmxStateKitItem);
+begin
+  inherited Root := Value;
+end;
+
+{ TsmxCellState }
+
+destructor TsmxCellState.Destroy;
+begin
+  if Assigned(FStateKit) then
+    FStateKit.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxCellState.Assign(Source: TsmxKitItem);
+begin
+  if Source is TsmxCellState then
+  begin
+    StateID := TsmxCellState(Source).StateID;
+    StateKit := TsmxCellState(Source).StateKit;
+  end else
+    inherited Assign(Source);
+end;
+
+function TsmxCellState.GetKit: TsmxCellStates;
+begin
+  Result := TsmxCellStates(inherited Kit);
+end;
+
+procedure TsmxCellState.SetKit(Value: TsmxCellStates);
+begin
+  inherited Kit := Value;
+end;
+
+function TsmxCellState.GetStateKit: TsmxStateKit;
+begin
+  if not Assigned(FStateKit) then
+    FStateKit := TsmxStateKit.Create(TsmxStateKitItem);
+  Result := FStateKit;
+end;
+
+procedure TsmxCellState.SetStateKit(Value: TsmxStateKit);
+begin
+  StateKit.Assign(Value);
+end;
+
+{ TsmxCellStates }
+
+function TsmxCellStates.Add: TsmxCellState;
+begin
+  Result := TsmxCellState(inherited Add);
+end;
+
+function TsmxCellStates.FindByStateID(StateID: Integer): TsmxCellState;
+var i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if Items[i].StateID = StateID then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxCellStates.GetItem(Index: Integer): TsmxCellState;
+begin
+  Result := TsmxCellState(inherited Items[Index]);
+end;
+
+procedure TsmxCellStates.SetItem(Index: Integer; Value: TsmxCellState);
+begin
+  inherited Items[Index] := Value;
+end;
+
+{ TsmxSimpleStateCfg }
+
+destructor TsmxSimpleStateCfg.Destroy;
+begin
+  if Assigned(FCellStates) then
+    FCellStates.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxSimpleStateCfg.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TsmxSimpleStateCfg then
+    CellStates := TsmxSimpleStateCfg(Source).CellStates;
+end;
+
+procedure TsmxSimpleStateCfg.ClearCfg;
+begin
+  inherited ClearCfg;
+  if Assigned(FCellStates) then
+    FCellStates.Clear;
+end;
+
+function TsmxSimpleStateCfg.GetCellStates: TsmxCellStates;
+begin
+  if not Assigned(FCellStates) then
+    FCellStates := TsmxCellStates.Create(TsmxCellState);
+  Result := FCellStates;
+end;
+
+procedure TsmxSimpleStateCfg.SetCellStates(Value: TsmxCellStates);
+begin
+  CellStates.Assign(Value);
+end;
+
+procedure TsmxSimpleStateCfg.ReadIntf(const Node: IXMLNode; ID: Integer);
+
+  procedure AddItems(const ANode: IXMLNode; AItem: TsmxStateKitItem);
+  var
+    i: Integer;
+    Item: TsmxStateKitItem;
+  begin
+    Item := AItem.FindByCfgID(ANode.Attributes['StateID']);
+    if not Assigned(Item) then
+      Item := AItem.Add;
+    Item.CurrentIntfID := ID;
+    Item.FCfgID := ANode.Attributes['CfgID'];
+    Item.FItemEnabled := ANode.Attributes['ItemEnabled']; //SysUtils.StrToBool(ANode.Attributes['ItemEnabled']);
+    Item.FItemVisible := ANode.Attributes['ItemVisible']; //SysUtils.StrToBool(ANode.Attributes['ItemVisible']);
+    for i := 0 to ANode.ChildNodes.Count - 1 do
+      if ANode.ChildNodes[i].NodeName = 'Cell' then
+        AddItems(ANode.ChildNodes[i], Item);
+  end;
+
+var
+  n, n2: IXMLNode;
+  i, j: Integer;
+  State: TsmxCellState;
+begin
+  inherited ReadIntf(Node, ID);
+  n := Node.ChildNodes.FindNode('States');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'State' then
+      begin
+        State := CellStates.FindByStateID(n.ChildNodes[i].Attributes['StateID']);
+        if not Assigned(State) then
+        begin
+          State := CellStates.Add;
+          State.StateID := n.ChildNodes[i].Attributes['StateID'];
+          State.StateKit.IntfID := IntfID;
+        end;
+        n2 := n.ChildNodes[i].ChildNodes.FindNode('Cells');
+        if Assigned(n2) and (n2.ChildNodes.Count > 0) then
+          for j := 0 to n2.ChildNodes.Count - 1 do
+            if n2.ChildNodes[j].NodeName = 'Cell' then
+              AddItems(n2.ChildNodes[j], State.StateKit.Root);
+      end;
+  end;
+end;
+
+procedure TsmxSimpleStateCfg.WriteIntf(const Node: IXMLNode; ID: Integer);
+
+  procedure AddNodes(const ANode: IXMLNode; AItem: TsmxStateKitItem);
+  var
+    n: IXMLNode;
+    i: Integer;
+  begin
+    if AItem.CurrentIntfID = ID then
+    begin
+      n := ANode.AddChild('Cell');
+      n.Attributes['CfgID'] := AItem.CfgID;
+      n.Attributes['Enabled'] := SysUtils.BoolToStr(AItem.ItemEnabled, True);
+      n.Attributes['Visible'] := SysUtils.BoolToStr(AItem.ItemVisible, True);
+    end;
+    for i := 0 to AItem.Count - 1 do
+      AddNodes(n, AItem[i]);
+  end;
+
+var
+  n, n2: IXMLNode;
+  i, j: Integer;
+begin
+  inherited WriteIntf(Node, ID);
+  n := Node.AddChild('States');
+  for i := 0 to CellStates.Count - 1 do
+  begin
+    n2 := n.AddChild('State');
+    n2.Attributes['StateID'] := CellStates[i].StateID;
+    for j := 0 to CellStates[i].StateKit.Root.Count - 1 do
+      AddNodes(n2.AddChild('Cells'), CellStates[i].StateKit.Root[j]);
+  end;
 end;
 
 initialization

@@ -206,7 +206,7 @@ type
 
   { TsmxEditFilter }
 
-  TsmxEditFilter = class(TsmxPanelFilter)
+  TsmxEditFilter = class(TsmxFilter)
   private
     FEdit: TEdit;
     FValue: Variant;
@@ -237,7 +237,7 @@ type
 
   { TsmxDateTimeFilter }
 
-  {TsmxDateTimeFilter = class(TsmxPanelFilter)
+  {TsmxDateTimeFilter = class(TsmxFilter)
   private
     FDateTime: TDateTimePicker;
     procedure SetFormat;
@@ -256,7 +256,7 @@ type
 
   { TsmxBitBtnFilter }
 
-  TsmxBitBtnFilter = class(TsmxPanelFilter)
+  TsmxBitBtnFilter = class(TsmxFilter)
   private
     FBitBtn: TBitBtn;
     FValue: Variant;
@@ -301,7 +301,7 @@ type
 
   { TsmxNumEditFilter }
 
-  {TsmxNumEditFilter = class(TsmxPanelFilter)
+  {TsmxNumEditFilter = class(TsmxFilter)
   private
     FEdit: TEdit;
   protected
@@ -320,7 +320,7 @@ type
 
   { TsmxLabelFilter }
 
-  {TsmxLabelFilter = class(TsmxPanelFilter)
+  {TsmxLabelFilter = class(TsmxFilter)
   private
     FSLabel: TLabel;
     FValue: Variant;
@@ -339,7 +339,7 @@ type
 
   { TsmxStateKitItem }
 
-  TsmxStateKit = class;
+  {TsmxStateKit = class;
 
   TsmxStateKitItem = class(TsmxHKitItem)
   private
@@ -372,11 +372,11 @@ type
     property ItemEnabled: Boolean read FItemEnabled write SetItemEnabled;
     property ItemVisible: Boolean read FItemVisible write SetItemVisible;
     property Parent: TsmxStateKitItem read GetParent write SetParent;
-  end;
+  end;}
 
   { TsmxStateKit }
 
-  TsmxStateKit = class(TsmxHKit)
+  {TsmxStateKit = class(TsmxHKit)
   private
     FIntfID: Integer;
     function GetRoot: TsmxStateKitItem;
@@ -386,11 +386,11 @@ type
 
     property IntfID: Integer read FIntfID write FIntfID;
     property Root: TsmxStateKitItem read GetRoot write SetRoot;
-  end;
+  end;}
 
   { TsmxCellState }
 
-  TsmxCellStates = class;
+  {TsmxCellStates = class;
 
   TsmxCellState = class(TsmxKitItem)
   private
@@ -407,11 +407,11 @@ type
     property Kit: TsmxCellStates read GetKit write SetKit;
     property StateID: Integer read FStateID write FStateID;
     property StateKit: TsmxStateKit read GetStateKit write SetStateKit;
-  end;
+  end;}
 
   { TsmxCellStates }
 
-  TsmxCellStates = class(TsmxKit)
+  {TsmxCellStates = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxCellState;
     procedure SetItem(Index: Integer; Value: TsmxCellState);
@@ -420,11 +420,11 @@ type
     function FindByStateID(StateID: Integer): TsmxCellState;
 
     property Items[Index: Integer]: TsmxCellState read GetItem write SetItem; default;
-  end;
+  end;}
 
   { TsmxSimpleStateCfg }
 
-  TsmxSimpleStateCfg = class(TsmxStateCfg)
+  {TsmxSimpleStateCfg = class(TsmxStateCfg)
   private
     FCellStates: TsmxCellStates;
     function GetCellStates: TsmxCellStates;
@@ -438,7 +438,7 @@ type
     procedure ClearCfg; override;
   
     property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
-  end;
+  end;}
 
   { TsmxStateFormCfg }
 
@@ -1673,7 +1673,7 @@ end;}
 
 { TsmxStateKitItem }
 
-function TsmxStateKitItem.Add: TsmxStateKitItem;
+(*function TsmxStateKitItem.Add: TsmxStateKitItem;
 begin
   Result := TsmxStateKitItem(inherited Add);
 end;
@@ -1975,7 +1975,7 @@ begin
     for j := 0 to CellStates[i].StateKit.Root.Count - 1 do
       AddNodes(n2.AddChild('Cells'), CellStates[i].StateKit.Root[j]);
   end;
-end;
+end;*)
 
 { TsmxStateFormCfg }
 
