@@ -1,4 +1,4 @@
-library dADO;
+library smxADODrivers;
 
 uses
   ComServ,
