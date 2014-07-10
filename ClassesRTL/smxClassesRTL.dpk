@@ -34,6 +34,8 @@ contains
   smxClassTypes in '..\Common\smxClassTypes.pas',
   smxClassProcs in '..\Common\smxClassProcs.pas',
   smxCells in 'smxCells.pas',
-  smxCfgs in 'smxCfgs.pas';
+  smxCfgs in 'smxCfgs.pas',
+  smxDBClasses in 'smxDBClasses.pas',
+  smxManagerClasses in 'smxManagerClasses.pas';
 
 end.
