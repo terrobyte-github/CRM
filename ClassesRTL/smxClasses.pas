@@ -212,7 +212,7 @@ type
 
   { TsmxResolvedItem }
 
-  TsmxResolvedKit = class;
+  {TsmxResolvedKit = class;
 
   TsmxResolvedItem = class(TsmxKitItem)
   private
@@ -235,11 +235,11 @@ type
     //property ProcName: String read FProcName write SetProcName;
     property PropInfo: PPropInfo read FPropInfo write SetPropInfo;
     property PropValue: Variant read FPropValue write SetPropValue;
-  end;
+  end;}
 
   { TsmxResolvedKit }
 
-  TsmxResolvedKit = class(TsmxKit)
+  {TsmxResolvedKit = class(TsmxKit)
   private
     function GetItem(Index: Integer): TsmxResolvedItem;
     procedure SetItem(Index: Integer; Value: TsmxResolvedItem);
@@ -251,7 +251,7 @@ type
 
     property Items[Index: Integer]: TsmxResolvedItem read GetItem write SetItem; default;
     //property Values[const Name: String]: Variant read GetValue write SetValue;
-  end;
+  end;}
 
   { TsmxCellfg }
 
@@ -2361,7 +2361,7 @@ end;}
 
 { TsmxResolvedItem }
 
-procedure TsmxResolvedItem.Assign(Source: TsmxKitItem);
+(*procedure TsmxResolvedItem.Assign(Source: TsmxKitItem);
 begin
   if Source is TsmxResolvedItem then
   begin
@@ -2431,7 +2431,7 @@ end;
 procedure TsmxResolvedKit.SetItem(Index: Integer; Value: TsmxResolvedItem);
 begin
   inherited Items[Index] := Value;
-end;
+end;*)
 
 { TsmxBaseCell }
 

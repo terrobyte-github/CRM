@@ -3,7 +3,7 @@ unit smxClassProcs;
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxDBIntf,
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxClasses, smxCfgs, smxDBIntf,
   smxManagerIntf, smxClassTypes;
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;

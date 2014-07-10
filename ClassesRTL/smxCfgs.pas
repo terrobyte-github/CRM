@@ -13,7 +13,7 @@ unit smxCfgs;
 interface
 
 uses
-  Classes, XMLIntf, smxBaseClasses, smxClasses;
+  Classes, TypInfo, XMLIntf, smxBaseClasses, smxClasses;
 
 type
   { TsmxTypeCfg }
@@ -44,58 +44,47 @@ type
     property CfgClassName: String read FCfgClassName write SetCfgClassName;
   end;
 
-  { TsmxCellfg }
+  { TsmxResolvedItem }
 
-  TsmxCellCfg = class(TsmxBaseCfg)
+  TsmxResolvedKit = class;
+
+  TsmxResolvedItem = class(TsmxKitItem)
   private
-    FCurNode: IXMLNode;
-    FFindList: TList;
-    FResolvedList: TsmxResolvedKit;
-    function GetCellOwner: TsmxBaseCell;
-    function GetResolvedList: TsmxResolvedKit;
-    function GetFindList: TList;
+    FInstance: TObject;
+    //FProcName: String;
+    FPropInfo: PPropInfo;
+    FPropValue: Variant;
+    function GetKit: TsmxResolvedKit;
+    procedure SetKit(Value: TsmxResolvedKit);
   protected
-    function GetCurNode: IXMLNode; virtual;
-    procedure SetCurNode(const Value: IXMLNode); virtual;
-    procedure SetFindList(Value: TList); virtual;
-    procedure SetResolvedList(Value: TsmxResolvedKit); virtual;
+    procedure SetInstance(Value: TObject); virtual;
+    //procedure SetProcName(const Value: String); virtual;
+    procedure SetPropInfo(Value: PPropInfo); virtual;
+    procedure SetPropValue(const Value: Variant); virtual;
   public
-    destructor Destroy; override;
-    procedure ClearCfg; override;
-    procedure ClearXML; override;
-    procedure Read; override;
-    procedure ReadCell(Cell: TsmxBaseCell); virtual;
-    procedure Write; override;
-    procedure WriteCell(Cell: TsmxBaseCell); virtual;
+    procedure Assign(Source: TsmxKitItem); override;
 
-    property CellOwner: TsmxBaseCell read GetCellOwner;
-    property CurNode: IXMLNode read GetCurNode write SetCurNode;
-    property FindList: TList read GetFindList write SetFindList;
-    property ResolvedList: TsmxResolvedKit read GetResolvedList write SetResolvedList;
+    property Instance: TObject read FInstance write SetInstance;
+    property Kit: TsmxResolvedKit read GetKit write SetKit;
+    //property ProcName: String read FProcName write SetProcName;
+    property PropInfo: PPropInfo read FPropInfo write SetPropInfo;
+    property PropValue: Variant read FPropValue write SetPropValue;
   end;
 
-  { TsmxStateCfg }
+  { TsmxResolvedKit }
 
-  TsmxStateCfg = class(TsmxBaseCfg)
+  TsmxResolvedKit = class(TsmxKit)
   private
-    FIntfID: Integer;
-    FRecID: Integer;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-    procedure ReadIntf(const Node: IXMLNode; ID: Integer); virtual;
-    procedure SetIntfID(Value: Integer); virtual;
-    procedure SetRecID(Value: Integer); virtual;
-    procedure WriteIntf(const Node: IXMLNode; ID: Integer); virtual;
+    function GetItem(Index: Integer): TsmxResolvedItem;
+    procedure SetItem(Index: Integer; Value: TsmxResolvedItem);
+    //function GetValue(const Name: String): Variant;
+    //procedure SetValue(const Name: String; const Value: Variant);
   public
-    //procedure Assign(Source: TPersistent); override;
-    procedure Load; override;
-    procedure Read; override;
-    procedure Remove; override;
-    procedure Save; override;
-    procedure Write; override;
+    function Add: TsmxResolvedItem;
+    function FindByCombo(Instance: TObject; PropInfo: PPropInfo): TsmxResolvedItem;
 
-    property IntfID: Integer read FIntfID write SetIntfID;
-    property RecID: Integer read FRecID write SetRecID;
+    property Items[Index: Integer]: TsmxResolvedItem read GetItem write SetItem; default;
+    //property Values[const Name: String]: Variant read GetValue write SetValue;
   end;
 
   { TsmxStateKitItem }
@@ -183,9 +172,69 @@ type
     property Items[Index: Integer]: TsmxCellState read GetItem write SetItem; default;
   end;
 
+  { TsmxCellfg }
+
+  TsmxCellCfg = class(TsmxBaseCfg)
+  private
+    FCurNode: IXMLNode;
+    FFindList: TList;
+    FResolvedList: TsmxResolvedKit;
+    function GetCellOwner: TsmxBaseCell;
+    function GetResolvedList: TsmxResolvedKit;
+    function GetFindList: TList;
+  protected
+    function GetCurNode: IXMLNode; virtual;
+    procedure SetCurNode(const Value: IXMLNode); virtual;
+    procedure SetFindList(Value: TList); virtual;
+    procedure SetResolvedList(Value: TsmxResolvedKit); virtual;
+  public
+    destructor Destroy; override;
+    procedure ClearCfg; override;
+    procedure ClearXML; override;
+    procedure Read; override;
+    procedure ReadCell(Cell: TsmxBaseCell); virtual;
+    procedure Write; override;
+    procedure WriteCell(Cell: TsmxBaseCell); virtual;
+
+    property CellOwner: TsmxBaseCell read GetCellOwner;
+    property CurNode: IXMLNode read GetCurNode write SetCurNode;
+    property FindList: TList read GetFindList write SetFindList;
+    property ResolvedList: TsmxResolvedKit read GetResolvedList write SetResolvedList;
+  end;
+
+  { TsmxStateCfg }
+
+  TsmxStateCfg = class(TsmxBaseCfg)
+  private
+    FCellStates: TsmxCellStates;
+    FIntfID: Integer;
+    FRecID: Integer;
+    function GetCellStates: TsmxCellStates;
+    procedure SetCellStates(Value: TsmxCellStates);
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+    procedure ReadIntf(const Node: IXMLNode; ID: Integer); virtual;
+    procedure SetIntfID(Value: Integer); virtual;
+    procedure SetRecID(Value: Integer); virtual;
+    procedure WriteIntf(const Node: IXMLNode; ID: Integer); virtual;
+  public
+    destructor Destroy; override;
+    //procedure Assign(Source: TPersistent); override;
+    procedure ClearCfg; override;
+    procedure Load; override;
+    procedure Read; override;
+    procedure Remove; override;
+    procedure Save; override;
+    procedure Write; override;
+
+    property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
+    property IntfID: Integer read FIntfID write SetIntfID;
+    property RecID: Integer read FRecID write SetRecID;
+  end;
+
   { TsmxSimpleStateCfg }
 
-  TsmxSimpleStateCfg = class(TsmxStateCfg)
+  {TsmxSimpleStateCfg = class(TsmxStateCfg)
   private
     FCellStates: TsmxCellStates;
     function GetCellStates: TsmxCellStates;
@@ -197,9 +246,9 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure ClearCfg; override;
-  
+
     property CellStates: TsmxCellStates read GetCellStates write SetCellStates;
-  end;
+  end;}
 
 implementation
 
@@ -291,6 +340,80 @@ begin
   FCfgClassName := Value;
   if FCfgClassName <> '' then
     FCfgClass := TsmxBaseCfgClass(Classes.FindClass(FCfgClassName));
+end;
+
+{ TsmxResolvedItem }
+
+procedure TsmxResolvedItem.Assign(Source: TsmxKitItem);
+begin
+  if Source is TsmxResolvedItem then
+  begin
+    //Instance := TsmxResolvedItem(Source).Instance;
+    //ProcName := TsmxResolvedItem(Source).ProcName;
+    //PropInfo := TsmxResolvedItem(Source).PropInfo;
+    PropValue := TsmxResolvedItem(Source).PropValue;
+  end else
+    inherited Assign(Source);
+end;
+
+function TsmxResolvedItem.GetKit: TsmxResolvedKit;
+begin
+  Result := TsmxResolvedKit(inherited Kit);
+end;
+
+procedure TsmxResolvedItem.SetKit(Value: TsmxResolvedKit);
+begin
+  inherited Kit := Value;
+end;
+
+procedure TsmxResolvedItem.SetInstance(Value: TObject);
+begin
+  FInstance := Value;
+end;
+
+{procedure TsmxResolvedItem.SetProcName(const Value: String);
+begin
+  FProcName := Value;
+end;}
+
+procedure TsmxResolvedItem.SetPropInfo(Value: PPropInfo);
+begin
+  FPropInfo := Value;
+end;
+
+procedure TsmxResolvedItem.SetPropValue(const Value: Variant);
+begin
+  FPropValue := Value;
+end;
+
+{ TsmxResolvedKit }
+
+function TsmxResolvedKit.Add: TsmxResolvedItem;
+begin
+  Result := TsmxResolvedItem(inherited Add);
+end;
+
+function TsmxResolvedKit.FindByCombo(Instance: TObject; PropInfo: PPropInfo): TsmxResolvedItem;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to Count - 1 do
+    if (Items[i].Instance = Instance) and (Items[i].PropInfo = PropInfo) then
+    begin
+      Result := Items[i];
+      Break;
+    end;
+end;
+
+function TsmxResolvedKit.GetItem(Index: Integer): TsmxResolvedItem;
+begin
+  Result := TsmxResolvedItem(inherited Items[Index]);
+end;
+
+procedure TsmxResolvedKit.SetItem(Index: Integer; Value: TsmxResolvedItem);
+begin
+  inherited Items[Index] := Value;
 end;
 
 { TsmxCellCfg }
@@ -411,207 +534,6 @@ begin
     smxClassProcs.WriteProps(CellOwner, Cell, CurNode, FindList);
     Cell.GetProperties(Self);
   end;
-end;
-
-{ TsmxStateCfg }
-
-{procedure TsmxStateCfg.Assign(Source: TPersistent);
-begin
-  inherited Assign(Source);
-  if Source is TsmxStateCfg then
-  begin
-    IntfID := TsmxStateCfg(Source).IntfID;
-    RecID := TsmxStateCfg(Source).RecID;
-  end;
-end;}
-
-procedure TsmxStateCfg.AssignTo(Dest: TPersistent);
-begin
-  inherited AssignTo(Dest);
-  if Dest is TsmxStateCfg then
-  begin
-    TsmxStateCfg(Dest).IntfID := IntfID;
-    TsmxStateCfg(Dest).RecID := RecID;
-  end;
-end;
-
-procedure TsmxStateCfg.Load;
-var
-  Key, Value: Variant;
-  KeySense: TsmxDataSense;
-begin
-  if not Assigned(SelectDataSet)
-      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0))) then
-    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
-      [ClassName, CfgID, 'load'], Self);
-  if FRecID = 0 then
-  begin
-    Key := Variants.VarArrayOf([CfgID, FIntfID]);
-    KeySense := dsForeignKey;
-  end else
-  begin
-    Key := FRecID;
-    KeySense := dsKey;
-  end;
-  if smxDBFuncs.GetValueByKey(SelectDataSet, Key, Value,
-      {FSelectRequest.PerformanceMode,} KeySense) then
-  begin
-    if smxDBFuncs.LocateByKey(SelectDataSet, Key, KeySense) then
-    begin
-      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value,
-          {FSelectRequest.PerformanceMode,} dsKey) then
-        FRecID := Value else
-        FRecID := 0;
-      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value{,
-          FSelectRequest.PerformanceMode}) then
-        XMLDoc.XML.Text := Value else
-        XMLDoc.XML.Text := '';
-      try
-        XMLDoc.Active := True;
-      except
-        on E: Exception do
-          raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
-            [ClassName, CfgID, 'load', E.Message], Self);
-      end;
-    end;
-  end;
-end;
-
-procedure TsmxStateCfg.Save;
-var
-  DataSet: IsmxDataSet;
-  //Request: IsmxDataSet;
-  //Performance: TsmxPerformanceMode;
-  Key, Value: Variant;
-  KeySense: TsmxDataSense;
-begin
-  if ((((FRecID = 0) and not Assigned(InsertDataSet))
-        or ((FRecID <> 0) and not Assigned(UpdateDataSet)))
-      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0)))) then
-    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
-      [ClassName, CfgID, 'save'], Self);
-  if FRecID = 0 then
-  begin
-    DataSet := InsertDataSet; // ModifyRequests[mrInsert];
-    //Performance := FSelectRequest.InsertPerformance; // ModifyPerformances[mrInsert];
-    Key := Variants.VarArrayOf([CfgID, FIntfID]);
-    KeySense := dsForeignKey;
-  end else
-  begin
-    DataSet := UpdateDataSet; // ModifyRequests[mrUpdate];
-    //Performance := FSelectRequest.UpdatePerformance; // ModifyPerformances[mrUpdate];
-    Key := FRecID;
-    KeySense := dsKey;
-  end;
-  {if not Assigned(Request) then
-    raise EsmxCellError.CreateByComponent(@smxConsts.rsCfgActionError,
-      [ClassName, FCfgID, 'save'], FCfgID);}
-  {if FRecID = 0 then
-  begin
-    Key := Variants.VarArrayOf([FCfgID, FIntfID]);
-    KeySense := fsForeignKey;
-  end else
-  begin
-    Key := FRecID;
-    KeySense := fsKey;
-  end;}
-  if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text, {Performance,} KeySense) then
-    if smxDBFuncs.GetCurrentValue(DataSet, Value, {Performance,} dsKey) then
-      FRecID := Value;
-end;
-
-procedure TsmxStateCfg.Read;
-var
-  Value: Variant;
-  CurIntfID: Integer;
-  XMLTextTemp: String;
-begin
-  inherited Read;
-  XMLTextTemp := XMLDoc.XML.Text;
-  if Assigned(SelectDataSet) then
-  begin
-    SelectDataSet.First;
-    while not SelectDataSet.Eof do
-    begin
-      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value{, FSelectRequest.PerformanceMode}) then
-        XMLDoc.XML.Text := Value else
-        XMLDoc.XML.Text := '';
-      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value, {FSelectRequest.PerformanceMode,} dsForeignKey) then
-        CurIntfID := smxFuncs.GetSingleValue(Value, 0, 1) else
-        CurIntfID := 0;
-      try
-        XMLDoc.Active := True;
-        ReadIntf(RootNode, CurIntfID);
-      except
-        on E: Exception do
-          raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
-            [ClassName, CfgID, 'read', E.Message], Self);
-      end;
-      SelectDataSet.Next;
-    end;
-  end;
-  XMLDoc.XML.Text := XMLTextTemp;
-  try
-    XMLDoc.Active := True;
-    ReadIntf(RootNode, IntfID);
-  except
-    on E: Exception do
-      raise EsmxCellError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
-        [ClassName, CfgID, 'read', E.Message], Self);
-  end;
-end;
-
-procedure TsmxStateCfg.Write;
-begin
-  inherited Write;
-  WriteIntf(RootNode, IntfID);
-end;
-
-procedure TsmxStateCfg.ReadIntf(const Node: IXMLNode; ID: Integer);
-begin
-end;
-
-procedure TsmxStateCfg.WriteIntf(const Node: IXMLNode; ID: Integer);
-begin
-end;
-
-procedure TsmxStateCfg.Remove;
-var
-  //Request: IsmxDataSet;
-  //Performance: TsmxPerformanceMode;
-  Key: Variant;
-  KeySense: TsmxDataSense;
-begin
-  if not Assigned(DeleteDataSet)
-      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0))) then
-    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
-      [ClassName, CfgID, 'remove'], Self);
-  //Request := FSelectRequest.DeleteDataSet; // ModifyRequests[mrDelete];
-  //Performance := FSelectRequest.DeletePerformance; // ModifyPerformances[mrDelete];
-  {if not Assigned(Request) then
-    raise EsmxCellError.CreateByComponent(@smxConsts.rsCfgActionError,
-      [ClassName, FCfgID, 'remove'], FCfgID);}
-  if FRecID = 0 then
-  begin
-    Key := Variants.VarArrayOf([CfgID, FIntfID]);
-    KeySense := dsForeignKey;
-  end else
-  begin
-    Key := FRecID;
-    KeySense := dsKey;
-  end;
-  if smxDBFuncs.SetValueByKey(DeleteDataSet, Key, Variants.Null, KeySense) then
-    FRecID := 0;
-end;
-
-procedure TsmxStateCfg.SetIntfID(Value: Integer);
-begin
-  FIntfID := Value;
-end;
-
-procedure TsmxStateCfg.SetRecID(Value: Integer);
-begin
-  FRecID := Value;
 end;
 
 { TsmxStateKitItem }
@@ -805,9 +727,309 @@ begin
   inherited Items[Index] := Value;
 end;
 
+{ TsmxStateCfg }
+
+destructor TsmxStateCfg.Destroy;
+begin
+  if Assigned(FCellStates) then
+    FCellStates.Free;
+  inherited Destroy;
+end;
+
+{procedure TsmxStateCfg.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TsmxStateCfg then
+  begin
+    IntfID := TsmxStateCfg(Source).IntfID;
+    RecID := TsmxStateCfg(Source).RecID;
+  end;
+end;}
+
+procedure TsmxStateCfg.AssignTo(Dest: TPersistent);
+begin
+  inherited AssignTo(Dest);
+  if Dest is TsmxStateCfg then
+  begin
+    TsmxStateCfg(Dest).IntfID := IntfID;
+    //TsmxStateCfg(Dest).RecID := RecID;
+    TsmxStateCfg(Dest).CellStates := CellStates;
+  end;
+end;
+
+procedure TsmxStateCfg.ClearCfg;
+begin
+  inherited ClearCfg;
+  if Assigned(FCellStates) then
+    FCellStates.Clear;
+end;
+
+function TsmxStateCfg.GetCellStates: TsmxCellStates;
+begin
+  if not Assigned(FCellStates) then
+    FCellStates := TsmxCellStates.Create(TsmxCellState);
+  Result := FCellStates;
+end;
+
+procedure TsmxStateCfg.SetCellStates(Value: TsmxCellStates);
+begin
+  CellStates.Assign(Value);
+end;
+
+procedure TsmxStateCfg.Load;
+var
+  Key, Value: Variant;
+  KeySense: TsmxDataSense;
+begin
+  if not Assigned(SelectDataSet)
+      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0))) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, CfgID, 'load'], Self);
+  if FRecID = 0 then
+  begin
+    Key := Variants.VarArrayOf([CfgID, FIntfID]);
+    KeySense := dsForeignKey;
+  end else
+  begin
+    Key := FRecID;
+    KeySense := dsKey;
+  end;
+  if smxDBFuncs.GetValueByKey(SelectDataSet, Key, Value,
+      {FSelectRequest.PerformanceMode,} KeySense) then
+  begin
+    if smxDBFuncs.LocateByKey(SelectDataSet, Key, KeySense) then
+    begin
+      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value,
+          {FSelectRequest.PerformanceMode,} dsKey) then
+        FRecID := Value else
+        FRecID := 0;
+      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value{,
+          FSelectRequest.PerformanceMode}) then
+        XMLDoc.XML.Text := Value else
+        XMLDoc.XML.Text := '';
+      try
+        XMLDoc.Active := True;
+      except
+        on E: Exception do
+          raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+            [ClassName, CfgID, 'load', E.Message], Self);
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxStateCfg.Save;
+var
+  DataSet: IsmxDataSet;
+  //Request: IsmxDataSet;
+  //Performance: TsmxPerformanceMode;
+  Key, Value: Variant;
+  KeySense: TsmxDataSense;
+begin
+  if ((((FRecID = 0) and not Assigned(InsertDataSet))
+        or ((FRecID <> 0) and not Assigned(UpdateDataSet)))
+      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0)))) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, CfgID, 'save'], Self);
+  if FRecID = 0 then
+  begin
+    DataSet := InsertDataSet; // ModifyRequests[mrInsert];
+    //Performance := FSelectRequest.InsertPerformance; // ModifyPerformances[mrInsert];
+    Key := Variants.VarArrayOf([CfgID, FIntfID]);
+    KeySense := dsForeignKey;
+  end else
+  begin
+    DataSet := UpdateDataSet; // ModifyRequests[mrUpdate];
+    //Performance := FSelectRequest.UpdatePerformance; // ModifyPerformances[mrUpdate];
+    Key := FRecID;
+    KeySense := dsKey;
+  end;
+  {if not Assigned(Request) then
+    raise EsmxCellError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'save'], FCfgID);}
+  {if FRecID = 0 then
+  begin
+    Key := Variants.VarArrayOf([FCfgID, FIntfID]);
+    KeySense := fsForeignKey;
+  end else
+  begin
+    Key := FRecID;
+    KeySense := fsKey;
+  end;}
+  if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text, {Performance,} KeySense) then
+    if smxDBFuncs.GetCurrentValue(DataSet, Value, {Performance,} dsKey) then
+      FRecID := Value;
+end;
+
+procedure TsmxStateCfg.Read;
+var
+  Value: Variant;
+  CurIntfID: Integer;
+  XMLTextTemp: String;
+begin
+  inherited Read;
+  XMLTextTemp := XMLDoc.XML.Text;
+  if Assigned(SelectDataSet) then
+  begin
+    SelectDataSet.First;
+    while not SelectDataSet.Eof do
+    begin
+      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value{, FSelectRequest.PerformanceMode}) then
+        XMLDoc.XML.Text := Value else
+        XMLDoc.XML.Text := '';
+      if smxDBFuncs.GetCurrentValue(SelectDataSet, Value, {FSelectRequest.PerformanceMode,} dsForeignKey) then
+        CurIntfID := smxFuncs.GetSingleValue(Value, 0, 1) else
+        CurIntfID := 0;
+      try
+        XMLDoc.Active := True;
+        ReadIntf(RootNode, CurIntfID);
+      except
+        on E: Exception do
+          raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+            [ClassName, CfgID, 'read', E.Message], Self);
+      end;
+      SelectDataSet.Next;
+    end;
+  end;
+  XMLDoc.XML.Text := XMLTextTemp;
+  try
+    XMLDoc.Active := True;
+    ReadIntf(RootNode, IntfID);
+  except
+    on E: Exception do
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, CfgID, 'read', E.Message], Self);
+  end;
+end;
+
+procedure TsmxStateCfg.Write;
+begin
+  inherited Write;
+  WriteIntf(RootNode, IntfID);
+end;
+
+procedure TsmxStateCfg.ReadIntf(const Node: IXMLNode; ID: Integer);
+
+  procedure AddItems(const ANode: IXMLNode; AItem: TsmxStateKitItem);
+  var
+    i: Integer;
+    Item: TsmxStateKitItem;
+  begin
+    Item := AItem.FindByCfgID(ANode.Attributes['StateID']);
+    if not Assigned(Item) then
+      Item := AItem.Add;
+    Item.CurrentIntfID := ID;
+    Item.FCfgID := ANode.Attributes['CfgID'];
+    Item.FItemEnabled := ANode.Attributes['ItemEnabled']; //SysUtils.StrToBool(ANode.Attributes['ItemEnabled']);
+    Item.FItemVisible := ANode.Attributes['ItemVisible']; //SysUtils.StrToBool(ANode.Attributes['ItemVisible']);
+    for i := 0 to ANode.ChildNodes.Count - 1 do
+      if ANode.ChildNodes[i].NodeName = 'Cell' then
+        AddItems(ANode.ChildNodes[i], Item);
+  end;
+
+var
+  n, n2: IXMLNode;
+  i, j: Integer;
+  State: TsmxCellState;
+begin
+  //inherited ReadIntf(Node, ID);
+  n := Node.ChildNodes.FindNode('States');
+  if Assigned(n) and (n.ChildNodes.Count > 0) then
+  begin
+    for i := 0 to n.ChildNodes.Count - 1 do
+      if n.ChildNodes[i].NodeName = 'State' then
+      begin
+        State := CellStates.FindByStateID(n.ChildNodes[i].Attributes['StateID']);
+        if not Assigned(State) then
+        begin
+          State := CellStates.Add;
+          State.StateID := n.ChildNodes[i].Attributes['StateID'];
+          State.StateKit.IntfID := IntfID;
+        end;
+        n2 := n.ChildNodes[i].ChildNodes.FindNode('Cells');
+        if Assigned(n2) and (n2.ChildNodes.Count > 0) then
+          for j := 0 to n2.ChildNodes.Count - 1 do
+            if n2.ChildNodes[j].NodeName = 'Cell' then
+              AddItems(n2.ChildNodes[j], State.StateKit.Root);
+      end;
+  end;
+end;
+
+procedure TsmxStateCfg.WriteIntf(const Node: IXMLNode; ID: Integer);
+
+  procedure AddNodes(const ANode: IXMLNode; AItem: TsmxStateKitItem);
+  var
+    n: IXMLNode;
+    i: Integer;
+  begin
+    if AItem.CurrentIntfID = ID then
+    begin
+      n := ANode.AddChild('Cell');
+      n.Attributes['CfgID'] := AItem.CfgID;
+      n.Attributes['Enabled'] := SysUtils.BoolToStr(AItem.ItemEnabled, True);
+      n.Attributes['Visible'] := SysUtils.BoolToStr(AItem.ItemVisible, True);
+    end;
+    for i := 0 to AItem.Count - 1 do
+      AddNodes(n, AItem[i]);
+  end;
+
+var
+  n, n2: IXMLNode;
+  i, j: Integer;
+begin
+  //inherited WriteIntf(Node, ID);
+  n := Node.AddChild('States');
+  for i := 0 to CellStates.Count - 1 do
+  begin
+    n2 := n.AddChild('State');
+    n2.Attributes['StateID'] := CellStates[i].StateID;
+    for j := 0 to CellStates[i].StateKit.Root.Count - 1 do
+      AddNodes(n2.AddChild('Cells'), CellStates[i].StateKit.Root[j]);
+  end;
+end;
+
+procedure TsmxStateCfg.Remove;
+var
+  //Request: IsmxDataSet;
+  //Performance: TsmxPerformanceMode;
+  Key: Variant;
+  KeySense: TsmxDataSense;
+begin
+  if not Assigned(DeleteDataSet)
+      or not ((FRecID <> 0) or ((CfgID <> 0) and (FIntfID <> 0))) then
+    raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, CfgID, 'remove'], Self);
+  //Request := FSelectRequest.DeleteDataSet; // ModifyRequests[mrDelete];
+  //Performance := FSelectRequest.DeletePerformance; // ModifyPerformances[mrDelete];
+  {if not Assigned(Request) then
+    raise EsmxCellError.CreateByComponent(@smxConsts.rsCfgActionError,
+      [ClassName, FCfgID, 'remove'], FCfgID);}
+  if FRecID = 0 then
+  begin
+    Key := Variants.VarArrayOf([CfgID, FIntfID]);
+    KeySense := dsForeignKey;
+  end else
+  begin
+    Key := FRecID;
+    KeySense := dsKey;
+  end;
+  if smxDBFuncs.SetValueByKey(DeleteDataSet, Key, Variants.Null, KeySense) then
+    FRecID := 0;
+end;
+
+procedure TsmxStateCfg.SetIntfID(Value: Integer);
+begin
+  FIntfID := Value;
+end;
+
+procedure TsmxStateCfg.SetRecID(Value: Integer);
+begin
+  FRecID := Value;
+end;
+
 { TsmxSimpleStateCfg }
 
-destructor TsmxSimpleStateCfg.Destroy;
+{destructor TsmxSimpleStateCfg.Destroy;
 begin
   if Assigned(FCellStates) then
     FCellStates.Free;
@@ -918,7 +1140,7 @@ begin
     for j := 0 to CellStates[i].StateKit.Root.Count - 1 do
       AddNodes(n2.AddChild('Cells'), CellStates[i].StateKit.Root[j]);
   end;
-end;
+end;}
 
 initialization
   Classes.RegisterClasses([TsmxTypeCfg, TsmxCellCfg, TsmxStateCfg]);
