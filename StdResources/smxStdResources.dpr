@@ -1,4 +1,4 @@
-library rImages;
+library smxStdResources;
 
 uses
   smxLibProcs,

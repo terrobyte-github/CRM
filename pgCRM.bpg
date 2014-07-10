@@ -9,9 +9,9 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = smxBaseRTL.bpl smxClassesRTL.bpl dADO.dll dBDE.dll rImages.dll \
-  smxStdProcs.dll smxStdClasses.dll smxVTRTL.bpl smxVTClasses.dll smxVTProcs.dll \
-  CRM.exe
+PROJECTS = smxBaseRTL.bpl smxClassesRTL.bpl dADO.dll dBDE.dll \
+  smxStdResources.dll smxStdProcs.dll smxStdClasses.dll smxVTRTL.bpl \
+  smxVTClasses.dll smxVTProcs.dll CRM.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ dADO.dll: dADO\dADO.dpr
 dBDE.dll: dBDE\dBDE.dpr
   $(DCC)
 
-rImages.dll: rImages\rImages.dpr
+smxStdResources.dll: StdResources\smxStdResources.dpr
   $(DCC)
 
 smxStdProcs.dll: StdProcs\smxStdProcs.dpr
