@@ -1,4 +1,4 @@
-library dBDE;
+library smxBDEDrivers;
 
 uses
   ComServ,

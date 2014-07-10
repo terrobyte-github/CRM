@@ -9,7 +9,7 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = smxBaseRTL.bpl smxClassesRTL.bpl dADO.dll dBDE.dll \
+PROJECTS = smxBaseRTL.bpl smxClassesRTL.bpl dADO.dll smxBDEDrivers.dll \
   smxStdResources.dll smxStdProcs.dll smxStdClasses.dll smxVTRTL.bpl \
   smxVTClasses.dll smxVTProcs.dll CRM.exe
 #------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ smxClassesRTL.bpl: ClassesRTL\smxClassesRTL.dpk
 dADO.dll: dADO\dADO.dpr
   $(DCC)
 
-dBDE.dll: dBDE\dBDE.dpr
+smxBDEDrivers.dll: BDEDrivers\smxBDEDrivers.dpr
   $(DCC)
 
 smxStdResources.dll: StdResources\smxStdResources.dpr
