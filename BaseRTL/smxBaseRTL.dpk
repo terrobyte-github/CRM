@@ -48,7 +48,7 @@ contains
   smxManagerIntf in '..\Common\smxManagerIntf.pas',
   smxBaseTypes in '..\Common\smxBaseTypes.pas',
   smxStdCtrls in 'smxStdCtrls.pas',
-  smxEditorIntf in '..\Common\smxEditorIntf.pas';
+  smxClassIntf in '..\Common\smxClassIntf.pas';
 
 end.
 

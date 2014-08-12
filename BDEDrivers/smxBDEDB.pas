@@ -89,12 +89,15 @@ type
 
   TsmxBDEParam = class(TsmxCustomParam, IsmxParam)
   private
-    FParam: TParam;
+    //FParam: TParam;
     //FLocation: TsmxParamLocation;
     //FDataSet: TObject;
     //FDataSetIntf: IsmxDataSet;
     //function GetParam: TParam;
   protected
+    FParam: TParam;
+    procedure ChangeObjectIndex(Value: Integer); override;
+    procedure ChangeObjectOwner(Value: TPersistent); override;
     //function GetDataType: TsmxDataType;
     function GetInternalRef: Pointer; override;
     //function GetNumericScale: Integer;
@@ -123,7 +126,7 @@ type
     //procedure SetParamLocation(Value: TsmxParamLocation);
     //function GetDataSet: IsmxDataSet;
 
-    property Param: TParam read FParam write FParam;
+    //property Param: TParam read FParam write FParam;
   public
     //constructor Create(Param: TParam; DataSet: TsmxCustomDataSet);
     //destructor Destroy; override;
@@ -148,6 +151,13 @@ type
     //property ParamLocation: TsmxParamLocation read GetParamLocation write SetParamLocation;
     //property IsBlob: Boolean read GetIsBlob;
     //property DataSet: IsmxDataSet read GetDataSet;
+  published
+    property DataType;
+    property NumericScale;
+    property ParamType;
+    property Precision;
+    property Size;
+    property Value;
   end;
 
   { TsmxQuery }
@@ -188,6 +198,7 @@ type
     //function GetFieldCount: Integer;
     //function GetIsDataSet: Boolean;
     //function GetInternalDataSetClass: TComponentClass; override;
+
     //function GetParam(Index: Integer): IsmxParam;
     //function GetParamCount: Integer;
     //function GetParamIntf(Param: TParam): IsmxParam; virtual;
@@ -206,9 +217,9 @@ type
     //procedure SetSQL(Value: TStrings); //virtual;
     procedure SetSQLText(const Value: String);
     //procedure SetDataSetType(Value: TsmxDataSetType); virtual;
-    function GetParamIntfClass: TsmxCustomParamClass; override;
-    procedure CreateInternalParam(Param: TsmxCustomParam); override;
-    procedure DestroyInternalParam(Param: TsmxCustomParam); override;
+    function GetParamClass: TsmxInterfacedPersistentClass; override;
+    //procedure CreateInternalParam(Param: TsmxCustomParam); override;
+    //procedure DestroyInternalParam(Param: TsmxCustomParam); override;
 
     //property ProcSQL: TStrings read GetProcSQL;
     //property SenseList: TsmxSenseKit read GetSenseList;
@@ -225,6 +236,8 @@ type
     //procedure ClearFields;
     //procedure ClearParams; override;
     //function CreateStreamField(const Value: IsmxField): TStream;
+    procedure CreateInternalParam(Param: TsmxCustomParam); override;
+    procedure DestroyInternalParam(Param: TsmxCustomParam); override;
     //procedure Close;
     procedure Execute; override;
     //function FieldByName(const AFieldName: String): IsmxField;
@@ -311,9 +324,9 @@ type
     procedure SetPrepare(Value: Boolean); //virtual;
     //procedure SetSQL(Value: TStrings);
     procedure SetSQLText(const Value: String);
-    function GetParamIntfClass: TsmxCustomParamClass; override;
-    procedure CreateInternalParam(Param: TsmxCustomParam); override;
-    procedure DestroyInternalParam(Param: TsmxCustomParam); override;
+    function GetParamClass: TsmxInterfacedPersistentClass; override;
+    //procedure CreateInternalParam(Param: TsmxCustomParam); override;
+    //procedure DestroyInternalParam(Param: TsmxCustomParam); override;
 
     //property ProcSQL: TStrings read GetProcSQL;
     property InternalParams: TParams read GetInternalParams;
@@ -323,6 +336,8 @@ type
     //function AddParam(DataType: TsmxDataType): IsmxParam;
     procedure AssignDataSet(const Source: IsmxDataSet); override;
     //procedure ClearParams; override;
+    procedure CreateInternalParam(Param: TsmxCustomParam); override;
+    procedure DestroyInternalParam(Param: TsmxCustomParam); override;
     procedure Execute; override;
     //function FindParam(const ParamName: String): IsmxParam;
     //function ParamByName(const ParamName: String): IsmxParam;
@@ -555,7 +570,9 @@ end;}
 begin
   //FDataSetIntf := nil;
   //FParam := nil;
-  FNotificationIntf := nil;
+  //FNotificationIntf := nil;
+  if Assigned(FParam) then
+    FParam.Free;
   inherited Destroy;
 end;}
 
@@ -614,7 +631,7 @@ begin
     //else
     //  Value := AParam.Value;
     NumericScale := Source.NumericScale;
-    ParamName := Source.ParamName;
+    //ParamName := Source.ParamName;
     ParamType := Source.ParamType;
     Precision := Source.Precision;
     //ParamLocation := Source.ParamLocation;
@@ -645,12 +662,41 @@ begin
   begin
     DataType := Source.DataType;
     Value := Source.Value;
-    ParamName := Source.FieldName;
+    //ParamName := Source.FieldName;
     Size := Source.Size;
     if Source.DataType in [ftBCD, ftFMTBcd] then
       NumericScale := Source.Size;
+    Precision := Source.Precision;
   end;
 end;}
+
+procedure TsmxBDEParam.ChangeObjectIndex(Value: Integer);
+begin
+  inherited ChangeObjectIndex(Value);
+  if Assigned(FParam) then
+    FParam.Index := Value;
+end;
+
+procedure TsmxBDEParam.ChangeObjectOwner(Value: TPersistent);
+begin
+  if InternalDataSet is TsmxDataSet then
+  begin
+    TsmxDataSet(InternalDataSet).DestroyInternalParam(Self);
+  end;
+  inherited ChangeObjectOwner(Value);
+  if InternalDataSet is TsmxDataSet then
+  begin
+    TsmxDataSet(InternalDataSet).CreateInternalParam(Self);
+
+    SetDataType(GetDataType);
+    SetNumericScale(GetNumericScale);
+    SetParamName(GetParamName);
+    SetParamType(GetParamType);
+    SetPrecision(GetPrecision);
+    SetSize(GetSize);
+    SetValue(GetValue);
+  end;
+end;
 
 {function TsmxBDEParam.GetDataType: TsmxDataType;
 begin
@@ -661,7 +707,7 @@ end;}
 
 function TsmxBDEParam.GetInternalRef: Pointer;
 begin
-  Result := Pointer(Param);
+  Result := Pointer(FParam);
 end;
 
 {function TsmxBDEParam.GetNumericScale: Integer;
@@ -673,9 +719,19 @@ end;}
 
 {function TsmxBDEParam.GetParam: TParam;
 begin
-  if TObject(InternalRef) is TParam then
-    Result := TParam(InternalRef) else
-    Result := nil;
+  //if TObject(InternalRef) is TParam then
+    //Result := TParam(InternalRef) else
+    //Result := nil;
+  if not Assigned(FParam) then
+  begin
+    //if InternalDataSet is TsmxBDEQuery then
+      //FParam := TParam.Create(TsmxBDEQuery(InternalDataSet).InternalParams) else
+    //if InternalDataSet is TsmxBDEStoredProc then
+      //FParam := TParam.Create(TsmxBDEStoredProc(InternalDataSet).InternalParams) else
+      FParam := TParam.Create(nil);
+      SetInternalDataSet(GetInternalDataSet);
+  end;
+  Result := FParam;
 end;}
 
 {function TsmxBDEParam.GetParamName: String;
@@ -720,7 +776,7 @@ end;*)
 begin
   if Assigned(Param) then
     Result := Param.Precision else
-    Result := 0;
+    Result := 0
 end;}
 
 {function TsmxBDEParam.GetReference: Pointer;
@@ -752,25 +808,25 @@ var
   Str: String;
 begin
   //FParam.LoadFromStream(Stream, ftBlob);
-  if Assigned(Param) then
+  if Assigned(FParam) then
   begin
     smxProcs.StreamToStr(Stream, Str);
-    Param.Value := Str;
+    FParam.Value := Str;
   end;
 end;
 
 procedure TsmxBDEParam.SetDataType(Value: TsmxDataType);
 begin
   inherited SetDataType(Value);
-  if Assigned(Param) then
-    Param.DataType := Value;
+  if Assigned(FParam) then
+    FParam.DataType := Value;
 end;
 
 procedure TsmxBDEParam.SetNumericScale(Value: Integer);
 begin
   inherited SetNumericScale(Value);
-  if Assigned(Param) then
-    Param.NumericScale := Value;
+  if Assigned(FParam) then
+    FParam.NumericScale := Value;
 end;
 
 procedure TsmxBDEParam.SetParamName(const Value: String);
@@ -783,8 +839,8 @@ begin
     InternalDataSet.LocationList.Locations[ParamName] :=
       plConst;
   end;}
-  if Assigned(Param) then
-    Param.Name := Value;
+  if Assigned(FParam) then
+    FParam.Name := Value;
 end;
 
 procedure TsmxBDEParam.SetParamType(Value: TsmxParamType);
@@ -802,35 +858,35 @@ begin
   end;}
   //FParam.Direction := TypeToDirection[Value];
   inherited SetParamType(Value);
-  if Assigned(Param) then
-    Param.ParamType := TParamType(Value);
+  if Assigned(FParam) then
+    FParam.ParamType := TParamType(Value);
 end;
 
 procedure TsmxBDEParam.SetPrecision(Value: Integer);
 begin
   inherited SetPrecision(Value);
-  if Assigned(Param) then
-    Param.Precision := Value;
+  if Assigned(FParam) then
+    FParam.Precision := Value;
 end;
 
 procedure TsmxBDEParam.SetSize(Value: Integer);
 begin
   inherited SetSize(Value);
-  if Assigned(Param) then
-    Param.Size := Value;
+  if Assigned(FParam) then
+    FParam.Size := Value;
 end;
 
 procedure TsmxBDEParam.SetValue(const Value: Variant);
 begin
   inherited SetValue(Value);
-  if Assigned(Param) then
-    Param.Value := Value;
+  if Assigned(FParam) then
+    FParam.Value := Value;
 end;
 
 procedure TsmxBDEParam.SaveToStream(Stream: TStream);
 begin
-  if Assigned(Param) then
-    smxProcs.StrToStream(Param.Value, Stream);
+  if Assigned(FParam) then
+    smxProcs.StrToStream(FParam.Value, Stream);
 end;
 
 {function TsmxBDEParam.GetParamLocation: TsmxParamLocation;
@@ -851,21 +907,27 @@ end;}
 {procedure TsmxBDEParam.Clear;
 begin
   inherited Clear;
-  if Assigned(Param) then
-    Param.Clear;
+  //Assigned(Param) then
+    //Param.Clear;
+  DataType := ftUnknown;
+  NumericScale := 0;
+  ParamType := ptUnknown;
+  Precision := 0;
+  Size := 0;
+  Value := Variants.Null;
 end;}
 
 function TsmxBDEParam.IsBlob: Boolean;
 begin
-  if Assigned(Param) then
-    Result := smxDBFuncs.IsBlobType(Param.DataType, Param.Size) else
+  if Assigned(FParam) then
+    Result := smxDBFuncs.IsBlobType(FParam.DataType, FParam.Size) else
     Result := False;
 end;
 
 function TsmxBDEParam.IsNull: Boolean;
 begin
-  if Assigned(Param) then
-    Result := Param.IsNull else
+  if Assigned(FParam) then
+    Result := FParam.IsNull else
     Result := False;
 end;
 
@@ -934,6 +996,9 @@ begin
     FParams.Free;
   if Assigned(FQuery) then
     FQuery.Free;
+  //if Assigned(FInternalDataSet) then
+    //FInternalDataSet.Free;
+  //inherited Destroy;
 end;
 
 {procedure TsmxBDEQuery.CreateDataSet;
@@ -1335,9 +1400,12 @@ begin
   FBDEDataSet.Active := Value;
 end;}
 
+//type
+  //_TDBDataSet = class(TDBDataSet);
 procedure TsmxBDEQuery.SetDatabase(const Value: IsmxDatabase);
 //var
   //Database: TObject;
+  //dbf: TDBFlags;
 begin
   {if FDatabaseIntf <> Value then
   begin
@@ -1351,7 +1419,14 @@ begin
       raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
   end;}
   if Assigned(Database) then
+  begin
+    //dbf := _TDBDataSet(InternalQuery).DBFlags;
+    //if dbfOpened in dbf then
+      //inf('yes');
+    InternalQuery.Close;
+    InternalQuery.UnPrepare;
     InternalQuery.DatabaseName := '';
+  end;
   inherited SetDatabase(Value);
   if Assigned(Database) then
     if TObject(Database.GetInternalRef) is TDatabase then
@@ -1524,11 +1599,12 @@ end;
 function TsmxBDEQuery.GetInternalQuery: TQuery;
 begin
   if not Assigned(FQuery) then
-  begin
+  //if not Assigned(FInternalDataSet) then
+  //begin
     FQuery := TQuery.Create(nil);
     //FQuery.ParamCheck := False;
     //FQuery.RequestLive := True;
-  end;
+  //end;
   Result := FQuery;
 end;
 
@@ -1541,21 +1617,21 @@ end;}
 procedure TsmxBDEQuery.CreateInternalParam(Param: TsmxCustomParam);
 begin
   if Param is TsmxBDEParam then
-    if not Assigned(TsmxBDEParam(Param).Param) then
-      TsmxBDEParam(Param).Param := TParam.Create(InternalParams);
+    if not Assigned(TsmxBDEParam(Param).FParam) then
+      TsmxBDEParam(Param).FParam := TParam.Create(InternalParams);
 end;
 
 procedure TsmxBDEQuery.DestroyInternalParam(Param: TsmxCustomParam);
 begin
   if Param is TsmxBDEParam then
-    if Assigned(TsmxBDEParam(Param).Param) then
+    if Assigned(TsmxBDEParam(Param).FParam) then
     begin
-      TsmxBDEParam(Param).Param.Free;
-      TsmxBDEParam(Param).Param := nil;
+      TsmxBDEParam(Param).FParam.Free;
+      TsmxBDEParam(Param).FParam := nil;
     end;
 end;
 
-function TsmxBDEQuery.GetParamIntfClass: TsmxCustomParamClass;
+function TsmxBDEQuery.GetParamClass: TsmxInterfacedPersistentClass;
 begin
   Result := TsmxBDEParam;
 end;
@@ -1737,6 +1813,9 @@ begin
     FParams.Free;
   if Assigned(FStoredProc) then
     FStoredProc.Free;
+  //if Assigned(FInternalDataSet) then
+    //FInternalDataSet.Free;
+  //inherited Destroy;
 end;
 
 {procedure TsmxBDEQuery.CreateDataSet;
@@ -2144,7 +2223,11 @@ begin
       raise EsmxDBInterfaceError.CreateRes(@SDBIntfDatabaseInvalid);
   end;}
   if Assigned(Database) then
+  begin
+    InternalStoredProc.Close;
+    InternalStoredProc.UnPrepare;
     InternalStoredProc.DatabaseName := '';
+  end;
   inherited SetDatabase(Value);
   if Assigned(Database) then
     if TObject(Database.GetInternalRef) is TDatabase then
@@ -2302,21 +2385,21 @@ end;}
 procedure TsmxBDEStoredProc.CreateInternalParam(Param: TsmxCustomParam);
 begin
   if Param is TsmxBDEParam then
-    if not Assigned(TsmxBDEParam(Param).Param) then
-      TsmxBDEParam(Param).Param := TParam.Create(InternalParams);
+    if not Assigned(TsmxBDEParam(Param).FParam) then
+      TsmxBDEParam(Param).FParam := TParam.Create(InternalParams);
 end;
 
 procedure TsmxBDEStoredProc.DestroyInternalParam(Param: TsmxCustomParam);
 begin
   if Param is TsmxBDEParam then
-    if Assigned(TsmxBDEParam(Param).Param) then
+    if Assigned(TsmxBDEParam(Param).FParam) then
     begin
-      TsmxBDEParam(Param).Param.Free;
-      TsmxBDEParam(Param).Param := nil;
+      TsmxBDEParam(Param).FParam.Free;
+      TsmxBDEParam(Param).FParam := nil;
     end;
 end;
 
-function TsmxBDEStoredProc.GetParamIntfClass: TsmxCustomParamClass;
+function TsmxBDEStoredProc.GetParamClass: TsmxInterfacedPersistentClass;
 begin
   Result := TsmxBDEParam;
 end;

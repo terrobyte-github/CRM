@@ -491,8 +491,8 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
         //IClsName := n.Attributes[smxConsts.cIClassNameAttributeName];
         CfgID := n.Attributes[smxConsts.cCfgIDAttributeName];
         Cell := TsmxOwnerCell(ACell).SlaveList.Add(
-          TsmxOwnerCellClass(Classes.FindClass(ClsName)){,
-          TsmxInterfacedPersistentClass(Classes.GetClass(IClsName))}).Slave;
+          TsmxBaseCellClass(Classes.FindClass(ClsName)){,
+          TsmxInterfacedPersistentClass(Classes.GetClass(IClsName))}).ItemObject;
         Cell.CfgID := CfgID;
         ReadProps(AOwner, Cell, n, AResolvedList);
       end;

@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Controls, Graphics, VirtualTrees, Types, Messages, StdCtrls,
-  smxBaseClasses, smxClasses, smxTypes, smxBaseTypes, smxEditorIntf;
+  smxBaseClasses, smxClasses, smxTypes, smxBaseTypes, smxClassIntf;
 
 type
   { TsmxVTColumn }
@@ -57,7 +57,7 @@ type
     procedure SetHeaderCaption(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
-    procedure ChangeSlaveIndex(Value: Integer); override;
+    procedure ChangeObjectIndex(Value: Integer); override;
 
     property VTColumn: TVirtualTreeColumn read GetVTColumn;
     property VTColumnFont: TFont read GetVTColumnFont;
@@ -120,7 +120,7 @@ type
 
   { TsmxVTEditor }
 
-  TsmxVTEditor = class(TsmxInterfacedPersistent, IsmxOuterEditor, IVTEditLink)
+  TsmxVTEditor = class(TsmxInterfacedPersistent, IsmxOuterEditor, IsmxTreeEditor, IVTEditLink)
   private
     FControl: TWinControl;
     FTree: TVirtualStringTree;
@@ -206,7 +206,7 @@ type
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
     function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
     //procedure ResetCellProps; override;
@@ -301,13 +301,13 @@ type
     function GetFocusedRowIndex: Pointer; override;
     function GetFocusedColIndex: Integer; override;
     function GetInternalRef: Pointer; override;
-    function GetEditor: IsmxOuterEditor; override;
+    function GetEditor: IsmxTreeEditor; override;
     //function GetEditorClass: TsmxInterfacedPersistentClass; override;
     function GetParentRow(RowIndex: Pointer): Pointer; override;
     function GetRootRow: Pointer; override;
     function GetRow(RowIndex: Pointer; Index: Integer): Pointer; override;
     function GetRowCount(RowIndex: Pointer): Integer; override;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     function GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String; override;
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; override;
     //procedure InternalPrepare; override;
@@ -831,7 +831,7 @@ begin
   end;
 end;}
 
-procedure TsmxVTColumn.ChangeSlaveIndex(Value: Integer);
+procedure TsmxVTColumn.ChangeObjectIndex(Value: Integer);
 begin
   VTColumn.Index := Value;
 end;
@@ -1313,7 +1313,7 @@ begin
     VTGrid.RootNodeCount := Value;
 end;
 
-function TsmxVTGrid.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxVTGrid.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxVTColumn;
 end;
@@ -1972,11 +1972,11 @@ begin
   Result := Pointer(VTTree);
 end;
 
-function TsmxVTTree.GetEditor: IsmxOuterEditor;
+function TsmxVTTree.GetEditor: IsmxTreeEditor;
 begin
   if not Assigned(FEditor) then
     FEditor := TsmxVTEditor.Create(Self as IsmxRefComponent);
-  Result := FEditor as IsmxOuterEditor;
+  Result := FEditor as IsmxTreeEditor;
 end;
 
 {function TsmxVTTree.GetEditorClass: TsmxInterfacedPersistentClass;
@@ -2032,7 +2032,7 @@ begin
     VTTree.ChildCount[RowIndex] := Value;
 end;
 
-function TsmxVTTree.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxVTTree.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxVTColumn;
 end;

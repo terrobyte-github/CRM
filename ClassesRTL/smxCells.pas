@@ -51,7 +51,7 @@ type
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     //procedure SetLibraryManager(Value: TsmxCustomLibraryManager); override;
-    procedure ChangeSlaveIndex(Value: Integer); override;
+    procedure ChangeObjectIndex(Value: Integer); override;
 
     property Action: TAction read GetAction;
   public
@@ -743,7 +743,7 @@ begin
     @FLibProc := LibraryManager.GetProcedure(Cfg.AlgLibrary, Cfg.AlgProcedure);
 end;}
 
-procedure TsmxAction.ChangeSlaveIndex(Value: Integer);
+procedure TsmxAction.ChangeObjectIndex(Value: Integer);
 begin
   //inherited SetSlaveIndex(Value);
   Action.Index := Value;

@@ -14,16 +14,16 @@ interface
 
 uses
   Classes, Controls, ImgList, Graphics, TypInfo, XMLIntf, smxBaseClasses,
-  smxTypes, smxDBIntf, smxManagerIntf, smxBaseIntf, smxBaseTypes, smxEditorIntf;
+  smxTypes, smxDBIntf, smxManagerIntf, smxBaseIntf, smxBaseTypes, smxClassIntf;
 
 type
   { EsmxCellError }
 
-  EsmxCellError = class(EsmxCfgError)
+  EsmxCellError = class(EsmxComponentError)
   {private
     FCfgID: Integer;}
   protected
-    function GetCfgID: Integer; override;
+    function GetCfgID: Integer; virtual;
   {public
     constructor CreateByCfgID(Ident: Integer;
       const Args: array of const; CfgID: Integer); overload;
@@ -441,69 +441,73 @@ type
 
   TsmxOwnerCell = class;
 
-  TsmxOwnerCellClass = class of TsmxOwnerCell;
+  //TsmxBaseCellClass = class of TsmxOwnerCell;
 
   TsmxSlaveList = class;
 
-  TsmxSlaveItem = class(TsmxKitItem)
+  TsmxSlaveItem = class(TsmxObjectItem)
   private
-    FSlave: TsmxOwnerCell;
-    //FCellClass: TsmxOwnerCellClass;
+    //FSlave: TsmxOwnerCell;
+    //FCellClass: TsmxBaseCellClass;
     //FImplementorClass: TsmxInterfacedPersistentClass;
     function GetKit: TsmxSlaveList;
     procedure SetKit(Value: TsmxSlaveList);
-    procedure SetSlave(Value: TsmxOwnerCell);
-  protected
-    procedure AddSlave(CellClass: TsmxOwnerCellClass = nil{; const Implementor: IsmxRefInterface = nil}); virtual;
-    procedure DelSlave; virtual;
-    function GetDisplayName: String; override;
-    function GetDisplayObject: TObject; override;
-    procedure SetIndex(Value: Integer); override;
+    //procedure SetSlave(Value: TsmxOwnerCell);
+    function GetItemObject: TsmxOwnerCell;
+    procedure SetItemObject(Value: TsmxOwnerCell);
+  //protected
+    //procedure AddSlave(CellClass: TsmxBaseCellClass = nil{; const Implementor: IsmxRefInterface = nil}); virtual;
+    //procedure AddObject(ObjectClass: TsmxBaseCellClass); reintroduce; overload; virtual;
+    //procedure DelSlave; virtual;
+    //function GetDisplayName: String; override;
+    //function GetDisplayObject: TObject; override;
+    //procedure SetIndex(Value: Integer); override;
   public
-    constructor Create(AKit: TsmxKit); overload; override;
+    //constructor Create(AKit: TsmxKit); overload; override;
     //constructor Create(AKit: TsmxKit; const AImplementor: IsmxRefInterface); reintroduce; overload; virtual;
-    constructor Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass); reintroduce; overload; virtual;
-    //constructor Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass;
+    //constructor Create(AKit: TsmxKit; AObjectClass: TsmxBaseCellClass); reintroduce; overload; virtual;
+    //constructor Create(AKit: TsmxKit; ACellClass: TsmxBaseCellClass;
       //AImplementorClass: TsmxInterfacedPersistentClass); reintroduce; overload; virtual;
-    destructor Destroy; override;
-    procedure Assign(Source: TsmxKitItem); override;
+    //destructor Destroy; override;
+    //procedure Assign(Source: TsmxKitItem); override;
 
     property Kit: TsmxSlaveList read GetKit write SetKit;
   //published
-    property Slave: TsmxOwnerCell read FSlave write SetSlave;
+    //property Slave: TsmxOwnerCell read FSlave write SetSlave;
+    property ItemObject: TsmxOwnerCell read GetItemObject write SetItemObject;
   end;
 
   TsmxSlaveItemClass = class of TsmxSlaveItem;
 
   { TsmxSlaveList }
-  { .TODO -oПоляков Александр :
-нужно всю логику переносить в TsmxOwnerCell
-Сам TsmxSlaveList сделать пустым }
-  TsmxSlaveList = class(TsmxKit)
+
+  TsmxSlaveList = class(TsmxObjectList)
   private
     //FOwner: TsmxOwnerCell;
     //FImplementor: IsmxRefInterface;
-    //FCellClass: TsmxOwnerCellClass;
+    //FCellClass: TsmxBaseCellClass;
     //FIsSetOwner: Boolean;
     function GetItem(Index: Integer): TsmxSlaveItem;
     procedure SetItem(Index: Integer; Value: TsmxSlaveItem);
-    function GetCellOwner: TsmxOwnerCell;
+    //function GetCellOwner: TsmxOwnerCell;
+    //function GetOwnerObjectInterface: IsmxMultipleObjectList;
   protected
     //function GetOwner: TObject; override;
-    //procedure GetSlaveVars(var CellClass: TsmxOwnerCellClass; var Implementor: IsmxRefInterface);
-    //procedure SetSlaveVars(CellClass: TsmxOwnerCellClass; const Implementor: IsmxRefInterface);
+    //procedure GetSlaveVars(var CellClass: TsmxBaseCellClass; var Implementor: IsmxRefInterface);
+    //procedure SetSlaveVars(CellClass: TsmxBaseCellClass; const Implementor: IsmxRefInterface);
 
-    property CellOwner: TsmxOwnerCell read GetCellOwner;// write FOwner;
+    //property CellOwner: TsmxOwnerCell read GetCellOwner;// write FOwner;
     //property IsSetOwner: Boolean read FIsSetOwner write FIsSetOwner;
+    //property OwnerObjectInterface: IsmxMultipleObjectList read GetOwnerObjectInterface;
   public
     //constructor Create(AOwner: TObject; AItemClass: TsmxKitItemClass); override; {overload; virtual;}
     //constructor Create(AOwner: TPersistent); {reintroduce;} overload; virtual;
 
     function Add: TsmxSlaveItem; overload;
     //function Add(const AImplementor: IsmxRefInterface): TsmxSlaveItem; overload;
-    //function Add(ACellClass: TsmxOwnerCellClass): TsmxSlaveItem; overload;
-    function Add(CellClass: TsmxOwnerCellClass{; ImplementorClass: TsmxInterfacedPersistentClass}): TsmxSlaveItem; overload;
-    procedure Assign(Source: TsmxKit); override;
+    //function Add(ACellClass: TsmxBaseCellClass): TsmxSlaveItem; overload;
+    function Add(ObjectClass: TPersistentClass): TsmxSlaveItem; overload;
+    //procedure Assign(Source: TsmxKit); override;
     //function IndexOfSlave(Slave: TsmxOwnerCell): Integer;
     //function FindSlave(Slave: TsmxOwnerCell): TsmxSlaveItem;
     //function FindBySlave(Slave: TsmxOwnerCell): TsmxSlaveItem;
@@ -518,9 +522,9 @@ type
 
   { TsmxOwnerCell }
 
-  //TsmxOwnerCellClass = class of TsmxOwnerCell;
+  //TsmxBaseCellClass = class of TsmxOwnerCell;
 
-  TsmxOwnerCell = class(TsmxBaseCell)
+  TsmxOwnerCell = class(TsmxBaseCell, IsmxObjectItem, IsmxObjectList)
   private
     FCellOwner: TsmxOwnerCell;
     //FIsAltSlaveClass: Boolean;
@@ -529,7 +533,6 @@ type
     //FSlaveList: TList;
     //FSlaveName: String;
     FSlaveList: TsmxSlaveList;
-    FSlaveItem: TsmxSlaveItem;
     function GetSlave(Index: Integer): TsmxOwnerCell;
     function GetSlaveCount: Integer;
     //function GetSlaveList: TList;
@@ -541,17 +544,18 @@ type
     procedure SetSlaveIndex(Value: Integer);
     function GetSlaveItem: TsmxSlaveItem;
   protected
-    procedure CreateSlave(Item: TsmxSlaveItem{var Slave: TsmxOwnerCell}{;
-      ImplementorClass: TsmxInterfacedPersistentClass}; CellClass: TsmxOwnerCellClass = nil); virtual;
-    procedure DestroySlave(Item: TsmxSlaveItem{var Slave: TsmxOwnerCell}); virtual;
+    FSlaveItem: TsmxSlaveItem;
+    procedure CreateObject(Item: TObject); overload; virtual;
+    procedure CreateObject(Item: TObject; ObjectClass: TPersistentClass); overload; virtual;
+    procedure DestroyObject(Item: TObject); virtual;
     function FindSlaveByInternalRef(Ref: Pointer): TsmxOwnerCell;
-    //function GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass; virtual;
+    //function GetAltSlaveClass(Index: Integer): TsmxBaseCellClass; virtual;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     //function GetIsWriteCell: Boolean; override;
-    function GetSlaveClass: TsmxOwnerCellClass; virtual;
-    procedure ChangeSlaveIndex(Value: Integer); virtual;
-    procedure ChangeCellOwner(Value: TsmxOwnerCell); virtual;
-    procedure CheckSlaveClass(CellClass: TsmxOwnerCellClass);
+    function GetSlaveClass: TsmxBaseCellClass; virtual;
+    procedure ChangeObjectIndex(Value: Integer); virtual;
+    procedure ChangeObjectOwner(Value: TPersistent); virtual;
+    procedure CheckObjectClass(ObjectClass: TPersistentClass);
     //procedure InternalInitialize; override;
     //procedure InternalFinalize; override;
     //procedure ResetCellProps; override;
@@ -572,7 +576,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     function AddSlave: TsmxOwnerCell;
-    function AddSlaveAsClass(CellClass: TsmxOwnerCellClass{; ImplementorClass: TsmxInterfacedPersistentClass}): TsmxOwnerCell;
+    function AddSlaveAsClass(CellClass: TsmxBaseCellClass{; ImplementorClass: TsmxInterfacedPersistentClass}): TsmxOwnerCell;
     procedure ClearSlaves;
     procedure DeleteSlave(Index: Integer);
     function FindSlaveByCfgID(CfgID: Integer): TsmxOwnerCell;
@@ -584,7 +588,7 @@ type
     //property IsAltSlaveClass: Boolean read FIsAltSlaveClass write SetIsAltSlaveClass;
     //property IsCreateSlaveWithOwner: Boolean read FIsCreateSlaveWithOwner write SetIsCreateSlaveWithOwner;
     property IsOwnerIsParent: Boolean read FIsOwnerIsParent write SetIsOwnerIsParent default True;
-    property SlaveClass: TsmxOwnerCellClass read GetSlaveClass;
+    property SlaveClass: TsmxBaseCellClass read GetSlaveClass;
     property SlaveCount: Integer read GetSlaveCount;
     property Slaves[Index: Integer]: TsmxOwnerCell read GetSlave write SetSlave; default;
     //property SlaveName: String read FSlaveName write SetSlaveName;
@@ -740,7 +744,7 @@ type
     function GetCellVisible: Boolean; virtual;
     function GetCellWidth: Integer; virtual;
     //function GetCfgClass: TsmxBaseCfgClass; override;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalBackup; virtual;
     procedure InternalDoubleSnap; virtual;
     //procedure InternalInitialize; override;
@@ -1029,7 +1033,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomAlgorithm;
     procedure SetSlave(Index: Integer; Value: TsmxCustomAlgorithm);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     //constructor Create(AOwner: TComponent); override;
     function AddSlave: TsmxCustomAlgorithm;
@@ -1149,7 +1153,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomRequest;
     procedure SetSlave(Index: Integer; Value: TsmxCustomRequest);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomRequest;
     function GetRequestParamValue(CfgID: Integer; const ParamName: String;
@@ -1220,7 +1224,7 @@ type
     procedure SetSlave(Index: Integer; Value: TsmxCustomColumn);
   protected
     function GetFocusedColIndex: Integer; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure SetFocusedColIndex(Value: Integer); virtual;
   public
     function AddSlave: TsmxCustomColumn;
@@ -1250,7 +1254,7 @@ type
     function GetFocusedRowIndex: Integer; virtual;
     function GetGridCaption(ColIndex, RowIndex: Integer): String; virtual;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; virtual;
-    //function GetSlaveClass: TsmxOwnerCellClass; override;
+    //function GetSlaveClass: TsmxBaseCellClass; override;
     function GetRowCount: Integer; virtual;
     procedure InternalApply; override;
     procedure InternalCancel; override;
@@ -1328,16 +1332,16 @@ type
     procedure DoEdited; virtual;
     procedure DoEditing; virtual;
     procedure DoExpand; virtual;
+    function GetEditor: IsmxTreeEditor; virtual;
     function GetExpanded(RowIndex: Pointer): Boolean; virtual;
     //function GetFocusedColIndex: Integer; virtual;
     function GetFocusedRowIndex: Pointer; virtual;
-    function GetEditor: IsmxOuterEditor; virtual;
     //function GetEditorClass: TsmxInterfacedPersistentClass; virtual;
     function GetParentRow(RowIndex: Pointer): Pointer; virtual;
     function GetRootRow: Pointer; virtual;
     function GetRow(RowIndex: Pointer; Index: Integer): Pointer; virtual;
     function GetRowCount(RowIndex: Pointer): Integer; virtual;
-    //function GetSlaveClass: TsmxOwnerCellClass; override;
+    //function GetSlaveClass: TsmxBaseCellClass; override;
     function GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String; virtual;
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; virtual;
     procedure InternalApply; override;
@@ -1371,10 +1375,10 @@ type
     procedure Expand;
     function RowLevel(RowIndex: Pointer): Integer; virtual;
 
+    property Editor: IsmxTreeEditor read GetEditor;
     property Expanded[RowIndex: Pointer]: Boolean read GetExpanded write SetExpanded;
     //property FocusedColIndex: Integer read GetFocusedColIndex write SetFocusedColIndex;
     property FocusedRowIndex: Pointer read GetFocusedRowIndex write SetFocusedRowIndex;
-    property Editor: IsmxOuterEditor read GetEditor;
     property ParentRow[RowIndex: Pointer]: Pointer read GetParentRow write SetParentRow;
     property Request: TsmxCustomRequest read FRequest write SetRequest;
     property RootRow: Pointer read GetRootRow;
@@ -1461,7 +1465,7 @@ type
     //procedure DoApply; virtual;
     //procedure DoPrepare; virtual;
     //procedure DoRefresh; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalApply; override;
     procedure InternalCancel; override;
     procedure InternalPrepare; override;
@@ -1523,7 +1527,7 @@ type
     procedure SetCellOwner(Value: TsmxCustomPageManager);
     procedure SetSlave(Index: Integer; Value: TsmxCustomSection);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomSection;
 
@@ -1544,7 +1548,7 @@ type
     function GetIsMultiLine: Boolean; virtual;
     function GetPageManagerStyle: TsmxPageManagerStyle; virtual;
     function GetPagePosition: TsmxPagePosition; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalChangePage; virtual;
     procedure SetActivePageIndex(Value: Integer); virtual;
     procedure SetIsMultiLine(Value: Boolean); virtual;
@@ -1576,7 +1580,7 @@ type
     function GetIsChecked: Boolean; virtual;
     function GetMenuItemHotKey: Integer; virtual;
     function GetMenuItemStyle: TsmxMenuItemStyle; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure SetAlgorithm(Value: TsmxCustomAlgorithm); override;
     procedure SetIsChecked(Value: Boolean); virtual;
     procedure SetMenuItemHotKey(Value: Integer); virtual;
@@ -1599,7 +1603,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomMenuItem;
     procedure SetSlave(Index: Integer; Value: TsmxCustomMenuItem);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomMenuItem;
 
@@ -1617,7 +1621,7 @@ type
     procedure SetCellOwner(Value: TsmxCustomPopupList);
     procedure SetSlave(Index: Integer; Value: TsmxCustomMenuItem);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomMenuItem;
 
@@ -1632,7 +1636,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomPopupMenu;
     procedure SetSlave(Index: Integer; Value: TsmxCustomPopupMenu);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomPopupMenu;
 
@@ -1673,7 +1677,7 @@ type
   protected
     function GetIsFlat: Boolean; virtual;
     function GetIsShowCaptions: Boolean; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure SetIsFlat(Value: Boolean); virtual;
     procedure SetIsShowCaptions(Value: Boolean); virtual;
   public
@@ -1693,7 +1697,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomToolBoard;
     procedure SetSlave(Index: Integer; Value: TsmxCustomToolBoard);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomToolBoard;
 
@@ -1734,7 +1738,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomStatusItem;
     procedure SetSlave(Index: Integer; Value: TsmxCustomStatusItem);
   protected
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomStatusItem;
 
@@ -1774,7 +1778,7 @@ type
     //function GetIsApplicationForm: Boolean; virtual;
     function GetIsMaximize: Boolean; virtual;
     function GetModalResult: TModalResult; virtual;
-    function GetSlaveClass: TsmxOwnerCellClass; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalActivate; virtual;
     procedure InternalClose; virtual;
     procedure InternalDeactivate; virtual;
@@ -1908,7 +1912,7 @@ begin
   if Component is TsmxBaseCell then
     Result := TsmxBaseCell(Component).CfgID
   else
-    Result := inherited GetCfgID;
+    Result := 0;
 end;
 
 { TsmxBaseCfg }
@@ -3481,7 +3485,7 @@ begin
   SetCellOwner(nil);
   if Assigned(FSlaveItem) then
   begin
-    FSlaveItem.FSlave := nil;
+    FSlaveItem.FItemObject := nil;
     FSlaveItem.Free;
   end;
   {if Assigned(FSlaveList) then
@@ -3494,7 +3498,7 @@ begin
   inherited Destroy;
 end;
 
-{function TsmxOwnerCell.Add(CellClass: TsmxOwnerCellClass = nil;
+{function TsmxOwnerCell.Add(CellClass: TsmxBaseCellClass = nil;
   ImplementorClass: TsmxInterfacedPersistentClass = nil): TsmxOwnerCell;
 begin
   if not Assigned(CellClass) then
@@ -3529,14 +3533,16 @@ begin
     //Result := Add(GetAltSlaveClass(SlaveList.Count), AImplementor) else
     //Result := Add(GetSlaveClass, AImplementor);
   //Result := SlaveList.Add(GetSlaveClass, nil).Slave;
-  Result := SlaveList.Add.Slave;
+  Result := SlaveList.Add.ItemObject;
 
   //Result := CreateSlave(GetSlaveClass, nil);
   //SlaveList.InsertSlave(Result);
 end;
 
-function TsmxOwnerCell.AddSlaveAsClass(CellClass: TsmxOwnerCellClass{;
+function TsmxOwnerCell.AddSlaveAsClass(CellClass: TsmxBaseCellClass{;
   ImplementorClass: TsmxInterfacedPersistentClass}): TsmxOwnerCell;
+var
+  s: String;
 begin
   //if CellClass.InheritsFrom(GetSlaveClass) then
   //begin
@@ -3547,7 +3553,10 @@ begin
     SlaveList.Add(Result);}
     //Result := Add(CellClass, AImplementor)
   //end
-    Result := SlaveList.Add(CellClass{, ImplementorClass}).Slave;
+    s := CellClass.ClassName;
+    if s <> '' then
+      s := '';
+    Result := SlaveList.Add(CellClass{, ImplementorClass}).ItemObject;
   //else
     //raise EsmxCellError.CreateResFmt(@smxConsts.rsListItemClassError,
       //[CellClass.ClassName, ClassName]);
@@ -3627,20 +3636,20 @@ end;
 
 function TsmxOwnerCell.GetSlave(Index: Integer): TsmxOwnerCell;
 begin
-  Result := SlaveList[Index].Slave;
+  Result := SlaveList[Index].ItemObject;
 end;
 
 procedure TsmxOwnerCell.SetSlave(Index: Integer; Value: TsmxOwnerCell);
 begin
-  SlaveList[Index].Slave := Value;
+  SlaveList[Index].ItemObject := Value;
 end;
 
-(*function TsmxOwnerCell.GetAltSlaveClass(Index: Integer): TsmxOwnerCellClass;
+(*function TsmxOwnerCell.GetAltSlaveClass(Index: Integer): TsmxBaseCellClass;
 begin
   Result := GetSlaveClass;
   if Cfg is TsmxOwnerCellCfg then
     if TsmxOwnerCellCfg(Cfg).SlaveCells.Count > Index then
-      Result := TsmxOwnerCellClass(smxClassFuncs.CfgIDToCellClass(
+      Result := TsmxBaseCellClass(smxClassFuncs.CfgIDToCellClass(
         TsmxOwnerCellCfg(Cfg).SlaveCells[Index].CfgID{, SelectRequest}));
 end;*)
 
@@ -3649,7 +3658,7 @@ begin
   Result := TsmxOwnerCellCfg;
 end;}
 
-function TsmxOwnerCell.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxOwnerCell.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxOwnerCell;
 end;
@@ -4161,7 +4170,7 @@ begin
   Result := TsmxControlCell(inherited AddSlave);
 end;
 
-{function TsmxControlCell.AddSlaveAsClass(SlaveClass: TsmxOwnerCellClass): TsmxControlCell;
+{function TsmxControlCell.AddSlaveAsClass(SlaveClass: TsmxBaseCellClass): TsmxControlCell;
 begin
   Result := TsmxControlCell(inherited AddSlaveAsClass(SlaveClass));
 end;}
@@ -4419,7 +4428,7 @@ begin
   Result := TsmxControlCellCfg;
 end;}
 
-function TsmxControlCell.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxControlCell.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxControlCell;
 end;
@@ -4621,51 +4630,77 @@ begin
   FIsSetAlgorithmProps := Value;
 end;}
 
-procedure TsmxOwnerCell.ChangeSlaveIndex(Value: Integer);
+procedure TsmxOwnerCell.ChangeObjectIndex(Value: Integer);
 begin
 end;
 
-procedure TsmxOwnerCell.CreateSlave(Item: TsmxSlaveItem{var Slave: TsmxOwnerCell}{;
-  ImplementorClass: TsmxInterfacedPersistentClass}; CellClass: TsmxOwnerCellClass = nil);
-var
-  AOwner: TComponent;
-  Slave: TsmxOwnerCell;
+procedure TsmxOwnerCell.CreateObject(Item: TObject);
+//var
+  //AOwner: TComponent;
+  //Slave: TsmxOwnerCell;
 begin
-  if Assigned(Owner) then
+  {if Assigned(Owner) then
     AOwner := Owner else
     AOwner := Self;
-  if Assigned(Item) then
-    if not Assigned(Item.FSlave) then
+  if Item is TsmxSlaveItem then
+    if not Assigned(TsmxSlaveItem(Item).FItemObject) then
     begin
-      if not Assigned(CellClass) then
-        CellClass := GetSlaveClass;
-      Slave := CellClass.Create({Self}AOwner{, ImplementorClass});
+      Slave := TsmxOwnerCell(GetSlaveClass.Create(AOwner));
       Slave.FCellOwner := Self;
       if FIsOwnerIsParent then
         Slave.CellParent := Self;
-      Slave.FSlaveItem := Item;
-      Item.FSlave := Slave;
+      Slave.FSlaveItem := TsmxSlaveItem(Item);
+      TsmxSlaveItem(Item).FItemObject := Slave;
+    end;}
+  CreateObject(Item, GetSlaveClass);
+end;
+
+procedure TsmxOwnerCell.CreateObject(Item: TObject; ObjectClass: TPersistentClass);
+var
+  AOwner: TComponent;
+  Slave: TsmxOwnerCell;
+  s2: String;
+begin
+  CheckObjectClass(ObjectClass);
+  if Assigned(Owner) then
+    AOwner := Owner else
+    AOwner := Self;
+  if Item is TsmxSlaveItem then
+    if not Assigned(TsmxSlaveItem(Item).FItemObject) then
+    begin
+      //if not Assigned(CellClass) then
+        //CellClass := GetSlaveClass;
+      s2 := ObjectClass.ClassName;
+      if s2 <> '' then
+        s2 := '';
+      Slave := TsmxOwnerCell(TsmxBaseCellClass(ObjectClass).Create(AOwner));
+      {Slave.FCellOwner := Self;
+      if FIsOwnerIsParent then
+        Slave.CellParent := Self;}
+      Slave.FSlaveItem := TsmxSlaveItem(Item);
+      TsmxSlaveItem(Item).FItemObject := Slave;
+      Slave.ChangeObjectOwner(Self);
     end;
 end;
 
-procedure TsmxOwnerCell.DestroySlave(Item: TsmxSlaveItem{var Slave: TsmxOwnerCell});
+procedure TsmxOwnerCell.DestroyObject(Item: TObject);
 var
   Slave: TsmxOwnerCell;
 begin
   {if FIsOwnerIsParent then
     Slave.CellParent := nil;
   Slave.FCellOwner := nil;}
-  if Assigned(Item) then
-    if Assigned(Item.FSlave) then
+  if Item is TsmxSlaveItem then
+    if Assigned(TsmxSlaveItem(Item).FItemObject) then
     begin
-      Slave := Item.FSlave;
-      Item.FSlave := nil;
+      Slave := TsmxOwnerCell(TsmxSlaveItem(Item).FItemObject);
+      TsmxSlaveItem(Item).FItemObject := nil;
       Slave.FSlaveItem := nil;
       Slave.Free;
     end;
 end;
 
-procedure TsmxOwnerCell.ChangeCellOwner(Value: TsmxOwnerCell);
+procedure TsmxOwnerCell.ChangeObjectOwner(Value: TPersistent);
 begin
   if Assigned(FCellOwner) then
   begin
@@ -4673,7 +4708,9 @@ begin
     if FIsOwnerIsParent then
       CellParent := nil;
   end;
-  FCellOwner := Value;
+  //if Value is TsmxOwnerCell then
+    //FCellOwner := TsmxOwnerCell(Value);
+  FCellOwner := Value as TsmxOwnerCell;
   if Assigned(FCellOwner) then
   begin
     //Index := FCellOwner.SlaveList.KitList.Add(Self);
@@ -4683,17 +4720,17 @@ begin
   end;
 end;
 
-procedure TsmxOwnerCell.CheckSlaveClass(CellClass: TsmxOwnerCellClass);
+procedure TsmxOwnerCell.CheckObjectClass(ObjectClass: TPersistentClass);
 var
-  SlaveClassName: String;
+  ObjectClassName: String;
 begin
-  if not Assigned(CellClass) or not CellClass.InheritsFrom(GetSlaveClass) then
+  if not Assigned(ObjectClass) or not ObjectClass.InheritsFrom(GetSlaveClass) then
   begin
-    if Assigned(CellClass) then
-      SlaveClassName := CellClass.ClassName else
-      SlaveClassName := 'nil';
+    if Assigned(ObjectClass) then
+      ObjectClassName := ObjectClass.ClassName else
+      ObjectClassName := 'nil';
     raise EsmxCellError.CreateResFmt(@smxConsts.rsListItemClassError,
-      [SlaveClassName, ClassName]);
+      [ObjectClassName, ClassName]);
   end;
 end;
 
@@ -4702,7 +4739,7 @@ begin
   if not Assigned(FSlaveItem) then
   begin
     FSlaveItem := TsmxSlaveItem.Create(nil);
-    FSlaveItem.FSlave := Self;
+    FSlaveItem.FItemObject := Self;
   end;
   Result := FSlaveItem;
 end;
@@ -4755,7 +4792,7 @@ begin
             ClsName := '';
           if ClsName <> '' then
           begin
-            Cell := AddSlaveAsClass(TsmxOwnerCellClass(Classes.FindClass(ClsName)));
+            Cell := AddSlaveAsClass(TsmxBaseCellClass(Classes.FindClass(ClsName)));
             TsmxCellCfg(SrcCfg).CurNode := n;
             TsmxCellCfg(SrcCfg).ReadCell(Cell);
           end;
@@ -5357,7 +5394,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomAlgorithmList.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomAlgorithmList.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomAlgorithm;
 end;
@@ -5608,7 +5645,7 @@ begin
   Result := FDataSetIntf;}
   if not Assigned(FDataSet) then
     FDataSet := GetDataSetClass.Create(nil, Self as IsmxBaseInterface);
-  Result := FDataSet as IsmxDataSet;  
+  Result := FDataSet as IsmxDataSet;
 end;
 
 function TsmxCustomRequest.GetDataSetClass: TsmxInterfacedComponentClass;
@@ -5820,7 +5857,7 @@ begin
   Result := False;
 end;
 
-function TsmxCustomRequestList.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomRequestList.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomRequest;
 end;
@@ -5993,7 +6030,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomColumns.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomColumns.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomColumn;
 end;
@@ -6119,7 +6156,7 @@ begin
   inherited Slaves[Index] := Value;
 end;}
 
-{function TsmxCustomGrid.GetSlaveClass: TsmxOwnerCellClass;
+{function TsmxCustomGrid.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomGridColumn;
 end;}
@@ -6313,7 +6350,7 @@ procedure TsmxCustomTree.SetFocusedRowIndex(Value: Pointer);
 begin
 end;
 
-function TsmxCustomTree.GetEditor: IsmxOuterEditor;
+function TsmxCustomTree.GetEditor: IsmxTreeEditor;
 begin
   Result := nil;
 end;
@@ -6365,7 +6402,7 @@ begin
   inherited Slaves[Index] := Value;
 end;}
 
-{function TsmxCustomTree.GetSlaveClass: TsmxOwnerCellClass;
+{function TsmxCustomTree.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomTreeColumn;
 end;}
@@ -6628,7 +6665,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomFilterDesk.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomFilterDesk.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomFilter;
 end;
@@ -6748,7 +6785,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomPage.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomPage.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomSection;
 end;
@@ -6832,7 +6869,7 @@ procedure TsmxCustomPageManager.SetPagePosition(Value: TsmxPagePosition);
 begin
 end;
 
-function TsmxCustomPageManager.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomPageManager.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomPage;
 end;
@@ -6902,7 +6939,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomMenuItem.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomMenuItem.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomMenuItem;
 end;
@@ -6931,7 +6968,7 @@ begin
   Slaves[Index] := Value;
 end;
 
-function TsmxCustomMainMenu.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomMainMenu.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomMenuItem;
 end;
@@ -6963,7 +7000,7 @@ begin
   Slaves[Index] := Value;
 end;
 
-function TsmxCustomPopupMenu.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomPopupMenu.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomMenuItem;
 end;
@@ -6985,7 +7022,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomPopupList.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomPopupList.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomPopupMenu;
 end;
@@ -7085,7 +7122,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomToolBoard.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomToolBoard.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomToolItem;
 end;
@@ -7107,7 +7144,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomControlBoard.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomControlBoard.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomToolBoard;
 end;
@@ -7185,7 +7222,7 @@ begin
   inherited Slaves[Index] := Value;
 end;
 
-function TsmxCustomStatusBoard.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomStatusBoard.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomStatusItem;
 end;
@@ -7736,22 +7773,22 @@ end;}
 
 { TsmxSlaveItem }
 
-constructor TsmxSlaveItem.Create(AKit: TsmxKit);
+(*constructor TsmxSlaveItem.Create(AKit: TsmxKit);
 begin
   inherited Create(AKit);
   AddSlave;
   {if Assigned(Kit) then
     if Kit.CellOwner then
       Kit.CellOwner.SlaveClass.Create();}
-end;
+end;*)
 
-constructor TsmxSlaveItem.Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass);
+{constructor TsmxSlaveItem.Create(AKit: TsmxKit; AObjectClass: TsmxBaseCellClass);
 begin
   inherited Create(AKit);
-  AddSlave(ACellClass);
-end;
+  AddObject(AObjectClass);
+end;}
 
-{constructor TsmxSlaveItem.Create(AKit: TsmxKit; ACellClass: TsmxOwnerCellClass;
+{constructor TsmxSlaveItem.Create(AKit: TsmxKit; ACellClass: TsmxBaseCellClass;
   AImplementorClass: TsmxInterfacedPersistentClass);
 begin
   inherited Create(AKit);
@@ -7766,19 +7803,19 @@ begin
   AddSlave(nil, AImplementor);
 end;}
 
-destructor TsmxSlaveItem.Destroy;
+(*destructor TsmxSlaveItem.Destroy;
 begin
   //FImplementor := nil;
   DelSlave;
   inherited Destroy;
   {if Assigned(FSlave) then
     FSlave.Free;}
-end;
+end;*)
 
-procedure TsmxSlaveItem.AddSlave(CellClass: TsmxOwnerCellClass = nil{;
+(*procedure TsmxSlaveItem.AddObject(ObjectClass: TsmxBaseCellClass {= nil}{;
   const Implementor: IsmxRefInterface = nil});
 //var
-  //CellClass: TsmxOwnerCellClass;
+  //CellClass: TsmxBaseCellClass;
   //Implementor: IsmxRefInterface;
 begin
   {if Assigned(FCellClass) then
@@ -7787,7 +7824,14 @@ begin
     if Assigned(Kit) then
       FSlave.ChangeCellOwner(Kit.Owner);
   end;}
+
   if Assigned(Kit) then
+    //if Assigned(Kit.OwnerObjectInterface) then
+    if Assigned(Kit.CellOwner) then
+      //Kit.OwnerObjectInterface.CreateObject(Self, CellClass);
+      Kit.CellOwner.CreateObject(Self, ObjectClass);*)
+
+  (*if Assigned(Kit) then
     if Assigned(Kit.CellOwner) then
       //if not Assigned(FSlave) then
       //begin
@@ -7804,10 +7848,10 @@ begin
         //FSlave.ChangeCellOwner(Kit.CellOwner);
         Kit.CellOwner.CreateSlave(Self{FSlave}, CellClass);
         //FSlave := Kit.Owner.CreateSlave(FCellClass, FImplementorClass);
-      //end;
-end;
+      //end;*)
+//end;
 
-procedure TsmxSlaveItem.DelSlave;
+(*procedure TsmxSlaveItem.DelSlave;
 begin
   {if Assigned(FSlave) then
   begin
@@ -7846,7 +7890,18 @@ begin
     Result := FSlave
   else
     Result := inherited GetDisplayObject;
+end;*)
+
+function TsmxSlaveItem.GetItemObject: TsmxOwnerCell;
+begin
+  Result := TsmxOwnerCell(inherited ItemObject);
 end;
+
+procedure TsmxSlaveItem.SetItemObject(Value: TsmxOwnerCell);
+begin
+  inherited ItemObject := Value;
+end;
+
 
 function TsmxSlaveItem.GetKit: TsmxSlaveList;
 begin
@@ -7855,20 +7910,20 @@ end;
 
 procedure TsmxSlaveItem.SetKit(Value: TsmxSlaveList);
 begin
-  if Assigned(Kit) then
+  {if Assigned(Kit) then
     //DelSlave;
     if Assigned(Kit.CellOwner) then
       if Assigned(FSlave) then
-        FSlave.ChangeCellOwner(nil);
+        FSlave.ChangeCellOwner(nil);}
   inherited Kit := Value;
-  if Assigned(Kit) then
+  {if Assigned(Kit) then
     //AddSlave;
     if Assigned(Kit.CellOwner) then
       if Assigned(FSlave) then
-        FSlave.ChangeCellOwner(Kit.CellOwner);
+        FSlave.ChangeCellOwner(Kit.CellOwner);}
 end;
 
-procedure TsmxSlaveItem.SetIndex(Value: Integer);
+{procedure TsmxSlaveItem.SetIndex(Value: Integer);
 begin
   inherited SetIndex(Value);
   if Assigned(FSlave) then
@@ -7879,7 +7934,7 @@ procedure TsmxSlaveItem.SetSlave(Value: TsmxOwnerCell);
 begin
   if Assigned(FSlave) then
     FSlave.Assign(Value);
-end;
+end;}
 
 { TsmxSlaveList }
 
@@ -7908,8 +7963,7 @@ begin
   FImplementor := AImplementor;
 end;}
 
-function TsmxSlaveList.Add(CellClass: TsmxOwnerCellClass{;
-  ImplementorClass: TsmxInterfacedPersistentClass}): TsmxSlaveItem;
+function TsmxSlaveList.Add(ObjectClass: TPersistentClass): TsmxSlaveItem;
 begin
   //SetSlaveVars(ACellClass, AImplementor);
   //Result := TsmxSlaveItem(inherited Add);
@@ -7922,29 +7976,34 @@ begin
     //CellOwner.CheckSlaveClass(CellClass);
 
   //Result := TsmxSlaveItem(inherited Add);
-  if Assigned(CellOwner) then
-    CellOwner.CheckSlaveClass(CellClass);
-  Result := TsmxSlaveItemClass(KitItemClass).Create(Self, CellClass);
-  KitList.Add(Result);
-  Change;
+  //if Assigned(CellOwner) then
+    //CellOwner.CheckObjectClass(ObjectClass);
+  //if Assigned(OwnerObjectInterface) then
+    //OwnerObjectInterface.CheckObjectClass(CellClass);
+  //Result := TsmxSlaveItemClass(KitItemClass).Create(Self, ObjectClass);
+  //KitList.Add(Result);
+  //Change;
+
+  Result := TsmxSlaveItem(inherited Add(ObjectClass));
+
 
   //if Assigned(CellOwner) then
     //Result.FSlave := CellOwner.CreateSlave(CellClass{, ImplementorClass});
 end;
 
-{function TsmxSlaveList.Add(ACellClass: TsmxOwnerCellClass): TsmxSlaveItem;
+{function TsmxSlaveList.Add(ACellClass: TsmxBaseCellClass): TsmxSlaveItem;
 begin
 
 end;}
 
-{procedure TsmxSlaveList.GetSlaveVars(var CellClass: TsmxOwnerCellClass;
+{procedure TsmxSlaveList.GetSlaveVars(var CellClass: TsmxBaseCellClass;
   var Implementor: IsmxRefInterface);
 begin
   CellClass := FCellClass;
   Implementor := FImplementor;
 end;
 
-procedure TsmxSlaveList.SetSlaveVars(CellClass: TsmxOwnerCellClass;
+procedure TsmxSlaveList.SetSlaveVars(CellClass: TsmxBaseCellClass;
   const Implementor: IsmxRefInterface);
 begin
   FCellClass := CellClass;
@@ -7960,6 +8019,14 @@ procedure TsmxSlaveList.SetItem(Index: Integer; Value: TsmxSlaveItem);
 begin
   inherited Items[Index] := Value;
 end;
+
+{function TsmxSlaveList.GetOwnerObjectInterface: IsmxMultipleObjectList;
+begin
+  if Assigned(Owner) then
+    Owner.GetInterface(IsmxMultipleObjectList, Result)
+  else
+    Result := nil;
+end;}
 
 {function TsmxSlaveList.GetOwner: TObject;
 begin
@@ -8006,7 +8073,7 @@ begin
   end;
 end;}
 
-procedure TsmxSlaveList.Assign(Source: TsmxKit);
+{procedure TsmxSlaveList.Assign(Source: TsmxKit);
 var
   i: Integer;
 begin
@@ -8014,14 +8081,13 @@ begin
   begin
     Clear;
     for i := 0 to Source.Count - 1 do
-      if Assigned(TsmxSlaveList(Source)[i].Slave) then
-        Add(TsmxOwnerCellClass(TsmxSlaveList(Source)[i].Slave.ClassType){,
-          TsmxSlaveList(Source)[i].Slave.ImplementorClass}).Assign(Source[i])
+      if Assigned(TsmxSlaveList(Source)[i].ItemObject) then
+        Add(TsmxBaseCellClass(TsmxSlaveList(Source)[i].ItemObject.ClassType)).Assign(Source[i])
       else
         Add.Assign(Source[i]);
   end else
     inherited Assign(Source);
-end;
+end;}
 
 {function TsmxSlaveList.InsertSlave(Slave: TsmxOwnerCell): Integer;
 var
@@ -8035,7 +8101,7 @@ begin
     ACellOwner := CellOwner;
     if Assigned(ACellOwner) then
     begin
-      ACellOwner.CheckSlaveClass(TsmxOwnerCellClass(Slave.ClassType));
+      ACellOwner.CheckSlaveClass(TsmxBaseCellClass(Slave.ClassType));
       OldIsSetOwner := FIsSetOwner;
       try
         FIsSetOwner := False;
@@ -8069,12 +8135,12 @@ begin
     Result := -1;
 end;}
 
-function TsmxSlaveList.GetCellOwner: TsmxOwnerCell;
+{function TsmxSlaveList.GetCellOwner: TsmxOwnerCell;
 begin
-  if {FIsSetOwner and (}Owner is TsmxOwnerCell{)} then
+  if Owner is TsmxOwnerCell then
     Result := TsmxOwnerCell(Owner) else
     Result := nil;
-end;
+end;}
 
 function TsmxCustomForm.AddSlave: TsmxCustomPageManager;
 begin
@@ -8086,7 +8152,7 @@ begin
   Result := TsmxCustomPageManager(inherited Slaves[Index]);
 end;
 
-function TsmxCustomForm.GetSlaveClass: TsmxOwnerCellClass;
+function TsmxCustomForm.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxCustomPageManager;
 end;
