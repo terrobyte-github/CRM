@@ -838,9 +838,9 @@ type
     FIsSetAlgorithmEvents: Boolean;
     FIsSetAlgorithmProps: Boolean;
   protected
-    function GetCellCaption: String; virtual;
+    function GetCellCaption: TCaption; virtual;
     function GetCellHint: String; virtual;
-    function GetCellImageIndex: Integer; virtual;
+    function GetCellImageIndex: TImageIndex; virtual;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     //procedure InternalInitialize; override;
     procedure InternalSnap; override;
@@ -849,18 +849,18 @@ type
     procedure SetAlgorithm(Value: TsmxCustomAlgorithm); virtual;
     procedure SetAlgorithmEvents(Alg: TsmxCustomAlgorithm); virtual;
     procedure SetAlgorithmProps(Alg: TsmxCustomAlgorithm); virtual;
-    procedure SetCellCaption(const Value: String); virtual;
+    procedure SetCellCaption(const Value: TCaption); virtual;
     procedure SetCellHint(const Value: String); virtual;
-    procedure SetCellImageIndex(Value: Integer); virtual;
+    procedure SetCellImageIndex(Value: TImageIndex); virtual;
     //procedure SetCellProps; override;
     procedure SetIsSetAlgorithmEvents(Value: Boolean); virtual;
     procedure SetIsSetAlgorithmProps(Value: Boolean); virtual;
   public
     procedure Assign(Source: TPersistent); override;
 
-    property CellCaption: String read GetCellCaption write SetCellCaption;
+    property CellCaption: TCaption read GetCellCaption write SetCellCaption;
     property CellHint: String read GetCellHint write SetCellHint;
-    property CellImageIndex: Integer read GetCellImageIndex write SetCellImageIndex;
+    property CellImageIndex: TImageIndex read GetCellImageIndex write SetCellImageIndex;
   published
     property Algorithm: TsmxCustomAlgorithm read FAlgorithm write SetAlgorithm;
     property IsSetAlgorithmEvents: Boolean read FIsSetAlgorithmEvents write SetIsSetAlgorithmEvents;
@@ -979,21 +979,21 @@ type
   protected
     procedure DoExecute; virtual;
     procedure DoRefreshParams; virtual;
-    function GetAlgorithmCaption: String; virtual;
+    function GetAlgorithmCaption: TCaption; virtual;
     function GetAlgorithmEnabled: Boolean; virtual;
     function GetAlgorithmHint: String; virtual;
-    function GetAlgorithmHotKey: Integer; virtual;
-    function GetAlgorithmImageIndex: Integer; virtual;
+    function GetAlgorithmHotKey: TShortCut; virtual;
+    function GetAlgorithmImageIndex: TImageIndex; virtual;
     function GetAlgorithmVisible: Boolean; virtual;
     //function GetProcExecuteEvent: TsmxProcExecuteEvent; virtual;
     procedure InternalExecute; virtual;
     procedure InternalRefreshParams; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure SetAlgorithmCaption(const Value: String); virtual;
+    procedure SetAlgorithmCaption(const Value: TCaption); virtual;
     procedure SetAlgorithmEnabled(Value: Boolean); virtual;
     procedure SetAlgorithmHint(const Value: String); virtual;
-    procedure SetAlgorithmHotKey(Value: Integer); virtual;
-    procedure SetAlgorithmImageIndex(Value: Integer); virtual;
+    procedure SetAlgorithmHotKey(Value: TShortCut); virtual;
+    procedure SetAlgorithmImageIndex(Value: TImageIndex); virtual;
     procedure SetAlgorithmParams(Value: TsmxAlgorithmParams); virtual;
     procedure SetAlgorithmVisible(Value: Boolean); virtual;
     procedure SetCellAction(Value: TsmxBaseCell); virtual;
@@ -1006,11 +1006,11 @@ type
     procedure Execute;
     procedure RefreshParams;
 
-    property AlgorithmCaption: String read GetAlgorithmCaption write SetAlgorithmCaption;
+    property AlgorithmCaption: TCaption read GetAlgorithmCaption write SetAlgorithmCaption;
     property AlgorithmEnabled: Boolean read GetAlgorithmEnabled write SetAlgorithmEnabled;
     property AlgorithmHint: String read GetAlgorithmHint write SetAlgorithmHint;
-    property AlgorithmHotKey: Integer read GetAlgorithmHotKey write SetAlgorithmHotKey;
-    property AlgorithmImageIndex: Integer read GetAlgorithmImageIndex write SetAlgorithmImageIndex;
+    property AlgorithmHotKey: TShortCut read GetAlgorithmHotKey write SetAlgorithmHotKey;
+    property AlgorithmImageIndex: TImageIndex read GetAlgorithmImageIndex write SetAlgorithmImageIndex;
     property AlgorithmParams: TsmxAlgorithmParams read GetAlgorithmParams write SetAlgorithmParams;
     property AlgorithmVisible: Boolean read GetAlgorithmVisible write SetAlgorithmVisible;
     property CellAction: TsmxBaseCell read FCellAction write SetCellAction;
@@ -1414,7 +1414,7 @@ type
     function GetFilterFont: TFont; virtual;
     function GetFilterValue: Variant; virtual;
     function GetHeaderAlignment: TAlignment; virtual;
-    function GetHeaderCaption: String; virtual;
+    function GetFilterText: String; virtual;
     function GetHeaderColor: TColor; virtual;
     function GetHeaderFont: TFont; virtual;
     function GetValueFormat: String; virtual;
@@ -1426,7 +1426,7 @@ type
     procedure SetFilterOptions(Value: TsmxFilterOptions); virtual;
     procedure SetFilterValue(const Value: Variant); virtual;
     procedure SetHeaderAlignment(Value: TAlignment); virtual;
-    procedure SetHeaderCaption(const Value: String); virtual;
+    procedure SetFilterText(const Value: String); virtual;
     procedure SetHeaderColor(Value: TColor); virtual;
     procedure SetHeaderFont(Value: TFont); virtual;
     procedure SetValueFormat(const Value: String); virtual;
@@ -1437,13 +1437,13 @@ type
     property CellOwner: TsmxCustomFilterDesk read GetCellOwner write SetCellOwner;
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FilterAlignment: TAlignment read GetFilterAlignment write SetFilterAlignment;
-    property FilterCaption: String read GetCellCaption write SetCellCaption;
+    property FilterText: String read GetFilterText write SetFilterText;
     property FilterColor: TColor read GetFilterColor write SetFilterColor;
     property FilterFont: TFont read GetFilterFont write SetFilterFont;
     property FilterOptions: TsmxFilterOptions read FFilterOptions write SetFilterOptions;
     property FilterValue: Variant read GetFilterValue write SetFilterValue;
     property HeaderAlignment: TAlignment read GetHeaderAlignment write SetHeaderAlignment;
-    property HeaderCaption: String read GetHeaderCaption write SetHeaderCaption;
+    property HeaderCaption: TCaption read GetCellCaption write SetCellCaption;
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor;
     property HeaderFont: TFont read GetHeaderFont write SetHeaderFont;
     property ValueFormat: String read GetValueFormat write SetValueFormat;
@@ -4819,12 +4819,12 @@ begin
   end;
 end;
 
-function TsmxActionCell.GetCellCaption: String;
+function TsmxActionCell.GetCellCaption: TCaption;
 begin
   Result := '';
 end;
 
-procedure TsmxActionCell.SetCellCaption(const Value: String);
+procedure TsmxActionCell.SetCellCaption(const Value: TCaption);
 begin
 end;
 
@@ -4837,12 +4837,12 @@ procedure TsmxActionCell.SetCellHint(const Value: String);
 begin
 end;
 
-function TsmxActionCell.GetCellImageIndex: Integer;
+function TsmxActionCell.GetCellImageIndex: TImageIndex;
 begin
   Result := -1;
 end;
 
-procedure TsmxActionCell.SetCellImageIndex(Value: Integer);
+procedure TsmxActionCell.SetCellImageIndex(Value: TImageIndex);
 begin
 end;
 
@@ -5258,12 +5258,12 @@ begin
   {end;}
 end;
 
-function TsmxCustomAlgorithm.GetAlgorithmCaption: String;
+function TsmxCustomAlgorithm.GetAlgorithmCaption: TCaption;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomAlgorithm.SetAlgorithmCaption(const Value: String);
+procedure TsmxCustomAlgorithm.SetAlgorithmCaption(const Value: TCaption);
 begin
 end;
 
@@ -5276,7 +5276,7 @@ procedure TsmxCustomAlgorithm.SetAlgorithmEnabled(Value: Boolean);
 begin
 end;
 
-function TsmxCustomAlgorithm.GetAlgorithmHotKey: Integer;
+function TsmxCustomAlgorithm.GetAlgorithmHotKey: TShortCut;
 begin
   Result := 0;
 end;
@@ -5290,16 +5290,16 @@ procedure TsmxCustomAlgorithm.SetAlgorithmHint(const Value: String);
 begin
 end;
 
-procedure TsmxCustomAlgorithm.SetAlgorithmHotKey(Value: Integer);
+procedure TsmxCustomAlgorithm.SetAlgorithmHotKey(Value: TShortCut);
 begin
 end;
 
-function TsmxCustomAlgorithm.GetAlgorithmImageIndex: Integer;
+function TsmxCustomAlgorithm.GetAlgorithmImageIndex: TImageIndex;
 begin
   Result := -1;
 end;
 
-procedure TsmxCustomAlgorithm.SetAlgorithmImageIndex(Value: Integer);
+procedure TsmxCustomAlgorithm.SetAlgorithmImageIndex(Value: TImageIndex);
 begin
 end;
 
@@ -6571,12 +6571,12 @@ procedure TsmxCustomFilter.SetHeaderAlignment(Value: TAlignment);
 begin
 end;
 
-function TsmxCustomFilter.GetHeaderCaption: String;
+function TsmxCustomFilter.GetFilterText: String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomFilter.SetHeaderCaption(const Value: String);
+procedure TsmxCustomFilter.SetFilterText(const Value: String);
 begin
 end;
 

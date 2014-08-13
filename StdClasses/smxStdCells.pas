@@ -421,7 +421,7 @@ type
     function GetEdit: TEdit;
     procedure EditChange(Sender: TObject);
   protected
-    function GetCellCaption: String; override;
+    function GetFilterText: String; override;
     function GetCellEnabled: Boolean; override;
     function GetCellHint: String; override;
     function GetFilterColor: TColor; override;
@@ -429,7 +429,7 @@ type
     function GetFilterFont: TFont; override;
     function GetFilterValue: Variant; override;
     //function GetInternalObject: TObject; override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetFilterText(const Value: String); override;
     procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellHint(const Value: String); override;
     procedure SetFilterColor(Value: TColor); override;
@@ -468,22 +468,22 @@ type
   private
     FBitBtn: TBitBtn;
     FValue: Variant;
-    FButtonImageIndex: Integer;
+    FButtonImageIndex: TImageIndex;
     function GetBitBtn: TBitBtn;
   protected
-    function GetCellCaption: String; override;
+    function GetFilterText: String; override;
     function GetCellEnabled: Boolean; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     function GetFilterColor: TColor; override;
     function GetFilterFont: TFont; override;
     //function GetFilterText: String; override;
     function GetFilterValue: Variant; override;
     //function GetInternalObject: TObject; override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetFilterText(const Value: String); override;
     procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     procedure SetFilterColor(Value: TColor); override;
     procedure SetFilterFont(Value: TFont); override;
     //procedure SetFilterText(Value: String); override;
@@ -498,7 +498,7 @@ type
     destructor Destroy; override;
   published
     property CellImageIndex;
-    property FilterCaption;
+    property FilterText;
     property FilterFont;
     property FilterOptions;
     property FilterValue;
@@ -578,7 +578,7 @@ type
     //function GetCellVisible: Boolean; override;
     //function GetCellWidth: Integer; override;
     //function GetAltSlaveClass(Index: Integer): TsmxBaseCellClass; override;
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellHint: String; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetInternalRef: Pointer; override;
@@ -594,7 +594,7 @@ type
     //procedure SetCellEnabled(Value: Boolean); override;
     //procedure SetCellHeight(Value: Integer); override;
     //procedure SetCellLeft(Value: Integer); override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellHint(const Value: String); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
@@ -717,9 +717,9 @@ type
     function GetTabSheet: TTabSheet;
   protected
     //function GetCellActive: Boolean; override;
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     //function GetCellAlign: TAlign; override;
     //function GetCellEnabled: Boolean; override;
     //function GetCellHeight: Integer; override;
@@ -732,9 +732,9 @@ type
     function GetSlaveClass: TsmxBaseCellClass; override;
     //procedure InternalInitialize; override;
     //procedure SetCellActive(Value: Boolean); override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     //procedure SetCellAlign(Value: TAlign); override;
     //procedure SetCellEnabled(Value: Boolean); override;
     //procedure SetCellHeight(Value: Integer); override;
@@ -920,10 +920,10 @@ type
     FMenuItem: TMenuItem;
     function GetMenuItem: TMenuItem;
   protected
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellEnabled: Boolean; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     function GetCellVisible: Boolean; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetInternalRef: Pointer; override;
@@ -933,10 +933,10 @@ type
     function GetSlaveClass: TsmxBaseCellClass; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellEnabled(Value: Boolean); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     procedure SetCellVisible(Value: Boolean); override;
@@ -1027,18 +1027,18 @@ type
     FToolButton: TToolButton;
     function GetToolButton: TToolButton;
   protected
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetInternalRef: Pointer; override;
     function GetIsChecked: Boolean; override;
     function GetToolItemStyle: TsmxToolItemStyle; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     procedure SetIsChecked(Value: Boolean); override;
@@ -1160,14 +1160,14 @@ type
     function GetStatusPanel: TStatusPanel;
   protected
     //procedure DoDrawPanel; override;
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellWidth: Integer; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetStatusItemAlignment: TAlignment; override;
     function GetStatusItemStyle: TsmxStatusItemStyle; override;
     //procedure InternalInitialize; override;
     //procedure ResetCellProps; override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellWidth(Value: Integer); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
@@ -1214,9 +1214,9 @@ type
     //procedure DoClose; override;
     //procedure DoShow; override;
     function GetCellActive: Boolean; override;
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetFormBorder: TsmxFormBorder; override;
     function GetFormPosition: TsmxFormPosition; override;
@@ -1231,9 +1231,9 @@ type
     //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     //procedure ResetCellProps; override;
     procedure SetCellActive(Value: Boolean); override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     procedure SetFormBorder(Value: TsmxFormBorder); override;
@@ -4022,14 +4022,14 @@ begin
   ChangeFilter;
 end;
 
-function TsmxEditFilter.GetCellCaption: String;
+function TsmxEditFilter.GetFilterText: String;
 begin
-  Result := Edit.Text;
+  Result := String(Edit.Text);
 end;
 
-procedure TsmxEditFilter.SetCellCaption(const Value: String);
+procedure TsmxEditFilter.SetFilterText(const Value: String);
 begin
-  Edit.Text := Value;
+  Edit.Text := TCaption(Value);
 end;
 
 function TsmxEditFilter.GetCellEnabled: Boolean;
@@ -4262,7 +4262,7 @@ begin
   Result := FBitBtn;
 end;
 
-function TsmxBitBtnFilter.GetCellCaption: String;
+function TsmxBitBtnFilter.GetFilterText: String;
 begin
   Result := String(BitBtn.Caption);
 end;
@@ -4272,12 +4272,12 @@ begin
   Result := BitBtn.Hint;
 end;
 
-function TsmxBitBtnFilter.GetCellImageIndex: Integer;
+function TsmxBitBtnFilter.GetCellImageIndex: TImageIndex;
 begin
   Result := FButtonImageIndex;
 end;
 
-procedure TsmxBitBtnFilter.SetCellImageIndex(Value: Integer);
+procedure TsmxBitBtnFilter.SetCellImageIndex(Value: TImageIndex);
 begin
   if FButtonImageIndex <> - 1 then
   begin
@@ -4288,7 +4288,7 @@ begin
   if FButtonImageIndex <> - 1 then
     if Assigned(ImageList) then
     begin
-      ImageList.GetBitmap(FButtonImageIndex, BitBtn.Glyph);
+      ImageList.GetBitmap(Integer(FButtonImageIndex), BitBtn.Glyph);
       BitBtn.Margin := 2;
     end;
 end;
@@ -4303,9 +4303,9 @@ begin
   Result := BitBtn.Font;
 end;
 
-procedure TsmxBitBtnFilter.SetCellCaption(const Value: String);
+procedure TsmxBitBtnFilter.SetFilterText(const Value: String);
 begin
-  BitBtn.Caption := Value;
+  BitBtn.Caption := TCaption(Value);
 end;
 
 procedure TsmxBitBtnFilter.SetCellHint(const Value: String);
@@ -4746,7 +4746,7 @@ begin
                 Slaves[i].FilterValue;
             //if foSetCaption in Slaves[i].FilterOptions then
               DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value :=
-                smxFuncs.StrToVar(Slaves[i].FilterCaption);
+                smxFuncs.StrToVar(Slaves[i].FilterText);
           end;
 
           {if foApplyValue in Slaves[i].FilterOptions then
@@ -4806,7 +4806,7 @@ begin
                     Slaves[i].FilterValue :=
                       DataSet.FieldByName(Slaves[i].Name).Value;
                   //if foSetValue in Slaves[i].FilterOptions then
-                    Slaves[i].FilterCaption :=
+                    Slaves[i].FilterText :=
                       Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
                   {if foPrepareValue in Slaves[i].FilterOptions then
                     Slaves[i].FilterValue :=
@@ -4821,7 +4821,7 @@ begin
                     Slaves[i].FilterValue :=
                       DataSet.ParamByName(Slaves[i].Name).Value;
                   //if foSetValue in Slaves[i].FilterOptions then
-                    Slaves[i].FilterCaption :=
+                    Slaves[i].FilterText :=
                       Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
                   {if foPrepareValue in Slaves[i].FilterOptions then
                     Slaves[i].FilterValue :=
@@ -4879,7 +4879,7 @@ begin
                   Slaves[i].FilterValue :=
                     DataSet.FieldByName(Slaves[i].Name).Value;
                 //if foSetValue in Slaves[i].FilterOptions then
-                  Slaves[i].FilterCaption :=
+                  Slaves[i].FilterText :=
                     Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
                 {if foPrepareValue in Slaves[i].FilterOptions then
                   Slaves[i].FilterValue :=
@@ -4894,7 +4894,7 @@ begin
                   Slaves[i].FilterValue :=
                     DataSet.ParamByName(Slaves[i].Name).Value;
                 //if foSetValue in Slaves[i].FilterOptions then
-                  Slaves[i].FilterCaption :=
+                  Slaves[i].FilterText :=
                     Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
                 {if foPrepareValue in Slaves[i].FilterOptions then
                   Slaves[i].FilterValue :=
@@ -5022,12 +5022,12 @@ begin
   Panel.Width := Value;
 end;}
 
-function TsmxPanelFilterDesk.GetCellCaption: String;
+function TsmxPanelFilterDesk.GetCellCaption: TCaption;
 begin
   Result := Panel.Caption;
 end;
 
-procedure TsmxPanelFilterDesk.SetCellCaption(const Value: String);
+procedure TsmxPanelFilterDesk.SetCellCaption(const Value: TCaption);
 begin
   Panel.Caption := Value;
 end;
@@ -5518,12 +5518,12 @@ begin
     TabSheet.PageControl.ActivePage := TabSheet;
 end;}
 
-function TsmxTabSheet.GetCellCaption: String;
+function TsmxTabSheet.GetCellCaption: TCaption;
 begin
   Result := TabSheet.Caption;
 end;
 
-procedure TsmxTabSheet.SetCellCaption(const Value: String);
+procedure TsmxTabSheet.SetCellCaption(const Value: TCaption);
 var
   PageControl: TPageControl;
   Form: TForm;
@@ -5561,12 +5561,12 @@ begin
   TabSheet.Hint := Value;
 end;
 
-function TsmxTabSheet.GetCellImageIndex: Integer;
+function TsmxTabSheet.GetCellImageIndex: TImageIndex;
 begin
   Result := TabSheet.ImageIndex;
 end;
 
-procedure TsmxTabSheet.SetCellImageIndex(Value: Integer);
+procedure TsmxTabSheet.SetCellImageIndex(Value: TImageIndex);
 var
   PageControl: TPageControl;
   Form: TForm;
@@ -6476,14 +6476,14 @@ begin
     FMenuItem.Free;
 end;
 
-function TsmxMenuItem.GetCellCaption: String;
+function TsmxMenuItem.GetCellCaption: TCaption;
 begin
-  Result := MenuItem.Caption;
+  Result := TCaption(MenuItem.Caption);
 end;
 
-procedure TsmxMenuItem.SetCellCaption(const Value: String);
+procedure TsmxMenuItem.SetCellCaption(const Value: TCaption);
 begin
-  MenuItem.Caption := Value;
+  MenuItem.Caption := String(Value);
 end;
 
 function TsmxMenuItem.GetCellEnabled: Boolean;
@@ -6506,14 +6506,14 @@ begin
   MenuItem.Hint := Value;
 end;
 
-function TsmxMenuItem.GetCellImageIndex: Integer;
+function TsmxMenuItem.GetCellImageIndex: TImageIndex;
 begin
-  Result := Integer(MenuItem.ImageIndex);
+  Result := MenuItem.ImageIndex;
 end;
 
-procedure TsmxMenuItem.SetCellImageIndex(Value: Integer);
+procedure TsmxMenuItem.SetCellImageIndex(Value: TImageIndex);
 begin
-  MenuItem.ImageIndex := TImageIndex(Value);
+  MenuItem.ImageIndex := Value;
 end;
 
 function TsmxMenuItem.GetCellVisible: Boolean;
@@ -6884,14 +6884,14 @@ begin
     FToolButton.Free;
 end;
 
-function TsmxToolItem.GetCellCaption: String;
+function TsmxToolItem.GetCellCaption: TCaption;
 begin
-  Result := String(ToolButton.Caption);
+  Result := ToolButton.Caption;
 end;
 
-procedure TsmxToolItem.SetCellCaption(const Value: String);
+procedure TsmxToolItem.SetCellCaption(const Value: TCaption);
 begin
-  ToolButton.Caption := TCaption(Value);
+  ToolButton.Caption := Value;
 end;
 
 function TsmxToolItem.GetCellHint: String;
@@ -6905,14 +6905,14 @@ begin
   ToolButton.ShowHint := Value <> '';
 end;
 
-function TsmxToolItem.GetCellImageIndex: Integer;
+function TsmxToolItem.GetCellImageIndex: TImageIndex;
 begin
-  Result := Integer(ToolButton.ImageIndex);
+  Result := ToolButton.ImageIndex;
 end;
 
-procedure TsmxToolItem.SetCellImageIndex(Value: Integer);
+procedure TsmxToolItem.SetCellImageIndex(Value: TImageIndex);
 begin
-  ToolButton.ImageIndex := TImageIndex(Value);
+  ToolButton.ImageIndex := Value;
 end;
 
 {function TsmxToolItem.GetCfgClass: TsmxBaseCfgClass;
@@ -7491,14 +7491,14 @@ begin
   end;
 end;}
 
-function TsmxStatusPanel.GetCellCaption: String;
+function TsmxStatusPanel.GetCellCaption: TCaption;
 begin
-  Result := StatusPanel.Text;
+  Result := TCaption(StatusPanel.Text);
 end;
 
-procedure TsmxStatusPanel.SetCellCaption(const Value: String);
+procedure TsmxStatusPanel.SetCellCaption(const Value: TCaption);
 begin
-  StatusPanel.Text := Value;
+  StatusPanel.Text := String(Value);
 end;
 
 function TsmxStatusPanel.GetCellWidth: Integer;

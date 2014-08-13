@@ -275,7 +275,7 @@ begin
     if foHasValue in TsmxCustomFilter(Cell).FilterOptions then
       AValue := TsmxCustomFilter(Cell).FilterValue
     else
-      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).FilterCaption);
+      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).FilterText);
     Result := True;
   end;
 end;

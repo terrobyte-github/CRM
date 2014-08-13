@@ -28,11 +28,11 @@ type
     //function GetParamValue(const ParamName: String): Variant;
   protected
     //procedure DoRefreshParams; override;
-    function GetAlgorithmCaption: String; override;
+    function GetAlgorithmCaption: TCaption; override;
     function GetAlgorithmEnabled: Boolean; override;
     function GetAlgorithmHint: String; override;
-    function GetAlgorithmHotKey: Integer; override;
-    function GetAlgorithmImageIndex: Integer; override;
+    function GetAlgorithmHotKey: TShortCut; override;
+    function GetAlgorithmImageIndex: TImageIndex; override;
     function GetAlgorithmVisible: Boolean; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetInternalRef: Pointer; override;
@@ -41,11 +41,11 @@ type
     //procedure InternalInitialize; override;
     procedure InternalRefreshParams; override;
     //procedure ResetCellProps; override;
-    procedure SetAlgorithmCaption(const Value: String); override;
+    procedure SetAlgorithmCaption(const Value: TCaption); override;
     procedure SetAlgorithmEnabled(Value: Boolean); override;
     procedure SetAlgorithmHint(const Value: String); override;
-    procedure SetAlgorithmHotKey(Value: Integer); override;
-    procedure SetAlgorithmImageIndex(Value: Integer); override;
+    procedure SetAlgorithmHotKey(Value: TShortCut); override;
+    procedure SetAlgorithmImageIndex(Value: TImageIndex); override;
     procedure SetAlgorithmVisible(Value: Boolean); override;
     //procedure ProcExec(Sender: TObject); virtual;
     procedure SetCellParent(Value: TsmxBaseCell); override;
@@ -179,7 +179,7 @@ type
     //function GetCfgClass: TsmxBaseCfgClass; override;
     //function GetFilter: TObject; virtual;
     function GetHeaderAlignment: TAlignment; override;
-    function GetHeaderCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
     function GetInternalRef: Pointer; override;
@@ -197,7 +197,7 @@ type
     //procedure SetCellVisible(Value: Boolean); override;
     //procedure SetCellWidth(Value: Integer); override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
-    procedure SetHeaderCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
     //procedure UnBindFilterObjects; virtual;
@@ -311,7 +311,7 @@ type
   TsmxForm = class(TsmxCustomForm)
   private
     FForm: TForm;
-    FFormImageIndex: Integer;
+    FFormImageIndex: TImageIndex;
     FIsMainForm: Boolean;
     function GetForm: TForm;
     procedure FormActivate(Sender: TObject);
@@ -323,9 +323,9 @@ type
     //procedure DoClose; override;
     //procedure DoShow; override;
     function GetCellActive: Boolean; override;
-    function GetCellCaption: String; override;
+    function GetCellCaption: TCaption; override;
     function GetCellHint: String; override;
-    function GetCellImageIndex: Integer; override;
+    function GetCellImageIndex: TImageIndex; override;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     function GetFormBorder: TsmxFormBorder; override;
     function GetFormPosition: TsmxFormPosition; override;
@@ -340,9 +340,9 @@ type
     //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     //procedure ResetCellProps; override;
     procedure SetCellActive(Value: Boolean); override;
-    procedure SetCellCaption(const Value: String); override;
+    procedure SetCellCaption(const Value: TCaption); override;
     procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: Integer); override;
+    procedure SetCellImageIndex(Value: TImageIndex); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     //procedure SetCellProps; override;
     procedure SetFormBorder(Value: TsmxFormBorder); override;
@@ -445,14 +445,14 @@ begin
   Result := FAction;
 end;
 
-function TsmxAction.GetAlgorithmCaption: String;
+function TsmxAction.GetAlgorithmCaption: TCaption;
 begin
-  Result := Action.Caption;
+  Result := TCaption(Action.Caption);
 end;
 
-procedure TsmxAction.SetAlgorithmCaption(const Value: String);
+procedure TsmxAction.SetAlgorithmCaption(const Value: TCaption);
 begin
-  Action.Caption := Value;
+  Action.Caption := String(Value);
 end;
 
 function TsmxAction.GetAlgorithmEnabled: Boolean;
@@ -475,24 +475,24 @@ begin
   Action.Hint := Value;
 end;
 
-function TsmxAction.GetAlgorithmHotKey: Integer;
+function TsmxAction.GetAlgorithmHotKey: TShortCut;
 begin
-  Result := Integer(Action.ShortCut);
+  Result := Action.ShortCut;
 end;
 
-procedure TsmxAction.SetAlgorithmHotKey(Value: Integer);
+procedure TsmxAction.SetAlgorithmHotKey(Value: TShortCut);
 begin
-  Action.ShortCut := TShortCut(Value);
+  Action.ShortCut := Value;
 end;
 
-function TsmxAction.GetAlgorithmImageIndex: Integer;
+function TsmxAction.GetAlgorithmImageIndex: TImageIndex;
 begin
-  Result := Integer(Action.ImageIndex);
+  Result := Action.ImageIndex;
 end;
 
-procedure TsmxAction.SetAlgorithmImageIndex(Value: Integer);
+procedure TsmxAction.SetAlgorithmImageIndex(Value: TImageIndex);
 begin
-  Action.ImageIndex := TImageIndex(Value);
+  Action.ImageIndex := Value;
 end;
 
 function TsmxAction.GetAlgorithmVisible: Boolean;
@@ -1528,12 +1528,12 @@ begin
   Header.Alignment := Value;
 end;
 
-function TsmxFilter.GetHeaderCaption: String;
+function TsmxFilter.GetCellCaption: TCaption;
 begin
   Result := Header.Caption;
 end;
 
-procedure TsmxFilter.SetHeaderCaption(const Value: String);
+procedure TsmxFilter.SetCellCaption(const Value: TCaption);
 begin
   Header.Caption := Value;
 end;
@@ -2415,14 +2415,14 @@ begin
     Form.Perform(WM_ACTIVATE, WA_INACTIVE, 0);
 end;
 
-function TsmxForm.GetCellCaption: String;
+function TsmxForm.GetCellCaption: TCaption;
 begin
-  Result := String(Form.Caption);
+  Result := Form.Caption;
 end;
 
-procedure TsmxForm.SetCellCaption(const Value: String);
+procedure TsmxForm.SetCellCaption(const Value: TCaption);
 begin
-  Form.Caption := TCaption(Value);
+  Form.Caption := Value;
 end;
 
 function TsmxForm.GetCellHint: String;
@@ -2435,19 +2435,19 @@ begin
   Form.Hint := Value;
 end;
 
-function TsmxForm.GetCellImageIndex: Integer;
+function TsmxForm.GetCellImageIndex: TImageIndex;
 begin
   Result := FFormImageIndex;
 end;
 
-procedure TsmxForm.SetCellImageIndex(Value: Integer);
+procedure TsmxForm.SetCellImageIndex(Value: TImageIndex);
 begin
   if FFormImageIndex <> -1 then
     Form.Icon := nil;
   FFormImageIndex := Value;
   if FFormImageIndex <> -1 then
     if Assigned(ImageList) then
-      ImageList.GetIcon(FFormImageIndex, Form.Icon);
+      ImageList.GetIcon(Integer(FFormImageIndex), Form.Icon);
 end;
 
 {function TsmxForm.GetCfgClass: TsmxBaseCfgClass;
