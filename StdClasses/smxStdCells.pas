@@ -245,8 +245,8 @@ type
     property HeaderColor;
     property HeaderFont;
 
-    property OnSnap;
-    property OnSnapHeader;
+    property OnClick;
+    property OnClickHeader;
   end;
 
   { TsmxDBGrid }
@@ -331,7 +331,7 @@ type
     property SlaveList;
 
     property OnChangeRow;
-    property OnDoubleSnap;
+    property OnDoubleClick;
   end;
 
   { TsmxFilter }
@@ -504,7 +504,7 @@ type
     property FilterValue;
     property ImageListName;
 
-    property OnSnap;
+    property OnClick;
   end;
 
   { TsmxNumEditFilter }
@@ -624,8 +624,8 @@ type
     property PopupMenu;
     property SlaveList;
 
-    property OnDoubleSnap;
-    property OnSnap;
+    property OnDoubleClick;
+    property OnClick;
   end;
 
   { TsmxSection }
@@ -692,8 +692,8 @@ type
     property PopupMenu;
     property SlaveList;
 
-    property OnDoubleSnap;
-    property OnSnap;
+    property OnDoubleClick;
+    property OnClick;
   end;
 
   { TsmxPage }
@@ -1054,7 +1054,7 @@ type
     property IsChecked;
     property ToolItemStyle;
 
-    property OnSnap;
+    property OnClick;
   end;
 
   { TsmxToolBar }

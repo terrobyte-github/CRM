@@ -721,8 +721,8 @@ type
   private
     FOnBackup: TsmxComponentEvent;
     FOnRestore: TsmxComponentEvent;
-    FOnDoubleSnap: TsmxComponentEvent;
-    FOnSnap: TsmxComponentEvent;
+    FOnDoubleClick: TsmxComponentEvent;
+    FOnClick: TsmxComponentEvent;
     FPopupMenu: TsmxCustomPopupMenu;
     function GetSlave(Index: Integer): TsmxControlCell;
     procedure SetSlave(Index: Integer; Value: TsmxControlCell);
@@ -789,8 +789,8 @@ type
     property PopupMenu: TsmxCustomPopupMenu read FPopupMenu write SetPopupMenu;
     property Slaves[Index: Integer]: TsmxControlCell read GetSlave write SetSlave; default;
 
-    property OnDoubleSnap: TsmxComponentEvent read FOnDoubleSnap write FOnDoubleSnap;
-    property OnSnap: TsmxComponentEvent read FOnSnap write FOnSnap;
+    property OnDoubleClick: TsmxComponentEvent read FOnDoubleClick write FOnDoubleClick;
+    property OnClick: TsmxComponentEvent read FOnClick write FOnClick;
   published
     property OnBackup: TsmxComponentEvent read FOnBackup write FOnBackup;
     property OnRestore: TsmxComponentEvent read FOnRestore write FOnRestore;
@@ -1169,7 +1169,7 @@ type
   TsmxCustomColumn = class(TsmxControlCell)
   private
     FColumnOptions: TsmxColumnOptions;
-    FOnSnapHeader: TsmxComponentEvent;
+    FOnClickHeader: TsmxComponentEvent;
     function GetCellOwner: TsmxCustomColumns;
     procedure SetCellOwner(Value: TsmxCustomColumns);
   protected
@@ -1213,7 +1213,7 @@ type
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor;
     property HeaderFont: TFont read GetHeaderFont write SetHeaderFont;
 
-    property OnSnapHeader: TsmxComponentEvent read FOnSnapHeader write FOnSnapHeader;
+    property OnClickHeader: TsmxComponentEvent read FOnClickHeader write FOnClickHeader;
   end;
 
   { TsmxCustomColumns }
@@ -3534,7 +3534,7 @@ begin
     //Result := Add(GetSlaveClass, AImplementor);
   //Result := SlaveList.Add(GetSlaveClass, nil).Slave;
   Result := SlaveList.Add.ItemObject;
-
+  //Result.Name := SysUtils.Format('%s_%d', [CellOwner.GetSlaveClass.ClassName, SlaveIndex]);
   //Result := CreateSlave(GetSlaveClass, nil);
   //SlaveList.InsertSlave(Result);
 end;
@@ -4223,8 +4223,8 @@ end;
 
 procedure TsmxControlCell.DoDoubleSnap;
 begin
-  if Assigned(FOnDoubleSnap) then
-    FOnDoubleSnap(Self);
+  if Assigned(FOnDoubleClick) then
+    FOnDoubleClick(Self);
 end;
 
 procedure TsmxControlCell.InternalDoubleSnap;
@@ -4259,8 +4259,8 @@ end;
 
 procedure TsmxControlCell.DoSnap;
 begin
-  if Assigned(FOnSnap) then
-    FOnSnap(Self);
+  if Assigned(FOnClick) then
+    FOnClick(Self);
 end;
 
 procedure TsmxControlCell.InternalSnap;
@@ -4455,9 +4455,9 @@ begin
     begin
       PopupMenu := smxClassFuncs.GetPopupMenuForm(Form, TsmxControlCellCfg(Cfg).PopupMenuCfgID);
       OnBackup := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).BackupAlgCfgID);
-      OnDoubleSnap := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).DoubleSnapAlgCfgID);
+      OnDoubleClick := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).DoubleSnapAlgCfgID);
       OnRestore := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).RestoreAlgCfgID);
-      OnSnap := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).SnapAlgCfgID);
+      OnClick := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).SnapAlgCfgID);
     end;
   end;
 end;}
@@ -4484,9 +4484,9 @@ begin
   CellWidth := 0;
   PopupMenu := nil;
   OnBackup := nil;
-  OnDoubleSnap := nil;
+  OnDoubleClick := nil;
   OnRestore := nil;
-  OnSnap := nil;
+  OnClick := nil;
 end;}
 
 {procedure TsmxControlCell.SetCellProps;
@@ -4512,9 +4512,9 @@ begin
     begin
       PopupMenu := smxClassFuncs.GetPopupMenuForm(Form, TsmxControlCellCfg(Cfg).PopupMenuCfgID);
       OnBackup := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).BackupAlgCfgID);
-      OnDoubleSnap := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).DoubleSnapAlgCfgID);
+      OnDoubleClick := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).DoubleSnapAlgCfgID);
       OnRestore := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).RestoreAlgCfgID);
-      OnSnap := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).SnapAlgCfgID);
+      OnClick := smxClassFuncs.GetEventForm(Form, TsmxControlCellCfg(Cfg).SnapAlgCfgID);
     end;
   end;
 end;}
@@ -4910,7 +4910,7 @@ end;
 procedure TsmxActionCell.SetAlgorithmEvents(Alg: TsmxCustomAlgorithm);
 begin
   if Assigned(Alg) then
-    OnSnap := Alg.OnExecute;
+    OnClick := Alg.OnExecute;
 end;
 
 procedure TsmxActionCell.SetAlgorithmProps(Alg: TsmxCustomAlgorithm);
@@ -5885,8 +5885,8 @@ end;
 
 procedure TsmxCustomColumn.DoSnapHeader;
 begin
-  if Assigned(FOnSnapHeader) then
-    FOnSnapHeader(Self);
+  if Assigned(FOnClickHeader) then
+    FOnClickHeader(Self);
 end;
 
 procedure TsmxCustomColumn.InternalSnapHeader;

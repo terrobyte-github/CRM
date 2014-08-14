@@ -77,8 +77,8 @@ type
     property HeaderColor;
     property HeaderFont;
 
-    property OnSnap;
-    property OnSnapHeader;
+    property OnClick;
+    property OnClickHeader;
   end;
 
   { TsmxVTNode }
@@ -243,7 +243,7 @@ type
     property SlaveList;
 
     property OnChangeRow;
-    property OnDoubleSnap;
+    property OnDoubleClick;
   end;
 
   { TsmxVTTree }
@@ -359,7 +359,7 @@ type
 
     property OnChangeRow;
     property OnCollapse;
-    property OnDoubleSnap;
+    property OnDoubleClick;
     property OnEdited;
     property OnEditing;
     property OnExpand;

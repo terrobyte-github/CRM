@@ -387,9 +387,9 @@ type
     property OnActivate;
     property OnClose;
     property OnDeactivate;
-    property OnDoubleSnap;
+    property OnDoubleClick;
     property OnShow;
-    property OnSnap;
+    property OnClick;
   end;
 
 implementation

@@ -556,12 +556,12 @@ begin
       ToolItem.CellHint := 'Add Slave';
       Method.Code := @AddSlaveFormSlaveList;
       Method.Data := ToolItem;
-      ToolItem.OnSnap := TsmxComponentEvent(Method);
+      ToolItem.OnClick := TsmxComponentEvent(Method);
       ToolItem := ToolBar.AddSlave;
       ToolItem.CellHint := 'Del Slave';
       Method.Code := @DelSlaveFormSlaveList;
       Method.Data := ToolItem;
-      ToolItem.OnSnap := TsmxComponentEvent(Method);
+      ToolItem.OnClick := TsmxComponentEvent(Method);
     end;
   end;
 end;

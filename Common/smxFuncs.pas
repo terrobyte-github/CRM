@@ -37,6 +37,7 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 //function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
 function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
 function GetRootControl(AControl: TWinControl): TWinControl;
+function FindUniqueName(AOwner: TComponent; const AName: String): String;
 
 implementation
 
@@ -346,6 +347,19 @@ begin
   if Assigned(Result) then
     while Assigned(Result.Parent) do
       Result := Result.Parent;
+end;
+
+function FindUniqueName(AOwner: TComponent; const AName: String): String;
+var
+  i: Integer;
+begin
+  i := 0;
+  Result := AName;
+  while not Assigned(AOwner.FindComponent(AName)) do
+  begin
+    Inc(i);
+    Result := SysUtils.Format('%s_%d', [AName, I]);
+  end;
 end;
 
 end.
