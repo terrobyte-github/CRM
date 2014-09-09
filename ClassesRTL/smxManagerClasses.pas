@@ -122,7 +122,7 @@ type
   TsmxLibraryManager = class(TsmxComponent, IsmxLibraryManager)
   private
     FCheckHandle: LongWord;
-    FCallBackManagerIntf: IsmxCallBackManager;
+    //FCallBackManagerIntf: IsmxCallBackManager;
     FIsCheckComp: Boolean;
     FLibInfoProcName: String;
     FLibPath: String;
@@ -135,7 +135,7 @@ type
     function GetLibraryList: TsmxParams;
     procedure PrepareLibrary(LibHandle: THandle);
   protected
-    function GetCallBackManager: IsmxCallBackManager;
+    //function GetCallBackManager: IsmxCallBackManager;
     function GetCheckHandle: LongWord;
     function GetIsCheckComp: Boolean;
     function GetLibInfoProcName: String;
@@ -143,7 +143,7 @@ type
     function GetLibrary(Index: Integer): THandle;
     function GetLibraryCount: Integer;
     function IndexOf(LibHandle: THandle): Integer;
-    procedure SetCallBackManager(const Value: IsmxCallBackManager);
+    //procedure SetCallBackManager(const Value: IsmxCallBackManager);
     procedure SetCheckHandle(Value: LongWord);
     procedure SetIsCheckComp(Value: Boolean);
     procedure SetLibInfoProcName(const Value: String);
@@ -164,7 +164,7 @@ type
     function InsertLibrary(LibHandle: THandle): Integer;
     procedure RemoveLibrary(LibHandle: THandle);
 
-    property CallBackManager: IsmxCallBackManager read GetCallBackManager write SetCallBackManager;
+    //property CallBackManager: IsmxCallBackManager read GetCallBackManager write SetCallBackManager;
     property CheckHandle: LongWord read GetCheckHandle write SetCheckHandle;
     property IsCheckComp: Boolean read GetIsCheckComp write SetIsCheckComp;
     property LibPath: String read GetLibPath write SetLibPath;
@@ -223,7 +223,7 @@ type
   private
     FDelimiter: String;
     FImageListRegister: TsmxParams;
-    FLibraryManagerIntf: IsmxLibraryManager;
+    //FLibraryManagerIntf: IsmxLibraryManager;
     //FNewResourceFuncName: String;
     procedure ClearImageListRegister;
     function GetImageListRegister: TsmxParams;
@@ -232,11 +232,11 @@ type
     function GetDelimiter: String;
     function GetImageListCount: Integer;
     function GetImageList(Index: Integer): TCustomImageList;
-    function GetLibraryManager: IsmxLibraryManager;
+    //function GetLibraryManager: IsmxLibraryManager;
     //function GetNewResourceFuncName: String;
     function IndexOf(ImageList: TCustomImageList): Integer;
     procedure SetDelimiter(const Value: String);
-    procedure SetLibraryManager(const Value: IsmxLibraryManager);
+    //procedure SetLibraryManager(const Value: IsmxLibraryManager);
     //procedure SetNewResourceFuncName(const Value: String);
 
     property ImageListRegister: TsmxParams read GetImageListRegister;
@@ -251,8 +251,42 @@ type
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
-    property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
+    //property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
     //property NewResourceFuncName: String read GetNewResourceFuncName write SetNewResourceFuncName;
+  end;
+
+  { TsmxClassTypeManager }
+
+  TsmxClassTypeManager = class(TsmxComponent, IsmxClassTypeManager)
+  private
+    FDelimiter: String;
+    FClassTypeList: TsmxParams;
+    //FLibraryManagerIntf: IsmxLibraryManager;
+    procedure ClearClassTypeList;
+    function GetClassTypeList: TsmxParams;
+    function LoadClassType(const ClassTypeName: String): TPersistentClass;
+  protected
+    function GetDelimiter: String;
+    function GetClassTypeCount: Integer;
+    function GetClassType(Index: Integer): TPersistentClass;
+    //function GetLibraryManager: IsmxLibraryManager;
+    function IndexOf(ClassType: TPersistentClass): Integer;
+    procedure SetDelimiter(const Value: String);
+    //procedure SetLibraryManager(const Value: IsmxLibraryManager);
+
+    property ClassTypeList: TsmxParams read GetClassTypeList;
+  public
+    destructor Destroy; override;
+    function AddClassType(const ClassTypeName: String): Integer;
+    procedure DeleteClassType(const ClassTypeName: String);
+    function FindByName(const ClassTypeName: String): TPersistentClass;
+    procedure InsertClassType(ClassType: TPersistentClass);
+    procedure RemoveClassType(ClassType: TPersistentClass);
+
+    property Delimiter: String read GetDelimiter write SetDelimiter;
+    property ClassTypeCount: Integer read GetClassTypeCount;
+    property ClassTypes[Index: Integer]: TPersistentClass read GetClassType; default;
+    //property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
   end;
 
 implementation
@@ -503,7 +537,7 @@ begin
     ClearLibraries;
     FLibraryList.Free;
   end;
-  FCallBackManagerIntf := nil;
+  //FCallBackManagerIntf := nil;
   inherited Destroy;
 end;
 
@@ -603,7 +637,7 @@ begin
   end;
 end;
 
-function TsmxLibraryManager.GetCallBackManager: IsmxCallBackManager;
+{function TsmxLibraryManager.GetCallBackManager: IsmxCallBackManager;
 begin
   Result := FCallBackManagerIntf;
 end;
@@ -611,7 +645,7 @@ end;
 procedure TsmxLibraryManager.SetCallBackManager(const Value: IsmxCallBackManager);
 begin
   FCallBackManagerIntf := Value;
-end;
+end;}
 
 function TsmxLibraryManager.GetCheckHandle: LongWord;
 begin
@@ -819,8 +853,8 @@ begin
     ProcInitLib := nil;
   if Assigned(ProcInitLib) then
   begin
-    if Assigned(FCallBackManagerIntf) then
-      FuncCallBack := FCallBackManagerIntf.GetFuncCallBack else
+    if Assigned(smxProcs.gCallBackManagerIntf) then
+      FuncCallBack := smxProcs.gCallBackManagerIntf.GetFuncCallBack else
       FuncCallBack := nil;
     ProcInitLib(FuncCallBack);
   end;
@@ -1051,7 +1085,7 @@ begin
   Result := FImageListRegister;
 end;
 
-function TsmxImageListManager.GetLibraryManager: IsmxLibraryManager;
+{function TsmxImageListManager.GetLibraryManager: IsmxLibraryManager;
 begin
   Result := FLibraryManagerIntf;
 end;
@@ -1059,7 +1093,7 @@ end;
 procedure TsmxImageListManager.SetLibraryManager(const Value: IsmxLibraryManager);
 begin
   FLibraryManagerIntf := Value;
-end;
+end;}
 
 {function TsmxImageListManager.GetNewResourceFuncName: String;
 begin
@@ -1076,8 +1110,8 @@ var
   i: Integer;
 begin
   Result := -1;
-  for i := 0 to ImageListCount - 1 do
-    if ImageLists[i] = ImageList then
+  for i := 0 to ImageListRegister.Count - 1 do
+    if TCustomImageList(Integer(ImageListRegister[i].ParamValue)) = ImageList then
     begin
       Result := i;
       Exit;
@@ -1130,39 +1164,213 @@ var
   rs: TResourceStream;
   i: Integer;
   Handle: Longword;
-  //FuncNewResource: TsmxFuncNewResource;
 begin
   Result := nil;
-  if Assigned(FLibraryManagerIntf) {and (FNewResourceFuncName <> '')} then
+  ParseImageListName(ResName, LibName);
+  if ResName <> '' then
   begin
-    ParseImageListName(ResName, LibName);
-    if ResName <> '' then
+    Handle := 0;
+    if LibName <> '' then
     begin
-      Handle := 0;
-      if LibName <> '' then
+      if Assigned(smxProcs.gLibraryManagerIntf) then
       begin
-        i := FLibraryManagerIntf.AddLibrary(LibName);
+        i := smxProcs.gLibraryManagerIntf.AddLibrary(LibName);
         if i <> -1 then
-          Handle := FLibraryManagerIntf[i];
-      end else
-        Handle := HInstance;
-      if Handle <> 0 then
-      begin
-        rs := TResourceStream.Create(Handle, ResName, RT_RCDATA);
-        try
-          Result := TImageList.Create(nil);
-          smxProcs.LoadImagesFromStream(Result, rs);
-        finally
-          rs.Free;
-        end;
+          Handle := smxProcs.gLibraryManagerIntf[i];
+      end
+    end else
+      Handle := HInstance;
+    if Handle <> 0 then
+    begin
+      rs := TResourceStream.Create(Handle, ResName, RT_RCDATA);
+      try
+        Result := TImageList.Create(nil);
+        smxProcs.LoadImagesFromStream(Result, rs);
+      finally
+        rs.Free;
       end;
     end;
+  end;
+end;
+
+{ TsmxClassTypeManager }
+
+destructor TsmxClassTypeManager.Destroy;
+begin
+  if Assigned(FClassTypeList) then
+  begin
+    ClearClassTypeList;
+    FClassTypeList.Free;
+  end;
+  inherited Destroy;
+end;
+
+function TsmxClassTypeManager.AddClassType(const ClassTypeName: String): Integer;
+var
+  Item: TsmxParam;
+  ClassType: TPersistentClass;
+begin
+  Item := ClassTypeList.FindByName(ClassTypeName);
+  if not Assigned(Item) then
+  begin
+    ClassType := LoadClassType(ClassTypeName);
+    if Assigned(ClassType) then
+    begin
+      Item := ClassTypeList.Add;
+      Item.ParamName := ClassTypeName;
+      Item.ParamValue := Integer(ClassType);
+    end;
+  end;
+  if Assigned(Item) then
+    Result := Item.ItemIndex else
+    Result := -1;
+end;
+
+procedure TsmxClassTypeManager.DeleteClassType(const ClassTypeName: String);
+var
+  Item: TsmxParam;
+begin
+  Item := ClassTypeList.FindByName(ClassTypeName);
+  if Assigned(Item) then
+  //begin
+    //TPersistentClass(Integer(Item.ParamValue)).Free;
+    ClassTypeList.Delete(Item.ItemIndex);
+  //end;
+end;
+
+procedure TsmxClassTypeManager.ClearClassTypeList;
+var
+  i: Integer;
+begin
+  for i := ClassTypeList.Count - 1 downto 0 do
+  //begin
+    //TCustomImageList(Integer(ImageListRegister[i].ParamValue)).Free;
+    ClassTypeList.Delete(i);
+  //end;
+end;
+
+function TsmxClassTypeManager.FindByName(const ClassTypeName: String): TPersistentClass;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to ClassTypeList.Count - 1 do
+    if SysUtils.AnsiCompareText(ClassTypeList[i].ParamName, ClassTypeName) = 0 then
+    begin
+      Result := TPersistentClass(Integer(ClassTypeList[i].ParamValue));
+      Break;
+    end;
+end;
+
+function TsmxClassTypeManager.GetClassType(Index: Integer): TPersistentClass;
+begin
+  Result := TPersistentClass(Integer(ClassTypeList[Index].ParamValue));
+end;
+
+function TsmxClassTypeManager.GetClassTypeCount: Integer;
+begin
+  Result := ClassTypeList.Count;
+end;
+
+function TsmxClassTypeManager.GetClassTypeList: TsmxParams;
+begin
+  if not Assigned(FClassTypeList) then
+    FClassTypeList := TsmxParams.Create(TsmxParam);
+  Result := FClassTypeList;
+end;
+
+function TsmxClassTypeManager.GetDelimiter: String;
+begin
+  Result := FDelimiter;
+end;
+
+procedure TsmxClassTypeManager.SetDelimiter(const Value: String);
+begin
+  FDelimiter := Value;
+end;
+
+function TsmxClassTypeManager.IndexOf(ClassType: TPersistentClass): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to ClassTypeList.Count - 1 do
+    if TPersistentClass(Integer(ClassTypeList[i].ParamValue)) = ClassType then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
+procedure TsmxClassTypeManager.InsertClassType(ClassType: TPersistentClass);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(ClassType);
+  if Index = -1 then
+    if Assigned(ClassType) then
+      with ClassTypeList.Add do
+      begin
+        ParamName := ClassType.ClassName;
+        ParamValue := Integer(ClassType);
+      end;
+end;
+
+procedure TsmxClassTypeManager.RemoveClassType(ClassType: TPersistentClass);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(ClassType);
+  if Index <> -1 then
+    ClassTypeList.Delete(Index);
+end;
+
+function TsmxClassTypeManager.LoadClassType(const ClassTypeName: String): TPersistentClass;
+
+  procedure ParseClassTypeName(var ClassName, LibName: String);
+  var
+    i: Integer;
+  begin
+    i := Pos(FDelimiter, ClassTypeName);
+    if i > 0 then
+    begin
+      ClassName := Copy(ClassTypeName, 1, i - 1);
+      LibName := Copy(ClassTypeName, i + Length(FDelimiter), MaxInt);
+    end else
+    begin
+      ClassName := ClassTypeName;
+      LibName := '';
+    end;
+  end;
+
+var
+  ClassName, LibName: String;
+  i: Integer;
+  Handle: Longword;
+begin
+  Result := nil;
+  ParseClassTypeName(ClassName, LibName);
+  if ClassName <> '' then
+  begin
+    Handle := 0;
+    if LibName <> '' then
+    begin
+      if Assigned(smxProcs.gLibraryManagerIntf) then
+      begin
+        i := smxProcs.gLibraryManagerIntf.AddLibrary(LibName);
+        if i <> -1 then
+          Handle := smxProcs.gLibraryManagerIntf[i];
+      end
+    end else
+      Handle := HInstance;
+    if Handle <> 0 then   
+      Result := Classes.GetClass(ClassName);
   end;
 end;
 
 initialization
   Classes.RegisterClasses([TsmxProjectManager, TsmxCallBackManager,
     TsmxStorageManager, TsmxLibraryManager, TsmxDatabaseManager,
-    TsmxFormManager, TsmxImageListManager]);
+    TsmxFormManager, TsmxImageListManager, TsmxClassTypeManager]);
 
 end.

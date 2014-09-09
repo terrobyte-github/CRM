@@ -34,6 +34,7 @@ var
   gDatabaseManager: TsmxDatabaseManager = nil;
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
+  gClassTypeManager: TsmxClassTypeManager = nil;
   gMainConnection: TsmxConnection = nil;
   //gMainDatabase: TsmxCustomDatabase = nil;
   gMainForm: TsmxCustomForm = nil;
@@ -56,12 +57,16 @@ begin
   smxProcs.gFormManagerIntf := gFormManager as IsmxFormManager;
   gImageListManager := TsmxImageListManager.Create(nil);
   smxProcs.gImageListManagerIntf := gImageListManager as IsmxImageListManager;
+  gClassTypeManager := TsmxClassTypeManager.Create(nil);
+  smxProcs.gClassTypeManagerIntf := gClassTypeManager as IsmxClassTypeManager;
   //gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyGlobalObjects;
 begin
   //gMainConnection.Free;
+  smxProcs.gClassTypeManagerIntf := nil;
+  gClassTypeManager.Free;
   smxProcs.gImageListManagerIntf := nil;
   gImageListManager.Free;
   smxProcs.gFormManagerIntf := nil;
@@ -88,6 +93,7 @@ begin
   gCallBackManager[smxConsts.cDatabaseManager] := Integer(gDatabaseManager as IsmxDatabaseManager);
   gCallBackManager[smxConsts.cFormManager] := Integer(gFormManager as IsmxFormManager);
   gCallBackManager[smxConsts.cImageListManager] := Integer(gImageListManager as IsmxImageListManager);
+  gCallBackManager[smxConsts.cClassTypeManager] := Integer(gClassTypeManager as IsmxClassTypeManager);
   //gCallBackManager[smxConsts.cMainConnection] := Integer(gMainConnection as IsmxConnection);
 
   s := ParamStr(0);
@@ -102,7 +108,7 @@ begin
     SysUtils.Format('%d.%d.%d.%d',
       [LongRec(VersM).Hi, LongRec(VersM).Lo, LongRec(VersL).Hi, LongRec(VersL).Lo]);
 
-  gLibraryManager.CallBackManager := gCallBackManager as IsmxCallBackManager;
+  //gLibraryManager.CallBackManager := gCallBackManager as IsmxCallBackManager;
   gLibraryManager.CheckHandle := HInstance;
   gLibraryManager.IsCheckComp := gStorageManager[smxPConsts.cLibrarySectionName + '.' + smxPConsts.cLibraryCheckComp];
   gLibraryManager.LibPath := gStorageManager[smxPConsts.cProgExePath] +
@@ -122,8 +128,10 @@ begin
       rs.Free;
     end;
   end;}
-  gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
+  //gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
   gImageListManager.Delimiter :=
+    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
+  gClassTypeManager.Delimiter :=
     gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
 end;
 

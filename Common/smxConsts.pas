@@ -41,7 +41,9 @@ const
   cDatabaseManager = 3;
   cFormManager = 4;
   cImageListManager = 5;
-  //cMainConnection = 6;
+  cClassTypeManager = 6;
+  //cMainConnection = 7;
+  //cMainForm = 8;
 
   { Constructor }
   cFormObjectPropsID = -100;

@@ -17,12 +17,13 @@ procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 
 var
+  gCallBackManagerIntf: IsmxCallBackManager = nil;
   gStorageManagerIntf: IsmxStorageManager = nil;
   gLibraryManagerIntf: IsmxLibraryManager = nil;
   gDatabaseManagerIntf: IsmxDatabaseManager = nil;
   gFormManagerIntf: IsmxFormManager = nil;
   gImageListManagerIntf: IsmxImageListManager = nil;
-  gClassManagerIntf: IsmxClassManager = nil;
+  gClassTypeManagerIntf: IsmxClassTypeManager = nil;
 
 implementation
 
