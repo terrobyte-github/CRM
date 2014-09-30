@@ -877,11 +877,12 @@ var
   i: Integer;
 begin
   for i := ConnectionList.Count - 1 downto 0 do
-    //(DatabaseList[i] as IsmxDatabase).
-    //if (ConnectionList[i] as IsmxConnection).GetReference is TsmxCustomConnection then
-      (ConnectionList[i] as IsmxConnection).GetReference.Free; //FreeConnection;
-    //else
-      //(ConnectionList[i] as IsmxConnection).DatabaseManager := nil;
+    if not ((ConnectionList[i] as IsmxConnection).GetReference is TsmxInterfacedComponent)
+        or IsImplIntf((ConnectionList[i] as IsmxConnection).GetController) then
+      (ConnectionList[i] as IsmxConnection).GetReference.Free
+    else
+      ConnectionList[i] := nil;
+    //(DatabaseList[i] as IsmxDatabase).GetReference.Free;
 end;
 
 function TsmxDatabaseManager.FindByName(const DatabaseName: String): IsmxConnection;
@@ -890,12 +891,11 @@ var
 begin
   Result := nil;
   for i := 0 to ConnectionList.Count - 1 do
-    if Assigned((ConnectionList[i] as IsmxConnection).Database) then
-      if SysUtils.AnsiCompareText((ConnectionList[i] as IsmxConnection).Database.DatabaseName, DatabaseName) = 0 then
-      begin
-        Result := ConnectionList[i] as IsmxConnection;
-        Break;
-      end;
+    if SysUtils.AnsiCompareText((ConnectionList[i] as IsmxConnection).DatabaseName, DatabaseName) = 0 then
+    begin
+      Result := ConnectionList[i] as IsmxConnection;
+      Break;
+    end;
 end;
 
 function TsmxDatabaseManager.GetConnection(Index: Integer): IsmxConnection;
@@ -944,7 +944,11 @@ var
   i: Integer;
 begin
   for i := FormList.Count - 1 downto 0 do
-    (FormList[i] as IsmxForm).GetReference.Free; //FreeForm;
+    if not ((FormList[i] as IsmxForm).GetReference is TsmxInterfacedComponent)
+        or IsImplIntf((FormList[i] as IsmxForm).GetController) then
+      (FormList[i] as IsmxForm).GetReference.Free
+    else
+      FormList[i] := nil;
 end;
 
 function TsmxFormManager.FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxForm;
@@ -1239,13 +1243,14 @@ begin
 end;
 
 procedure TsmxClassTypeManager.ClearClassTypeList;
-var
-  i: Integer;
+//var
+  //i: Integer;
 begin
-  for i := ClassTypeList.Count - 1 downto 0 do
+  ClassTypeList.Clear;
+  //for i := ClassTypeList.Count - 1 downto 0 do
   //begin
     //TCustomImageList(Integer(ImageListRegister[i].ParamValue)).Free;
-    ClassTypeList.Delete(i);
+    //ClassTypeList.Delete(i);
   //end;
 end;
 
@@ -1363,7 +1368,7 @@ begin
       end
     end else
       Handle := HInstance;
-    if Handle <> 0 then   
+    if Handle <> 0 then
       Result := Classes.GetClass(ClassName);
   end;
 end;

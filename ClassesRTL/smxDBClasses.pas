@@ -19,16 +19,21 @@ uses
 type
   { TsmxCoDatabase }
 
-  TsmxCoDatabase = class(TComObject, IsmxDatabase)
+  TsmxCoDatabase = class(TComObject, IsmxBaseInterface, IsmxDatabase)
   private
     FDatabaseIntf: IsmxDatabase;
   protected
-    function GetDatabaseIntf: IsmxDatabase; virtual;
+    function CreateDatabase: IsmxDatabase; virtual;
+    function GetController: IsmxBaseInterface; virtual;
+    function GetDescription: String;
+    function GetVersion: String; virtual;
   public
     destructor Destroy; override;
     procedure Initialize; override;
 
     property Database: IsmxDatabase read FDatabaseIntf implements IsmxDatabase;
+    property Description: String read GetDescription;
+    property Version: String read GetVersion;
   end;
 
   { TsmxObjectItem }
@@ -286,16 +291,22 @@ type
 
   { TsmxCustomDatabase }
 
-  TsmxCustomDatabase = class(TsmxInterfacedComponent)
-  {private
+  TsmxCustomDatabase = class(TsmxInterfacedComponent, IsmxConnection)
+  private
     FDatabaseManagerIntf: IsmxDatabaseManager;
   protected
+    function GetDatabase: IsmxDatabase;
     function GetDatabaseManager: IsmxDatabaseManager;
+    function GetDatabaseName: String; virtual;
     procedure SetDatabaseManager(const Value: IsmxDatabaseManager); virtual;
+    procedure SetDatabaseName(const Value: String); virtual;
   public
+    //constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;}
+    //property Database: IsmxDatabase read GetDatabase;
+    property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
+    property DatabaseName: String read GetDatabaseName write SetDatabaseName;
   end;
 
   { TsmxCustomField }
@@ -757,7 +768,7 @@ type
 
   { TsmxCustomConnection }
 
-  TsmxCustomConnection = class(TsmxComponent, IsmxConnection)
+  {TsmxCustomConnection = class(TsmxComponent, IsmxConnection)
   private
     FDatabaseIntf: IsmxDatabase;
     FDatabaseManagerIntf: IsmxDatabaseManager;
@@ -779,11 +790,11 @@ type
     //property Connected: Boolean read GetConnected write SetConnected;
     property Database: IsmxDatabase read GetDatabase write SetDatabase;
     property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
-  end;
+  end;}
 
   { TsmxConnection }
 
-  TsmxConnection = class(TsmxCustomConnection)
+  //TsmxConnection = class(TsmxCustomConnection)
   {private
     FDatabaseIntf: IsmxDatabase;
     //FDatabaseManagerIntf: IsmxDatabaseManager;
@@ -806,7 +817,7 @@ type
     //property Connected: Boolean read GetConnected write SetConnected;
     property Database: IsmxDatabase read GetDatabase write SetDatabase;
     //property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;}
-  end;
+  //end;
 
   { IsmxObjectList }
 
@@ -826,21 +837,40 @@ uses
 
 { TsmxCoDatabase }
 
+procedure TsmxCoDatabase.Initialize;
+begin
+  inherited Initialize;
+  FDatabaseIntf := CreateDatabase;
+end;
+
 destructor TsmxCoDatabase.Destroy;
 begin
-  FDatabaseIntf := nil;
+  if Assigned(FDatabaseIntf) then
+  begin
+    FDatabaseIntf.GetReference.Free;
+    FDatabaseIntf := nil;
+  end;
   inherited Destroy;
 end;
 
-function TsmxCoDatabase.GetDatabaseIntf: IsmxDatabase;
+function TsmxCoDatabase.CreateDatabase: IsmxDatabase;
 begin
   Result := nil;
 end;
 
-procedure TsmxCoDatabase.Initialize;
+function TsmxCoDatabase.GetController: IsmxBaseInterface;
 begin
-  inherited Initialize;
-  FDatabaseIntf := GetDatabaseIntf;
+  Result := nil;
+end;
+
+function TsmxCoDatabase.GetDescription: String;
+begin
+  Result := ClassName;
+end;
+
+function TsmxCoDatabase.GetVersion: String;
+begin
+  Result := '';
 end;
 
 { TsmxFieldItem }
@@ -1550,10 +1580,24 @@ end;}
 
 { TsmxCustomDatabase }
 
-{destructor TsmxCustomDatabase.Destroy;
+{constructor TsmxCustomDatabase.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  if Assigned(smxProcs.gDatabaseManagerIntf) then
+    smxProcs.gDatabaseManagerIntf.InsertDatabase(Self as IsmxDatabase);
+end;}
+
+destructor TsmxCustomDatabase.Destroy;
 begin
   SetDatabaseManager(nil);
+  {if Assigned(smxProcs.gDatabaseManagerIntf) then
+    smxProcs.gDatabaseManagerIntf.RemoveDatabase(Self as IsmxDatabase);}
   inherited Destroy;
+end;
+
+function TsmxCustomDatabase.GetDatabase: IsmxDatabase;
+begin
+  Result := Self as IsmxDatabase;
 end;
 
 function TsmxCustomDatabase.GetDatabaseManager: IsmxDatabaseManager;
@@ -1564,11 +1608,20 @@ end;
 procedure TsmxCustomDatabase.SetDatabaseManager(const Value: IsmxDatabaseManager);
 begin
   if Assigned(FDatabaseManagerIntf) then
-    FDatabaseManagerIntf.RemoveDatabase(Self as IsmxDatabase);
+    FDatabaseManagerIntf.RemoveConnection(Self as IsmxConnection);
   FDatabaseManagerIntf := Value;
   if Assigned(FDatabaseManagerIntf) then
-    FDatabaseManagerIntf.InsertDatabase(Self as IsmxDataBase);
-end;}
+    FDatabaseManagerIntf.InsertConnection(Self as IsmxConnection);
+end;
+
+function TsmxCustomDatabase.GetDatabaseName: String;
+begin
+  Result := '';
+end;
+
+procedure TsmxCustomDatabase.SetDatabaseName(const Value: String);
+begin
+end;
 
 { TsmxCustomField }
 
@@ -3757,7 +3810,7 @@ end;
 
 { TsmxCustomConnection }
 
-destructor TsmxCustomConnection.Destroy;
+(*destructor TsmxCustomConnection.Destroy;
 begin
   SetDatabaseManager(nil);
   inherited Destroy;
@@ -3824,7 +3877,7 @@ end;
 
 procedure TsmxCustomConnection.SetDatabaseName(const Value: String);
 begin
-end;}
+end;}*)
 
 { TsmxConnection }
 
@@ -4014,6 +4067,6 @@ begin
 end;
 
 initialization
-  Classes.RegisterClasses([TsmxField, TsmxConnection]);
+  Classes.RegisterClasses([TsmxField{, TsmxConnection}]);
 
 end.

@@ -15,6 +15,8 @@ procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
 procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);}
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
+procedure RegisterClasses(AClasses: array of TPersistentClass);
+procedure UnRegisterClasses(AClasses: array of TPersistentClass);
 
 var
   gCallBackManagerIntf: IsmxCallBackManager = nil;
@@ -180,6 +182,42 @@ begin
     end;
     AValue[0] := v1;
     AValue[1] := v2;
+  end;
+end;
+
+procedure RegisterClasses(AClasses: array of TPersistentClass);
+var
+  i: Integer;
+  ModuleName: String;
+begin
+  Classes.RegisterClasses(AClasses);
+  if Assigned(gClassTypeManagerIntf) then
+  begin
+    ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(HInstance));
+    for i := Low(AClasses) to High(AClasses) do
+      if IsLibrary then
+        gClassTypeManagerIntf.AddClassType(SysUtils.Format('%s%s%s',
+          [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
+      else
+        gClassTypeManagerIntf.AddClassType(AClasses[i].ClassName);
+  end;
+end;
+
+procedure UnRegisterClasses(AClasses: array of TPersistentClass);
+var
+  i: Integer;
+  ModuleName: String;
+begin
+  Classes.UnRegisterClasses(AClasses);
+  if Assigned(gClassTypeManagerIntf) then
+  begin
+    ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(HInstance));
+    for i := Low(AClasses) to High(AClasses) do
+      if IsLibrary then
+        gClassTypeManagerIntf.DeleteClassType(SysUtils.Format('%s%s%s',
+          [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
+      else
+        gClassTypeManagerIntf.DeleteClassType(AClasses[i].ClassName);
   end;
 end;
 

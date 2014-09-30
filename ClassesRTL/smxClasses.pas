@@ -1797,7 +1797,7 @@ type
     procedure SetPopupList(Value: TsmxCustomPopupList); virtual;
     procedure SetRequestList(Value: TsmxCustomRequestList); virtual;
   public
-    //constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); overload; override;
     constructor Create(AOwner: TComponent; AID: Integer); reintroduce; overload; virtual;
     {constructor Create(AOwner: TComponent; AImplementorClass: TsmxInterfacedPersistentClass;
       AID: Integer); reintroduce; overload; virtual;}
@@ -5791,7 +5791,7 @@ begin
     Connection := smxProcs.gDatabaseManagerIntf.FindByName(FDatabaseName);
     //if Assigned(Connection) and SysUtils.Supports(IInterface(Connection.GetInternalRef), IsmxDatabase) then
     if Assigned(Connection) then
-      Database := Connection.Database;
+      Database := Connection as IsmxDatabase;
   end;
 end;
 
@@ -7232,8 +7232,8 @@ end;
 {constructor TsmxCustomForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  if Assigned(smxClassProcs.gFormManagerIntf) then
-    smxClassProcs.gFormManagerIntf.InsertForm(Self as IsmxForm);
+  if Assigned(smxProcs.gFormManagerIntf) then
+    smxProcs.gFormManagerIntf.InsertForm(Self as IsmxForm);
 end;}
 
 constructor TsmxCustomForm.Create(AOwner: TComponent; AID: Integer);
@@ -7252,7 +7252,8 @@ end;}
 destructor TsmxCustomForm.Destroy;
 begin
   SetFormManager(nil);
-  //smxClassProcs.gFormManagerIntf.RemoveForm(Self as IsmxForm);
+  {if Assigned(smxProcs.gFormManagerIntf) then
+    smxProcs.gFormManagerIntf.RemoveForm(Self as IsmxForm);}
   inherited Destroy;
 end;
 

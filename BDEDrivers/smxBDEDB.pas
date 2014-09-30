@@ -16,7 +16,7 @@ type
 
   TsmxCoBDEDatabase = class(TsmxCoDatabase)
   protected
-    function GetDatabaseIntf: IsmxDatabase; override;
+    function CreateDatabase: IsmxDatabase; override;
   //public
     //procedure Initialize; override;
   end;
@@ -31,7 +31,7 @@ type
   protected
     function GetConnected: Boolean;
     //function GetDatabase: TObject;
-    function GetDatabaseName: String;
+    function GetDatabaseName: String; override;
     function GetDriverName: String;
     function GetInternalRef: Pointer; override;
     function GetInTransaction: Boolean;
@@ -40,7 +40,7 @@ type
     function GetParamText: String;
     //function GetVersion: String; override;
     procedure SetConnected(Value: Boolean);
-    procedure SetDatabaseName(const Value: String);
+    procedure SetDatabaseName(const Value: String); override;
     procedure SetDriverName(const Value: String);
     //procedure SetLoginPrompt(Value: Boolean);
     //procedure SetParams(Value: TStrings);
@@ -60,7 +60,7 @@ type
   published
     property Connected: Boolean read GetConnected write SetConnected;
     //property Database: TObject read GetDatabase;
-    property DatabaseName: String read GetDatabaseName write SetDatabaseName;
+    //property DatabaseName: String read GetDatabaseName write SetDatabaseName;
     property DriverName: String read GetDriverName write SetDriverName;
     //property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     //property Params: TStrings read GetParams write SetParams;
@@ -1749,9 +1749,9 @@ begin
   FDatabaseIntf := TsmxBDEDatabase.Create as IsmxDatabase;
 end;}
 
-function TsmxCoBDEDatabase.GetDatabaseIntf: IsmxDatabase;
+function TsmxCoBDEDatabase.CreateDatabase: IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create(nil) as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil, Self as IsmxBaseInterface) as IsmxDatabase;
 end;
 
 { TsmxParam }

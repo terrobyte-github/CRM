@@ -35,7 +35,7 @@ var
   gFormManager: TsmxFormManager = nil;
   gImageListManager: TsmxImageListManager = nil;
   gClassTypeManager: TsmxClassTypeManager = nil;
-  gMainConnection: TsmxConnection = nil;
+  //gMainConnection: TsmxConnection = nil;
   //gMainDatabase: TsmxCustomDatabase = nil;
   gMainForm: TsmxCustomForm = nil;
   gCfgSelectRequest: TsmxCustomRequest = nil;
@@ -47,6 +47,7 @@ var
 procedure CreateGlobalObjects;
 begin
   gCallBackManager := TsmxCallBackManager.Create(nil);
+  smxProcs.gCallBackManagerIntf := gCallBackManager as IsmxCallBackManager;
   gStorageManager := TsmxStorageManager.Create(nil);
   smxProcs.gStorageManagerIntf := gStorageManager as IsmxStorageManager;
   gLibraryManager := TsmxLibraryManager.Create(nil);
@@ -77,6 +78,7 @@ begin
   gLibraryManager.Free;
   smxProcs.gStorageManagerIntf := nil;
   gStorageManager.Free;
+  smxProcs.gCallBackManagerIntf := nil;
   gCallBackManager.Free;
 end;
 
@@ -262,7 +264,7 @@ begin
     //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
     //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
   end;
-  gMainConnection := TsmxConnection.Create(nil);
+  //gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyMainObjects;
@@ -282,7 +284,7 @@ begin
     SysUtils.FreeAndNil(gCfgSelectRequest);
   end;
   smxClassProcs.gMainDatabaseIntf := nil;
-  gMainConnection.Free;
+  //gMainConnection.Free;
 end;
 
 procedure AssignMainObjects;
@@ -496,7 +498,7 @@ function LogIn: Boolean;
       begin
         FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
         if Assigned(FuncNewDatabase) then
-          Database := FuncNewDatabase;
+          Database := FuncNewDatabase(gDatabaseManager as IsmxBaseInterface);
       end;
       gmCOM:
       begin
@@ -513,7 +515,7 @@ function LogIn: Boolean;
         begin
           IntfClass := TsmxInterfacedComponentClass(Classes.GetClass(Connection.FuncOrClassNameOrProgID));
           if Assigned(IntfClass) then
-            Database := IntfClass.Create(nil) as IsmxDatabase;
+            Database := IntfClass.Create(nil, gDatabaseManager as IsmxBaseInterface) as IsmxDatabase;
         end;
       end;
     end;
@@ -537,8 +539,11 @@ function LogIn: Boolean;
       Database.Connected := True;
       if Database.Connected then
       begin
-        gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
-        gMainConnection.Database := Database;
+        //gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
+        //gMainConnection.Database := Database;
+        //if SysUtils.Supports(Database, IsmxConnection, Connection) then
+
+        (Database as IsmxConnection).DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
         smxClassProcs.gMainDatabaseIntf := Database;
         Result := True;
       end;
@@ -713,12 +718,17 @@ end;
 
 procedure LogOut;
 begin
-  if Assigned(gMainConnection.Database) then
-    if gMainConnection.Database.Connected then
+  //if Assigned(gMainConnection.Database) then
+    //if gMainConnection.Database.Connected then
+  if Assigned(smxClassProcs.gMainDatabaseIntf) then
+    if smxClassProcs.gMainDatabaseIntf.Connected then
     begin
-      if gMainConnection.Database.InTransaction then
-        gMainConnection.Database.RollbackTransaction;
-      gMainConnection.Database.Connected := False;
+      //if gMainConnection.Database.InTransaction then
+        //gMainConnection.Database.RollbackTransaction;
+      if smxClassProcs.gMainDatabaseIntf.InTransaction then
+        smxClassProcs.gMainDatabaseIntf.RollbackTransaction;
+      //gMainConnection.Database.Connected := False;
+      smxClassProcs.gMainDatabaseIntf.Connected := False;
     end;
 end;
 

@@ -3,7 +3,7 @@ unit smxManagerIntf;
 interface
 
 uses
-  Classes, Controls, ImgList, smxBaseIntf, smxDBIntf, smxLibTypes;
+  Classes, Controls, ImgList, smxBaseIntf, {smxDBIntf,} smxLibTypes;
 
 const
   IID_IsmxCallBackManager: TGUID = '{402AC1B6-6DEB-4CD2-93FB-7528D6DEA805}';
@@ -88,18 +88,18 @@ type
     //procedure Disconnect;
     //procedure FreeConnection;
     //function GetConnected: Boolean;
-    function GetDatabase: IsmxDatabase;
-    //function GetDatabaseName: String;
+    //function GetDatabase: IsmxDatabase;
+    function GetDatabaseName: String;
     function GetDatabaseManager: IsmxDatabaseManager;
     //function GetInternalRef: Pointer;
     //procedure SetConnected(Value: Boolean);
-    procedure SetDatabase(const Value: IsmxDatabase);
-    //procedure SetDatabaseName(const Value: String);
+    //procedure SetDatabase(const Value: IsmxDatabase);
+    procedure SetDatabaseName(const Value: String);
     procedure SetDatabaseManager(const Value: IsmxDatabaseManager);
 
     //property Connected: Boolean read GetConnected write SetConnected;
-    property Database: IsmxDatabase read GetDatabase write SetDatabase;
-    //property DatabaseName: String read GetDatabaseName write SetDatabaseName;
+    //property Database: IsmxDatabase read GetDatabase;// write SetDatabase;
+    property DatabaseName: String read GetDatabaseName write SetDatabaseName;
     property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
   end;
 
@@ -107,14 +107,15 @@ type
 
   IsmxDatabaseManager = interface(IsmxBaseInterface)
     ['{AD0FCDC5-ED53-430D-9A09-D4096818EE17}']
-    {function FindByName(const DatabaseName: String): IsmxConnection;
-    function GetConnectionCount: Integer;
-    function GetConnection(Index: Integer): IsmxConnection;
-    procedure InsertConnection(Connection: IsmxConnection);
-    procedure RemoveConnection(Connection: IsmxConnection);
+    {function FindByName(const DatabaseName: String): IsmxDatabase;
+    function GetDatabaseCount: Integer;
+    function GetDatabase(Index: Integer): IsmxDatabase;
+    procedure InsertDatabase(const Database: IsmxDatabase);
+    procedure RemoveDatabase(const Database: IsmxDatabase);
 
-    property ConnectionCount: Integer read GetConnectionCount;
-    property Connections[Index: Integer]: IsmxConnection read GetConnection; default;}
+    property DatabaseCount: Integer read GetDatabaseCount;
+    property Databases[Index: Integer]: IsmxDatabase read GetDatabase; default;}
+
     function FindByName(const DatabaseName: String): IsmxConnection;
     function GetConnectionCount: Integer;
     function GetConnection(Index: Integer): IsmxConnection;
