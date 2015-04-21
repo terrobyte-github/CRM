@@ -40,6 +40,7 @@ type
     function GetInternalRef: Pointer; virtual;
     function GetReference: TComponent;
     function GetVersion: String; virtual;
+    function IsInterfacedObj: Boolean; virtual;
   public
     function IsImplIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
 
@@ -60,6 +61,7 @@ type
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetController: IsmxBaseInterface; override;
+    function IsInterfacedObj: Boolean; override;
   public
     constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
     procedure AfterConstruction; override;
@@ -111,6 +113,7 @@ type
     function GetInternalRef: Pointer; virtual;
     function GetReference: TPersistent;
     function GetVersion: String; virtual;
+    function IsInterfacedObj: Boolean; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
@@ -145,6 +148,7 @@ type
     //function GetInternalRef: Pointer; virtual;
     //function GetReference: TPersistent;
     //function GetVersion: String; virtual;
+    function IsInterfacedObj: Boolean; override;
     //function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
@@ -432,10 +436,10 @@ type
     procedure Write; virtual;
 
     property CfgID: Integer read FCfgID write SetCfgID;
-    property DeleteDataSet: IsmxDataSet index mrDelete read FDeleteDataSetIntf write SetModifyDataSet;
-    property InsertDataSet: IsmxDataSet index mrInsert read FInsertDataSetIntf write SetModifyDataSet;
+    property DeleteDataSet: IsmxDataSet index rtDelete read FDeleteDataSetIntf write SetModifyDataSet;
+    property InsertDataSet: IsmxDataSet index rtInsert read FInsertDataSetIntf write SetModifyDataSet;
     property SelectDataSet: IsmxDataSet read FSelectDataSetIntf write SetSelectDataSet;
-    property UpdateDataSet: IsmxDataSet index mrUpdate read FUpdateDataSetIntf write SetModifyDataSet;
+    property UpdateDataSet: IsmxDataSet index rtUpdate read FUpdateDataSetIntf write SetModifyDataSet;
     //property SelectRequest: TsmxCustomRequest read FSelectRequest write SetSelectRequest;
     property XMLText: String read GetXMLText write SetXMLText;
   end;
@@ -623,6 +627,11 @@ begin
   Result := cVersion;
 end;
 
+function TsmxComponent.IsInterfacedObj: Boolean;
+begin
+  Result := False;
+end;
+
 function TsmxComponent.IsImplIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxRefComponent;
@@ -673,6 +682,11 @@ end;
 function TsmxInterfacedComponent.GetController: IsmxBaseInterface;//IsmxRefComponent;
 begin
   Result := IsmxBaseInterface{IsmxRefComponent}(FController);
+end;
+
+function TsmxInterfacedComponent.IsInterfacedObj: Boolean;
+begin
+  Result := True; //not Assigned(FController);
 end;
 
 class function TsmxInterfacedComponent.NewInstance: TObject;
@@ -753,6 +767,11 @@ function TsmxInterfacedPersistent.GetVersion: String;
 begin
   Result := cVersion;
 end;}
+
+function TsmxInterfacedPersistent.IsInterfacedObj: Boolean;
+begin
+  Result := True; //not Assigned(FController);
+end;
 
 class function TsmxInterfacedPersistent.NewInstance: TObject;
 begin
@@ -1333,13 +1352,6 @@ begin
   Result := cVersion;
 end;
 
-function TsmxPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
-begin
-  if GetInterface(IID, Obj) then
-    Result := S_OK else
-    Result := E_NOINTERFACE;
-end;
-
 function TsmxPersistent.IsImplIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxRefPersistent;
@@ -1349,15 +1361,27 @@ begin
     and (AIntf.GetReference = Self);
 end;
 
+function TsmxPersistent.IsInterfacedObj: Boolean;
+begin
+  Result := False;
+end;
+
+function TsmxPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if GetInterface(IID, Obj) then
+    Result := S_OK else
+    Result := E_NOINTERFACE;
+end;
+
 { TsmxBaseCfg }
 
 destructor TsmxBaseCfg.Destroy;
 begin
   FXMLDocIntf := nil;
   SetSelectDataSet(nil);
-  SetModifyDataSet(mrDelete, nil);
-  SetModifyDataSet(mrInsert, nil);
-  SetModifyDataSet(mrUpdate, nil);
+  SetModifyDataSet(rtDelete, nil);
+  SetModifyDataSet(rtInsert, nil);
+  SetModifyDataSet(rtUpdate, nil);
   inherited Destroy;
 end;
 
@@ -1568,9 +1592,9 @@ end;}
 procedure TsmxBaseCfg.SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet);
 begin
   case Index of
-    mrDelete: FDeleteDataSetIntf := Value;
-    mrInsert: FInsertDataSetIntf := Value;
-    mrUpdate: FUpdateDataSetIntf := Value;
+    rtDelete: FDeleteDataSetIntf := Value;
+    rtInsert: FInsertDataSetIntf := Value;
+    rtUpdate: FUpdateDataSetIntf := Value;
   end;
   if Assigned(Value) then
     Value.GetReference.FreeNotification(Self);

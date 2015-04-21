@@ -20,5 +20,5 @@ exports
 {$R *.RES}
 
 begin
-  smxLibProcs.FillInfo(1, 0, nil, [ltDatabaseIntf]);
+  smxLibProcs.FillInfo(1, 0, nil, [ltDatabaseIntf, ltCellClass]);
 end.

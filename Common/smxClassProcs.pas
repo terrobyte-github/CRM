@@ -332,7 +332,7 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
     //n: IXMLNode;
     GUID: TGUID;
     s: String;
-    Intf2: IsmxRefComponent;
+    //Intf2: IsmxRefComponent;
   begin
     //n := Node.ChildNodes.FindNode(PropInfo^.Name);
     if {Assigned(n) and (}AObject is TsmxBaseCell{)} then
@@ -341,10 +341,10 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
       Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
       if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
       begin
-        AObject.GetInterface(IsmxRefComponent{IsmxRefPersistent}, Intf2);
-        if Assigned(Intf) then
-          if IsmxRefComponent(Intf).GetReference = Intf2.GetReference then
-            Intf2 := nil;
+        //AObject.GetInterface(IsmxRefComponent{IsmxRefPersistent}, Intf2);
+        //if Assigned(Intf) then
+          //if IsmxRefComponent(Intf).GetReference = Intf2.GetReference then
+            //Intf2 := nil;
         //if smxFuncs.IsImplIntf(AObject, IsmxRefComponent{IsmxRefPersistent}(Intf)) then
         if TsmxBaseCell(AObject).IsImplIntf(IsmxRefComponent(Intf)) then
         begin
@@ -448,7 +448,7 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
     end;
   end;
 
-  procedure ReadChild(ACell: TsmxBaseCell; const Node: IXMLNode);
+  (*procedure ReadChild(ACell: TsmxBaseCell; const Node: IXMLNode);
 
     {function GetImplIntf(const ClassName: String): IsmxRefPersistent;
     begin
@@ -497,7 +497,7 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
         ReadProps(AOwner, Cell, n, AResolvedList);
       end;
     end;
-  end;
+  end;*)
 
 var
   Count: Integer;
@@ -748,7 +748,7 @@ procedure WriteProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode
     end;
   end;
 
-  procedure WriteChild(ACell: TsmxBaseCell; const Node: IXMLNode);
+  (*procedure WriteChild(ACell: TsmxBaseCell; const Node: IXMLNode);
 
     {function GetImplClassName(Cell: TsmxBaseCell): String;
     begin
@@ -786,7 +786,7 @@ procedure WriteProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode
         n.Attributes[smxConsts.cClassNameAttributeName] := Cell.ClassName;
         n.Attributes[smxConsts.cCfgIDAttributeName] := Cell.CfgID;
       end;
-  end;
+  end;*)
 
 var
   Count: Integer;

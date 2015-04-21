@@ -15,8 +15,10 @@ procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
 procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);}
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
-procedure RegisterClasses(AClasses: array of TPersistentClass);
-procedure UnRegisterClasses(AClasses: array of TPersistentClass);
+procedure SplitByDelimiter(const AStr, ADelimiter: String;
+  var AName, AValue: String);
+procedure RegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
+procedure UnRegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
 
 var
   gCallBackManagerIntf: IsmxCallBackManager = nil;
@@ -31,7 +33,7 @@ implementation
 
 uses
   Windows, Graphics, SysUtils, CommCtrl, Variants, TypInfo, smxFuncs, smxConsts,
-  smxBaseIntf;
+  smxBaseIntf, Forms;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var
@@ -185,7 +187,24 @@ begin
   end;
 end;
 
-procedure RegisterClasses(AClasses: array of TPersistentClass);
+procedure SplitByDelimiter(const AStr, ADelimiter: String;
+  var AName, AValue: String);
+var
+  i: Integer;
+begin
+  i := Pos(ADelimiter, AStr);
+  if i > 0 then
+  begin
+    AName := Copy(AStr, 1, i - 1);
+    AValue := Copy(AStr, i + Length(ADelimiter), MaxInt);
+  end else
+  begin
+    AName := AStr;
+    AValue := '';
+  end;
+end;
+
+procedure RegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
 var
   i: Integer;
   ModuleName: String;
@@ -193,17 +212,23 @@ begin
   Classes.RegisterClasses(AClasses);
   if Assigned(gClassTypeManagerIntf) then
   begin
-    ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(HInstance));
+    if AInstance <> 0 then
+      ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(AInstance))
+    else
+      ModuleName := '';
     for i := Low(AClasses) to High(AClasses) do
-      if IsLibrary then
-        gClassTypeManagerIntf.AddClassType(SysUtils.Format('%s%s%s',
-          [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
+      if ModuleName <> ''{IsLibrary} then
+        gClassTypeManagerIntf.RegisterClassTypeName(
+          SysUtils.Format('%s%s%s', [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]),
+          AClasses[i])
       else
-        gClassTypeManagerIntf.AddClassType(AClasses[i].ClassName);
+        gClassTypeManagerIntf.RegisterClassTypeName(
+          AClasses[i].ClassName,
+          AClasses[i]);
   end;
 end;
 
-procedure UnRegisterClasses(AClasses: array of TPersistentClass);
+procedure UnRegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
 var
   i: Integer;
   ModuleName: String;
@@ -211,13 +236,16 @@ begin
   Classes.UnRegisterClasses(AClasses);
   if Assigned(gClassTypeManagerIntf) then
   begin
-    ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(HInstance));
+    if AInstance <> 0 then
+      ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(AInstance))
+    else
+      ModuleName := '';
     for i := Low(AClasses) to High(AClasses) do
-      if IsLibrary then
-        gClassTypeManagerIntf.DeleteClassType(SysUtils.Format('%s%s%s',
+      if ModuleName <> ''{IsLibrary} then
+        gClassTypeManagerIntf.UnRegisterClassTypeName(SysUtils.Format('%s%s%s',
           [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
       else
-        gClassTypeManagerIntf.DeleteClassType(AClasses[i].ClassName);
+        gClassTypeManagerIntf.UnRegisterClassTypeName(AClasses[i].ClassName);
   end;
 end;
 

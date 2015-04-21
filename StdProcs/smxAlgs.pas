@@ -124,7 +124,7 @@ begin
     if CfgID <> 0 then
     begin
       AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
-      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID, True);
       try
         Form.CellParent := AccessoryForm;
         Form.Initialize;
@@ -141,7 +141,7 @@ procedure ShowUniForm(Sender: TsmxComponent);
 var
   CfgID, ID: Integer;
   AccessoryForm, Form: TsmxCustomForm;
-  FormIntf: IsmxForm;
+  FormIntf: IsmxFormControl;
 begin
   if Sender is TsmxCustomAlgorithm then
   begin
@@ -156,7 +156,7 @@ begin
       if not Assigned(Form) then
       begin
         AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
-        Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+        Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID, True);
         Form.CellParent := AccessoryForm;
         Form.Initialize;
         Form.IntfID := AccessoryForm.IntfID;
@@ -194,7 +194,7 @@ begin
     if CfgID <> 0 then
     begin
       AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
-      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID);
+      Form := smxClassFuncs.NewForm(AccessoryForm, CfgID, nil, ID, True);
       try
         Form.CellParent := AccessoryForm;
         //Form.IsNewInitialize := True;
@@ -643,7 +643,7 @@ begin
         if (PropKit in [2, 3]) and (FormCfgID <> 0) then
         begin
           AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
-          Form := smxClassFuncs.NewForm(AccessoryForm, FormCfgID);
+          Form := smxClassFuncs.NewForm(AccessoryForm, FormCfgID, nil, 0, True);
           try
             Form.CellParent := AccessoryForm;
             Form.Initialize;

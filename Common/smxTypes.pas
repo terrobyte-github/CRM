@@ -82,7 +82,10 @@ type
 
   TsmxChangeMode = (cmReplace, cmAdd{, cmUnique});
 
-  TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
+  TsmxRequestType = (rtSelect, rtDelete, rtInsert, rtUpdate);
+
+  //TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
+  TsmxModifyRequest = rtDelete .. rtUpdate;
 
   TsmxColumnOption = (coEditing, coHasValue);
 

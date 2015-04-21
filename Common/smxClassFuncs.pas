@@ -15,7 +15,8 @@ function NewCell(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCell;
 //function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
 function NewForm(AOwner: TComponent; ACfgID: Integer;
-  const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0): TsmxCustomForm;
+  const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0;
+  AIsRegister: Boolean = False): TsmxCustomForm;
 function ExistsParent(ACell, ACellParent: TsmxBaseCell): Boolean;
 function FindFilterOnSection(ASection: TsmxCustomSection; const AName: String;
   var AValue: Variant): Boolean;
@@ -33,12 +34,13 @@ function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomReque
 function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest; overload;
 function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
 function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
+//function GetCellClassName(ACell: TsmxBaseCell): String;
 
 implementation
 
 uses
   Variants, smxCfgs, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes,
-  smxDBFuncs;
+  smxDBFuncs, smxManagerIntf;
 
 function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
 var
@@ -192,7 +194,8 @@ begin
 end;}
 
 function NewForm(AOwner: TComponent; ACfgID: Integer;
-  const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0): TsmxCustomForm;
+  const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0;
+  AIsRegister: Boolean = False): TsmxCustomForm;
 var
   CellClass: TsmxBaseCellClass;
   //IntfClass: TsmxInterfacedPersistentClass;
@@ -224,7 +227,11 @@ begin
     //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
     //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
     //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
-    Result.FormManager := smxProcs.gFormManagerIntf;
+
+    if AIsRegister and Assigned(smxProcs.gFormManagerIntf) then
+      smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
+      //Result.FormManager := smxProcs.gFormManagerIntf;
+
     //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,
@@ -448,5 +455,28 @@ begin
         if AForm.RequestList[i].DataSet = ADataSet then
           Result := AForm.RequestList[i];
 end;
+
+{function GetCellClassName(ACell: TsmxBaseCell): String;
+begin
+  Result := '';
+  if (not Assigned(smxProcs.gClassTypeManagerIntf))
+      or (Assigned(smxProcs.gClassTypeManagerIntf)
+        and not smxProcs.gClassTypeManagerIntf.ResolvedClassType(TPersistentClass(ACell.ClassType), Result)) then
+    Result := ACell.ClassName;
+end;
+
+function GetCellClassType(const ACellClassTypeName: String): TsmxBaseCellClass;
+var
+  AClass: TPersistentClass;
+begin
+  Result := nil;
+  if (not Assigned(smxProcs.gClassTypeManagerIntf))
+      or (Assigned(smxProcs.gClassTypeManagerIntf)
+        and not smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(ACellClassTypeName, AClass)) then
+    AClass := Classes.GetClass(ACellClassTypeName);
+  if Assigned(AClass) then
+    if AClass.InheritsFrom(TsmxBaseCell) then
+      Result := TsmxBaseCellClass(AClass);
+end;}
 
 end.

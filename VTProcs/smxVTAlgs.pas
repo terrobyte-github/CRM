@@ -244,7 +244,7 @@ end;
 
 function GetForm(ACfgID, AID: Integer): TsmxCustomForm;
 var
-  FormIntf: IsmxForm;
+  FormIntf: IsmxFormControl;
 begin
   FormIntf := smxProcs.gFormManagerIntf.FindByComboID(ACfgID, AID);
   if Assigned(FormIntf) then
@@ -269,7 +269,7 @@ begin
       begin
         Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
         AddObjectProps(AObject, Tree, Tree.RootRow);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
+        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
       end;
     end;
 
@@ -356,11 +356,21 @@ var
   Method: TMethod;
 begin
   Result := nil;
-  FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  if Assigned(smxProcs.gClassTypeManagerIntf) then
+    FormClass := TsmxCustomFormClass(
+      smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+        'TsmxStandardForm' +
+          smxProcs.gClassTypeManagerIntf.Delimiter +
+          'smxStdClasses.dll',
+        True))
+  else
+    FormClass := nil;
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormCellViewID);
-    Result.FormManager := smxProcs.gFormManagerIntf;
+    if Assigned(smxProcs.gFormManagerIntf) then
+      smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
     Result.CellLeft := 500;
     Result.CellTop := 100;
@@ -439,9 +449,9 @@ var
   Form: TsmxCustomForm;
 begin
   Result := nil;
-  for i := 0 to smxProcs.gFormManagerIntf.FormCount - 1 do
+  for i := 0 to smxProcs.gFormManagerIntf.FormControlCount - 1 do
   begin
-    Form := TsmxCustomForm(smxProcs.gFormManagerIntf.Forms[i].GetReference);
+    Form := TsmxCustomForm(smxProcs.gFormManagerIntf.FormControls[i].GetReference);
     if (Form.ID = smxConsts.cFormSlaveListID)
         and (TsmxKit(Form.Tag) = AKit) then
     begin
@@ -509,11 +519,21 @@ var
   ToolItem: TsmxCustomToolItem;
 begin
   Result := nil;
-  FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  if Assigned(smxProcs.gClassTypeManagerIntf) then
+    FormClass := TsmxCustomFormClass(
+      smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+        'TsmxStandardForm' +
+          smxProcs.gClassTypeManagerIntf.Delimiter +
+          'smxStdClasses.dll',
+        True))
+  else
+    FormClass := nil;      
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormSlaveListID);
-    Result.FormManager := smxProcs.gFormManagerIntf;
+    if Assigned(smxProcs.gFormManagerIntf) then
+      smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
     Result.CellLeft := 300;
     Result.CellTop := 50;
@@ -526,7 +546,16 @@ begin
     Result.FormOptions := [foFreeOnClose];
     Result.Tag := Integer(AKit);
 
-    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTGrid'));
+    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTGrid'));
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      CellClass := TsmxBaseCellClass(
+        smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+          'TsmxVTGrid' +
+            smxProcs.gClassTypeManagerIntf.Delimiter +
+            'smxVTClasses.dll',
+          True))
+    else
+      CellClass := nil;
     if Assigned(CellClass) then
     begin
       Grid := TsmxCustomGrid(CellClass.Create(nil));
@@ -545,7 +574,16 @@ begin
       end;
     end;
 
-    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxToolBar'));
+    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxToolBar'));
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      CellClass := TsmxBaseCellClass(
+        smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+          'TsmxToolBar' +
+            smxProcs.gClassTypeManagerIntf.Delimiter +
+            'smxStdClasses.dll',
+          True))
+    else
+      CellClass := nil;
     if Assigned(CellClass) then
     begin
       ToolBar := TsmxCustomToolBoard(CellClass.Create(nil));
@@ -1008,11 +1046,21 @@ var
   Tree: TsmxCustomTree;
 begin
   Result := nil;
-  FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
+  if Assigned(smxProcs.gClassTypeManagerIntf) then
+    FormClass := TsmxCustomFormClass(
+      smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+        'TsmxStandardForm' +
+          smxProcs.gClassTypeManagerIntf.Delimiter +
+          'smxStdClasses.dll',
+        True))
+  else
+    FormClass := nil;
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormObjectPropsID);
-    Result.FormManager := smxProcs.gFormManagerIntf;
+    if Assigned(smxProcs.gFormManagerIntf) then
+      smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
     Result.CellLeft := 0;
     Result.CellTop := 50;
@@ -1029,7 +1077,16 @@ begin
     Page := Result.Slaves[0].AddSlave;
     Page.CellCaption := 'Object Inspector';
 
-    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxPageControl'));
+    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxPageControl'));
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      CellClass := TsmxBaseCellClass(
+        smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+          'TsmxPageControl' +
+            smxProcs.gClassTypeManagerIntf.Delimiter +
+            'smxStdClasses.dll',
+          True))
+    else
+      CellClass := nil;
     if Assigned(CellClass) then
     begin
       PageManager := TsmxCustomPageManager(CellClass.Create(nil));
@@ -1040,7 +1097,16 @@ begin
       Page := PageManager.AddSlave;
       Page.CellCaption := 'Properties';
 
-      CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+      //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+      if Assigned(smxProcs.gClassTypeManagerIntf) then
+        CellClass := TsmxBaseCellClass(
+          smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+            'TsmxVTTree' +
+              smxProcs.gClassTypeManagerIntf.Delimiter +
+              'smxVTClasses.dll',
+            True))
+      else
+        CellClass := nil;
       if Assigned(CellClass) then
       begin
         Tree := TsmxCustomTree(CellClass.Create(nil));
@@ -1070,7 +1136,16 @@ begin
       Page := PageManager.AddSlave;
       Page.CellCaption := 'Events';
 
-      CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+      //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+      if Assigned(smxProcs.gClassTypeManagerIntf) then
+        CellClass := TsmxBaseCellClass(
+          smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+            'TsmxVTTree' +
+              smxProcs.gClassTypeManagerIntf.Delimiter +
+              'smxVTClasses.dll',
+            True))
+      else
+        CellClass := nil;
       if Assigned(CellClass) then
       begin
         Tree := TsmxCustomTree(CellClass.Create(nil));
@@ -1098,7 +1173,16 @@ begin
     Page := Result.Slaves[0].AddSlave;
     Page.CellCaption := 'Object TreeView';
 
-    CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      CellClass := TsmxBaseCellClass(
+        smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+          'TsmxVTTree' +
+            smxProcs.gClassTypeManagerIntf.Delimiter +
+            'smxVTClasses.dll',
+          True))
+    else
+      CellClass := nil;
     if Assigned(CellClass) then
     begin
       Tree := TsmxCustomTree(CellClass.Create(nil));

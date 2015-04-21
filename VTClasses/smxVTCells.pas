@@ -368,8 +368,8 @@ type
 implementation
 
 uses
-  Windows, Variants, Forms, TypInfo, {smxCfgs,} smxStdCtrls, smxFuncs,
-  smxClassFuncs, smxDBFuncs, smxDBIntf, smxBaseIntf, Mask;
+  Windows, Variants, Forms, TypInfo, {smxCfgs,} smxStdCtrls, smxFuncs, smxProcs,
+  smxClassFuncs, smxDBFuncs, smxDBIntf, smxBaseIntf{, Mask};
 
 //type
   { _TsmxBaseCell }
@@ -2749,5 +2749,8 @@ end;
 
 initialization
   Classes.RegisterClasses([TsmxVTColumn, TsmxVTGrid, TsmxVTTree]);
+
+finalization
+  Classes.UnRegisterClasses([TsmxVTColumn, TsmxVTGrid, TsmxVTTree]);
 
 end.

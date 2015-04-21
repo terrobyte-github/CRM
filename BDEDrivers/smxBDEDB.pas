@@ -377,7 +377,7 @@ function NewProcedure(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
 implementation
 
 uses
-  ComServ, StrUtils, Variants, smxConsts, smxFuncs, smxProcs, smxDBFuncs;
+  ComServ, StrUtils, Variants, smxConsts, smxFuncs, smxProcs, smxDBFuncs, smxLibProcs;
 
 //const
   //Vers = '1.0';
@@ -1482,6 +1482,7 @@ end;*)
 procedure TsmxBDEQuery.SetPrepare(Value: Boolean);
 begin
   //if FBDEDataSet is TQuery then
+  //if InternalQuery.DatabaseName <> '' then
     InternalQuery.Prepared := Value {else
   if FBDEDataSet is TStoredProc then
     TStoredProc(FBDEDataSet).Prepared := Value};
@@ -2283,6 +2284,7 @@ end;*)
 procedure TsmxBDEStoredProc.SetPrepare(Value: Boolean);
 begin
   //if FBDEDataSet is TQuery then
+  //if InternalStoredProc.DatabaseName <> '' then
     InternalStoredProc.Prepared := Value {else
   if FBDEDataSet is TStoredProc then
     TStoredProc(FBDEDataSet).Prepared := Value};
@@ -2440,5 +2442,9 @@ initialization
     TsmxBDEStoredProc, TsmxReqBDEQuery, TsmxReqBDEStoredProc]);
   TComObjectFactory.Create(ComServer, TsmxCoBDEDatabase, CLSID_smxCoBDEDatabase,
     'smxCoBDEDatabase', '', ciMultiInstance, tmApartment);
+
+finalization
+  Classes.UnRegisterClasses([TsmxBDEDatabase, TsmxBDEParam, TsmxBDEQuery,
+    TsmxBDEStoredProc, TsmxReqBDEQuery, TsmxReqBDEStoredProc]);
 
 end.

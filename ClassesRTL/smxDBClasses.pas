@@ -27,6 +27,7 @@ type
     function GetController: IsmxBaseInterface; virtual;
     function GetDescription: String;
     function GetVersion: String; virtual;
+    function IsInterfacedObj: Boolean; virtual;
   public
     destructor Destroy; override;
     procedure Initialize; override;
@@ -291,21 +292,24 @@ type
 
   { TsmxCustomDatabase }
 
-  TsmxCustomDatabase = class(TsmxInterfacedComponent, IsmxConnection)
+  TsmxCustomDatabase = class(TsmxInterfacedComponent, IsmxDataEntity)
   private
     FDatabaseManagerIntf: IsmxDatabaseManager;
   protected
+    procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager); virtual;
     function GetDatabase: IsmxDatabase;
-    function GetDatabaseManager: IsmxDatabaseManager;
+    //function GetDatabaseManager: IsmxDatabaseManager;
     function GetDatabaseName: String; virtual;
-    procedure SetDatabaseManager(const Value: IsmxDatabaseManager); virtual;
+    function IsmxDataEntity.GetDataEntityName = GetDatabaseName;
+    //procedure SetDatabaseManager(const Value: IsmxDatabaseManager); virtual;
     procedure SetDatabaseName(const Value: String); virtual;
+    procedure IsmxDataEntity.SetDataEntityName = SetDatabaseName;
   public
-    //constructor Create(AOwner: TComponent); override;
+    //constructor Create(AOwner: TComponent); overload; override;
     destructor Destroy; override;
 
     //property Database: IsmxDatabase read GetDatabase;
-    property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
+    //property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
   end;
 
@@ -871,6 +875,11 @@ end;
 function TsmxCoDatabase.GetVersion: String;
 begin
   Result := '';
+end;
+
+function TsmxCoDatabase.IsInterfacedObj: Boolean;
+begin
+  Result := True; //not Assigned(Controller);
 end;
 
 { TsmxFieldItem }
@@ -1584,15 +1593,22 @@ end;}
 begin
   inherited Create(AOwner);
   if Assigned(smxProcs.gDatabaseManagerIntf) then
-    smxProcs.gDatabaseManagerIntf.InsertDatabase(Self as IsmxDatabase);
+    smxProcs.gDatabaseManagerIntf.InsertConnection(Self as IsmxConnection);
 end;}
 
 destructor TsmxCustomDatabase.Destroy;
 begin
-  SetDatabaseManager(nil);
-  {if Assigned(smxProcs.gDatabaseManagerIntf) then
-    smxProcs.gDatabaseManagerIntf.RemoveDatabase(Self as IsmxDatabase);}
+  //SetDatabaseManager(nil);
+  //if Assigned(smxProcs.gDatabaseManagerIntf) then
+    //smxProcs.gDatabaseManagerIntf.RemoveConnection(Self as IsmxConnection);
+  if Assigned(FDatabaseManagerIntf) then
+    FDatabaseManagerIntf.RemoveDataEntity(Self as IsmxDataEntity);
   inherited Destroy;
+end;
+
+procedure TsmxCustomDatabase.ChangeDatabaseManager(const Value: IsmxDatabaseManager);
+begin
+  FDatabaseManagerIntf := Value;
 end;
 
 function TsmxCustomDatabase.GetDatabase: IsmxDatabase;
@@ -1600,7 +1616,7 @@ begin
   Result := Self as IsmxDatabase;
 end;
 
-function TsmxCustomDatabase.GetDatabaseManager: IsmxDatabaseManager;
+{function TsmxCustomDatabase.GetDatabaseManager: IsmxDatabaseManager;
 begin
   Result := FDatabaseManagerIntf;
 end;
@@ -1608,11 +1624,11 @@ end;
 procedure TsmxCustomDatabase.SetDatabaseManager(const Value: IsmxDatabaseManager);
 begin
   if Assigned(FDatabaseManagerIntf) then
-    FDatabaseManagerIntf.RemoveConnection(Self as IsmxConnection);
-  FDatabaseManagerIntf := Value;
+    FDatabaseManagerIntf.RemoveDataEntity(Self as IsmxDataEntity);
+  //FDatabaseManagerIntf := Value;
   if Assigned(FDatabaseManagerIntf) then
-    FDatabaseManagerIntf.InsertConnection(Self as IsmxConnection);
-end;
+    FDatabaseManagerIntf.InsertDataEntity(Self as IsmxDataEntity);
+end;}
 
 function TsmxCustomDatabase.GetDatabaseName: String;
 begin
@@ -4066,7 +4082,10 @@ procedure TsmxDataSet.DestroyInternalParam(Param: TsmxCustomParam);
 begin
 end;
 
-initialization
-  Classes.RegisterClasses([TsmxField{, TsmxConnection}]);
+//initialization
+  //smxProcs{Classes}.RegisterClasses([TsmxField{, TsmxConnection}]);
+
+//finalization
+  //Classes.UnRegisterClasses([TsmxField{, TsmxConnection}]);
 
 end.

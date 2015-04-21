@@ -9208,4 +9208,14 @@ initialization
     TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar{, TsmxForm},
     TsmxStandardForm]);
 
+finalization
+  Classes.UnRegisterClasses([{TsmxAction,} TsmxLibAction, TsmxActionList,
+    {TsmxRequest,} TsmxRequestList, TsmxColumn, TsmxDBGrid, {TsmxPanelFilter,}
+    TsmxEditFilter{, TsmxDateTimeFilter}, TsmxBitBtnFilter,
+    {, TsmxNumEditFilter, TsmxLabelFilter}
+    TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet, TsmxPageControl,
+    TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList, TsmxToolItem,
+    TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar{, TsmxForm},
+    TsmxStandardForm]);
+
 end.

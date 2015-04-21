@@ -42,17 +42,12 @@ contains
   smxTypes in '..\Common\smxTypes.pas',
   smxDBFuncs in '..\Common\smxDBFuncs.pas',
   smxBaseIntf in '..\Common\smxBaseIntf.pas',
-  smxLibTypes in '..\Common\smxLibTypes.pas',
-  smxLibProcs in '..\Common\smxLibProcs.pas',
-  smxLibFuncs in '..\Common\smxLibFuncs.pas',
   smxManagerIntf in '..\Common\smxManagerIntf.pas',
   smxBaseTypes in '..\Common\smxBaseTypes.pas',
   smxStdCtrls in 'smxStdCtrls.pas',
-  smxClassIntf in '..\Common\smxClassIntf.pas';
+  smxClassIntf in '..\Common\smxClassIntf.pas',
+  smxLibTypes in '..\Common\smxLibTypes.pas',
+  smxLibFuncs in '..\Common\smxLibFuncs.pas',
+  smxLibProcs in '..\Common\smxLibProcs.pas';
 
 end.
-
-
-
-
-

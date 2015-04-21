@@ -253,8 +253,8 @@ type
 implementation
 
 uses
-  Variants, SysUtils, smxClassProcs, smxDBFuncs, smxDBIntf, smxFuncs, smxConsts,
-  smxTypes;
+  Variants, SysUtils, smxClassProcs, smxDBFuncs, smxDBIntf, smxProcs, smxFuncs,
+  smxConsts, smxTypes;
 
 { TsmxTypeCfg }
 
@@ -308,38 +308,48 @@ end;
 
 procedure TsmxTypeCfg.SetCellClass(Value: TsmxBaseCellClass);
 begin
-  if Assigned(FCellClass) then
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} Assigned(FCellClass) then
     FCellClassName := '';
   FCellClass := Value;
-  if Assigned(FCellClass) then
-    FCellClassName := FCellClass.ClassName;
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} Assigned(FCellClass) then
+    FCellClassName := smxFuncs.ResolvedClassType(FCellClass);
+    //FCellClassName := smxProcs.gClassTypeManagerIntf.ResolvedClassType(FCellClass);
+    //FCellClassName := FCellClass.ClassName;
 end;
 
 procedure TsmxTypeCfg.SetCellClassName(const Value: String);
 begin
-  if FCellClassName <> '' then
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} (FCellClassName <> '') then
     FCellClass := nil;
   FCellClassName := Value;
-  if FCellClassName <> '' then
-    FCellClass := TsmxBaseCellClass(Classes.FindClass(FCellClassName));
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} (FCellClassName <> '') then
+    FCellClass := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(FCellClassName, True));
+    //FCellClass := TsmxBaseCellClass(smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(FCellClassName, True));
+    //FCellClass := TsmxBaseCellClass(smxProcs.gClassTypeManagerIntf.FindByName(FCellClassName));
+    //FCellClass := TsmxBaseCellClass(Classes.FindClass(FCellClassName));
 end;
 
 procedure TsmxTypeCfg.SetCfgClass(Value: TsmxBaseCfgClass);
 begin
-  if Assigned(FCfgClass) then
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} Assigned(FCfgClass) then
     FCfgClassName := '';
   FCfgClass := Value;
-  if Assigned(FCfgClass) then
-    FCfgClassName := FCfgClass.ClassName;
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} Assigned(FCfgClass) then
+    FCfgClassName := smxFuncs.ResolvedClassType(FCfgClass);
+    //FCfgClassName := smxProcs.gClassTypeManagerIntf.ResolvedClassType(FCfgClass);
+    //FCfgClassName := FCfgClass.ClassName;
 end;
 
 procedure TsmxTypeCfg.SetCfgClassName(const Value: String);
 begin
-  if FCfgClassName <> '' then
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} (FCfgClassName <> '') then
     FCfgClass := nil;
   FCfgClassName := Value;
-  if FCfgClassName <> '' then
-    FCfgClass := TsmxBaseCfgClass(Classes.FindClass(FCfgClassName));
+  if {Assigned(smxProcs.gClassTypeManagerIntf) and} (FCfgClassName <> '') then
+    FCfgClass := TsmxBaseCfgClass(smxFuncs.ResolvedClassTypeName(FCfgClassName, True));
+    //FCfgClass := TsmxBaseCfgClass(smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(FCfgClassName, True));
+    //FCfgClass := TsmxBaseCfgClass(smxProcs.gClassTypeManagerIntf.FindByName(FCfgClassName));
+    //FCfgClass := TsmxBaseCfgClass(Classes.FindClass(FCfgClassName));
 end;
 
 { TsmxResolvedItem }
@@ -1142,7 +1152,10 @@ begin
   end;
 end;}
 
-initialization
-  Classes.RegisterClasses([TsmxTypeCfg, TsmxCellCfg, TsmxStateCfg]);
+//initialization
+  //smxProcs{Classes}.RegisterClasses([TsmxTypeCfg, TsmxCellCfg, TsmxStateCfg]);
+
+//finalization
+  //Classes.UnRegisterClasses([TsmxTypeCfg, TsmxCellCfg, TsmxStateCfg]);
 
 end.

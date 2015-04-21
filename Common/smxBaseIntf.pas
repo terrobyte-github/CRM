@@ -17,6 +17,7 @@ type
     ['{6785BD02-C530-4E8D-9001-A814F06B5045}']
     function GetController: IsmxBaseInterface;
     function GetDescription: String;
+    function IsInterfacedObj: Boolean;
     function GetVersion: String;
 
     property Description: String read GetDescription;
@@ -29,6 +30,7 @@ type
     ['{48732C0C-F577-4061-9B97-926BA4B715DA}']
     function GetInternalRef: Pointer;
     function GetReference: TComponent;
+    //function IsInterfaced: Boolean;
   end;
 
   { IsmxRefPersistent }
@@ -37,6 +39,7 @@ type
     ['{AE2E363C-A7E6-47E9-ABE7-66E8C80473AB}']
     function GetInternalRef: Pointer;
     function GetReference: TPersistent;
+    //function IsInterfaced: Boolean;
   end;
 
 implementation

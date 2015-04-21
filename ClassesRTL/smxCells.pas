@@ -2773,8 +2773,8 @@ begin
   end;
 end;
 
-initialization
-  Classes.RegisterClasses([TsmxAction, {TsmxActionList,} TsmxRequest,
-    {TsmxRequestList,} TsmxFilter, {TsmxPanelFilterDesk,} TsmxForm]);
+//initialization
+  //Classes.RegisterClasses([TsmxAction, {TsmxActionList,} TsmxRequest,
+    //{TsmxRequestList,} TsmxFilter, {TsmxPanelFilterDesk,} TsmxForm]);
 
 end.

@@ -38,11 +38,13 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
 function GetRootControl(AControl: TWinControl): TWinControl;
 function FindUniqueName(AOwner: TComponent; const AName: String): String;
+function ResolvedClassType(AClassType: TPersistentClass): String;
+function ResolvedClassTypeName(const AClassTypeName: String; AIsRegister: Boolean = False): TPersistentClass;
 
 implementation
 
 uses
-  Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc{, smxConsts};
+  Forms, Menus, Graphics, SysUtils, StrUtils, Variants, XMLDoc, smxProcs;
 
 function HotKeyToStr(AKey: Integer): String;
 begin
@@ -358,7 +360,31 @@ begin
   while not Assigned(AOwner.FindComponent(AName)) do
   begin
     Inc(i);
-    Result := SysUtils.Format('%s_%d', [AName, I]);
+    Result := SysUtils.Format('%s_%d', [AName, i]);
+  end;
+end;
+
+function ResolvedClassType(AClassType: TPersistentClass): String;
+begin
+  Result := '';
+  if Assigned(AClassType) then
+  begin
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      Result := smxProcs.gClassTypeManagerIntf.ResolvedClassType(AClassType);
+    if Result = '' then
+      Result := AClassType.ClassName;
+  end;
+end;
+
+function ResolvedClassTypeName(const AClassTypeName: String; AIsRegister: Boolean = False): TPersistentClass;
+begin
+  Result := nil;
+  if AClassTypeName <> '' then
+  begin
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      Result := smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(AClassTypeName, AIsRegister);
+    if not Assigned(Result) then
+      Result := Classes.GetClass(AClassTypeName);
   end;
 end;
 
