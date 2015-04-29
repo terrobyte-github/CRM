@@ -63,6 +63,7 @@ type
     function GetController: IsmxBaseInterface; override;
     function IsInterfacedObj: Boolean; override;
   public
+    { TODO : убрать owner из конструктора }
     constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;

@@ -50,7 +50,7 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
     if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
@@ -79,7 +79,7 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
     if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
@@ -134,7 +134,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CfgClass := CfgIDToCfgClass(ACfgID, DataSet);
   if Assigned(CfgClass) then
@@ -155,7 +155,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) then
@@ -202,7 +202,7 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomForm) then

@@ -14,38 +14,55 @@ const
 
   { Ini }
   cConfigurationFileName = '..\Cfg\conf.ini';
+  cConfigurationDelimiter = '.';
+  cValueDelimiter = ';';
+
   cInitSectionName = 'Init';
-  cInitCfgSelectReqClassName = 'CfgSelectReqClassName';
-  cInitCfgSelectReqLibName = 'CfgSelectReqLibName';
-  cInitCfgSelectReqProcName = 'CfgSelectReqProcName';
-  cInitCfgSelectReqXMLText = 'CfgSelectReqXMLText';
   cInitCheckUserReqCfgID = 'CheckUserReqCfgID';
   cInitCheckIntfReqCfgID = 'CheckIntfReqCfgID';
   cInitMainFormCfgID = 'MainFormCfgID';
   cInitConfFormCfgID = 'ConfFormCfgID';
-  cInitCfgDeleteReqCfgID = 'CfgDeleteReqCfgID';
-  cInitCfgInsertReqCfgID = 'CfgInsertReqCfgID';
-  cInitCfgUpdateReqCfgID = 'CfgUpdateReqCfgID';
+  cInitDeleteReqCfgID = 'DeleteReqCfgID';
+  cInitInsertReqCfgID = 'InsertReqCfgID';
+  cInitUpdateReqCfgID = 'UpdateReqCfgID';
+
+  cConfigSectionName = 'Config';
+  cConfigDataSetClassName = 'DataSetClassName';
+  cConfigDataSetLibName = 'DataSetLibName';
+  cConfigDataSetProcName = 'DataSetProcName';
+  cConfigDataSetType = 'DataSetType';
+  cConfigSQLText = 'SQLText';
+  cConfigFieldNames = 'FieldNames';
+  cConfigFieldDataTypes = 'FieldDataTypes';
+  cConfigFieldDataSenses = 'FieldDataSenses';
+  cConfigFieldSizes = 'FieldSizes';
+  cConfigParamNames = 'ParamNames';
+  cConfigParamDataTypes = 'ParamDataTypes';
+  cConfigParamDataSenses = 'ParamDataSenses';
+  cConfigParamSizes = 'ParamSizes';
+
   cPathSectionName = 'Path';
   cPathBin = 'Bin';
   cPathCfg = 'Cfg';
   cPathLib = 'Lib';
   cPathTemp = 'Temp';
-  cProjectSectionName = 'Project';
-  cProjectFileName = 'FileName';
-  cProjectMacroUserName = 'MacroUserName';
-  cProjectMacroPassword = 'MacroPassword';
-  cLibrarySectionName = 'Library';
+
+  cManagerSectionName = 'Manager';
+  cProjectFileName = 'ProjectFileName';
+  cProjectMacroUserName = 'ProjectMacroUserName';
+  cProjectMacroPassword = 'ProjectMacroPassword';
   cLibraryLibInfoProcName = 'LibInfoProcName';
-  cLibraryCheckComp = 'CheckComp';
-  cImageListSectionName = 'ImageList';
-  cImageListDelimiter = 'Delimiter';
+  cLibraryCheckComp = 'LibCheckComp';
+  cImageListDelimiter = 'ImageListDelimiter';
+  cClassTypeDelimiter = 'ClassTypeDelimiter';
+
   cParamSectionName = 'Param';
   cParamDatabaseName = 'DatabaseName';
   cParamUserName = 'UserName';
   cParamUserID = 'UserID';
   cParamIntfName = 'IntfName';
   cParamIntfID = 'IntfID';
+
   cDefValueSectionName = 'DefValue';
   cDefValueUserName = 'UserName';
   cDefValueProjectName = 'ProjectName';

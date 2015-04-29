@@ -27,7 +27,7 @@ type
     function GetInTransaction: Boolean;
     //function GetParams: TStrings;
     function GetParamText: String;
-    function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
     procedure RollbackTransaction;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
@@ -170,6 +170,7 @@ type
     function GetActive: Boolean;
     //function GetBookmark: Pointer;
     function GetDatabase: IsmxDatabase;
+    function GetDataSetName: String;
     function GetDataSetType: TsmxDataSetType;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
@@ -195,6 +196,7 @@ type
     procedure Prior;
     procedure SetActive(Value: Boolean);
     procedure SetDatabase(const Value: IsmxDatabase);
+    procedure SetDataSetName(const Value: String);
     procedure SetField(Index: Integer; const Value: IsmxField);
     procedure SetParam(Index: Integer; const Value: IsmxParam);
     procedure SetPerformanceMode(Value: TsmxPerformanceMode);
@@ -205,6 +207,7 @@ type
 
     property Active: Boolean read GetActive write SetActive;
     property Database: IsmxDatabase read GetDatabase write SetDatabase;
+    property DataSetName: String read GetDataSetName write SetDataSetName;
     property DataSetType: TsmxDataSetType read GetDataSetType;
     property FieldCount: Integer read GetFieldCount;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;

@@ -295,11 +295,12 @@ type
   TsmxCustomDatabase = class(TsmxInterfacedComponent, IsmxDataEntity)
   private
     FDatabaseManagerIntf: IsmxDatabaseManager;
+    FDatabaseName: String;
   protected
     procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager); virtual;
     function GetDatabase: IsmxDatabase;
     //function GetDatabaseManager: IsmxDatabaseManager;
-    function GetDatabaseName: String; virtual;
+    function GetDatabaseName: String; //virtual;
     function IsmxDataEntity.GetDataEntityName = GetDatabaseName;
     //procedure SetDatabaseManager(const Value: IsmxDatabaseManager); virtual;
     procedure SetDatabaseName(const Value: String); virtual;
@@ -570,9 +571,11 @@ type
 
   { TsmxCustomDataSet }
 
-  TsmxCustomDataSet = class(TsmxInterfacedComponent, IsmxObjectList)
+  TsmxCustomDataSet = class(TsmxInterfacedComponent, IsmxDataEntity, IsmxObjectList)
   private
     FDatabaseIntf: IsmxDatabase;
+    FDatabaseManagerIntf: IsmxDatabaseManager;
+    FDataSetName: String;
     //FFieldReferenceList: TsmxReferenceList;
     FParamList: TsmxParamList;
     //FParamReferenceList: TsmxReferenceList;
@@ -593,12 +596,15 @@ type
     //procedure ResetFieldReference(Reference: Pointer);
     //procedure ResetParamReference(Reference: Pointer);
   protected
+    procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager); virtual;
     procedure CheckObjectClass(Item: TObject; ObjectClass: TPersistentClass);
     procedure CreateObject(Item: TObject); overload; virtual;
     procedure CreateObject(Item: TObject; ObjectClass: TPersistentClass); overload; virtual;
     procedure DestroyObject(Item: TObject); virtual;
     function GetDatabase: IsmxDatabase; //virtual;
     procedure SetDatabase(const Value: IsmxDatabase); virtual;
+    function GetDataSetName: String; //virtual;
+    function IsmxDataEntity.GetDataEntityName = GetDataSetName;
     function GetFieldClass: TsmxInterfacedPersistentClass; virtual;
     function GetParamClass: TsmxInterfacedPersistentClass; virtual;
     //procedure SetFieldReferenceList(Value: TsmxReferenceList); virtual;
@@ -613,6 +619,8 @@ type
     procedure SetField(Index: Integer; const Value: IsmxField); //virtual;
     function GetParamCount: Integer; //virtual;
     function GetParam(Index: Integer): IsmxParam; //virtual;
+    procedure SetDataSetName(const Value: String); virtual;
+    procedure IsmxDataEntity.SetDataEntityName = SetDataSetName;
     procedure SetParam(Index: Integer; const Value: IsmxParam); //virtual;
     procedure SetPerformanceMode(Value: TsmxPerformanceMode); virtual;
     //procedure SetDatabase(const Value: IsmxDatabase); virtual;
@@ -638,6 +646,7 @@ type
     //property FieldIntfClass: TsmxCustomFieldClass read GetFieldIntfClass;
     //property ParamIntfClass: TsmxCustomParamClass read GetParamIntfClass;
     property Database: IsmxDatabase read GetDatabase write SetDatabase;
+    property DataSetName: String read GetDataSetName write SetDataSetName;
     property FieldCount: Integer read GetFieldCount;
     property FieldList: TsmxFieldList read GetFieldList write SetFieldList;
     property Fields[Index: Integer]: IsmxField read GetField write SetField;
@@ -1632,11 +1641,12 @@ end;}
 
 function TsmxCustomDatabase.GetDatabaseName: String;
 begin
-  Result := '';
+  Result := FDatabaseName; //Result := '';
 end;
 
 procedure TsmxCustomDatabase.SetDatabaseName(const Value: String);
 begin
+  FDatabaseName := Value;
 end;
 
 { TsmxCustomField }
@@ -2557,6 +2567,8 @@ begin
     FFieldList.Free;
   if Assigned(FParamList) then
     FParamList.Free;
+  if Assigned(FDatabaseManagerIntf) then
+    FDatabaseManagerIntf.RemoveDataEntity(Self as IsmxDataEntity);
   {if Assigned(FFieldIntfList) then
     FFieldIntfList.Free;
   if Assigned(FParamIntfList) then
@@ -2599,6 +2611,22 @@ begin
   if not Assigned(Item) then
     SenseList.Add.FieldName := FieldName;
 end;}
+
+procedure TsmxCustomDataSet.AssignDataSet(const Source: IsmxDataSet);
+var
+  i: Integer;
+begin
+  ClearFields;
+  ClearParams;
+  if Assigned(Source) then
+  begin
+    PerformanceMode := Source.PerformanceMode;
+    for i := 0 to Source.FieldCount - 1 do
+      AddField.AssignField(Source.Fields[i]);
+    for i := 0 to Source.ParamCount - 1 do
+      AddParam.AssignParam(Source.Params[i]);
+  end;
+end;
 
 procedure TsmxCustomDataSet.ClearFields;
 begin
@@ -2896,6 +2924,21 @@ begin
   end;
 end;
 
+procedure TsmxCustomDataSet.ChangeDatabaseManager(const Value: IsmxDatabaseManager);
+begin
+  FDatabaseManagerIntf := Value;
+end;
+
+function TsmxCustomDataSet.GetDataSetName: String;
+begin
+  Result := FDataSetName;
+end;
+
+procedure TsmxCustomDataSet.SetDataSetName(const Value: String);
+begin
+  FDataSetName := Value;
+end;
+
 function TsmxCustomDataSet.FieldByName(const FieldName: String): IsmxField;
 var
   //i: Integer;
@@ -2994,20 +3037,9 @@ begin
   (ParamList[Index].ItemObject as IsmxParam).AssignParam(Value);
 end;
 
-procedure TsmxCustomDataSet.AssignDataSet(const Source: IsmxDataSet);
-var
-  i: Integer;
+function TsmxCustomDataSet.GetDatabase: IsmxDatabase;
 begin
-  ClearFields;
-  ClearParams;
-  if Assigned(Source) then
-  begin
-    PerformanceMode := Source.PerformanceMode;
-    for i := 0 to Source.FieldCount - 1 do
-      AddField.AssignField(Source.Fields[i]);
-    for i := 0 to Source.ParamCount - 1 do
-      AddParam.AssignParam(Source.Params[i]);
-  end;
+  Result := FDatabaseIntf;
 end;
 
 procedure TsmxCustomDataSet.SetDatabase(const Value: IsmxDatabase);
@@ -3015,9 +3047,31 @@ begin
   FDatabaseIntf := Value;
 end;
 
-function TsmxCustomDataSet.GetDatabase: IsmxDatabase;
+function TsmxCustomDataSet.GetPerformanceMode: TsmxPerformanceMode;
 begin
-  Result := FDatabaseIntf;
+  Result := FPerformanceMode;
+end;
+
+procedure TsmxCustomDataSet.SetPerformanceMode(Value: TsmxPerformanceMode);
+begin
+  FPerformanceMode := Value;
+end;
+
+procedure TsmxCustomDataSet.CheckObjectClass(Item: TObject; ObjectClass: TPersistentClass);
+var
+  ObjectClassName: String;
+begin
+  if not Assigned(ObjectClass)
+      or not Assigned(Item)
+      or ((Item is TsmxFieldItem) and not ObjectClass.InheritsFrom(GetFieldClass))
+      or ((Item is TsmxParamItem) and not ObjectClass.InheritsFrom(GetParamClass)) then
+  begin
+    if Assigned(ObjectClass) then
+      ObjectClassName := ObjectClass.ClassName else
+      ObjectClassName := 'nil';
+    raise EsmxComponentError.CreateResFmt(@smxConsts.rsListItemClassError,
+      [ObjectClassName, ClassName]);
+  end;
 end;
 
 { TsmxDataSet }
@@ -3619,33 +3673,6 @@ begin
   if Assigned(Source) then
     PerformanceMode := Source.PerformanceMode;
 end;}
-
-function TsmxCustomDataSet.GetPerformanceMode: TsmxPerformanceMode;
-begin
-  Result := FPerformanceMode;
-end;
-
-procedure TsmxCustomDataSet.SetPerformanceMode(Value: TsmxPerformanceMode);
-begin
-  FPerformanceMode := Value;
-end;
-
-procedure TsmxCustomDataSet.CheckObjectClass(Item: TObject; ObjectClass: TPersistentClass);
-var
-  ObjectClassName: String;
-begin
-  if not Assigned(ObjectClass)
-      or not Assigned(Item)
-      or ((Item is TsmxFieldItem) and not ObjectClass.InheritsFrom(GetFieldClass))
-      or ((Item is TsmxParamItem) and not ObjectClass.InheritsFrom(GetParamClass)) then
-  begin
-    if Assigned(ObjectClass) then
-      ObjectClassName := ObjectClass.ClassName else
-      ObjectClassName := 'nil';
-    raise EsmxComponentError.CreateResFmt(@smxConsts.rsListItemClassError,
-      [ObjectClassName, ClassName]);
-  end;
-end;
 
 { TsmxTargetRequest }
 

@@ -22,10 +22,10 @@ procedure ResolvedProps(AResolvedList: TsmxResolvedKit; AFindList: TList);
 var
   //gSelectRequest: TsmxCustomRequest = nil;
   gMainDatabaseIntf: IsmxDatabase = nil;
-  gCfgSelectDataSetIntf: IsmxDataSet = nil;
-  gCfgDeleteDataSetIntf: IsmxDataSet = nil;
-  gCfgInsertDataSetIntf: IsmxDataSet = nil;
-  gCfgUpdateDataSetIntf: IsmxDataSet = nil;
+  gSelectDataSetIntf: IsmxDataSet = nil;
+  gDeleteDataSetIntf: IsmxDataSet = nil;
+  gInsertDataSetIntf: IsmxDataSet = nil;
+  gUpdateDataSetIntf: IsmxDataSet = nil;
   
 implementation
 

@@ -1774,7 +1774,7 @@ type
     procedure DoDeactivate; virtual;
     procedure DoShow; virtual;
     //procedure FreeForm;
-    function GetCfgID: Integer;
+    //function GetCfgID: Integer;
     function GetFormBorder: TsmxFormBorder; virtual;
     //function GetFormManager: IsmxFormManager;
     function GetFormPosition: TsmxFormPosition; virtual;
@@ -2617,7 +2617,7 @@ begin
       
       ////Cfg.SelectRequest := FSelectRequest;
       //Cfg.SelectRequest := smxClassProcs.gSelectRequest;
-      Cfg.SelectDataSet := smxClassProcs.gCfgSelectDataSetIntf;
+      Cfg.SelectDataSet := smxClassProcs.gSelectDataSetIntf;
       //Cfg.Receive;
       Cfg.Load;
     end;
@@ -3071,8 +3071,8 @@ begin
     begin
       //Cfg.CfgID := FCfgID;
       
-      Cfg.InsertDataSet := smxClassProcs.gCfgInsertDataSetIntf;
-      Cfg.UpdateDataSet := smxClassProcs.gCfgUpdateDataSetIntf;
+      Cfg.InsertDataSet := smxClassProcs.gInsertDataSetIntf;
+      Cfg.UpdateDataSet := smxClassProcs.gUpdateDataSetIntf;
       Cfg.Save;
     end;
     //SetCellProps;
@@ -5463,7 +5463,10 @@ begin
     FDataSetIntf := nil;
   end;}
   if Assigned(FDataSet) then
+  begin
     FDataSet.Free;
+    FDataSet := nil;
+  end;
   inherited Destroy;
 end;
 
@@ -7425,10 +7428,10 @@ begin
   Free;
 end;}
 
-function TsmxCustomForm.GetCfgID: Integer;
+{function TsmxCustomForm.GetCfgID: Integer;
 begin
   Result := CfgID;
-end;
+end;}
 
 {function TsmxCustomForm.GetFormManager: IsmxFormManager;
 begin

@@ -31,7 +31,7 @@ type
   protected
     function GetConnected: Boolean;
     //function GetDatabase: TObject;
-    function GetDatabaseName: String; override;
+    //function GetDatabaseName: String; override;
     function GetDriverName: String;
     function GetInternalRef: Pointer; override;
     function GetInTransaction: Boolean;
@@ -52,7 +52,7 @@ type
     destructor Destroy; override;
     procedure AssignDatabase(const Source: IsmxDatabase);
     procedure CommitTransaction;
-    function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
     procedure RollbackTransaction;
     procedure StartTransaction;
 
@@ -461,13 +461,14 @@ begin
   Result := FDatabase;
 end;}
 
-function TsmxBDEDatabase.GetDatabaseName: String;
+{function TsmxBDEDatabase.GetDatabaseName: String;
 begin
   Result := InternalDatabase.DatabaseName;
-end;
+end;}
 
 procedure TsmxBDEDatabase.SetDatabaseName(const Value: String);
 begin
+  inherited SetDatabaseName(Value);
   InternalDatabase.DatabaseName := Value;
 end;
 
@@ -522,12 +523,12 @@ begin
   InternalDatabase.Params.Text := Value;
 end;
 
-function TsmxBDEDatabase.NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
+function TsmxBDEDatabase.NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
 begin
   //Result := nil;
   case DataSetType of
-    dstQuery: Result := TsmxBDEQuery.Create(nil) as IsmxDataSet;
-    dstStoredProc: Result := TsmxBDEStoredProc.Create(nil) as IsmxDataSet;
+    dstQuery: Result := TsmxBDEQuery.Create(nil, Controller) as IsmxDataSet;
+    dstStoredProc: Result := TsmxBDEStoredProc.Create(nil, Controller) as IsmxDataSet;
     //else
       //raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetUnknown);
   end;

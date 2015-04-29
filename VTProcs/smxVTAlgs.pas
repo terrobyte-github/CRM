@@ -1228,7 +1228,7 @@ begin
         begin
           Obj := TsmxTypeCfg.Create(nil);
           TsmxTypeCfg(Obj).CfgID := CfgID;
-          TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gCfgSelectDataSetIntf;
+          TsmxTypeCfg(Obj).SelectDataSet := smxClassProcs.gSelectDataSetIntf;
           TsmxTypeCfg(Obj).Load;
           TsmxTypeCfg(Obj).Read;
           RefreshFormObjectProps(Obj, cObjectInspectorPages);

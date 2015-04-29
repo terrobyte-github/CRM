@@ -14,7 +14,7 @@ implementation
 
 uses
   Classes, ImgList, Forms, Controls, Windows, SysUtils, StdCtrls, ComObj,
-  Graphics, IniFiles, StrUtils, Variants, smxBaseClasses, smxClasses,
+  Graphics, IniFiles, StrUtils, Variants, TypInfo, smxBaseClasses, smxClasses,
   smxClassFuncs, smxFuncs, smxProcs, smxTypes, smxBaseIntf, smxDBIntf, smxConsts,
   smxManagerClasses, smxManagerIntf, smxDBClasses, smxPConsts, smxClassProcs,
   smxDBTypes, smxDBFuncs, smxLibTypes, smxLogIn;
@@ -38,10 +38,10 @@ var
   //gMainConnection: TsmxConnection = nil;
   //gMainDatabase: TsmxCustomDatabase = nil;
   gMainForm: TsmxCustomForm = nil;
-  gCfgSelectRequest: TsmxCustomRequest = nil;
-  gCfgDeleteRequest: TsmxCustomRequest = nil;
-  gCfgInsertRequest: TsmxCustomRequest = nil;
-  gCfgUpdateRequest: TsmxCustomRequest = nil;
+  //gCfgSelectRequest: TsmxCustomRequest = nil;
+  gDeleteRequest: TsmxCustomRequest = nil;
+  gInsertRequest: TsmxCustomRequest = nil;
+  gUpdateRequest: TsmxCustomRequest = nil;
   gIsConstructor: Boolean = False;
 
 procedure CreateGlobalObjects;
@@ -82,6 +82,11 @@ begin
   gCallBackManager.Free;
 end;
 
+function IniValue(const SectionName, ParamName: String): Variant;
+begin
+  Result := gStorageManager[SectionName + smxPConsts.cConfigurationDelimiter + ParamName];
+end;
+
 procedure AssignGlobalObjects;
 var
   s: String;
@@ -112,11 +117,12 @@ begin
 
   //gLibraryManager.CallBackManager := gCallBackManager as IsmxCallBackManager;
   gLibraryManager.CheckHandle := HInstance;
-  gLibraryManager.IsCheckComp := gStorageManager[smxPConsts.cLibrarySectionName + '.' + smxPConsts.cLibraryCheckComp];
+  gLibraryManager.IsCheckComp :=
+    IniValue(smxPConsts.cManagerSectionName, smxPConsts.cLibraryCheckComp);
   gLibraryManager.LibPath := gStorageManager[smxPConsts.cProgExePath] +
-    gStorageManager[smxPConsts.cPathSectionName + '.' + smxPConsts.cPathLib];
+    IniValue(smxPConsts.cPathSectionName, smxPConsts.cPathLib);
   gLibraryManager.LibInfoProcName :=
-    gStorageManager[smxPConsts.cLibrarySectionName + '.' + smxPConsts.cLibraryLibInfoProcName];
+    IniValue(smxPConsts.cManagerSectionName, smxPConsts.cLibraryLibInfoProcName);
 
   {@FuncNewResource := gLibraryManager.GetProcedure(
     Variants.VarToStr(gStorageManager[smxPConsts.cImageSectionName + '.' + smxPConsts.cImageLibraryName]),
@@ -132,9 +138,9 @@ begin
   end;}
   //gImageListManager.LibraryManager := gLibraryManager as IsmxLibraryManager;
   gImageListManager.Delimiter :=
-    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
+    IniValue(smxPConsts.cManagerSectionName, smxPConsts.cImageListDelimiter);
   gClassTypeManager.Delimiter :=
-    gStorageManager[smxPConsts.cImageListSectionName + '.' + smxPConsts.cImageListDelimiter];
+    IniValue(smxPConsts.cManagerSectionName, smxPConsts.cClassTypeDelimiter);
 end;
 
 procedure LoadClassLibraries;
@@ -220,30 +226,128 @@ begin
 end;
 
 procedure CreateMainObjects;
+
+  function CreateDataSet: IsmxDataSet;
+  var
+    DataSetClassName: String;
+    DataSetLibName: String;
+    DataSetProcName: String;
+    DataSetTypeName: String;
+    DataSetClass: TPersistentClass;
+    FuncNewDataSet: TsmxFuncNewDataSet;
+    Value: Integer;
+  begin
+    Result := nil;
+
+    DataSetClassName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetClassName);
+    DataSetLibName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetLibName);
+    DataSetProcName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetProcName);
+    DataSetTypeName := Variants.VarToStr(IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetType));
+    if DataSetLibName <> '' then
+    begin
+      if DataSetClassName <> '' then
+      begin
+        DataSetClass := gClassTypeManager.ResolvedClassTypeName(
+          DataSetClassName + gClassTypeManager.Delimiter + DataSetLibName,
+          True);
+        if Assigned(DataSetClass) and DataSetClass.InheritsFrom(TsmxInterfacedComponent) then
+          Result := TsmxInterfacedComponentClass(DataSetClass).Create(nil, smxProcs.gDatabaseManagerIntf) as IsmxDataSet;
+      end else
+      if DataSetProcName <> '' then
+      begin
+        FuncNewDataSet := gLibraryManager.GetProcedure(DataSetLibName, DataSetProcName);
+        if Assigned(FuncNewDataSet) then
+          Result := FuncNewDataSet(smxProcs.gDatabaseManagerIntf);
+      end;
+    end else
+    if DataSetTypeName <> '' then
+    begin
+      Value := TypInfo.GetEnumValue(TypeInfo(TsmxDataSetType), DataSetTypeName);
+      if (Value <> -1) and Assigned(smxClassProcs.gMainDatabaseIntf) then
+        Result := smxClassProcs.gMainDatabaseIntf.NewDataSet(TsmxDataSetType(Value), smxProcs.gDatabaseManagerIntf);
+    end;
+  end;
+
 var
-  ReqClsName{, IReqClsName}: String;
-  ReqLibName{, ReqProcName}: String;
-  ReqClass: TPersistentClass;
+  //DataSetClassName{, IReqClsName}: String;
+  //DataSetLibName{, ReqProcName}: String;
+  //DataSetProcName: String;
+  //DataSetClass: TPersistentClass;
   //IntfClass: TsmxInterfacedPersistentClass;
   //FuncNewDataSet: TsmxFuncNewDataSet;
+  DataSet: IsmxDataSet;
 begin
-  ReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqClassName];
+  (*DataSetClassName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetClassName);
   //IReqClsName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitIRequestClassName];
-  ReqLibName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqLibName];
-  //ReqProcName := gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitRequestProcName];
-  ReqClass := nil;
-  if {(IReqClsName <> '') and (}ReqLibName <> ''{)} then
-    ReqClass := gClassTypeManager.ResolvedClassTypeName(
-      ReqClsName + gClassTypeManager.Delimiter + ReqLibName,
-      True);
+  DataSetLibName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetLibName);
+  DataSetProcName := IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigDataSetProcName);
+  //DataSetClass := nil;
+  DataSet := nil;
+  if {(IReqClsName <> '') and (}DataSetLibName <> ''{)} then
+    if DataSetClassName <> '' then
+    begin
+      DataSetClass := gClassTypeManager.ResolvedClassTypeName(
+        DataSetClassName + gClassTypeManager.Delimiter + DataSetLibName,
+        True);
+      if Assigned(DataSetClass) and DataSetClass.InheritsFrom(TsmxInterfacedComponent) then
+        DataSet := TsmxInterfacedComponentClass(DataSetClass).Create(nil, smxProcs.gDatabaseManagerIntf) as IsmxDataSet;
+    end else
+    if DataSetProcName <> '' then
+    begin
+      FuncNewDataSet := gLibraryManager.GetProcedure(DataSetLibName, DataSetProcName);
+      if Assigned(FuncNewDataSet) then
+        DataSet := FuncNewDataSet(smxProcs.gDatabaseManagerIntf);
+    end;*)
+  DataSet := CreateDataSet;
+  if Assigned(DataSet) then
+  begin
+    DataSet.DataSetName := 'SelectDataSet';
+    if SysUtils.Supports(DataSet, IsmxDataEntity) then
+      smxProcs.gDatabaseManagerIntf.InsertDataEntity(DataSet as IsmxDataEntity);
+
+    smxClassProcs.gSelectDataSetIntf := DataSet;
+  end;
+
+  {DataSet := CreateDataSet;
+  if Assigned(DataSet) then
+  begin
+    DataSet.DataSetName := 'DeleteDataSet';
+    if SysUtils.Supports(DataSet, IsmxDataEntity) then
+      smxProcs.gDatabaseManagerIntf.InsertDataEntity(DataSet as IsmxDataEntity);
+
+    smxClassProcs.gDeleteDataSetIntf := DataSet;
+  end;
+
+  DataSet := CreateDataSet;
+  if Assigned(DataSet) then
+  begin
+    DataSet.DataSetName := 'InsertDataSet';
+    if SysUtils.Supports(DataSet, IsmxDataEntity) then
+      smxProcs.gDatabaseManagerIntf.InsertDataEntity(DataSet as IsmxDataEntity);
+
+    smxClassProcs.gInsertDataSetIntf := DataSet;
+  end;
+
+  DataSet := CreateDataSet;
+  if Assigned(DataSet) then
+  begin
+    DataSet.DataSetName := 'UpdateDataSet';
+    if SysUtils.Supports(DataSet, IsmxDataEntity) then
+      smxProcs.gDatabaseManagerIntf.InsertDataEntity(DataSet as IsmxDataEntity);
+
+    smxClassProcs.gUpdateDataSetIntf := DataSet;
+  end;}
     //if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
       //CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName));
   {if ReqClsName <> '' then
     CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName))
   else
     CellClass := nil;}
-  if Assigned(ReqClass) and ReqClass.InheritsFrom(TsmxCustomRequest) then
-  begin
+
+
+
+  //if Assigned(ReqClass) and ReqClass.InheritsFrom(TsmxCustomRequest) then
+  //begin
     //if {(IReqClsName <> '') and (}ReqLibName <> ''{)} then
     //begin
       //if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
@@ -251,7 +355,14 @@ begin
         //IntfClass := TsmxInterfacedPersistentClass(Classes.GetClass(IReqClsName));
         //if Assigned(IntfClass) then
           //gCfgRequest := TsmxCustomRequest(CellClass.Create(nil, IntfClass));
-        gCfgSelectRequest := TsmxCustomRequest(TsmxBaseCellClass(ReqClass).Create(nil));
+
+
+
+        //gCfgSelectRequest := TsmxCustomRequest(TsmxBaseCellClass(ReqClass).Create(nil));
+
+
+
+
       //end;
     //end
     { else
@@ -266,84 +377,186 @@ begin
     //smxClassProcs.gCfgDeleteDataSet := gCfgRequest.DeleteDataSet;
     //smxClassProcs.gCfgInsertDataSet := gCfgRequest.InsertDataSet;
     //smxClassProcs.gCfgUpdateDataSet := gCfgRequest.UpdateDataSet;
-  end;
+  //end;
+
+
+
+
   //gMainConnection := TsmxConnection.Create(nil);
 end;
 
 procedure DestroyMainObjects;
 begin
-  if Assigned(gCfgSelectRequest) then
-  begin
-    smxClassProcs.gCfgDeleteDataSetIntf := nil;
-    smxClassProcs.gCfgInsertDataSetIntf := nil;
-    smxClassProcs.gCfgUpdateDataSetIntf := nil;
-    smxClassProcs.gCfgSelectDataSetIntf := nil;
-    if Assigned(gCfgDeleteRequest) then
-      SysUtils.FreeAndNil(gCfgDeleteRequest);
-    if Assigned(gCfgInsertRequest) then
-      SysUtils.FreeAndNil(gCfgInsertRequest);
-    if Assigned(gCfgUpdateRequest) then
-      SysUtils.FreeAndNil(gCfgUpdateRequest);
-    SysUtils.FreeAndNil(gCfgSelectRequest);
-  end;
+  //if Assigned(gCfgSelectRequest) then
+  //begin
+    smxClassProcs.gDeleteDataSetIntf := nil;
+    smxClassProcs.gInsertDataSetIntf := nil;
+    smxClassProcs.gUpdateDataSetIntf := nil;
+    smxClassProcs.gSelectDataSetIntf := nil;
+    if Assigned(gDeleteRequest) then
+      SysUtils.FreeAndNil(gDeleteRequest);
+    if Assigned(gInsertRequest) then
+      SysUtils.FreeAndNil(gInsertRequest);
+    if Assigned(gUpdateRequest) then
+      SysUtils.FreeAndNil(gUpdateRequest);
+    {if Assigned(gCfgSelectRequest) then
+      SysUtils.FreeAndNil(gCfgSelectRequest);}
+  //end;
   //smxClassProcs.gMainDatabaseIntf := nil;
   //gMainConnection.Free;
 end;
 
 procedure AssignMainObjects;
+type
+  TsmxSetting = record
+    Name: String;
+    DataType: TsmxDataType;
+    DataSense: TsmxDataSense;
+    Size: Integer
+  end;
+
+  TsmxSettings = array of TsmxSetting;
+
+  TsmxSettingType = (stField, stParam);
+
+  function GetSettings(SettingType: TsmxSettingType): TsmxSettings;
+  const
+    Names: array[TsmxSettingType] of String = (smxPConsts.cConfigFieldNames, smxPConsts.cConfigParamNames);
+    DataTypes: array[TsmxSettingType] of String = (smxPConsts.cConfigFieldDataTypes, smxPConsts.cConfigParamDataTypes);
+    DataSenses: array[TsmxSettingType] of String = (smxPConsts.cConfigFieldDataSenses, smxPConsts.cConfigParamDataSenses);
+    Sizes: array[TsmxSettingType] of String = (smxPConsts.cConfigFieldSizes, smxPConsts.cConfigParamSizes);
+  var
+    s: TStrings;
+    i: Integer;
+    c: Integer;
+  begin
+    s := TStringList.Create;
+    try
+      s.Delimiter := smxPConsts.cValueDelimiter;
+      s.DelimitedText := IniValue(smxPConsts.cConfigSectionName, Names[SettingType]);
+      c := s.Count;
+      SetLength(Result, c);
+      for i := 0 to c - 1 do
+        Result[i].Name := s[i];
+      s.DelimitedText := IniValue(smxPConsts.cConfigSectionName, DataTypes[SettingType]);
+      for i := 0 to c - 1 do
+        Result[i].DataType := TsmxDataType(TypInfo.GetEnumValue(TypeInfo(TsmxDataType), s[i]));
+      s.DelimitedText := IniValue(smxPConsts.cConfigSectionName, DataSenses[SettingType]);
+      for i := 0 to c - 1 do
+        Result[i].DataSense := TsmxDataSense(TypInfo.GetEnumValue(TypeInfo(TsmxDataSense), s[i]));
+      s.DelimitedText := IniValue(smxPConsts.cConfigSectionName, Sizes[SettingType]);
+      for i := 0 to c - 1 do
+        Result[i].Size := SysUtils.StrToInt(s[i]);
+    finally
+      s.Free;
+    end;
+  end;
+
+  procedure AssignSelectDataSet;
+  var
+    Settings: TsmxSettings;
+    i: Integer;
+  begin
+    smxClassProcs.gSelectDataSetIntf.SQLText :=
+      IniValue(smxPConsts.cConfigSectionName, smxPConsts.cConfigSQLText);
+    smxClassProcs.gSelectDataSetIntf.ClearFields;
+    Settings := GetSettings(stField);
+    for i := Low(Settings) to High(Settings) do
+      with smxClassProcs.gSelectDataSetIntf.AddField do
+      begin
+        FieldName := Settings[i].Name;
+        DataType := Settings[i].DataType;
+        DataSense := Settings[i].DataSense;
+        Size := Settings[i].Size;
+      end;
+    smxClassProcs.gSelectDataSetIntf.ClearParams;
+    Settings := GetSettings(stParam);
+    for i := Low(Settings) to High(Settings) do
+      with smxClassProcs.gSelectDataSetIntf.AddParam do
+      begin
+        ParamName := Settings[i].Name;
+        DataType := Settings[i].DataType;
+        DataSense := Settings[i].DataSense;
+        Size := Settings[i].Size;
+      end;
+  end;
+
+//var
+  //Request: TsmxCustomRequest;
+  //DataSet: IsmxDataSet;
 begin
   //if Assigned(gMainConnection) then
     //gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
-  if Assigned(gCfgSelectRequest) then
+  //if Assigned(gCfgSelectRequest) then
+  if Assigned(smxClassProcs.gSelectDataSetIntf) then
   begin
-    _TsmxBaseCell(gCfgSelectRequest).Cfg.XMLText :=
-      Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqXMLText]);
-    gCfgSelectRequest.IsRecieveCfg := False;
+    //_TsmxBaseCell(gCfgSelectRequest).Cfg.XMLText :=
+      //Variants.VarToStr(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgSelectReqXMLText]);
+    AssignSelectDataSet;
+    smxClassProcs.gSelectDataSetIntf.Database := smxClassProcs.gMainDatabaseIntf;
+    smxClassProcs.gSelectDataSetIntf.Prepared := True;
+    //gCfgSelectRequest.IsRecieveCfg := False;
+
+
     //smxClassProcs.gSelectRequest.StorageManager := gStorageManager as IsmxStorageManager;
     //smxClassProcs.gSelectRequest.LibraryManager := gLibraryManager as IsmxLibraryManager;
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.FormManager := gFormManager as IsmxFormManager;
     //smxClassProcs.gSelectRequest.ImageListManager := gImageListManager as IsmxImageListManager;
-    gCfgSelectRequest.Database := smxClassProcs.gMainDatabaseIntf;
-    gCfgSelectRequest.Initialize;
-    gCfgSelectRequest.Prepare;
+
+
+    //gCfgSelectRequest.Database := smxClassProcs.gMainDatabaseIntf;
+    //gCfgSelectRequest.Initialize;
+    //gCfgSelectRequest.Prepare;
+
+
+
     //smxClassProcs.gSelectRequest.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
     //smxClassProcs.gSelectRequest.DatabaseName := gMainConnection.Database.DatabaseName;
-    smxClassProcs.gCfgSelectDataSetIntf := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
 
-    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID], 0) <> 0 then
-    begin
-      gCfgDeleteRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
-        nil,
-        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgDeleteReqCfgID],
-        smxClassProcs.gCfgSelectDataSetIntf));
-      gCfgDeleteRequest.Initialize;
-      gCfgDeleteRequest.Prepare;
-      smxClassProcs.gCfgDeleteDataSetIntf := gCfgDeleteRequest as IsmxDataSet;
-    end;
 
-    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID], 0) <> 0 then
-    begin
-      gCfgInsertRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
-        nil,
-        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgInsertReqCfgID],
-        smxClassProcs.gCfgSelectDataSetIntf));
-      gCfgInsertRequest.Initialize;
-      gCfgInsertRequest.Prepare;
-      smxClassProcs.gCfgInsertDataSetIntf := gCfgInsertRequest as IsmxDataSet;
-    end;
 
-    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID], 0) <> 0 then
-    begin
-      gCfgUpdateRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
-        nil,
-        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitCfgUpdateReqCfgID],
-        smxClassProcs.gCfgSelectDataSetIntf));
-      gCfgUpdateRequest.Initialize;
-      gCfgUpdateRequest.Prepare;
-      smxClassProcs.gCfgUpdateDataSetIntf := gCfgUpdateRequest as IsmxDataSet;
-    end;
+    //smxClassProcs.gCfgSelectDataSetIntf := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
   end;
+
+  //if Assigned(smxClassProcs.gDeleteDataSetIntf) then
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitDeleteReqCfgID], 0) <> 0 then
+    begin
+      gDeleteRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitDeleteReqCfgID],
+        smxClassProcs.gSelectDataSetIntf));
+      gDeleteRequest.Initialize;
+      gDeleteRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      gDeleteRequest.Prepare;
+      smxClassProcs.gDeleteDataSetIntf := gDeleteRequest as IsmxDataSet;
+    end;
+
+  //if Assigned(smxClassProcs.gInsertDataSetIntf) then
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitInsertReqCfgID], 0) <> 0 then
+    begin
+      gInsertRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitInsertReqCfgID],
+        smxClassProcs.gSelectDataSetIntf));
+      gInsertRequest.Initialize;
+      gInsertRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      gInsertRequest.Prepare;
+      smxClassProcs.gInsertDataSetIntf := gInsertRequest as IsmxDataSet;
+    end;
+
+  //if Assigned(smxClassProcs.gUpdateDataSetIntf) then
+    if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitUpdateReqCfgID], 0) <> 0 then
+    begin
+      gUpdateRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
+        nil,
+        gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitUpdateReqCfgID],
+        smxClassProcs.gSelectDataSetIntf));
+      gUpdateRequest.Initialize;
+      gUpdateRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      gUpdateRequest.Prepare;
+      smxClassProcs.gUpdateDataSetIntf := gUpdateRequest as IsmxDataSet;
+    end;
 end;
 
 procedure Initialize;
@@ -506,7 +719,7 @@ function LogIn: Boolean;
       begin
         FuncNewDatabase := gLibraryManager.GetProcedure(Connection.LibraryName, Connection.FuncOrClassNameOrProgID);
         if Assigned(FuncNewDatabase) then
-          Database := FuncNewDatabase(gDatabaseManager as IsmxBaseInterface);
+          Database := FuncNewDatabase({gDatabaseManager as IsmxBaseInterface});
       end;
       gmCOM:
       begin
@@ -525,7 +738,7 @@ function LogIn: Boolean;
             Connection.FuncOrClassNameOrProgID + gClassTypeManager.Delimiter + Connection.LibraryName,
             True);
           if Assigned(DatabaseClass) and DatabaseClass.InheritsFrom(TsmxInterfacedComponent) then
-            Database := TsmxInterfacedComponentClass(DatabaseClass).Create(nil, gDatabaseManager as IsmxBaseInterface) as IsmxDatabase;
+            Database := TsmxInterfacedComponentClass(DatabaseClass).Create({nil,} nil {gDatabaseManager as IsmxBaseInterface}) as IsmxDatabase;
         end;
       end;
     end;
@@ -537,10 +750,10 @@ function LogIn: Boolean;
         SysUtils.StringReplace(
           SysUtils.StringReplace(
             Connection.Params,
-            gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroUserName],
+            gStorageManager[smxPConsts.cManagerSectionName + '.' + smxPConsts.cProjectMacroUserName],
             StrUtils.IfThen(Connection.IsUseUser, Connection.UserName, UserName),
             [rfReplaceAll, rfIgnoreCase]),
-          gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
+          gStorageManager[smxPConsts.cManagerSectionName + '.' + smxPConsts.cProjectMacroPassword],
           StrUtils.IfThen(Connection.IsUseUser, Connection.Password, Password),
           [rfReplaceAll, rfIgnoreCase]);
       //gMainConnection.DatabaseManager := gDatabaseManager as IsmxDatabaseManager;
@@ -691,9 +904,9 @@ begin
   if smxLogIn.ShowLogIn(
       gStorageManager[smxPConsts.cProgExePath] +
         gStorageManager[smxPConsts.cPathSectionName + '.' + smxPConsts.cPathCfg] +
-        gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectFileName],
-      gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroUserName],
-      gStorageManager[smxPConsts.cProjectSectionName + '.' + smxPConsts.cProjectMacroPassword],
+        gStorageManager[smxPConsts.cManagerSectionName + '.' + smxPConsts.cProjectFileName],
+      gStorageManager[smxPConsts.cManagerSectionName + '.' + smxPConsts.cProjectMacroUserName],
+      gStorageManager[smxPConsts.cManagerSectionName + '.' + smxPConsts.cProjectMacroPassword],
       Connection, UserName, Password, gIsConstructor) then
   begin
     SaveDefValues(UserName, Connection.ProjectName);

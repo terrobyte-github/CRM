@@ -889,6 +889,7 @@ var
   i: Integer;
 begin
   for i := DataEntityList.Count - 1 downto 0 do
+  begin
     //if not ((DataEntityList[i] as IsmxDataEntity).GetReference is TsmxInterfacedComponent)
         //or IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
     if not (DataEntityList[i] as IsmxDataEntity).IsInterfacedObj
@@ -896,12 +897,16 @@ begin
     begin
       (DataEntityList[i] as IsmxDataEntity).GetReference.Free;
       //DataEntityList[i] := nil;
-    end
-    //if IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
+    end else
+    begin
+      //if IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
       //(DataEntityList[i] as IsmxDataEntity).GetReference.Free
-    else
-      DataEntityList[i] := nil;
-    //(DatabaseList[i] as IsmxDatabase).GetReference.Free;
+      //DataEntityList[i] := nil;
+      (DataEntityList[i] as IsmxDataEntity).ChangeDatabaseManager(nil);
+      DataEntityList.Delete(i);
+      //(DatabaseList[i] as IsmxDatabase).GetReference.Free;
+    end;
+  end;
 end;
 
 function TsmxDatabaseManager.FindByName(const DataEntityName: String): IsmxDataEntity;
@@ -949,8 +954,8 @@ begin
   if Assigned(DataEntity) then
     if DataEntityList.IndexOf(DataEntity) <> -1 then
     begin
-      DataEntityList.Remove(DataEntity);
       DataEntity.ChangeDatabaseManager(nil);
+      DataEntityList.Remove(DataEntity);
     end;
 end;
 
@@ -971,13 +976,19 @@ var
   i: Integer;
 begin
   for i := FormControlList.Count - 1 downto 0 do
+  begin
     //if not ((FormControlList[i] as IsmxFormControl).GetReference is TsmxInterfacedComponent)
     //    or IsImplIntf((FormControlList[i] as IsmxFormControl).GetController) then
     if not (FormControlList[i] as IsmxFormControl).IsInterfacedObj
         or IsImplIntf((FormControlList[i] as IsmxFormControl).GetController) then
       (FormControlList[i] as IsmxFormControl).GetReference.Free
     else
-      FormControlList[i] := nil;
+    begin
+      (FormControlList[i] as IsmxFormControl).ChangeFormManager(nil);
+      FormControlList.Delete(i);
+      //FormControlList[i] := nil;
+    end;
+  end;
 end;
 
 function TsmxFormManager.FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxFormControl;
@@ -1023,8 +1034,8 @@ procedure TsmxFormManager.RemoveFormControl(const FormControl: IsmxFormControl);
 begin
   if FormControlList.IndexOf(FormControl) <> -1 then
   begin
-    FormControlList.Remove(FormControl);
     FormControl.ChangeFormManager(nil);
+    FormControlList.Remove(FormControl);
   end;
 end;
 

@@ -1,31 +1,40 @@
 const
   cIni =
     '[Init]'#13#10 +
-    'CfgSelectReqClassName='#13#10 +
-    'CfgSelectReqLibName='#13#10 +
-    'CfgSelectReqProcName='#13#10 +
-    'CfgSelectReqXMLText='#13#10 +
     'CheckUserReqCfgID=0'#13#10 +
     'CheckIntfReqCfgID=0'#13#10 +
     'MainFormCfgID=0'#13#10 +
     'ConfFormCfgID=0'#13#10 +
-    'CfgDeleteReqCfgID=0'#13#10 +
-    'CfgInsertReqCfgID=0'#13#10 +
-    'CfgUpdateReqCfgID=0'#13#10 + #13#10 +
+    'DeleteReqCfgID=0'#13#10 +
+    'InsertReqCfgID=0'#13#10 +
+    'UpdateReqCfgID=0'#13#10 + #13#10 +
+    '[Config]'#13#10 +
+    'DataSetClassName='#13#10 +
+    'DataSetLibName='#13#10 +
+    'DataSetProcName='#13#10 +
+    'DataSetType='#13#10 +
+    'SQLText='#13#10 +
+    'FieldNames='#13#10 +
+    'FieldDataTypes='#13#10 +
+    'FieldDataSenses='#13#10 +
+    'FieldSizes='#13#10 +
+    'ParamNames='#13#10 +
+    'ParamDataTypes='#13#10 +
+    'ParamDataSense='#13#10 +
+    'ParamSizes='#13#10 + #13#10 +
     '[Path]'#13#10 +
     'Bin=..\Bin\'#13#10 +
     'Cfg=..\Cfg\'#13#10 +
     'Lib=..\Lib\'#13#10 +
     'Temp=..\Temp\'#13#10 + #13#10 +
-    '[Project]'#13#10 +
-    'FileName=proj.dat'#13#10 +
-    'MacroUserName=%UserName%'#13#10 +
-    'MacroPassword=%Password%'#13#10 + #13#10 +
-    '[Library]'#13#10 +
+    '[Manager]'#13#10 +
+    'ProjectFileName=proj.dat'#13#10 +
+    'ProjectMacroUserName=%UserName%'#13#10 +
+    'ProjectMacroPassword=%Password%'#13#10 +
     'LibInfoProcName=LibInfo'#13#10 +
-    'CheckComp=False'#13#10 + #13#10 +
-    '[ImageList]'#13#10 +
-    'Delimiter=:'#13#10 +
+    'LibCheckComp=False'#13#10 +
+    'ImageListDelimiter=:'#13#10 +
+    'ClassTypeDelimiter=:'#13#10 + #13#10 +
     '[Param]'#13#10 +
     'DatabaseName=Base'#13#10 +
     'UserName=UserName'#13#10 +
