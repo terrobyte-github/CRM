@@ -455,8 +455,8 @@ type
     function GetKit: TsmxSlaveList;
     procedure SetKit(Value: TsmxSlaveList);
     //procedure SetSlave(Value: TsmxOwnerCell);
-    function GetItemObject: TsmxOwnerCell;
-    procedure SetItemObject(Value: TsmxOwnerCell);
+    function GetObjectItem: TsmxOwnerCell;
+    procedure SetObjectItem(Value: TsmxOwnerCell);
   //protected
     //procedure AddSlave(CellClass: TsmxBaseCellClass = nil{; const Implementor: IsmxRefInterface = nil}); virtual;
     //procedure AddObject(ObjectClass: TsmxBaseCellClass); reintroduce; overload; virtual;
@@ -476,7 +476,7 @@ type
     property Kit: TsmxSlaveList read GetKit write SetKit;
   //published
     //property Slave: TsmxOwnerCell read FSlave write SetSlave;
-    property ItemObject: TsmxOwnerCell read GetItemObject write SetItemObject;
+    property ObjectItem: TsmxOwnerCell read GetObjectItem write SetObjectItem;
   end;
 
   TsmxSlaveItemClass = class of TsmxSlaveItem;
@@ -554,9 +554,12 @@ type
     //function GetAltSlaveClass(Index: Integer): TsmxBaseCellClass; virtual;
     //function GetCfgClass: TsmxBaseCfgClass; override;
     //function GetIsWriteCell: Boolean; override;
+    //function GetReferenceObj: TPersistent;
+    //function IsmxObjectItem.GetReference = GetReferenceObj;
+    //function IsmxObjectList.GetReference = GetReferenceObj;
     function GetSlaveClass: TsmxBaseCellClass; virtual;
     procedure ChangeObjectIndex(Value: Integer); virtual;
-    procedure ChangeObjectOwner(Value: TPersistent); virtual;
+    procedure ChangeObjectOwner({const Value: IsmxObjectList}Value: TPersistent); virtual;
     procedure CheckObjectClass(ObjectClass: TPersistentClass);
     //procedure InternalInitialize; override;
     //procedure InternalFinalize; override;
@@ -1057,7 +1060,8 @@ type
     FCurDataSetIntf: IsmxDataSet;
     FDatabaseIntf: IsmxDatabase;
     FDatabaseName: String;
-    FDataSet: TsmxInterfacedComponent;
+    //FDataSet: TsmxInterfacedComponent;
+    FDataSetIntf: IsmxDataSet;
     //FDataSetIntf: IsmxDataSet;
     //FDeletePerformance: TsmxPerformanceMode;
     //FDeleteRequestIntf: IsmxDataSet;
@@ -1119,7 +1123,7 @@ type
     procedure Delete;
     procedure Execute;
     procedure Insert;
-    function IsImplIntf(const Intf: IsmxBaseInterface): Boolean; override;
+    function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; override;
     procedure Prepare;
     procedure RefreshParams;
     procedure Update;
@@ -1753,7 +1757,7 @@ type
   TsmxCustomForm = class(TsmxActionCell, IsmxFormControl)
   private
     FAlgorithmList: TsmxCustomAlgorithmList;
-    FFormManagerIntf: IsmxFormManager;
+    //FFormManagerIntf: IsmxFormManager;
     FFormOptions: TsmxFormOptions;
     FID: Integer;
     FIntfID: Integer;
@@ -1768,7 +1772,7 @@ type
     function GetSlave(Index: Integer): TsmxCustomPageManager;
     procedure SetSlave(Index: Integer; Value: TsmxCustomPageManager);
   protected
-    procedure ChangeFormManager(const Value: IsmxFormManager); virtual;
+    //procedure ChangeFormManager(const Value: IsmxFormManager); virtual;
     procedure DoActivate; virtual;
     procedure DoClose; virtual;
     procedure DoDeactivate; virtual;
@@ -1805,7 +1809,7 @@ type
     constructor Create(AOwner: TComponent; AID: Integer); reintroduce; overload; virtual;
     {constructor Create(AOwner: TComponent; AImplementorClass: TsmxInterfacedPersistentClass;
       AID: Integer); reintroduce; overload; virtual;}
-    destructor Destroy; override;
+    //destructor Destroy; override;
     function AddSlave: TsmxCustomPageManager;
     procedure Assign(Source: TPersistent); override;
     function CellParams(const Name: String; var Value: Variant): Boolean; override;
@@ -3516,7 +3520,7 @@ begin
   SetCellOwner(nil);
   if Assigned(FSlaveItem) then
   begin
-    FSlaveItem.FItemObject := nil;
+    FSlaveItem.FObjectItem := nil;
     FSlaveItem.Free;
   end;
   {if Assigned(FSlaveList) then
@@ -3564,7 +3568,7 @@ begin
     //Result := Add(GetAltSlaveClass(SlaveList.Count), AImplementor) else
     //Result := Add(GetSlaveClass, AImplementor);
   //Result := SlaveList.Add(GetSlaveClass, nil).Slave;
-  Result := SlaveList.Add.ItemObject;
+  Result := TsmxOwnerCell(SlaveList.Add.ObjectItem.GetReference);
   //Result.Name := SysUtils.Format('%s_%d', [CellOwner.GetSlaveClass.ClassName, SlaveIndex]);
   //Result := CreateSlave(GetSlaveClass, nil);
   //SlaveList.InsertSlave(Result);
@@ -3572,8 +3576,8 @@ end;
 
 function TsmxOwnerCell.AddSlaveAsClass(CellClass: TsmxBaseCellClass{;
   ImplementorClass: TsmxInterfacedPersistentClass}): TsmxOwnerCell;
-var
-  s: String;
+//var
+  //s: String;
 begin
   //if CellClass.InheritsFrom(GetSlaveClass) then
   //begin
@@ -3584,10 +3588,10 @@ begin
     SlaveList.Add(Result);}
     //Result := Add(CellClass, AImplementor)
   //end
-    s := CellClass.ClassName;
-    if s <> '' then
-      s := '';
-    Result := SlaveList.Add(CellClass{, ImplementorClass}).ItemObject;
+    //s := CellClass.ClassName;
+    //if s <> '' then
+      //s := '';
+    Result := TsmxOwnerCell(SlaveList.Add(CellClass{, ImplementorClass}).ObjectItem.GetReference);
   //else
     //raise EsmxCellError.CreateResFmt(@smxConsts.rsListItemClassError,
       //[CellClass.ClassName, ClassName]);
@@ -3665,14 +3669,19 @@ begin
     end;
 end;
 
+{function TsmxOwnerCell.GetReferenceObj: TPersistent;
+begin
+  Result := Self;
+end;}
+
 function TsmxOwnerCell.GetSlave(Index: Integer): TsmxOwnerCell;
 begin
-  Result := SlaveList[Index].ItemObject;
+  Result := SlaveList[Index].ObjectItem;
 end;
 
 procedure TsmxOwnerCell.SetSlave(Index: Integer; Value: TsmxOwnerCell);
 begin
-  SlaveList[Index].ItemObject := Value;
+  SlaveList[Index].ObjectItem := Value;
 end;
 
 (*function TsmxOwnerCell.GetAltSlaveClass(Index: Integer): TsmxBaseCellClass;
@@ -4690,27 +4699,29 @@ procedure TsmxOwnerCell.CreateObject(Item: TObject; ObjectClass: TPersistentClas
 var
   AOwner: TComponent;
   Slave: TsmxOwnerCell;
-  s2: String;
+  //s2: String;
 begin
   CheckObjectClass(ObjectClass);
   if Assigned(Owner) then
     AOwner := Owner else
     AOwner := Self;
   if Item is TsmxSlaveItem then
-    if not Assigned(TsmxSlaveItem(Item).FItemObject) then
+    if not Assigned(TsmxSlaveItem(Item).FObjectItem) then
     begin
       //if not Assigned(CellClass) then
         //CellClass := GetSlaveClass;
-      s2 := ObjectClass.ClassName;
-      if s2 <> '' then
-        s2 := '';
+      //s2 := ObjectClass.ClassName;
+      //if s2 <> '' then
+        //s2 := '';
       Slave := TsmxOwnerCell(TsmxBaseCellClass(ObjectClass).Create(AOwner));
       {Slave.FCellOwner := Self;
       if FIsOwnerIsParent then
         Slave.CellParent := Self;}
       Slave.FSlaveItem := TsmxSlaveItem(Item);
-      TsmxSlaveItem(Item).FItemObject := Slave;
-      Slave.ChangeObjectOwner(Self);
+      TsmxSlaveItem(Item).FObjectItem := Slave;
+
+      //Slave.ChangeObjectOwner(Self);
+
     end;
 end;
 
@@ -4722,16 +4733,16 @@ begin
     Slave.CellParent := nil;
   Slave.FCellOwner := nil;}
   if Item is TsmxSlaveItem then
-    if Assigned(TsmxSlaveItem(Item).FItemObject) then
+    if Assigned(TsmxSlaveItem(Item).FObjectItem) then
     begin
-      Slave := TsmxOwnerCell(TsmxSlaveItem(Item).FItemObject);
-      TsmxSlaveItem(Item).FItemObject := nil;
+      Slave := TsmxOwnerCell(TsmxSlaveItem(Item).FObjectItem);
+      TsmxSlaveItem(Item).FObjectItem := nil;
       Slave.FSlaveItem := nil;
       Slave.Free;
     end;
 end;
 
-procedure TsmxOwnerCell.ChangeObjectOwner(Value: TPersistent);
+procedure TsmxOwnerCell.ChangeObjectOwner({const Value: IsmxObjectList}Value: TPersistent);
 begin
   if Assigned(FCellOwner) then
   begin
@@ -4741,7 +4752,11 @@ begin
   end;
   //if Value is TsmxOwnerCell then
     //FCellOwner := TsmxOwnerCell(Value);
-  FCellOwner := Value as TsmxOwnerCell;
+  {if Assigned(Value) then
+    FCellOwner := Value.GetReference as TsmxOwnerCell
+  else
+    FCellOwner := nil;}
+  FCellOwner := Value as TsmxOwnerCell;  
   if Assigned(FCellOwner) then
   begin
     //Index := FCellOwner.SlaveList.KitList.Add(Self);
@@ -4770,7 +4785,7 @@ begin
   if not Assigned(FSlaveItem) then
   begin
     FSlaveItem := TsmxSlaveItem.Create(nil);
-    FSlaveItem.FItemObject := Self;
+    FSlaveItem.FObjectItem := Pointer(Self as IsmxObjectItem);
   end;
   Result := FSlaveItem;
 end;
@@ -5462,11 +5477,19 @@ begin
     FDataSetIntf.GetReference.Free;
     FDataSetIntf := nil;
   end;}
-  if Assigned(FDataSet) then
+
+  //if Assigned(FDataSet) then
+  //begin
+    //FDataSet.Free;
+    //FDataSet := nil;
+  //end;
+  FDataSetIntf := nil;
+  {if Assigned(FDataSetIntf) then
   begin
+    FDataSetIntf := nil;
     FDataSet.Free;
-    FDataSet := nil;
-  end;
+    //FDataSet := nil;
+  end;}
   inherited Destroy;
 end;
 
@@ -5692,9 +5715,18 @@ begin
   {if not Assigned(FDataSetIntf) and Assigned(GetDataSetClass()) then
     FDataSetIntf := GetDataSetClass.Create(nil, Self as IsmxRefComponent) as IsmxDataSet;
   Result := FDataSetIntf;}
-  if not Assigned(FDataSet) then
-    FDataSet := GetDataSetClass.Create(nil, Self as IsmxBaseInterface);
-  Result := FDataSet as IsmxDataSet;
+
+
+  //if not Assigned(FDataSet) then
+    //FDataSet := GetDataSetClass.Create(nil, Self as IsmxBaseInterface);
+  //Result := FDataSet as IsmxDataSet;
+  if not Assigned(FDataSetIntf) then
+  //begin
+    //FDataSet :=
+    FDataSetIntf := GetDataSetClass.Create(nil{, Self as IsmxBaseInterface}) as IsmxDataSet;
+    //FDataSetIntf := FDataSet as IsmxDataSet;
+  //end;
+  Result := FDataSetIntf;
 end;
 
 function TsmxCustomRequest.GetDataSetClass: TsmxInterfacedComponentClass;
@@ -5745,15 +5777,16 @@ begin
   end;
 end;}
 
-function TsmxCustomRequest.IsImplIntf(const Intf: IsmxBaseInterface): Boolean;
+function TsmxCustomRequest.IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxDataSet;
 begin
-  Result := inherited IsImplIntf(Intf)
-    or (Assigned(Intf)
+  Result := inherited IsImplementedIntf(Intf);
+  if not Result then
+    Result := Assigned(Intf)
       and SysUtils.Supports(Intf, IsmxDataSet, AIntf)
       and Assigned(DataSet)
-      and (AIntf.GetReference = DataSet.GetReference))
+      and (AIntf.GetReference = DataSet.GetReference);
 end;
 
 procedure TsmxCustomRequest.Notification(AComponent: TComponent; Operation: TOperation);
@@ -5764,18 +5797,18 @@ begin
   if Operation = opRemove then
   begin
     if AComponent = CellRequest then
-      CellRequest := nil else
-    if Assigned(Database) and (AComponent = Database.GetReference) then
-      Database := nil else
-    if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
-        and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
-      DeleteDataSet := nil else
-    if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
-        and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
-      InsertDataSet := nil else
-    if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
-        and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
-      UpdateDataSet := nil;
+      CellRequest := nil;// else
+    //if Assigned(Database) and (AComponent = Database.GetReference) then
+      //Database := nil else
+    //if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+      //  and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
+      //DeleteDataSet := nil else
+    //if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+      //  and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
+      //InsertDataSet := nil else
+    //if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+      //  and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
+      //UpdateDataSet := nil;
   end;
 end;
 
@@ -5808,8 +5841,8 @@ end;
 procedure TsmxCustomRequest.SetDatabase(const Value: IsmxDatabase);
 begin
   FDatabaseIntf := Value;
-  if Assigned(FDatabaseIntf) then
-    FDatabaseIntf.GetReference.FreeNotification(Self);
+  //if Assigned(FDatabaseIntf) then
+    //FDatabaseIntf.GetReference.FreeNotification(Self);
 end;
 
 {procedure TsmxCustomRequest.SetDatabaseManager(const Value: IsmxDatabaseManager);
@@ -5870,8 +5903,8 @@ begin
     rtInsert: FInsertDataSetIntf := Value;
     rtUpdate: FUpdateDataSetIntf := Value;
   end;
-  if Assigned(Value){ and smxFuncs.GetRefComponent(Value.GetReference, Component)} then
-    Value.GetReference.FreeNotification(Self);
+  //if Assigned(Value){ and smxFuncs.GetRefComponent(Value.GetReference, Component)} then
+    //Value.GetReference.FreeNotification(Self);
     //Component.FreeNotification(Self);
 end;
 
@@ -7300,7 +7333,7 @@ begin
   FID := AID;
 end;}
 
-destructor TsmxCustomForm.Destroy;
+{destructor TsmxCustomForm.Destroy;
 begin
   //SetFormManager(nil);
   //if Assigned(smxProcs.gFormManagerIntf) then
@@ -7308,7 +7341,7 @@ begin
   if Assigned(FFormManagerIntf) then
     FFormManagerIntf.RemoveFormControl(Self as IsmxFormControl);
   inherited Destroy;
-end;
+end;}
 
 procedure TsmxCustomForm.Assign(Source: TPersistent);
 begin
@@ -7337,10 +7370,10 @@ begin
     Result := inherited CellParams(Name, Value);
 end;
 
-procedure TsmxCustomForm.ChangeFormManager(const Value: IsmxFormManager);
+{procedure TsmxCustomForm.ChangeFormManager(const Value: IsmxFormManager);
 begin
   FFormManagerIntf := Value;
-end;
+end;}
 
 procedure TsmxCustomForm.DoActivate;
 begin
@@ -7951,14 +7984,22 @@ begin
     Result := inherited GetDisplayObject;
 end;*)
 
-function TsmxSlaveItem.GetItemObject: TsmxOwnerCell;
+function TsmxSlaveItem.GetObjectItem: TsmxOwnerCell;
 begin
-  Result := TsmxOwnerCell(inherited ItemObject);
+  {if Assigned(inherited ObjectItem) then
+    Result := TsmxOwnerCell(inherited ObjectItem.GetReference)
+  else
+    Result := nil;}
+  Result := TsmxOwnerCell(inherited ObjectItem)
 end;
 
-procedure TsmxSlaveItem.SetItemObject(Value: TsmxOwnerCell);
+procedure TsmxSlaveItem.SetObjectItem(Value: TsmxOwnerCell);
 begin
-  inherited ItemObject := Value;
+  {if Assigned(Value) then
+    inherited ObjectItem := Value as IsmxObjectItem
+  else
+    inherited ObjectItem := nil;}
+  inherited ObjectItem := Value;
 end;
 
 

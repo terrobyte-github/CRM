@@ -80,11 +80,11 @@ type
 
   { IsmxDataEntity }
 
-  IsmxDatabaseManager = interface;
+  //IsmxDatabaseManager = interface;
 
   IsmxDataEntity = interface(IsmxRefComponent)
     ['{24415658-D331-48A8-8560-1845F3076622}']
-    procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager);
+    //procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager);
     //procedure Connect;
     //procedure Disconnect;
     //procedure FreeConnection;
@@ -129,11 +129,11 @@ type
 
   { IsmxFormControl }
 
-  IsmxFormManager = interface;
+  //IsmxFormManager = interface;
 
   IsmxFormControl = interface(IsmxRefComponent)
     ['{6A6AE753-A9BB-4617-B65E-4BC0DD271966}']
-    procedure ChangeFormManager(const Value: IsmxFormManager);
+    //procedure ChangeFormManager(const Value: IsmxFormManager);
     //procedure Close;
     //procedure FreeForm;
     function GetCfgID: Integer;

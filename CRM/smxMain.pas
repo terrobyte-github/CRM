@@ -251,20 +251,20 @@ procedure CreateMainObjects;
           DataSetClassName + gClassTypeManager.Delimiter + DataSetLibName,
           True);
         if Assigned(DataSetClass) and DataSetClass.InheritsFrom(TsmxInterfacedComponent) then
-          Result := TsmxInterfacedComponentClass(DataSetClass).Create(nil, smxProcs.gDatabaseManagerIntf) as IsmxDataSet;
+          Result := TsmxInterfacedComponentClass(DataSetClass).Create(nil{, smxProcs.gDatabaseManagerIntf}) as IsmxDataSet;
       end else
       if DataSetProcName <> '' then
       begin
         FuncNewDataSet := gLibraryManager.GetProcedure(DataSetLibName, DataSetProcName);
         if Assigned(FuncNewDataSet) then
-          Result := FuncNewDataSet(smxProcs.gDatabaseManagerIntf);
+          Result := FuncNewDataSet({smxProcs.gDatabaseManagerIntf});
       end;
     end else
     if DataSetTypeName <> '' then
     begin
       Value := TypInfo.GetEnumValue(TypeInfo(TsmxDataSetType), DataSetTypeName);
       if (Value <> -1) and Assigned(smxClassProcs.gMainDatabaseIntf) then
-        Result := smxClassProcs.gMainDatabaseIntf.NewDataSet(TsmxDataSetType(Value), smxProcs.gDatabaseManagerIntf);
+        Result := smxClassProcs.gMainDatabaseIntf.NewDataSet(TsmxDataSetType(Value){, smxProcs.gDatabaseManagerIntf});
     end;
   end;
 
@@ -308,7 +308,7 @@ begin
     smxClassProcs.gSelectDataSetIntf := DataSet;
   end;
 
-  {DataSet := CreateDataSet;
+  DataSet := CreateDataSet;
   if Assigned(DataSet) then
   begin
     DataSet.DataSetName := 'DeleteDataSet';
@@ -336,7 +336,7 @@ begin
       smxProcs.gDatabaseManagerIntf.InsertDataEntity(DataSet as IsmxDataEntity);
 
     smxClassProcs.gUpdateDataSetIntf := DataSet;
-  end;}
+  end;
     //if gLibraryManager.AddLibrary(ReqLibName) <> -1 then
       //CellClass := TsmxBaseCellClass(Classes.FindClass(ReqClsName));
   {if ReqClsName <> '' then
@@ -393,12 +393,12 @@ begin
     smxClassProcs.gInsertDataSetIntf := nil;
     smxClassProcs.gUpdateDataSetIntf := nil;
     smxClassProcs.gSelectDataSetIntf := nil;
-    if Assigned(gDeleteRequest) then
-      SysUtils.FreeAndNil(gDeleteRequest);
-    if Assigned(gInsertRequest) then
-      SysUtils.FreeAndNil(gInsertRequest);
-    if Assigned(gUpdateRequest) then
-      SysUtils.FreeAndNil(gUpdateRequest);
+    //if Assigned(gDeleteRequest) then
+      //SysUtils.FreeAndNil(gDeleteRequest);
+    //if Assigned(gInsertRequest) then
+      //SysUtils.FreeAndNil(gInsertRequest);
+    {if Assigned(gUpdateRequest) then
+      SysUtils.FreeAndNil(gUpdateRequest);}
     {if Assigned(gCfgSelectRequest) then
       SysUtils.FreeAndNil(gCfgSelectRequest);}
   //end;
@@ -519,43 +519,67 @@ begin
     //smxClassProcs.gCfgSelectDataSetIntf := gCfgSelectRequest as IsmxDataSet; //gCfgRequest.DataSet;
   end;
 
-  //if Assigned(smxClassProcs.gDeleteDataSetIntf) then
+  if Assigned(smxClassProcs.gDeleteDataSetIntf) then
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitDeleteReqCfgID], 0) <> 0 then
     begin
       gDeleteRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitDeleteReqCfgID],
         smxClassProcs.gSelectDataSetIntf));
+      try
       gDeleteRequest.Initialize;
-      gDeleteRequest.Database := smxClassProcs.gMainDatabaseIntf;
-      gDeleteRequest.Prepare;
-      smxClassProcs.gDeleteDataSetIntf := gDeleteRequest as IsmxDataSet;
+      smxClassProcs.gDeleteDataSetIntf.AssignDataSet(gDeleteRequest.DataSet);
+      smxClassProcs.gDeleteDataSetIntf.Database := smxClassProcs.gMainDatabaseIntf;
+      smxClassProcs.gDeleteDataSetIntf.Prepared := True;
+      //gDeleteRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      //gDeleteRequest.Prepare;
+      //smxClassProcs.gDeleteDataSetIntf := gDeleteRequest as IsmxDataSet;
+      finally
+        gDeleteRequest.Free;
+        gDeleteRequest := nil;
+      end;
     end;
 
-  //if Assigned(smxClassProcs.gInsertDataSetIntf) then
+  if Assigned(smxClassProcs.gInsertDataSetIntf) then
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitInsertReqCfgID], 0) <> 0 then
     begin
       gInsertRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitInsertReqCfgID],
         smxClassProcs.gSelectDataSetIntf));
+      try
       gInsertRequest.Initialize;
-      gInsertRequest.Database := smxClassProcs.gMainDatabaseIntf;
-      gInsertRequest.Prepare;
-      smxClassProcs.gInsertDataSetIntf := gInsertRequest as IsmxDataSet;
+      smxClassProcs.gInsertDataSetIntf.AssignDataSet(gInsertRequest.DataSet);
+      smxClassProcs.gInsertDataSetIntf.Database := smxClassProcs.gMainDatabaseIntf;
+      smxClassProcs.gInsertDataSetIntf.Prepared := True;
+      //gInsertRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      //gInsertRequest.Prepare;
+      //smxClassProcs.gInsertDataSetIntf := gInsertRequest as IsmxDataSet;
+      finally
+        gInsertRequest.Free;
+        gInsertRequest := nil;
+      end;
     end;
 
-  //if Assigned(smxClassProcs.gUpdateDataSetIntf) then
+  if Assigned(smxClassProcs.gUpdateDataSetIntf) then
     if SysUtils.StrToIntDef(gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitUpdateReqCfgID], 0) <> 0 then
     begin
+      try
       gUpdateRequest := TsmxCustomRequest(smxClassFuncs.NewCell(
         nil,
         gStorageManager[smxPConsts.cInitSectionName + '.' + smxPConsts.cInitUpdateReqCfgID],
         smxClassProcs.gSelectDataSetIntf));
       gUpdateRequest.Initialize;
-      gUpdateRequest.Database := smxClassProcs.gMainDatabaseIntf;
-      gUpdateRequest.Prepare;
-      smxClassProcs.gUpdateDataSetIntf := gUpdateRequest as IsmxDataSet;
+      //gUpdateRequest.Database := smxClassProcs.gMainDatabaseIntf;
+      //gUpdateRequest.Prepare;
+      //smxClassProcs.gUpdateDataSetIntf := gUpdateRequest as IsmxDataSet;
+      smxClassProcs.gUpdateDataSetIntf.AssignDataSet(gUpdateRequest.DataSet);
+      smxClassProcs.gUpdateDataSetIntf.Database := smxClassProcs.gMainDatabaseIntf;
+      smxClassProcs.gUpdateDataSetIntf.Prepared := True;
+      finally
+        gUpdateRequest.Free;
+        gUpdateRequest := nil;
+      end;
     end;
 end;
 

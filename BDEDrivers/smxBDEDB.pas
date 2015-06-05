@@ -1753,7 +1753,7 @@ end;}
 
 function TsmxCoBDEDatabase.CreateDatabase: IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create(nil, Self as IsmxBaseInterface) as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil{, Self as IsmxBaseInterface}) as IsmxDatabase;
 end;
 
 { TsmxParam }

@@ -82,7 +82,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
     if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
     begin
       if (AObject is TsmxBaseCell)
-          and (TsmxBaseCell(AObject).IsImplIntf(IsmxRefComponent(Intf))) then
+          and (TsmxBaseCell(AObject).IsImplementedIntf(IsmxRefComponent(Intf))) then
       begin
         AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
         ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference.ClassName]);

@@ -346,7 +346,7 @@ procedure ReadProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode;
           //if IsmxRefComponent(Intf).GetReference = Intf2.GetReference then
             //Intf2 := nil;
         //if smxFuncs.IsImplIntf(AObject, IsmxRefComponent{IsmxRefPersistent}(Intf)) then
-        if TsmxBaseCell(AObject).IsImplIntf(IsmxRefComponent(Intf)) then
+        if TsmxBaseCell(AObject).IsImplementedIntf(IsmxRefComponent(Intf)) then
         begin
           ReadProps(AOwner, IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference, Node.ChildNodes.FindNode(APropInfo^.Name), AResolvedList);
         end else
@@ -638,7 +638,7 @@ procedure WriteProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode
               and (IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference = AIntf.GetReference) then*)
           //if smxFuncs.IsImplIntf(TObject(AFindList[i]), AIntf) then
           if (TObject(AFindList[i]) is TsmxBaseCell)
-              and TsmxBaseCell(TObject(AFindList[i])).IsImplIntf(AIntf) then
+              and TsmxBaseCell(TObject(AFindList[i])).IsImplementedIntf(AIntf) then
           begin
             Result := TObject(AFindList[i]);
             Break;
@@ -659,7 +659,7 @@ procedure WriteProps(AOwner: TComponent; AObject: TObject; const ANode: IXMLNode
       //if {Assigned(Intf) and} SysUtils.Supports(Intf, IsmxRefComponent{IsmxRefPersistent}) {then
       //begin
       //  if} and smxFuncs.IsImplIntf(AObject, IsmxRefComponent{IsmxRefPersistent}(Intf)) then
-        if TsmxBaseCell(AObject).IsImplIntf(IsmxRefComponent(Intf)) then
+        if TsmxBaseCell(AObject).IsImplementedIntf(IsmxRefComponent(Intf)) then
         begin
           //n := Node.AddChild(PropInfo^.Name, 0);
           WriteProps(AOwner, IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference, Node.AddChild(APropInfo^.Name), AFindList);

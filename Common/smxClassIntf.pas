@@ -52,10 +52,12 @@ type
 
   { IsmxObjectItem }
 
+  //IsmxObjectList = interface;
+
   IsmxObjectItem = interface(IsmxBaseInterface)
     ['{488FD65F-FEC5-4619-9251-BEC32DC20578}']
     procedure ChangeObjectIndex(Value: Integer);
-    procedure ChangeObjectOwner(Value: TPersistent);
+    procedure ChangeObjectOwner({const Value: IsmxObjectList}Value: TPersistent);
   end;
 
   { IsmxObjectList }

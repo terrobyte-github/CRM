@@ -183,6 +183,7 @@ type
   protected
     function GetDataEntityCount: Integer;
     function GetDataEntity(Index: Integer): IsmxDataEntity;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     property DataEntityList: TInterfaceList read GetDataEntityList;
   public
@@ -205,6 +206,7 @@ type
   protected
     function GetFormControlCount: Integer;
     function GetFormControl(Index: Integer): IsmxFormControl;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     property FormControlList: TInterfaceList read GetFormControlList;
   public
@@ -887,23 +889,29 @@ end;
 procedure TsmxDatabaseManager.ClearDataEntities;
 var
   i: Integer;
+  DataEntity: IsmxDataEntity;
+  Component: TComponent;
 begin
   for i := DataEntityList.Count - 1 downto 0 do
   begin
     //if not ((DataEntityList[i] as IsmxDataEntity).GetReference is TsmxInterfacedComponent)
         //or IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
-    if not (DataEntityList[i] as IsmxDataEntity).IsInterfacedObj
-        or IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
+    DataEntity := DataEntityList[i] as IsmxDataEntity;
+    if not DataEntity.IsCountedObj {or IsImplementedIntf(DataEntity.GetController)} then
     begin
-      (DataEntityList[i] as IsmxDataEntity).GetReference.Free;
+      Component := DataEntity.GetReference;
+      DataEntityList.Delete(i);
+      DataEntity := nil;
+      Component.Free;
       //DataEntityList[i] := nil;
     end else
     begin
       //if IsImplIntf((DataEntityList[i] as IsmxDataEntity).GetController) then
       //(DataEntityList[i] as IsmxDataEntity).GetReference.Free
       //DataEntityList[i] := nil;
-      (DataEntityList[i] as IsmxDataEntity).ChangeDatabaseManager(nil);
+      //(DataEntityList[i] as IsmxDataEntity).ChangeDatabaseManager(nil);
       DataEntityList.Delete(i);
+      DataEntity := nil;
       //(DatabaseList[i] as IsmxDatabase).GetReference.Free;
     end;
   end;
@@ -912,14 +920,18 @@ end;
 function TsmxDatabaseManager.FindByName(const DataEntityName: String): IsmxDataEntity;
 var
   i: Integer;
+  DataEntity: IsmxDataEntity;
 begin
   Result := nil;
   for i := 0 to DataEntityList.Count - 1 do
-    if SysUtils.AnsiCompareText((DataEntityList[i] as IsmxDataEntity).DataEntityName, DataEntityName) = 0 then
+  begin
+    DataEntity := DataEntityList[i] as IsmxDataEntity;
+    if SysUtils.AnsiCompareText(DataEntity.DataEntityName, DataEntityName) = 0 then
     begin
-      Result := DataEntityList[i] as IsmxDataEntity;
+      Result := DataEntity;
       Break;
     end;
+  end;
 end;
 
 function TsmxDatabaseManager.GetDataEntity(Index: Integer): IsmxDataEntity;
@@ -945,7 +957,9 @@ begin
     if DataEntityList.IndexOf(DataEntity) = -1 then
     begin
       DataEntityList.Add(DataEntity);
-      DataEntity.ChangeDatabaseManager(Self);
+      //DataEntity.ChangeDatabaseManager(Self);
+      if not DataEntity.IsCountedObj then
+        DataEntity.GetReference.FreeNotification(Self);
     end;
 end;
 
@@ -954,9 +968,18 @@ begin
   if Assigned(DataEntity) then
     if DataEntityList.IndexOf(DataEntity) <> -1 then
     begin
-      DataEntity.ChangeDatabaseManager(nil);
+      //DataEntity.ChangeDatabaseManager(nil);
+      if not DataEntity.IsCountedObj then
+        DataEntity.GetReference.RemoveFreeNotification(Self);
       DataEntityList.Remove(DataEntity);
     end;
+end;
+
+procedure TsmxDatabaseManager.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+    DataEntityList.Remove(AComponent as IsmxDataEntity);
 end;
 
 { TsmxFormManager }
@@ -974,18 +997,25 @@ end;
 procedure TsmxFormManager.ClearFormControls;
 var
   i: Integer;
+  FormControl: IsmxFormControl;
+  Component: TComponent;
 begin
   for i := FormControlList.Count - 1 downto 0 do
   begin
     //if not ((FormControlList[i] as IsmxFormControl).GetReference is TsmxInterfacedComponent)
     //    or IsImplIntf((FormControlList[i] as IsmxFormControl).GetController) then
-    if not (FormControlList[i] as IsmxFormControl).IsInterfacedObj
-        or IsImplIntf((FormControlList[i] as IsmxFormControl).GetController) then
-      (FormControlList[i] as IsmxFormControl).GetReference.Free
-    else
+    FormControl := FormControlList[i] as IsmxFormControl;
+    if not FormControl.IsCountedObj {or IsImplementedIntf(FormControl.GetController)} then
     begin
-      (FormControlList[i] as IsmxFormControl).ChangeFormManager(nil);
+      Component := FormControl.GetReference;
       FormControlList.Delete(i);
+      FormControl := nil;
+      Component.Free;
+    end else
+    begin
+      //(FormControlList[i] as IsmxFormControl).ChangeFormManager(nil);
+      FormControlList.Delete(i);
+      FormControl := nil;
       //FormControlList[i] := nil;
     end;
   end;
@@ -994,14 +1024,18 @@ end;
 function TsmxFormManager.FindByComboID(CfgID: Integer; ID: Integer = 0): IsmxFormControl;
 var
   i: Integer;
+  FormControl: IsmxFormControl;
 begin
   Result := nil;
   for i := 0 to FormControlList.Count - 1 do
-    if ((FormControlList[i] as IsmxFormControl).CfgID = CfgID) and ((FormControlList[i] as IsmxFormControl).ID = ID) then
+  begin
+    FormControl := FormControlList[i] as IsmxFormControl;
+    if (FormControl.CfgID = CfgID) and (FormControl.ID = ID) then
     begin
-      Result := FormControlList[i] as IsmxFormControl;
+      Result := FormControl;
       Break;
     end;
+  end;
 end;
 
 function TsmxFormManager.GetFormControl(Index: Integer): IsmxFormControl;
@@ -1023,20 +1057,33 @@ end;
 
 procedure TsmxFormManager.InsertFormControl(const FormControl: IsmxFormControl);
 begin
-  if FormControlList.IndexOf(FormControl) = -1 then
-  begin
-    FormControlList.Add(FormControl);
-    FormControl.ChangeFormManager(Self);
-  end;
+  if Assigned(FormControl) then
+    if FormControlList.IndexOf(FormControl) = -1 then
+    begin
+      FormControlList.Add(FormControl);
+      //FormControl.ChangeFormManager(Self);
+      if not FormControl.IsCountedObj then
+        FormControl.GetReference.FreeNotification(Self);
+    end;
 end;
 
 procedure TsmxFormManager.RemoveFormControl(const FormControl: IsmxFormControl);
 begin
-  if FormControlList.IndexOf(FormControl) <> -1 then
-  begin
-    FormControl.ChangeFormManager(nil);
-    FormControlList.Remove(FormControl);
-  end;
+  if Assigned(FormControl) then
+    if FormControlList.IndexOf(FormControl) <> -1 then
+    begin
+      //FormControl.ChangeFormManager(nil);
+      if not FormControl.IsCountedObj then
+        FormControl.GetReference.RemoveFreeNotification(Self);
+      FormControlList.Remove(FormControl);
+    end;
+end;
+
+procedure TsmxFormManager.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+    FormControlList.Remove(AComponent as IsmxFormControl);
 end;
 
 { TsmxImageListManager }

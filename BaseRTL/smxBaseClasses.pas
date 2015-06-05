@@ -40,9 +40,9 @@ type
     function GetInternalRef: Pointer; virtual;
     function GetReference: TComponent;
     function GetVersion: String; virtual;
-    function IsInterfacedObj: Boolean; virtual;
+    function IsCountedObj: Boolean; virtual;
   public
-    function IsImplIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
+    function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
 
     property Description: String read GetDescription;
     property Version: String read GetVersion;
@@ -52,7 +52,7 @@ type
 
   { TsmxInterfacedComponent }
 
-  TsmxInterfacedComponent = class(TsmxComponent, IInterface)
+  TsmxInterfacedComponent = class(TsmxComponent, IInterface, IsmxBaseInterface)
   private
     FController: Pointer;
     //function GetController: IsmxBaseInterface;//IsmxRefComponent;
@@ -61,7 +61,7 @@ type
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     function GetController: IsmxBaseInterface; override;
-    function IsInterfacedObj: Boolean; override;
+    function IsCountedObj: Boolean; override;
   public
     { TODO : убрать owner из конструктора }
     constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
@@ -114,7 +114,7 @@ type
     function GetInternalRef: Pointer; virtual;
     function GetReference: TPersistent;
     function GetVersion: String; virtual;
-    function IsInterfacedObj: Boolean; virtual;
+    function IsCountedObj: Boolean; virtual;
     function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
@@ -122,7 +122,7 @@ type
     //procedure AfterConstruction; override;
     //procedure BeforeDestruction; override;
     //class function NewInstance: TObject; override;
-    function IsImplIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
+    function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
 
     //property Controller: IsmxRefComponent read GetController;
     property Description: String read GetDescription;
@@ -135,7 +135,7 @@ type
 
   { TsmxInterfacedPersistent }
 
-  TsmxInterfacedPersistent = class(TsmxPersistent, IInterface{, IsmxBaseInterface, IsmxRefPersistent})
+  TsmxInterfacedPersistent = class(TsmxPersistent, IInterface, IsmxBaseInterface{, IsmxRefPersistent})
   private
     //FName: String;
     FController: Pointer;
@@ -149,7 +149,7 @@ type
     //function GetInternalRef: Pointer; virtual;
     //function GetReference: TPersistent;
     //function GetVersion: String; virtual;
-    function IsInterfacedObj: Boolean; override;
+    function IsCountedObj: Boolean; override;
     //function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
@@ -454,20 +454,25 @@ type
   TsmxObjectItem = class(TsmxKitItem)
   private
     function GetKit: TsmxObjectList;
-    function GetItemObjectInterface: IsmxObjectItem;
-    procedure SetItemObject(Value: TPersistent);
+    //function GetItemObjectInterface: IsmxObjectItem;
+    //procedure SetItemObject(Value: TPersistent);
     procedure SetKit(Value: TsmxObjectList);
   protected
-    FItemObject: TPersistent;
+    //FItemObject: TPersistent;
+    FObjectItem: TPersistent; //Pointer;
+    FObjectItemIntf: Pointer;
     //procedure AddObject(ObjectClass: TPersistentClass = nil); virtual;
     procedure AddObject; overload; //virtual;
     procedure AddObject(ObjectClass: TPersistentClass); {reintroduce;} overload; //virtual;
     procedure DelObject; //virtual;
     function GetDisplayName: String; override;
     function GetDisplayObject: TObject; override;
+    //function GetObjectItem: TPersistent;//IsmxObjectItem;
+    //function GetObjectItemIntf: IsmxObjectItem;
     procedure SetIndex(Value: Integer); override;
+    procedure SetObjectItem(Value: TPersistent);//(const Value: IsmxObjectItem);
 
-    property ItemObjectInterface: IsmxObjectItem read GetItemObjectInterface;
+    //property ItemObjectInterface: IsmxObjectItem read GetItemObjectInterface;
   public
     constructor Create(AKit: TsmxKit); overload; override;
     constructor Create(AKit: TsmxKit; AObjectClass: TPersistentClass); reintroduce; overload; virtual;
@@ -476,7 +481,8 @@ type
     //procedure InitializeItemObject(ItemObject: TPersistent);
 
     property Kit: TsmxObjectList read GetKit write SetKit;
-    property ItemObject: TPersistent read FItemObject write SetItemObject;
+    //property ItemObject: TPersistent read FItemObject write SetItemObject;
+    property ObjectItem: TPersistent{IsmxObjectItem} read FObjectItem write SetObjectItem;
   end;
 
   TsmxObjectItemClass = class of TsmxObjectItem;
@@ -486,19 +492,23 @@ type
   TsmxObjectList = class(TsmxKit)
   private
     FOwner: TPersistent;
+    FOwnerIntf: Pointer;
     function GetItem(Index: Integer): TsmxObjectItem;
-    function GetOwnerObjectInterface: IsmxObjectList;
+    //function GetOwnerObjectInterface: IsmxObjectList;
     procedure SetItem(Index: Integer; Value: TsmxObjectItem);
   protected
-    property OwnerObjectInterface: IsmxObjectList read GetOwnerObjectInterface;
+    //property OwnerObjectInterface: IsmxObjectList read GetOwnerObjectInterface;
+    function GetOwner: TPersistent;//IsmxObjectList;
+    //function GetOwnerIntf: IsmxObjectList;
   public
     constructor Create(AOwner: TPersistent; AItemClass: TsmxKitItemClass); reintroduce; overload; virtual;
+    //destructor Destroy; override;
     function Add: TsmxObjectItem; overload;
     function Add(ObjectClass: TPersistentClass): TsmxObjectItem; overload;
     procedure Assign(Source: TsmxKit); override;
 
     property Items[Index: Integer]: TsmxObjectItem read GetItem write SetItem; default;
-    property Owner: TPersistent read FOwner;
+    property Owner: TPersistent read GetOwner;
   end;
 
   TsmxObjectListClass = class of TsmxObjectList;
@@ -628,12 +638,12 @@ begin
   Result := cVersion;
 end;
 
-function TsmxComponent.IsInterfacedObj: Boolean;
+function TsmxComponent.IsCountedObj: Boolean;
 begin
   Result := False;
 end;
 
-function TsmxComponent.IsImplIntf(const Intf: IsmxBaseInterface): Boolean;
+function TsmxComponent.IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxRefComponent;
 begin
@@ -663,9 +673,11 @@ begin
   if Assigned(FController) then
     Result := IsmxBaseInterface{IsmxRefComponent}(FController)._Release
   else
+  begin
     Result := Windows.InterlockedDecrement(FRefCount);
-  if Result = 0 then
-    Destroy;
+    if Result = 0 then
+      Destroy;
+  end;
 end;
 
 procedure TsmxInterfacedComponent.AfterConstruction;
@@ -685,7 +697,7 @@ begin
   Result := IsmxBaseInterface{IsmxRefComponent}(FController);
 end;
 
-function TsmxInterfacedComponent.IsInterfacedObj: Boolean;
+function TsmxInterfacedComponent.IsCountedObj: Boolean;
 begin
   Result := True; //not Assigned(FController);
 end;
@@ -728,9 +740,11 @@ begin
   if Assigned(FController) then
     Result := IsmxBaseInterface{IsmxRefComponent}(FController)._Release
   else
+  begin
     Result := Windows.InterlockedDecrement(FRefCount);
-  if Result = 0 then
-    Destroy;
+    if Result = 0 then
+      Destroy;
+  end;     
 end;
 
 procedure TsmxInterfacedPersistent.AfterConstruction;
@@ -769,7 +783,7 @@ begin
   Result := cVersion;
 end;}
 
-function TsmxInterfacedPersistent.IsInterfacedObj: Boolean;
+function TsmxInterfacedPersistent.IsCountedObj: Boolean;
 begin
   Result := True; //not Assigned(FController);
 end;
@@ -1353,7 +1367,7 @@ begin
   Result := cVersion;
 end;
 
-function TsmxPersistent.IsImplIntf(const Intf: IsmxBaseInterface): Boolean;
+function TsmxPersistent.IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxRefPersistent;
 begin
@@ -1362,7 +1376,7 @@ begin
     and (AIntf.GetReference = Self);
 end;
 
-function TsmxPersistent.IsInterfacedObj: Boolean;
+function TsmxPersistent.IsCountedObj: Boolean;
 begin
   Result := False;
 end;
@@ -1629,46 +1643,73 @@ begin
 end;
 
 procedure TsmxObjectItem.AddObject;
+var
+  ObjectItemIntf: IsmxObjectItem;
 begin
   if Assigned(Kit) then
-    if Assigned(Kit.OwnerObjectInterface) then
-      Kit.OwnerObjectInterface.CreateObject(Self);
+    if Assigned(Kit.Owner) then
+    begin
+      IsmxObjectList(Kit.FOwnerIntf).CreateObject(Self);
+      if Assigned(FObjectItem) then
+        if FObjectItem.GetInterface(IsmxObjectItem, ObjectItemIntf) then
+        begin
+          FObjectItemIntf := Pointer(ObjectItemIntf);
+          ObjectItemIntf.ChangeObjectOwner(Kit.Owner);
+        end;
+    end;
 end;
 
 procedure TsmxObjectItem.AddObject(ObjectClass: TPersistentClass);
+var
+  ObjectItemIntf: IsmxObjectItem;
 begin
   if Assigned(Kit) then
-    if Assigned(Kit.OwnerObjectInterface) then
-      Kit.OwnerObjectInterface.CreateObject(Self, ObjectClass);
+    if Assigned(Kit.Owner) then
+    begin
+      IsmxObjectList(Kit.FOwnerIntf).CreateObject(Self, ObjectClass);
+      //if Assigned(ObjectItem) then
+        //GetObjectItemIntf.ChangeObjectOwner(Kit.Owner);
+      if Assigned(FObjectItem) then
+        if FObjectItem.GetInterface(IsmxObjectItem, ObjectItemIntf) then
+        begin
+          FObjectItemIntf := Pointer(ObjectItemIntf);
+          ObjectItemIntf.ChangeObjectOwner(Kit.Owner);
+        end;
+    end;
 end;
 
 procedure TsmxObjectItem.DelObject;
 begin
   if Assigned(Kit) then
-    if Assigned(Kit.OwnerObjectInterface) then
-      Kit.OwnerObjectInterface.DestroyObject(Self);
+    if Assigned(Kit.Owner) then
+    begin
+      if Assigned(FObjectItem) then
+        IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(nil);
+      IsmxObjectList(Kit.FOwnerIntf).DestroyObject(Self);
+    end;
 end;
 
 procedure TsmxObjectItem.Assign(Source: TsmxKitItem);
 begin
   if Source is TsmxObjectItem then
-    ItemObject := TsmxObjectItem(Source).ItemObject
+    //ItemObject := TsmxObjectItem(Source).ItemObject
+    ObjectItem := TsmxObjectItem(Source).ObjectItem
   else
     inherited Assign(Source);
 end;
 
 function TsmxObjectItem.GetDisplayName: String;
 begin
-  if Assigned(FItemObject) then
-    Result := FItemObject.ClassName
+  if Assigned(ObjectItem) then
+    Result := ObjectItem{.GetReference}.ClassName
   else
     Result := inherited GetDisplayName;
 end;
 
 function TsmxObjectItem.GetDisplayObject: TObject;
 begin
-  if Assigned(FItemObject) then
-    Result := FItemObject
+  if Assigned(ObjectItem) then
+    Result := ObjectItem{.GetReference}
   else
     Result := inherited GetDisplayObject;
 end;
@@ -1681,35 +1722,45 @@ end;
 procedure TsmxObjectItem.SetKit(Value: TsmxObjectList);
 begin
   if Assigned(Kit) then
-    //if Assigned(Kit.Owner) then
-      if Assigned(ItemObjectInterface) then
-        ItemObjectInterface.ChangeObjectOwner(nil);
+    if Assigned(Kit.Owner) then
+      if Assigned(ObjectItem) then
+        IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(nil);
   inherited Kit := Value;
   if Assigned(Kit) then
-    //if Assigned(Kit.Owner) then
-      if Assigned(ItemObjectInterface) then
-        ItemObjectInterface.ChangeObjectOwner(Kit.Owner);
+    if Assigned(Kit.Owner) then
+      if Assigned(ObjectItem) then
+        IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(Kit.Owner);
 end;
 
-function TsmxObjectItem.GetItemObjectInterface: IsmxObjectItem;
+{function TsmxObjectItem.GetObjectItemIntf: IsmxObjectItem;
 begin
-  if Assigned(FItemObject) then
-    FItemObject.GetInterface(IsmxObjectItem, Result)
+  if Assigned(FObjectItem) then
+    FObjectItem.GetInterface(IsmxObjectItem, Result)
   else
     Result := nil;
+end;}
+
+{function TsmxObjectItem.GetObjectItem: TPersistent;//IsmxObjectItem;
+begin
+  Result := FObjectItem;//IsmxObjectItem(FObjectItem);
+end;}
+
+procedure TsmxObjectItem.SetObjectItem(Value: TPersistent{const Value: IsmxObjectItem});
+begin
+  {if Assigned(ObjectItem) then
+    if Assigned(Value) then
+      ObjectItem.GetReference.Assign(Value.GetReference)
+    else
+      ObjectItem.GetReference.Assign(nil);}
+  if Assigned(FObjectItem) then
+    FObjectItem.Assign(Value);
 end;
 
 procedure TsmxObjectItem.SetIndex(Value: Integer);
 begin
   inherited SetIndex(Value);
-  if Assigned(ItemObjectInterface) then
-    ItemObjectInterface.ChangeObjectIndex(Value);
-end;
-
-procedure TsmxObjectItem.SetItemObject(Value: TPersistent);
-begin
-  if Assigned(FItemObject) then
-    FItemObject.Assign(Value);
+  if Assigned(ObjectItem) then
+    IsmxObjectItem(FObjectItemIntf).ChangeObjectIndex(Value);
 end;
 
 {procedure TsmxObjectItem.InitializeItemObject(ItemObject: TPersistent);
@@ -1720,10 +1771,24 @@ end;}
 { TsmxObjectList }
 
 constructor TsmxObjectList.Create(AOwner: TPersistent; AItemClass: TsmxKitItemClass);
+var
+  ObjectListIntf: IsmxObjectList;
 begin
   Create(AItemClass);
   FOwner := AOwner;
+  if Assigned(FOwner) then
+    if FOwner.GetInterface(IsmxObjectList, ObjectListIntf) then
+      FOwnerIntf := Pointer(ObjectListIntf);
 end;
+
+{destructor TsmxObjectList.Destroy;
+begin
+  if Assigned(FOwner) then
+    IsmxObjectList(FOwner)._AddRef;
+  inherited Destroy;
+  //if Assigned(FOwner) then
+    //IsmxObjectList(FOwner)._Release;
+end;}
 
 function TsmxObjectList.Add: TsmxObjectItem;
 begin
@@ -1747,8 +1812,8 @@ begin
   begin
     Clear;
     for i := 0 to Source.Count - 1 do
-      if Assigned(TsmxObjectList(Source)[i].ItemObject) then
-        Add(TPersistentClass(TsmxObjectList(Source)[i].ItemObject.ClassType)).Assign(Source[i])
+      if Assigned(TsmxObjectList(Source)[i].ObjectItem) then
+        Add(TPersistentClass(TsmxObjectList(Source)[i].ObjectItem.ClassType)).Assign(Source[i])
       else
         Add.Assign(Source[i]);
   end else
@@ -1765,18 +1830,22 @@ begin
   inherited Items[Index] := Value;
 end;
 
-function TsmxObjectList.GetOwnerObjectInterface: IsmxObjectList;
+function TsmxObjectList.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
+(*function TsmxObjectList.GetOwnerIntf: IsmxObjectList;
 begin
   {if Assigned(Owner) then
     Owner.GetInterface(IsmxObjectList, Result)
   else
     Result := nil;}
-  if Assigned(Owner) then
-    //Result := Owner as IsmxObjectList
-    Owner.GetInterface(IsmxObjectList, Result)
+  if Assigned(FOwner) then
+    FOwner.GetInterface(IsmxObjectList, Result)
   else
     Result := nil;
-end;
+end;*)
 
 { TsmxMultipleObjectItem }
 
