@@ -2299,8 +2299,10 @@ begin
   end else
   begin
     //FForm.Hide;
+
+
     FForm := nil;
-    Free;
+    //Free;
   end;
 
 

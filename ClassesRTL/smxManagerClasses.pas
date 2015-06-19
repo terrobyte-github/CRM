@@ -230,7 +230,7 @@ type
     procedure ClearImageListRegister;
     function GetImageListRegister: TsmxParams;
     function LoadImageList(const ImageListName: String): TCustomImageList;
-    function VarToInt(const Value: Variant): Integer;
+    //function VarToInt(const Value: Variant): Integer;
   protected
     function GetDelimiter: String;
     function GetImageListCount: Integer;
@@ -272,7 +272,7 @@ type
     procedure ClearClassTypeList;
     function GetClassTypeList: TsmxParams;
     function LoadClassType(const ClassTypeName: String): TPersistentClass;
-    function VarToInt(const Value: Variant): Integer;
+    //function VarToInt(const Value: Variant): Integer;
   protected
     function GetDelimiter: String;
     function GetClassTypeCount: Integer;
@@ -308,7 +308,7 @@ type
 implementation
 
 uses
-  DB, Windows, Controls, SysUtils, Variants, smxProcs, smxConsts;
+  DB, Windows, Controls, SysUtils, Variants, smxProcs, smxFuncs, smxConsts;
 
 { TsmxProjectItem }
 
@@ -1136,7 +1136,7 @@ var
   i: Integer;
 begin
   for i := ImageListRegister.Count - 1 downto 0 do
-    if Assigned(TCustomImageList(VarToInt(ImageListRegister[i].ParamValue))) then
+    if Assigned(TCustomImageList(smxFuncs.VarToInt(ImageListRegister[i].ParamValue))) then
     begin
       TCustomImageList(Integer(ImageListRegister[i].ParamValue)).Free;
       ImageListRegister.Delete(i);
@@ -1151,7 +1151,7 @@ begin
   Result := nil;
   Item := ImageListRegister.FindByName(ImageListName);
   if Assigned(Item) then
-    Result := TCustomImageList(VarToInt(Item.ParamValue));
+    Result := TCustomImageList(smxFuncs.VarToInt(Item.ParamValue));
   {for i := 0 to ImageListRegister.Count - 1 do
     if SysUtils.AnsiCompareText(ImageListRegister[i].ParamName, ImageListName) = 0 then
     begin
@@ -1172,7 +1172,7 @@ end;
 
 function TsmxImageListManager.GetImageList(Index: Integer): TCustomImageList;
 begin
-  Result := TCustomImageList(VarToInt(ImageListRegister[Index].ParamValue));
+  Result := TCustomImageList(smxFuncs.VarToInt(ImageListRegister[Index].ParamValue));
 end;
 
 function TsmxImageListManager.GetImageListCount: Integer;
@@ -1213,7 +1213,7 @@ var
 begin
   Result := -1;
   for i := 0 to ImageListRegister.Count - 1 do
-    if TCustomImageList(VarToInt(ImageListRegister[i].ParamValue)) = ImageList then
+    if TCustomImageList(smxFuncs.VarToInt(ImageListRegister[i].ParamValue)) = ImageList then
     begin
       Result := i;
       Exit;
@@ -1331,13 +1331,13 @@ begin
   end;
 end;
 
-function TsmxImageListManager.VarToInt(const Value: Variant): Integer;
+{function TsmxImageListManager.VarToInt(const Value: Variant): Integer;
 begin
   if Variants.VarIsNull(Value) then
     Result := 0
   else
     Result := Value;
-end;
+end;}
 
 { TsmxClassTypeManager }
 
@@ -1404,7 +1404,7 @@ begin
   Result := nil;
   Item := ClassTypeList.FindByName(ClassTypeName);
   if Assigned(Item) then
-    Result := TPersistentClass(VarToInt(Item.ParamValue));
+    Result := TPersistentClass(smxFuncs.VarToInt(Item.ParamValue));
   {for i := 0 to ClassTypeList.Count - 1 do
     if SysUtils.AnsiCompareText(ClassTypeList[i].ParamName, ClassTypeName) = 0 then
     begin
@@ -1415,7 +1415,7 @@ end;
 
 function TsmxClassTypeManager.GetClassType(Index: Integer): TPersistentClass;
 begin
-  Result := TPersistentClass(VarToInt(ClassTypeList[Index].ParamValue));
+  Result := TPersistentClass(smxFuncs.VarToInt(ClassTypeList[Index].ParamValue));
 end;
 
 function TsmxClassTypeManager.GetClassTypeCount: Integer;
@@ -1446,7 +1446,7 @@ var
 begin
   Result := -1;
   for i := 0 to ClassTypeList.Count - 1 do
-    if TPersistentClass(VarToInt(ClassTypeList[i].ParamValue)) = ClassType then
+    if TPersistentClass(smxFuncs.VarToInt(ClassTypeList[i].ParamValue)) = ClassType then
     begin
       Result := i;
       Exit;
@@ -1560,13 +1560,13 @@ begin
   end;
 end;
 
-function TsmxClassTypeManager.VarToInt(const Value: Variant): Integer;
+{function TsmxClassTypeManager.VarToInt(const Value: Variant): Integer;
 begin
   if Variants.VarIsNull(Value) then
     Result := 0
   else
     Result := Value;
-end;
+end;}
 
 //initialization
   //smxProcs{Classes}.RegisterClasses([TsmxProjectManager, TsmxCallBackManager,

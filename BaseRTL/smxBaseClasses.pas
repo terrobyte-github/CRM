@@ -62,6 +62,7 @@ type
     function _Release: Integer; stdcall;
     function GetController: IsmxBaseInterface; override;
     function IsCountedObj: Boolean; override;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; override; stdcall;
   public
     { TODO : убрать owner из конструктора }
     constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
@@ -150,7 +151,7 @@ type
     //function GetReference: TPersistent;
     //function GetVersion: String; virtual;
     function IsCountedObj: Boolean; override;
-    //function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; override; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
     constructor Create(const AController: IsmxBaseInterface{IsmxRefComponent}); overload;
@@ -708,6 +709,14 @@ begin
   TsmxInterfacedComponent(Result).FRefCount := 1;
 end;
 
+function TsmxInterfacedComponent.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if Assigned(FController) then
+    Result := IsmxBaseInterface(FController).QueryInterface(IID, Obj)
+  else
+    Result := inherited QueryInterface(IID, Obj);  
+end;
+
 { TsmxInterfacedObject }
 
 {function TsmxInterfacedObject.GetDescription: String;
@@ -794,14 +803,13 @@ begin
   TsmxInterfacedPersistent(Result).FRefCount := 1;
 end;
 
-{function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
+function TsmxInterfacedPersistent.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
-  //if Assigned(FController) then
-    //Result := IsmxRefComponent(FController).QueryInterface(IID, Obj) else
-  if GetInterface(IID, Obj) then
-    Result := S_OK else
-    Result := E_NOINTERFACE;
-end;}
+  if Assigned(FController) then
+    Result := IsmxBaseInterface(FController).QueryInterface(IID, Obj)
+  else
+    Result := inherited QueryInterface(IID, Obj);
+end;
 
 {procedure TsmxInterfacedPersistent.SetName(const Value: String);
 begin

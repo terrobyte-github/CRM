@@ -60,8 +60,12 @@ const
   cParamDatabaseName = 'DatabaseName';
   cParamUserName = 'UserName';
   cParamUserID = 'UserID';
-  cParamIntfName = 'IntfName';
-  cParamIntfID = 'IntfID';
+  cParamInterfaceName = 'InterfaceName';
+  cParamInterfaceID = 'InterfaceID';
+  cParamSelectDataSetName = 'SelectDataSetName';
+  cParamDeleteDataSetName = 'DeleteDataSetName';
+  cParamInsertDataSetName = 'InsertDataSetName';
+  cParamUpdateDataSetName = 'UpdateDataSetName';
 
   cDefValueSectionName = 'DefValue';
   cDefValueUserName = 'UserName';

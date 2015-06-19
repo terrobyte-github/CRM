@@ -39,8 +39,12 @@ const
     'DatabaseName=Base'#13#10 +
     'UserName=UserName'#13#10 +
     'UserID=UserID'#13#10 +
-    'IntfName=IntfName'#13#10 +
-    'IntfID=IntfID'#13#10 + #13#10 +
+    'InterfaceName=IntfName'#13#10 +
+    'InterfaceID=IntfID'#13#10 +
+    'SelectDataSetName=SelectDataSetName'#13#10 +
+    'DeleteDataSetName=DeleteDataSetName'#13#10 +
+    'InsertDataSetName=InsertDataSetName'#13#10 +
+    'UpdateDataSetName=UpdateDataSetName'#13#10 + #13#10 +
     '[DefValue]'#13#10 +
     'UserName='#13#10 +
     'ProjectName=';

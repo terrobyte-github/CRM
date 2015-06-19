@@ -27,7 +27,7 @@ type
     function GetInTransaction: Boolean;
     //function GetParams: TStrings;
     function GetParamText: String;
-    function NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType{; const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
     procedure RollbackTransaction;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);

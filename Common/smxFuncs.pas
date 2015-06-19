@@ -40,6 +40,8 @@ function GetRootControl(AControl: TWinControl): TWinControl;
 function FindUniqueName(AOwner: TComponent; const AName: String): String;
 function ResolvedClassType(AClassType: TPersistentClass): String;
 function ResolvedClassTypeName(const AClassTypeName: String; AIsRegister: Boolean = False): TPersistentClass;
+function VarToInt(const AValue: Variant): Integer;
+function IntToVar(AValue: Integer): Variant;
 
 implementation
 
@@ -276,22 +278,22 @@ end;
 
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Integer): Integer;
 begin
-  Result := SysUtils.StrToIntDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+  Result := SysUtils.StrToIntDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, Variants.Null), ''), ADefValue);
 end;
 
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String;
 begin
-  Result := Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ADefValue);
+  Result := Variants.VarToStrDef(GetParamValue(AParams, AParamName, Variants.Null), ADefValue);
 end;
 
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended;
 begin
-  Result := SysUtils.StrToFloatDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+  Result := SysUtils.StrToFloatDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, Variants.Null), ''), ADefValue);
 end;
 
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime;
 begin
-  Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, ADefValue), ''), ADefValue);
+  Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, Variants.Null), ''), ADefValue);
 end;
 
 {function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
@@ -386,6 +388,22 @@ begin
     if not Assigned(Result) then
       Result := Classes.GetClass(AClassTypeName);
   end;
+end;
+
+function VarToInt(const AValue: Variant): Integer;
+begin
+  if Variants.VarIsNull(AValue) then
+    Result := 0
+  else
+    Result := AValue;
+end;
+
+function IntToVar(AValue: Integer): Variant;
+begin
+  if AValue = 0 then
+    Result := Variants.Null
+  else
+    Result := AValue;
 end;
 
 end.

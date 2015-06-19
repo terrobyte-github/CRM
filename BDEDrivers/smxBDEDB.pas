@@ -52,7 +52,7 @@ type
     destructor Destroy; override;
     procedure AssignDatabase(const Source: IsmxDatabase);
     procedure CommitTransaction;
-    function NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType{; const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
     procedure RollbackTransaction;
     procedure StartTransaction;
 
@@ -370,9 +370,9 @@ type
   end;
 
 function DatabaseCLSID: TGUID;
-function NewDatabase(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
-function NewQuery(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
-function NewProcedure(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
+function NewDatabase({const Controller: IsmxBaseInterface = nil}): IsmxDatabase;
+function NewQuery({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
+function NewProcedure({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
 
 implementation
 
@@ -393,19 +393,19 @@ begin
   Result := CLSID_smxCoBDEDatabase;
 end;
 
-function NewDatabase(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
+function NewDatabase({const Controller: IsmxBaseInterface = nil}): IsmxDatabase;
 begin
-  Result := TsmxBDEDatabase.Create(nil, Controller) as IsmxDatabase;
+  Result := TsmxBDEDatabase.Create(nil{, Controller}) as IsmxDatabase;
 end;
 
-function NewQuery(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
+function NewQuery({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
 begin
-  Result := TsmxBDEQuery.Create(nil, Controller) as IsmxDataSet;
+  Result := TsmxBDEQuery.Create(nil{, Controller}) as IsmxDataSet;
 end;
 
-function NewProcedure(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
+function NewProcedure({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
 begin
-  Result := TsmxBDEStoredProc.Create(nil, Controller) as IsmxDataSet;
+  Result := TsmxBDEStoredProc.Create(nil{, Controller}) as IsmxDataSet;
 end;
 
 { TsmxBDEDatabase }
@@ -523,12 +523,12 @@ begin
   InternalDatabase.Params.Text := Value;
 end;
 
-function TsmxBDEDatabase.NewDataSet(DataSetType: TsmxDataSetType; Controller: IsmxBaseInterface = nil): IsmxDataSet;
+function TsmxBDEDatabase.NewDataSet(DataSetType: TsmxDataSetType{; const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
 begin
   //Result := nil;
   case DataSetType of
-    dstQuery: Result := TsmxBDEQuery.Create(nil, Controller) as IsmxDataSet;
-    dstStoredProc: Result := TsmxBDEStoredProc.Create(nil, Controller) as IsmxDataSet;
+    dstQuery: Result := TsmxBDEQuery.Create(nil{, Controller}) as IsmxDataSet;
+    dstStoredProc: Result := TsmxBDEStoredProc.Create(nil{, Controller}) as IsmxDataSet;
     //else
       //raise EsmxDBInterfaceError.CreateRes(@SDBIntfDataSetUnknown);
   end;

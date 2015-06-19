@@ -6,9 +6,9 @@ uses
   smxBaseIntf, smxDBIntf, smxTypes;
 
 type
-  TsmxFuncNewDatabase = function(const Controller: IsmxBaseInterface = nil): IsmxDatabase;
+  TsmxFuncNewDatabase = function({const Controller: IsmxBaseInterface = nil}): IsmxDatabase;
 
-  TsmxFuncNewDataSet = function(const Controller: IsmxBaseInterface = nil): IsmxDataSet;
+  TsmxFuncNewDataSet = function({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
 
   TsmxParamArray = array of IsmxParam;
 
@@ -19,4 +19,3 @@ type
 implementation
 
 end.
- 
