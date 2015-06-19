@@ -861,7 +861,7 @@ begin
   //inherited Initialize;
   //FDatabaseIntf := CreateDatabase;
 
-  FDatabase := GetDatabaseClass.Create(nil, Self as IsmxBaseInterface);
+  FDatabase := GetDatabaseClass.Create({nil,} Self as IsmxBaseInterface);
 end;
 
 destructor TsmxCoDatabase.Destroy;

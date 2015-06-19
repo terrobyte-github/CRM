@@ -65,7 +65,7 @@ type
     function QueryInterface(const IID: TGUID; out Obj): HResult; override; stdcall;
   public
     { TODO : убрать owner из конструктора }
-    constructor Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; overload; virtual;
+    constructor Create({AOwner: TComponent;} const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; {overload;} virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
@@ -655,9 +655,10 @@ end;
 
 { TsmxInterfacedComponent }
 
-constructor TsmxInterfacedComponent.Create(AOwner: TComponent; const AController: IsmxBaseInterface{IsmxRefComponent});
+constructor TsmxInterfacedComponent.Create({AOwner: TComponent;} const AController: IsmxBaseInterface{IsmxRefComponent});
 begin
-  Create(AOwner);
+  //Create(AOwner);
+  inherited Create(nil);
   FController := Pointer(AController);
 end;
 
