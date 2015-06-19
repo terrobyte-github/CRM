@@ -1053,7 +1053,7 @@ type
 
   TsmxCustomRequestList = class;
 
-  TsmxCustomRequest = class(TsmxOwnerCell, IsmxDataSet)
+  TsmxCustomRequest = class(TsmxOwnerCell{, IsmxDataSet})
   private
     FCellRequest: TsmxBaseCell;
     //FCurPerformanceMode: TsmxPerformanceMode;
@@ -1132,7 +1132,7 @@ type
     property CellRequest: TsmxBaseCell read FCellRequest write SetCellRequest;
     property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
     property DatabaseName: String read FDatabaseName write SetDatabaseName;
-    property DataSet: IsmxDataSet read GetDataSet implements IsmxDataSet;//FDataSetIntf write SetDataSet;
+    property DataSet: IsmxDataSet read GetDataSet; //implements IsmxDataSet;//FDataSetIntf write SetDataSet;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
     //property ModifyPerformances[Modify: TsmxModifyRequest]: TsmxPerformanceMode read GetModifyPerformance write SetModifyPerformance;
     //property ModifyRequests[Modify: TsmxModifyRequest]: IsmxDataSet read GetModifyRequest write SetModifyRequest;

@@ -21,18 +21,22 @@ type
 
   TsmxCoDatabase = class(TComObject, IsmxBaseInterface, IsmxDatabase)
   private
-    FDatabaseIntf: IsmxDatabase;
+    //FDatabaseIntf: IsmxDatabase;
+    FDatabase: TsmxInterfacedComponent;
+    function GetDatabase: IsmxDatabase;
   protected
-    function CreateDatabase: IsmxDatabase; virtual; abstract;
+    //function CreateDatabase: IsmxDatabase; virtual; abstract;
     function GetController: IsmxBaseInterface; virtual;
-    function GetDescription: String;
+    function GetDatabaseClass: TsmxInterfacedComponentClass; virtual;
+    function GetDescription: String; virtual;
     function GetVersion: String; virtual;
     function IsCountedObj: Boolean; virtual;
+
+    property Database: IsmxDatabase read GetDatabase implements IsmxDatabase;
   public
     destructor Destroy; override;
     procedure Initialize; override;
 
-    property Database: IsmxDatabase read FDatabaseIntf implements IsmxDatabase;
     property Description: String read GetDescription;
     property Version: String read GetVersion;
   end;
@@ -855,7 +859,9 @@ uses
 procedure TsmxCoDatabase.Initialize;
 begin
   //inherited Initialize;
-  FDatabaseIntf := CreateDatabase;
+  //FDatabaseIntf := CreateDatabase;
+
+  FDatabase := GetDatabaseClass.Create(nil, Self as IsmxBaseInterface);
 end;
 
 destructor TsmxCoDatabase.Destroy;
@@ -863,7 +869,10 @@ begin
   //if Assigned(FDatabaseIntf) then
   //begin
     //FDatabaseIntf.GetReference.Free;
-    FDatabaseIntf := nil;
+
+    //FDatabaseIntf := nil;
+  FDatabase.Free;
+
   //end;
   inherited Destroy;
 end;
@@ -876,6 +885,16 @@ end;}
 function TsmxCoDatabase.GetController: IsmxBaseInterface;
 begin
   Result := nil;
+end;
+
+function TsmxCoDatabase.GetDatabase: IsmxDatabase;
+begin
+  Result := FDatabase as IsmxDatabase;
+end;
+
+function TsmxCoDatabase.GetDatabaseClass: TsmxInterfacedComponentClass;
+begin
+  Result := TsmxInterfacedComponent;
 end;
 
 function TsmxCoDatabase.GetDescription: String;

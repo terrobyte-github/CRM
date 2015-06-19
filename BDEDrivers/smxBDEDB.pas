@@ -14,10 +14,17 @@ const
 type
   { TsmxCoBDEDatabase }
 
+  //TsmxBDEDatabase = class;
+
   TsmxCoBDEDatabase = class(TsmxCoDatabase)
+  //private
+    //FDatabase: TsmxBDEDatabase;
   protected
-    function CreateDatabase: IsmxDatabase; override;
+    //function CreateDatabase: IsmxDatabase; override;
+    //function GetDatabase: IsmxDatabase; override;
+    function GetDatabaseClass: TsmxInterfacedComponentClass; override;
   //public
+    //destructor Destroy; override;
     //procedure Initialize; override;
   end;
 
@@ -1747,14 +1754,30 @@ end;}
 
 {procedure TsmxCoBDEDatabase.Initialize;
 begin
-  inherited Initialize;
-  FDatabaseIntf := TsmxBDEDatabase.Create as IsmxDatabase;
+  //inherited Initialize;
+  FDatabase := TsmxBDEDatabase.Create(nil, Self as IsmxBaseInterface);
 end;}
 
-function TsmxCoBDEDatabase.CreateDatabase: IsmxDatabase;
+{destructor TsmxCoBDEDatabase.Destroy;
+begin
+  FDatabase.Free;
+  inherited Destroy;
+end;}
+
+{function TsmxCoBDEDatabase.GetDatabase: IsmxDatabase;
+begin
+  Result := FDatabase as IsmxDatabase;
+end;}
+
+function TsmxCoBDEDatabase.GetDatabaseClass: TsmxInterfacedComponentClass;
+begin
+  Result := TsmxBDEDatabase;
+end;
+
+(*function TsmxCoBDEDatabase.CreateDatabase: IsmxDatabase;
 begin
   Result := TsmxBDEDatabase.Create(nil{, Self as IsmxBaseInterface}) as IsmxDatabase;
-end;
+end;*)
 
 { TsmxParam }
 
