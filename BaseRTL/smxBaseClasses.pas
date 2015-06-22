@@ -66,6 +66,7 @@ type
   public
     { TODO : убрать owner из конструктора }
     constructor Create({AOwner: TComponent;} const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; {overload;} virtual;
+    //constructor Create; {reintroduce;} reintroduce; {overload;} virtual;//override;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
@@ -154,7 +155,7 @@ type
     function QueryInterface(const IID: TGUID; out Obj): HResult; override; stdcall;
     //procedure SetName(const Value: String); virtual;
   public
-    constructor Create(const AController: IsmxBaseInterface{IsmxRefComponent}); overload;
+    constructor Create(const AController: IsmxBaseInterface{IsmxRefComponent}); {overload;} virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
@@ -654,6 +655,13 @@ begin
 end;
 
 { TsmxInterfacedComponent }
+
+{constructor TsmxInterfacedComponent.Create;
+begin
+  //Create(AOwner);
+  inherited Create(nil);
+  //FController := Pointer(AController);
+end;}
 
 constructor TsmxInterfacedComponent.Create({AOwner: TComponent;} const AController: IsmxBaseInterface{IsmxRefComponent});
 begin

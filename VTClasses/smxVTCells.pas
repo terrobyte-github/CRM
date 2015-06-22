@@ -257,7 +257,7 @@ type
     //FOnEditing: TsmxComponentEvent;
     //FOnEdited: TsmxComponentEvent;
     //FOnEditing: TsmxComponentEvent;
-    FEditor: TsmxVTEditor;
+    FEditorIntf: IsmxTreeEditor;
     function GetDBText(ColIndex: Integer; Node: PVirtualNode): String;
     function GetDBValue(ColIndex: Integer; Node: PVirtualNode): Variant;
     function GetVTTree: TVirtualStringTree;
@@ -1587,9 +1587,9 @@ begin
     FVTNodes.Free;
   if Assigned(FVTTree) then
     FVTTree.Free;
-  if Assigned(FEditor) then
+  if Assigned(FEditorIntf) then
     //FEditor.Free;
-    FEditor._Release;
+    FEditorIntf := nil;
 end;
 
 function TsmxVTTree.AddRow(RowIndex: Pointer): Pointer;
@@ -1975,12 +1975,12 @@ end;
 
 function TsmxVTTree.GetEditor: IsmxTreeEditor;
 begin
-  if not Assigned(FEditor) then
-  begin
-    FEditor := TsmxVTEditor.Create(nil{Self as IsmxRefComponent});
-    FEditor._AddRef;
-  end;
-  Result := FEditor as IsmxTreeEditor;
+  if not Assigned(FEditorIntf) then
+  //begin
+    FEditorIntf := TsmxVTEditor.Create(nil) as IsmxTreeEditor;//(nil{Self as IsmxRefComponent});
+    //FEditor._AddRef;
+  //end;
+  Result := FEditorIntf;// as IsmxTreeEditor;
 end;
 
 {function TsmxVTTree.GetEditorClass: TsmxInterfacedPersistentClass;

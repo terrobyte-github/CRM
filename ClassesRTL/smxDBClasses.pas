@@ -2915,7 +2915,7 @@ begin
   begin
     if not Assigned(TsmxFieldItem(Item).FObjectItem) then
     begin
-      Field := TsmxCustomField(TsmxInterfacedPersistentClass(ObjectClass).Create{(Self as IsmxBaseInterface)});
+      Field := TsmxCustomField(TsmxInterfacedPersistentClass(ObjectClass).Create(nil){(Self as IsmxBaseInterface)});
       //Field.FInternalDataSet := Self;
       Field.FFieldItem := TsmxFieldItem(Item);
       //ObjectItem := Field as IsmxObjectItem;
@@ -2929,7 +2929,7 @@ begin
   begin
     if not Assigned(TsmxParamItem(Item).FObjectItem) then
     begin
-      Param := TsmxCustomParam(TsmxInterfacedPersistentClass(ObjectClass).Create{(Self as IsmxBaseInterface)});
+      Param := TsmxCustomParam(TsmxInterfacedPersistentClass(ObjectClass).Create(nil){(Self as IsmxBaseInterface)});
       //Param.FInternalDataSet := Self;
       Param.FParamItem := TsmxParamItem(Item);
       //ObjectItem := Param as IsmxObjectItem;
