@@ -1588,7 +1588,8 @@ begin
   if Assigned(FVTTree) then
     FVTTree.Free;
   if Assigned(FEditor) then
-    FEditor.Free;
+    //FEditor.Free;
+    FEditor._Release;
 end;
 
 function TsmxVTTree.AddRow(RowIndex: Pointer): Pointer;
@@ -1975,7 +1976,10 @@ end;
 function TsmxVTTree.GetEditor: IsmxTreeEditor;
 begin
   if not Assigned(FEditor) then
-    FEditor := TsmxVTEditor.Create(Self as IsmxRefComponent);
+  begin
+    FEditor := TsmxVTEditor.Create(nil{Self as IsmxRefComponent});
+    FEditor._AddRef;
+  end;
   Result := FEditor as IsmxTreeEditor;
 end;
 

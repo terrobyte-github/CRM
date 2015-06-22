@@ -415,7 +415,7 @@ type
   protected
     procedure AssignTo(Dest: TPersistent); override;
     function GetXMLText: String; virtual;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure SetCfgID(Value: Integer); virtual;
     procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
     procedure SetSelectDataSet(const Value: IsmxDataSet); virtual;
@@ -1446,7 +1446,7 @@ end;
 function TsmxBaseCfg.GetXMLDoc: IXMLDocument;
 begin
   if not Assigned(FXMLDocIntf) then
-    FXMLDocIntf := smxFuncs.NewXML;
+    FXMLDocIntf := smxFuncs.NewXMLDoc;
   Result := FXMLDocIntf;
 end;
 
@@ -1536,7 +1536,7 @@ begin
     FCfgID := Key;
 end;
 
-procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
+(*procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
   if Operation = opRemove then
@@ -1554,7 +1554,7 @@ begin
         and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
       UpdateDataSet := nil;
   end;
-end;
+end;*)
 
 procedure TsmxBaseCfg.Read;
 begin
@@ -1620,15 +1620,15 @@ begin
     rtInsert: FInsertDataSetIntf := Value;
     rtUpdate: FUpdateDataSetIntf := Value;
   end;
-  if Assigned(Value) then
-    Value.GetReference.FreeNotification(Self);
+  //if Assigned(Value) then
+    //Value.GetReference.FreeNotification(Self);
 end;
 
 procedure TsmxBaseCfg.SetSelectDataSet(const Value: IsmxDataSet);
 begin
   FSelectDataSetIntf := Value;
-  if Assigned(FSelectDataSetIntf) then
-    FSelectDataSetIntf.GetReference.FreeNotification(Self);
+  //if Assigned(FSelectDataSetIntf) then
+    //FSelectDataSetIntf.GetReference.FreeNotification(Self);
 end;
 
 { TsmxObjectItem }
@@ -1664,7 +1664,8 @@ begin
         begin
           FObjectItemIntf := Pointer(ObjectItemIntf);
           ObjectItemIntf.ChangeObjectOwner(Kit.Owner);
-        end;
+        end else
+          raise EsmxListError.CreateResFmt(@smxConsts.rsListActionError, [ClassName, 'create']);
     end;
 end;
 
@@ -1683,7 +1684,8 @@ begin
         begin
           FObjectItemIntf := Pointer(ObjectItemIntf);
           ObjectItemIntf.ChangeObjectOwner(Kit.Owner);
-        end;
+        end else
+          raise EsmxListError.CreateResFmt(@smxConsts.rsListActionError, [ClassName, 'create']);;
     end;
 end;
 
@@ -1692,7 +1694,7 @@ begin
   if Assigned(Kit) then
     if Assigned(Kit.Owner) then
     begin
-      if Assigned(FObjectItem) then
+      if Assigned(FObjectItem) and Assigned(FObjectItemIntf) then
         IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(nil);
       IsmxObjectList(Kit.FOwnerIntf).DestroyObject(Self);
     end;
@@ -1732,12 +1734,12 @@ procedure TsmxObjectItem.SetKit(Value: TsmxObjectList);
 begin
   if Assigned(Kit) then
     if Assigned(Kit.Owner) then
-      if Assigned(ObjectItem) then
+      if Assigned(ObjectItem) and Assigned(FObjectItemIntf) then
         IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(nil);
   inherited Kit := Value;
   if Assigned(Kit) then
     if Assigned(Kit.Owner) then
-      if Assigned(ObjectItem) then
+      if Assigned(ObjectItem) and Assigned(FObjectItemIntf) then
         IsmxObjectItem(FObjectItemIntf).ChangeObjectOwner(Kit.Owner);
 end;
 
@@ -1768,7 +1770,7 @@ end;
 procedure TsmxObjectItem.SetIndex(Value: Integer);
 begin
   inherited SetIndex(Value);
-  if Assigned(ObjectItem) then
+  if Assigned(ObjectItem) and Assigned(FObjectItemIntf) then
     IsmxObjectItem(FObjectItemIntf).ChangeObjectIndex(Value);
 end;
 

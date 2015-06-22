@@ -60,6 +60,7 @@ resourcestring
   rsCellIDActionErrorM = 'A ClassName %s of cell with ID %d %s error'#13#10'%s';
   rsListItemNotFound = 'Item ''%s'' not found';
   rsListItemClassError = 'A ClassName %s invalid for ClassName %s';
+  rsListActionError = 'A ClassName %s of item %s error';
 
 implementation
 

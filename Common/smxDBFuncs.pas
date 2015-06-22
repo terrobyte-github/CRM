@@ -98,6 +98,7 @@ begin
   Result := False;
   Count := FindFieldBySense(ADataSet, ASense, Fields);
   if not Variants.VarIsArray(AValues) then
+  begin
     if Count = 1 then
     begin
       ADataSet.Edit;
@@ -105,15 +106,15 @@ begin
       ADataSet.Post;
       Result := True;
     end
-  else
-    if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
-    begin
-      ADataSet.Edit;
-      for i := 0 to Count - 1 do
-        Fields[i].Value := AValues[i];
-      ADataSet.Post;
-      Result := True;
-    end;
+  end else
+  if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
+  begin
+    ADataSet.Edit;
+    for i := 0 to Count - 1 do
+      Fields[i].Value := AValues[i];
+    ADataSet.Post;
+    Result := True;
+  end;
 end;
 
 function FindParamBySense(const ADataSet: IsmxDataSet; ASense: TsmxDataSense;
@@ -165,18 +166,19 @@ begin
   Result := False;
   Count := FindParamBySense(ADataSet, ASense, Params);
   if not Variants.VarIsArray(AValues) then
+  begin
     if Count = 1 then
     begin
       Params[0].Value := AValues;
       Result := True;
     end
-  else
-    if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
-    begin
-      for i := 0 to Count - 1 do
-        Params[i].Value := AValues[i];
-      Result := True;
-    end;
+  end else
+  if Variants.VarArrayHighBound(AValues, 1) = Count - 1 then
+  begin
+    for i := 0 to Count - 1 do
+      Params[i].Value := AValues[i];
+    Result := True;
+  end;
 end;
 
 {function FindParamByLocation(const ADataSet: IsmxDataSet; ALocation: TsmxDataLocation;
