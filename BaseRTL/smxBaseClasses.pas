@@ -215,8 +215,8 @@ type
   { TsmxInfoObject }
 
 {$M+}
-  TsmxInfoObject = class(TObject)
-  end;
+  {TsmxInfoObject = class(TObject)
+  end;}
 {$M-}
 
   { TsmxKitItem }
@@ -225,7 +225,7 @@ type
 
   TsmxKit = class;
    // может унаследываться от persistent
-  TsmxKitItem = class(TsmxInfoObject)
+  TsmxKitItem = class(TPersistent{TsmxInfoObject})
   private
     FKit: TsmxKit;
     procedure SetKit(Value: TsmxKit);
@@ -237,7 +237,7 @@ type
   public
     constructor Create(AKit: TsmxKit); virtual;
     destructor Destroy; override;
-    procedure Assign(Source: TsmxKitItem); virtual;
+    procedure Assign(Source: TsmxKitItem); reintroduce; virtual;
 
     property DisplayName: String read GetDisplayName;
     property DisplayObject: TObject read GetDisplayObject;
@@ -249,7 +249,7 @@ type
 
   { TsmxKit }
 
-  TsmxKit = class(TsmxInfoObject)
+  TsmxKit = class(TPersistent{TsmxInfoObject})
   private
     FKitItemClass: TsmxKitItemClass;
     FKitList: TList;
@@ -269,7 +269,7 @@ type
     constructor Create(AItemClass: TsmxKitItemClass); {overload;} virtual;
     //constructor Create(AOwner: TPersistent; AItemClass: TsmxKitItemClass); overload; virtual;
     destructor Destroy; override;
-    procedure Assign(Source: TsmxKit); virtual;
+    procedure Assign(Source: TsmxKit); reintroduce; virtual;
     function Add: TsmxKitItem;
     procedure Change;
     procedure Clear;
@@ -290,7 +290,7 @@ type
 
   TsmxHKit = class;
 
-  TsmxHKitItem = class(TsmxInfoObject)
+  TsmxHKitItem = class(TPersistent{TsmxInfoObject})
   private
     FHKit: TsmxHKit;
     FHKitItemList: TList;
@@ -309,7 +309,7 @@ type
     constructor Create(AHKit: TsmxHKit); virtual;
     destructor Destroy; override;
     function Add: TsmxHKitItem;
-    procedure Assign(Source: TsmxHKitItem); virtual;
+    procedure Assign(Source: TsmxHKitItem); reintroduce; virtual;
     procedure Clear;
     procedure Delete(Index: Integer);
     function HasChilds: Boolean;
@@ -327,7 +327,7 @@ type
 
   { TsmxHKit }
 
-  TsmxHKit = class(TsmxInfoObject)
+  TsmxHKit = class(TPersistent{TsmxInfoObject})
   private
     FHKitItemClass: TsmxHKitItemClass;
     FRoot: TsmxHKitItem;
@@ -336,7 +336,7 @@ type
   public
     constructor Create(AItemClass: TsmxHKitItemClass); virtual;
     destructor Destroy; override;
-    procedure Assign(Source: TsmxHKit); virtual;
+    procedure Assign(Source: TsmxHKit); reintroduce; virtual;
 
     property HKitItemClass: TsmxHKitItemClass read FHKitItemClass;
     property Root: TsmxHKitItem read GetRoot write SetRoot;
@@ -498,9 +498,9 @@ type
     function GetItem(Index: Integer): TsmxObjectItem;
     //function GetOwnerObjectInterface: IsmxObjectList;
     procedure SetItem(Index: Integer; Value: TsmxObjectItem);
-  protected
+  //protected
     //property OwnerObjectInterface: IsmxObjectList read GetOwnerObjectInterface;
-    function GetOwner: TPersistent;//IsmxObjectList;
+    //function GetOwner: TPersistent; //IsmxObjectList;
     //function GetOwnerIntf: IsmxObjectList;
   public
     constructor Create(AOwner: TPersistent; AItemClass: TsmxKitItemClass); reintroduce; overload; virtual;
@@ -510,7 +510,7 @@ type
     procedure Assign(Source: TsmxKit); override;
 
     property Items[Index: Integer]: TsmxObjectItem read GetItem write SetItem; default;
-    property Owner: TPersistent read GetOwner;
+    property Owner: TPersistent read FOwner;
   end;
 
   TsmxObjectListClass = class of TsmxObjectList;
@@ -1849,10 +1849,10 @@ begin
   inherited Items[Index] := Value;
 end;
 
-function TsmxObjectList.GetOwner: TPersistent;
+{function TsmxObjectList.GetOwner: TPersistent;
 begin
   Result := FOwner;
-end;
+end;}
 
 (*function TsmxObjectList.GetOwnerIntf: IsmxObjectList;
 begin
