@@ -19,9 +19,9 @@ const
   cItemNodeName = 'Item';
   cCfgIDAttributeName = 'CfgID';
   cNameAttributeName = 'Name';
-  cProcNameAttributeName = 'ProcName';
+  //cProcNameAttributeName = 'ProcName';
   cClassNameAttributeName = 'ClassName';
-  cIClassNameAttributeName = 'IClassName';
+  //cIClassNameAttributeName = 'IClassName';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =
@@ -33,7 +33,8 @@ const
   { Consts }
   cSuffixTextFieldName = 'Text';
   cDelimiterObjAndMethName = '.';
-
+  cPrefixClassName = 'Tsmx';
+  
   { Global objects }
   cApplicationHandle = 0;
   cStorageManager = 1;

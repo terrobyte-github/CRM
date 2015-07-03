@@ -42,6 +42,7 @@ function ResolvedClassType(AClassType: TPersistentClass): String;
 function ResolvedClassTypeName(const AClassTypeName: String; AIsRegister: Boolean = False): TPersistentClass;
 function VarToInt(const AValue: Variant): Integer;
 function IntToVar(AValue: Integer): Variant;
+function ClassNameWithoutPrefix(AClassName: ShortString): ShortString;
 
 implementation
 
@@ -357,12 +358,15 @@ function FindUniqueName(AOwner: TComponent; const AName: String): String;
 var
   i: Integer;
 begin
-  i := 0;
   Result := AName;
-  while not Assigned(AOwner.FindComponent(AName)) do
+  if Assigned(AOwner) then
   begin
-    Inc(i);
-    Result := SysUtils.Format('%s_%d', [AName, i]);
+    i := 0;
+    while not Assigned(AOwner.FindComponent(Result)) do
+    begin
+      Inc(i);
+      Result := SysUtils.Format('%s_%d', [AName, i]);
+    end;
   end;
 end;
 
@@ -404,6 +408,14 @@ begin
     Result := Variants.Null
   else
     Result := AValue;
+end;
+
+function ClassNameWithoutPrefix(AClassName: ShortString): ShortString;
+begin
+  if Pos(smxConsts.cPrefixClassName, AClassName) = 1 then
+    Result := Copy(AClassName, Length(smxConsts.cPrefixClassName) + 1, MaxInt)
+  else
+    Result := AClassName;
 end;
 
 end.

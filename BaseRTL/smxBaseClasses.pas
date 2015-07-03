@@ -42,10 +42,13 @@ type
     function GetVersion: String; virtual;
     function IsCountedObj: Boolean; virtual;
   public
+    //constructor Create(AOwner: TComponent); override;
     function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; virtual;
 
     property Description: String read GetDescription;
     property Version: String read GetVersion;
+  published
+    property Name stored True;
   end;
 
   TsmxComponentClass = class of TsmxComponent;
@@ -66,13 +69,15 @@ type
   public
     { TODO : убрать owner из конструктора }
     constructor Create({AOwner: TComponent;} const AController: IsmxBaseInterface{IsmxRefComponent}); reintroduce; {overload;} virtual;
-    //constructor Create; {reintroduce;} reintroduce; {overload;} virtual;//override;
+    //constructor Create; {reintroduce;} {reintroduce;} overload; //virtual;//override;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     class function NewInstance: TObject; override;
 
     property Controller: IsmxBaseInterface{IsmxRefComponent} read GetController;
     property RefCount: Integer read FRefCount;
+  //published
+    //property Name stored True;
   end;
 
   TsmxInterfacedComponentClass = class of TsmxInterfacedComponent;
@@ -416,10 +421,10 @@ type
   protected
     procedure AssignTo(Dest: TPersistent); override;
     function GetXMLText: String; virtual;
-    //procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure SetCfgID(Value: Integer); virtual;
-    procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
-    procedure SetSelectDataSet(const Value: IsmxDataSet); virtual;
+    procedure SetDataSet(Index: TsmxRequestType; const Value: IsmxDataSet); virtual;
+    //procedure SetSelectDataSet(const Value: IsmxDataSet); virtual;
     //procedure SetSelectRequest(Value: TsmxCustomRequest); virtual;
     procedure SetXMLText(const Value: String); virtual;
 
@@ -439,10 +444,10 @@ type
     procedure Write; virtual;
 
     property CfgID: Integer read FCfgID write SetCfgID;
-    property DeleteDataSet: IsmxDataSet index rtDelete read FDeleteDataSetIntf write SetModifyDataSet;
-    property InsertDataSet: IsmxDataSet index rtInsert read FInsertDataSetIntf write SetModifyDataSet;
-    property SelectDataSet: IsmxDataSet read FSelectDataSetIntf write SetSelectDataSet;
-    property UpdateDataSet: IsmxDataSet index rtUpdate read FUpdateDataSetIntf write SetModifyDataSet;
+    property DeleteDataSet: IsmxDataSet index rtDelete read FDeleteDataSetIntf write SetDataSet;
+    property InsertDataSet: IsmxDataSet index rtInsert read FInsertDataSetIntf write SetDataSet;
+    property SelectDataSet: IsmxDataSet index rtSelect read FSelectDataSetIntf write SetDataSet;
+    property UpdateDataSet: IsmxDataSet index rtUpdate read FUpdateDataSetIntf write SetDataSet;
     //property SelectRequest: TsmxCustomRequest read FSelectRequest write SetSelectRequest;
     property XMLText: String read GetXMLText write SetXMLText;
   end;
@@ -614,6 +619,12 @@ begin
 end;
 
 { TsmxComponent }
+
+{constructor TsmxComponent.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SetName(smxFuncs.FindUniqueName(AOwner, smxFuncs.ClassNameWithoutSuffix(ClassName)));
+end;}
 
 function TsmxComponent.GetController: IsmxBaseInterface;
 begin
@@ -956,7 +967,10 @@ end;
 
 function TsmxKitItem.GetDisplayName: String;
 begin
-  Result := ClassName;
+  if Assigned(FKit) then
+    Result := Format('%s_%d', [ClassName, ItemIndex])
+  else
+    Result := ClassName;
 end;
 
 function TsmxKitItem.GetDisplayObject: TObject;
@@ -1410,10 +1424,11 @@ end;
 destructor TsmxBaseCfg.Destroy;
 begin
   FXMLDocIntf := nil;
-  SetSelectDataSet(nil);
-  SetModifyDataSet(rtDelete, nil);
-  SetModifyDataSet(rtInsert, nil);
-  SetModifyDataSet(rtUpdate, nil);
+  //SetSelectDataSet(nil);
+  SetDataSet(rtSelect, nil);
+  SetDataSet(rtDelete, nil);
+  SetDataSet(rtInsert, nil);
+  SetDataSet(rtUpdate, nil);
   inherited Destroy;
 end;
 
@@ -1512,6 +1527,7 @@ var
   //Performance: TsmxPerformanceMode;
   DataSet: IsmxDataSet;
   Key: Variant;
+  InTransaction: Boolean;
 begin
   if ((FCfgID = 0) and not Assigned(FInsertDataSetIntf))
       or ((FCfgID <> 0) and not Assigned(FUpdateDataSetIntf)) then
@@ -1540,29 +1556,50 @@ begin
   {if not Assigned(Request) then
     raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'save'], FCfgID);}
-  if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text{, Performance}) then
-    FCfgID := Key;
+  InTransaction := DataSet.Database.InTransaction;
+  if not InTransaction then
+    DataSet.Database.StartTransaction;
+  try
+    if smxDBFuncs.SetValueByKey(DataSet, Key, XMLDoc.XML.Text{, Performance}) then
+    begin
+      FCfgID := Key;
+      if not InTransaction then
+        DataSet.Database.CommitTransaction;
+    end else
+    begin
+      if not InTransaction then
+        DataSet.Database.RollbackTransaction;
+    end;
+  except
+    on E: Exception do
+    begin
+      if not InTransaction then
+        DataSet.Database.RollbackTransaction;
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'save', E.Message], Self);
+    end;
+  end;
 end;
 
-(*procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TsmxBaseCfg.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
   if Operation = opRemove then
   begin
-    if Assigned(SelectDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+    if Assigned(SelectDataSet) and not SelectDataSet.IsCountedObj {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
         and (AComponent = Component)} and (AComponent = SelectDataSet.GetReference) then
       SelectDataSet := nil;
-    if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+    if Assigned(DeleteDataSet) and not DeleteDataSet.IsCountedObj {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
         and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
       DeleteDataSet := nil else
-    if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+    if Assigned(InsertDataSet) and not InsertDataSet.IsCountedObj {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
         and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
       InsertDataSet := nil else
-    if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+    if Assigned(UpdateDataSet) and not UpdateDataSet.IsCountedObj {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
         and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
       UpdateDataSet := nil;
   end;
-end;*)
+end;
 
 procedure TsmxBaseCfg.Read;
 begin
@@ -1592,6 +1629,7 @@ var
   //Request: IsmxDataSet;
   //Performance: TsmxPerformanceMode;
   Key: Variant;
+  InTransaction: Boolean;
 begin
   if not Assigned(FDeleteDataSetIntf) or (FCfgID = 0) then
     raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
@@ -1602,10 +1640,29 @@ begin
     raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionError,
       [ClassName, FCfgID, 'remove'], FCfgID);}
   Key := FCfgID;
-  if smxDBFuncs.SetValueByKey(FDeleteDataSetIntf, Key, Variants.Null{, Performance}) then
-  begin
-    FCfgID := 0;
-    XMLDoc.XML.Text := smxConsts.cXMLDocTextDef;
+  InTransaction := FDeleteDataSetIntf.Database.InTransaction;
+  if not InTransaction then
+    FDeleteDataSetIntf.Database.StartTransaction;
+  try
+    if smxDBFuncs.SetValueByKey(FDeleteDataSetIntf, Key, Variants.Null{, Performance}) then
+    begin
+      FCfgID := 0;
+      XMLDoc.XML.Text := smxConsts.cXMLDocTextDef;
+      if not InTransaction then
+        FDeleteDataSetIntf.Database.CommitTransaction;
+    end else
+    begin
+      if not InTransaction then
+        FDeleteDataSetIntf.Database.RollbackTransaction;
+    end;
+  except
+    on E: Exception do
+    begin
+      if not InTransaction then
+        FDeleteDataSetIntf.Database.RollbackTransaction;
+      raise EsmxCfgError.CreateByComponent(@smxConsts.rsCfgActionErrorM,
+        [ClassName, FCfgID, 'remove', E.Message], Self);
+    end;
   end;
 end;
 
@@ -1621,23 +1678,24 @@ begin
     FSelectRequest.FreeNotification(Self);
 end;}
 
-procedure TsmxBaseCfg.SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet);
+procedure TsmxBaseCfg.SetDataSet(Index: TsmxRequestType; const Value: IsmxDataSet);
 begin
   case Index of
+    rtSelect: FSelectDataSetIntf := Value;
     rtDelete: FDeleteDataSetIntf := Value;
     rtInsert: FInsertDataSetIntf := Value;
     rtUpdate: FUpdateDataSetIntf := Value;
   end;
-  //if Assigned(Value) then
-    //Value.GetReference.FreeNotification(Self);
+  if Assigned(Value) and not Value.IsCountedObj then
+    Value.GetReference.FreeNotification(Self);
 end;
 
-procedure TsmxBaseCfg.SetSelectDataSet(const Value: IsmxDataSet);
+{procedure TsmxBaseCfg.SetSelectDataSet(const Value: IsmxDataSet);
 begin
   FSelectDataSetIntf := Value;
   //if Assigned(FSelectDataSetIntf) then
     //FSelectDataSetIntf.GetReference.FreeNotification(Self);
-end;
+end;}
 
 { TsmxObjectItem }
 
@@ -1720,8 +1778,12 @@ end;
 function TsmxObjectItem.GetDisplayName: String;
 begin
   if Assigned(ObjectItem) then
-    Result := ObjectItem{.GetReference}.ClassName
-  else
+  begin
+    if Assigned(Kit) then
+      Result := Format('%s_%d', [ObjectItem{.GetReference}.ClassName, ItemIndex])
+    else
+      Result := ObjectItem.ClassName;
+  end else
     Result := inherited GetDisplayName;
 end;
 

@@ -178,6 +178,7 @@ type
     function FindChildByCfgID(CfgID: Integer): TsmxBaseCell;
     function FindChildByName(const Name: String): TsmxBaseCell;
     procedure GetProperties(DestCfg: TsmxBaseCfg); virtual;
+    //procedure GetRefList(List: TList); virtual;
     procedure Initialize;
     procedure SetProperties(SrcCfg: TsmxBaseCfg); virtual;
 
@@ -203,7 +204,7 @@ type
     //property SelectRequest: TsmxCustomRequest read FSelectRequest write SetSelectRequest;
     //property StorageManager: IsmxStorageManager read FStorageManagerIntf write SetStorageManager;
   published
-    property Name stored True;
+    //property Name stored True;
     //property Tag stored False;
 
     property OnFinalize: TsmxComponentEvent read FOnFinalize write FOnFinalize;
@@ -588,6 +589,7 @@ type
     function FindSlaveByCfgID(CfgID: Integer): TsmxOwnerCell;
     function FindSlaveByName(const Name: String): TsmxOwnerCell;
     procedure GetProperties(DestCfg: TsmxBaseCfg); override;
+    //procedure GetRefList(List: TList); override;
     procedure SetProperties(SrcCfg: TsmxBaseCfg); override;
 
     property CellOwner: TsmxOwnerCell read FCellOwner write SetCellOwner;
@@ -1110,6 +1112,7 @@ type
     procedure SetIsManualRefreshParams(Value: Boolean); virtual;
     //procedure SetModifyPerformance(Modify: TsmxModifyRequest; Value: TsmxPerformanceMode); virtual;
     //procedure SetModifyRequest(Modify: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
+    procedure SetName(const NewName: TComponentName); override;
     procedure SetOperationMode(Value: TsmxOperationMode); virtual;
     //procedure SetPerformanceMode(Value: TsmxPerformanceMode); virtual;
     procedure SetModifyDataSet(Index: TsmxModifyRequest; const Value: IsmxDataSet); virtual;
@@ -1122,8 +1125,9 @@ type
     procedure Assign(Source: TPersistent); override;
     procedure Delete;
     procedure Execute;
+    //procedure GetRefList(List: TList); override;
     procedure Insert;
-    function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; override;
+    //function IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean; override;
     procedure Prepare;
     procedure RefreshParams;
     procedure Update;
@@ -1132,7 +1136,7 @@ type
     property CellRequest: TsmxBaseCell read FCellRequest write SetCellRequest;
     property Database: IsmxDatabase read FDatabaseIntf write SetDatabase;
     property DatabaseName: String read FDatabaseName write SetDatabaseName;
-    property DataSet: IsmxDataSet read GetDataSet; //implements IsmxDataSet;//FDataSetIntf write SetDataSet;
+    property DataSet: IsmxDataSet read GetDataSet {implements IsmxDataSet};//FDataSetIntf write SetDataSet;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
     //property ModifyPerformances[Modify: TsmxModifyRequest]: TsmxPerformanceMode read GetModifyPerformance write SetModifyPerformance;
     //property ModifyRequests[Modify: TsmxModifyRequest]: IsmxDataSet read GetModifyRequest write SetModifyRequest;
@@ -1145,12 +1149,12 @@ type
     //property InsertPerformance: TsmxPerformanceMode index mrInsert read FInsertPerformance write SetModifyPerformance;
     //property UpdatePerformance: TsmxPerformanceMode index mrUpdate read FUpdatePerformance write SetModifyPerformance;
 
-    property OnDelete: TsmxComponentEvent read FOnExecute write FOnExecute;
+    property OnDelete: TsmxComponentEvent read FOnDelete write FOnDelete;
     property OnExecute: TsmxComponentEvent read FOnExecute write FOnExecute;
-    property OnInsert: TsmxComponentEvent read FOnExecute write FOnExecute;
+    property OnInsert: TsmxComponentEvent read FOnInsert write FOnInsert;
     property OnPrepare: TsmxComponentEvent read FOnPrepare write FOnPrepare;
     property OnRefreshParams: TsmxComponentEvent read FOnRefreshParams write FOnRefreshParams;
-    property OnUpdate: TsmxComponentEvent read FOnExecute write FOnExecute;
+    property OnUpdate: TsmxComponentEvent read FOnUpdate write FOnUpdate;
   end;
 
   { TsmxCustomRequestList }
@@ -1896,8 +1900,8 @@ type
 implementation
 
 uses
-  DB, Variants, SysUtils, smxCfgs, smxConsts, smxDBTypes, smxProcs, smxFuncs,
-  smxDBFuncs, smxClassProcs, smxClassFuncs;
+  DB, Variants, SysUtils, StrUtils, smxCfgs, smxConsts, smxDBTypes, smxProcs,
+  smxFuncs, smxDBFuncs, smxClassProcs, smxClassFuncs;
 
 { EsmxCellError }
 
@@ -2452,6 +2456,8 @@ begin
   inherited Create(AOwner);
   SetCellFeedback;
   FIsRecieveCfg := True;
+  //if Assigned(Owner) then
+    //SetName(smxFuncs.FindUniqueName(Owner, smxFuncs.ClassNameWithoutPrefix(ClassName)));
   //FIsNewInitialize := True;
 end;
 
@@ -2867,6 +2873,22 @@ begin
   end;
 end;
 
+{procedure TsmxBaseCell.GetRefList(List: TList);
+var
+  i: Integer;
+begin
+  if Assigned(List) and Assigned(FCellList) then
+  //begin
+    //List.Assign(FCellList, laOr);
+    for i := 0 to FCellList.Count - 1 do
+    begin
+      if List.IndexOf(FCellList[i]) = -1 then
+        List.Add(FCellList[i]);
+      TsmxBaseCell(FCellList[i]).GetRefList(List);
+    end;
+  //end;
+end;}
+
 function TsmxBaseCell.IsStoredCell(Cell: TsmxBaseCell): Boolean;
 begin
   Result := Cell.FCellParent = Self;
@@ -2978,7 +3000,10 @@ begin
     FCellParent.CellList.Remove(Self);
   FCellParent := Value;
   if Assigned(FCellParent) then
+  begin
     FCellParent.CellList.Add(Self);
+    SetIsDesigning(FCellParent.FIsDesigning);
+  end;
 end;
 
 (*procedure TsmxBaseCell.SetCellProps;
@@ -3018,9 +3043,20 @@ begin
   end;
 end;
 
+{type
+  _TComponent = class(TComponent)
+  end;}
+
 procedure TsmxBaseCell.SetIsDesigning(Value: Boolean);
+//var
+  //i: Integer;
 begin
   FIsDesigning := Value;
+  {if TObject(GetInternalRef) is TComponent then
+    TsmxBaseCell(GetInternalRef).SetDesigning(Value, False);
+  if Assigned(FCellList) then
+    for i := 0 to FCellList.Count - 1 do
+      TsmxBaseCell(FCellList[i]).IsDesigning := Value;}
 end;
 
 procedure TsmxBaseCell.SetIsRecieveCfg(Value: Boolean);
@@ -3568,7 +3604,7 @@ begin
     //Result := Add(GetAltSlaveClass(SlaveList.Count), AImplementor) else
     //Result := Add(GetSlaveClass, AImplementor);
   //Result := SlaveList.Add(GetSlaveClass, nil).Slave;
-  Result := TsmxOwnerCell(SlaveList.Add.ObjectItem.GetReference);
+  Result := {TsmxOwnerCell(}SlaveList.Add.ObjectItem{.GetReference)};
   //Result.Name := SysUtils.Format('%s_%d', [CellOwner.GetSlaveClass.ClassName, SlaveIndex]);
   //Result := CreateSlave(GetSlaveClass, nil);
   //SlaveList.InsertSlave(Result);
@@ -3591,7 +3627,7 @@ begin
     //s := CellClass.ClassName;
     //if s <> '' then
       //s := '';
-    Result := TsmxOwnerCell(SlaveList.Add(CellClass{, ImplementorClass}).ObjectItem.GetReference);
+    Result := {TsmxOwnerCell(}SlaveList.Add(CellClass).ObjectItem{.GetReference)};
   //else
     //raise EsmxCellError.CreateResFmt(@smxConsts.rsListItemClassError,
       //[CellClass.ClassName, ClassName]);
@@ -4857,6 +4893,20 @@ begin
   end;
 end;
 
+{procedure TsmxOwnerCell.GetRefList(List: TList);
+var
+  i: Integer;
+begin
+  inherited GetRefList(List);
+  if Assigned(List) and Assigned(FSlaveList) then
+    for i := 0 to FSlaveList.Count - 1 do
+    begin
+      if List.IndexOf(FSlaveList[i].ObjectItem) = -1 then
+        List.Add(FSlaveList[i].ObjectItem);
+      FSlaveList[i].ObjectItem.GetRefList(List);
+    end;
+end;}
+
 function TsmxOwnerCell.IsStoredCell(Cell: TsmxBaseCell): Boolean;
 begin
   if (Cell is TsmxOwnerCell) and (TsmxOwnerCell(Cell).FCellOwner = Self) then
@@ -5721,11 +5771,13 @@ begin
     //FDataSet := GetDataSetClass.Create(nil, Self as IsmxBaseInterface);
   //Result := FDataSet as IsmxDataSet;
   if not Assigned(FDataSetIntf) then
-  //begin
+  begin
     //FDataSet :=
     FDataSetIntf := GetDataSetClass.Create(nil{, Self as IsmxBaseInterface}) as IsmxDataSet;
     //FDataSetIntf := FDataSet as IsmxDataSet;
-  //end;
+    FDataSetIntf.GetReference.Name :=
+      StrUtils.IfThen(Name <> '', Format('%s_%s', [Name, 'DataSet']), FDataSetIntf.GetReference.Name);
+  end;
   Result := FDataSetIntf;
 end;
 
@@ -5777,7 +5829,15 @@ begin
   end;
 end;}
 
-function TsmxCustomRequest.IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean;
+{procedure TsmxCustomRequest.GetRefList(List: TList);
+begin
+  inherited GetRefList(List);
+  if Assigned(List) and Assigned(DataSet) then
+    if List.IndexOf(DataSet.GetReference) = -1 then
+      List.Add(DataSet.GetReference);
+end;}
+
+{function TsmxCustomRequest.IsImplementedIntf(const Intf: IsmxBaseInterface): Boolean;
 var
   AIntf: IsmxDataSet;
 begin
@@ -5787,7 +5847,7 @@ begin
       and SysUtils.Supports(Intf, IsmxDataSet, AIntf)
       and Assigned(DataSet)
       and (AIntf.GetReference = DataSet.GetReference);
-end;
+end;}
 
 procedure TsmxCustomRequest.Notification(AComponent: TComponent; Operation: TOperation);
 //var
@@ -5798,17 +5858,17 @@ begin
   begin
     if AComponent = CellRequest then
       CellRequest := nil;// else
-    //if Assigned(Database) and (AComponent = Database.GetReference) then
-      //Database := nil else
-    //if Assigned(DeleteDataSet) {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
+    if Assigned(Database) and not Database.IsCountedObj and (AComponent = Database.GetReference) then
+      Database := nil else
+    if Assigned(DeleteDataSet) and not DeleteDataSet.IsCountedObj {and smxFuncs.GetRefComponent(DeleteDataSet.GetReference, Component)
       //  and (AComponent = Component)} and (AComponent = DeleteDataSet.GetReference) then
-      //DeleteDataSet := nil else
-    //if Assigned(InsertDataSet) {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
+      DeleteDataSet := nil else
+    if Assigned(InsertDataSet) and not InsertDataSet.IsCountedObj {and smxFuncs.GetRefComponent(InsertDataSet.GetReference, Component)
       //  and (AComponent = Component)} and (AComponent = InsertDataSet.GetReference) then
-      //InsertDataSet := nil else
-    //if Assigned(UpdateDataSet) {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
+      InsertDataSet := nil else
+    if Assigned(UpdateDataSet) and not UpdateDataSet.IsCountedObj {and smxFuncs.GetRefComponent(UpdateDataSet.GetReference, Component)
       //  and (AComponent = Component)} and (AComponent = UpdateDataSet.GetReference) then
-      //UpdateDataSet := nil;
+      UpdateDataSet := nil;
   end;
 end;
 
@@ -5841,8 +5901,8 @@ end;
 procedure TsmxCustomRequest.SetDatabase(const Value: IsmxDatabase);
 begin
   FDatabaseIntf := Value;
-  //if Assigned(FDatabaseIntf) then
-    //FDatabaseIntf.GetReference.FreeNotification(Self);
+  if Assigned(FDatabaseIntf) and not FDatabaseIntf.IsCountedObj then
+    FDatabaseIntf.GetReference.FreeNotification(Self);
 end;
 
 {procedure TsmxCustomRequest.SetDatabaseManager(const Value: IsmxDatabaseManager);
@@ -5884,6 +5944,14 @@ begin
   FIsManualRefreshParams := Value;
 end;
 
+procedure TsmxCustomRequest.SetName(const NewName: TComponentName);
+begin
+  inherited SetName(NewName);
+  if Assigned(FDataSetIntf) then
+    FDataSetIntf.GetReference.Name :=
+      StrUtils.IfThen(Name <> '', Format('%s_%s', [Name, 'DataSet']), FDataSetIntf.GetReference.Name);
+end;
+
 procedure TsmxCustomRequest.SetOperationMode(Value: TsmxOperationMode);
 begin
   FOperationMode := Value;
@@ -5903,8 +5971,8 @@ begin
     rtInsert: FInsertDataSetIntf := Value;
     rtUpdate: FUpdateDataSetIntf := Value;
   end;
-  //if Assigned(Value){ and smxFuncs.GetRefComponent(Value.GetReference, Component)} then
-    //Value.GetReference.FreeNotification(Self);
+  if Assigned(Value) and not Value.IsCountedObj { and smxFuncs.GetRefComponent(Value.GetReference, Component)} then
+    Value.GetReference.FreeNotification(Self);
     //Component.FreeNotification(Self);
 end;
 

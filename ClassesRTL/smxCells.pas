@@ -627,6 +627,7 @@ begin
         end;
         dlParentFilterDesk:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
             if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
@@ -637,6 +638,7 @@ begin
         end;
         dlParentGrid:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
             if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
@@ -652,6 +654,7 @@ begin
         end;
         dlParentCellParam:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
             if TsmxBaseCell(List[j]).CellParams(AlgorithmParams[i].ParamName, Value) then
@@ -1141,6 +1144,7 @@ begin
         end;
         dlParentFilterDesk:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
             if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
@@ -1151,6 +1155,7 @@ begin
         end;
         dlParentGrid:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
             if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
@@ -1166,6 +1171,7 @@ begin
         end;
         dlParentCellParam:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
             if TsmxBaseCell(List[j]).CellParams(CurDataSet.Params[i].ParamName, Value) then

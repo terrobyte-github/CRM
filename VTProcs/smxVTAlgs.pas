@@ -1238,12 +1238,12 @@ begin
           if not Assigned(Form) then
           begin  
             Form := CreateFormCellView(FormParent, CfgID);
-            Obj := smxClassFuncs.NewCell(nil, CfgID);
+            Obj := smxClassFuncs.NewCell(Form, CfgID);
             TsmxBaseCell(Obj).CellParent := Form;
             TsmxBaseCell(Obj).CfgID := CfgID;
             TsmxBaseCell(Obj).Initialize;
             TsmxBaseCell(Obj).IsDesigning := True;
-            
+
             Form.CellCaption := Format('%s(%s) [%d]',
               [TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName, CfgID]);
           end;

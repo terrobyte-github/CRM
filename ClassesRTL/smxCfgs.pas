@@ -177,15 +177,15 @@ type
   TsmxCellCfg = class(TsmxBaseCfg)
   private
     FCurNode: IXMLNode;
-    FFindList: TList;
+    FRefList: TList;
     FResolvedList: TsmxResolvedKit;
     function GetCellOwner: TsmxBaseCell;
     function GetResolvedList: TsmxResolvedKit;
-    function GetFindList: TList;
+    function GetRefList: TList;
   protected
     function GetCurNode: IXMLNode; virtual;
     procedure SetCurNode(const Value: IXMLNode); virtual;
-    procedure SetFindList(Value: TList); virtual;
+    procedure SetRefList(Value: TList); virtual;
     procedure SetResolvedList(Value: TsmxResolvedKit); virtual;
   public
     destructor Destroy; override;
@@ -198,7 +198,7 @@ type
 
     property CellOwner: TsmxBaseCell read GetCellOwner;
     property CurNode: IXMLNode read GetCurNode write SetCurNode;
-    property FindList: TList read GetFindList write SetFindList;
+    property RefList: TList read GetRefList write SetRefList;
     property ResolvedList: TsmxResolvedKit read GetResolvedList write SetResolvedList;
   end;
 
@@ -433,16 +433,16 @@ begin
   SetCurNode(nil);
   if Assigned(FResolvedList) then
     FResolvedList.Free;
-  if Assigned(FFindList) then
-    FFindList.Free;
+  if Assigned(FRefList) then
+    FRefList.Free;
   inherited Destroy;
 end;
 
 procedure TsmxCellCfg.ClearCfg;
 begin
   inherited ClearCfg;
-  if Assigned(FFindList) then
-    FFindList.Clear;
+  if Assigned(FRefList) then
+    FRefList.Clear;
   if Assigned(FResolvedList) then
     FResolvedList.Clear;
 end;
@@ -472,16 +472,16 @@ begin
   FCurNode := Value;
 end;
 
-function TsmxCellCfg.GetFindList: TList;
+function TsmxCellCfg.GetRefList: TList;
 begin
-  if not Assigned(FFindList) then
-    FFindList := TList.Create;
-  Result := FFindList;
+  if not Assigned(FRefList) then
+    FRefList := TList.Create;
+  Result := FRefList;
 end;
 
-procedure TsmxCellCfg.SetFindList(Value: TList);
+procedure TsmxCellCfg.SetRefList(Value: TList);
 begin
-  FindList.Assign(Value);
+  RefList.Assign(Value);
 end;
 
 function TsmxCellCfg.GetResolvedList: TsmxResolvedKit;
@@ -508,8 +508,9 @@ begin
     begin
       CurNode := n;
       ReadCell(CellOwner);
-      smxClassProcs.AllCells(CellOwner, FindList, []);
-      smxClassProcs.ResolvedProps(ResolvedList, FindList);
+      //smxClassProcs.AllCells(CellOwner, FindList, []);
+      smxClassProcs.RefList(CellOwner, RefList);
+      smxClassProcs.ResolvedProps(ResolvedList, RefList);
     end;
   end;
 end;
@@ -521,7 +522,9 @@ begin
   inherited Write;
   if Assigned(CellOwner) then
   begin
-    smxClassProcs.AllCells(CellOwner, FindList, []);
+    RefList.Clear;
+    //smxClassProcs.AllCells(CellOwner, FindList, []);
+    smxClassProcs.RefList(CellOwner, RefList);
     n := RootNode.AddChild(smxConsts.cCellNodeName);
     CurNode := n;
     WriteCell(CellOwner);
@@ -541,7 +544,7 @@ procedure TsmxCellCfg.WriteCell(Cell: TsmxBaseCell);
 begin
   if Assigned(Cell) then
   begin
-    smxClassProcs.WriteProps(CellOwner, Cell, CurNode, FindList);
+    smxClassProcs.WriteProps(CellOwner, Cell, CurNode, RefList);
     Cell.GetProperties(Self);
   end;
 end;

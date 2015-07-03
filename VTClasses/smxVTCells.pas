@@ -2366,7 +2366,8 @@ begin      //inf('BeginEdit');
   if Assigned(Control) then
   begin
     Control.Show;
-    Control.SetFocus;
+    if Control.CanFocus then
+      Control.SetFocus;
     Result := True;
   end else
     Result := False;
@@ -2460,7 +2461,8 @@ begin
   begin
     Control.Hide;
     //TVirtualStringTree((Tree as IsmxRefComponent).GetInternalRef).SetFocus;
-    FTree.SetFocus;
+    if FTree.CanFocus then
+      FTree.SetFocus;
     Result := True;
   end else
     Result := False;

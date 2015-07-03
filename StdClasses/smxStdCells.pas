@@ -5111,6 +5111,7 @@ begin
         end;
         dlParentCellParam:
         begin
+          List.Clear;
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
             if TsmxBaseCell(List[j]).CellParams(DataSet.Params[i].ParamName, Value) then

@@ -976,10 +976,15 @@ begin
 end;
 
 procedure TsmxDatabaseManager.Notification(AComponent: TComponent; Operation: TOperation);
+var
+  DataEntity: IsmxDataEntity;
 begin
   inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-    DataEntityList.Remove(AComponent as IsmxDataEntity);
+  if SysUtils.Supports(AComponent, IsmxDataEntity, DataEntity)
+      and not DataEntity.IsCountedObj
+      and (DataEntityList.IndexOf(DataEntity) <> -1)
+      and (Operation = opRemove) then
+    DataEntityList.Remove(DataEntity);
 end;
 
 { TsmxFormManager }
@@ -1080,10 +1085,15 @@ begin
 end;
 
 procedure TsmxFormManager.Notification(AComponent: TComponent; Operation: TOperation);
+var
+  FormControl: IsmxFormControl;
 begin
   inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-    FormControlList.Remove(AComponent as IsmxFormControl);
+  if SysUtils.Supports(AComponent, IsmxFormControl, FormControl)
+      and not FormControl.IsCountedObj
+      and (FormControlList.IndexOf(FormControl) <> -1)
+      and (Operation = opRemove) then
+    FormControlList.Remove(FormControl);
 end;
 
 { TsmxImageListManager }
