@@ -458,11 +458,11 @@ type
     //procedure SetSlave(Value: TsmxOwnerCell);
     function GetObjectItem: TsmxOwnerCell;
     procedure SetObjectItem(Value: TsmxOwnerCell);
-  //protected
+  protected
     //procedure AddSlave(CellClass: TsmxBaseCellClass = nil{; const Implementor: IsmxRefInterface = nil}); virtual;
     //procedure AddObject(ObjectClass: TsmxBaseCellClass); reintroduce; overload; virtual;
     //procedure DelSlave; virtual;
-    //function GetDisplayName: String; override;
+    function GetDisplayName: String; override;
     //function GetDisplayObject: TObject; override;
     //procedure SetIndex(Value: Integer); override;
   public
@@ -573,6 +573,7 @@ type
     //procedure SetIsAltSlaveClass(Value: Boolean); virtual;
     //procedure SetIsCreateSlaveWithOwner(Value: Boolean); virtual;
     procedure SetIsOwnerIsParent(Value: Boolean); virtual;
+    procedure SetName(const NewName: TComponentName); override;
     //procedure SetSlaveCellProps(Slave: TsmxOwnerCell; Item: TsmxOwnerKitItem); virtual;
     //procedure SetSlaveName(const Value: String); virtual;
 
@@ -4733,14 +4734,14 @@ end;
 
 procedure TsmxOwnerCell.CreateObject(Item: TObject; ObjectClass: TPersistentClass);
 var
-  AOwner: TComponent;
+  //AOwner: TComponent;
   Slave: TsmxOwnerCell;
   //s2: String;
 begin
   CheckObjectClass(ObjectClass);
-  if Assigned(Owner) then
-    AOwner := Owner else
-    AOwner := Self;
+  //if Assigned(Owner) then
+    //AOwner := Owner else
+    //AOwner := Self;
   if Item is TsmxSlaveItem then
     if not Assigned(TsmxSlaveItem(Item).FObjectItem) then
     begin
@@ -4749,7 +4750,7 @@ begin
       //s2 := ObjectClass.ClassName;
       //if s2 <> '' then
         //s2 := '';
-      Slave := TsmxOwnerCell(TsmxBaseCellClass(ObjectClass).Create(AOwner));
+      Slave := TsmxOwnerCell(TsmxBaseCellClass(ObjectClass).Create(Owner));
       {Slave.FCellOwner := Self;
       if FIsOwnerIsParent then
         Slave.CellParent := Self;}
@@ -4913,6 +4914,13 @@ begin
     Result := False
   else
     Result := inherited IsStoredCell(Cell);
+end;
+
+procedure TsmxOwnerCell.SetName(const NewName: TComponentName);
+begin
+  inherited SetName(NewName);
+  if Assigned(FCellOwner) then
+    FCellOwner.SlaveList.Change;
 end;
 
 { TsmxActionCell }
@@ -8034,17 +8042,17 @@ begin
     Slave := TsmxSlaveItem(Source).Slave
   else
     inherited Assign(Source);
-end;
+end;*)
 
 function TsmxSlaveItem.GetDisplayName: String;
 begin
-  if Assigned(FSlave) then
-    Result := FSlave.Name
+  if Assigned(ObjectItem) then
+    Result := Format('%s(%s) [%d]', [ObjectItem.Name, ObjectItem.ClassName, ObjectItem.CfgID])
   else
     Result := inherited GetDisplayName;
 end;
 
-function TsmxSlaveItem.GetDisplayObject: TObject;
+(*function TsmxSlaveItem.GetDisplayObject: TObject;
 begin
   if Assigned(FSlave) then
     Result := FSlave

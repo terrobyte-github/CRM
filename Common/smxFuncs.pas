@@ -362,7 +362,7 @@ begin
   if Assigned(AOwner) then
   begin
     i := 0;
-    while not Assigned(AOwner.FindComponent(Result)) do
+    while Assigned(AOwner.FindComponent(Result)) do
     begin
       Inc(i);
       Result := SysUtils.Format('%s_%d', [AName, i]);

@@ -184,7 +184,7 @@ procedure AddObjectEvents(AObject: TObject; ATree: TsmxCustomTree; AParentRow: P
     begin
       AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
       ATree.TreeCaptions[1, ARow] :=
-        Format('%s.%s', [TsmxComponent(Obj).Name, TsmxComponent(Obj).MethodName(Method.Code)]);
+        Format('%s%s%s', [TsmxComponent(Obj).Name, smxConsts.cDelimiterObjAndMethName, TsmxComponent(Obj).MethodName(Method.Code)]);
     end;
   end;
 
@@ -478,6 +478,12 @@ begin
       Grid.FocusedRowIndex := ItemIndex;
       NewObj := DisplayObject;
     end;
+    if NewObj is TsmxBaseCell then
+    //begin
+      TsmxBaseCell(NewObj).Name :=
+        smxFuncs.FindUniqueName(TsmxBaseCell(NewObj).Owner, smxFuncs.ClassNameWithoutPrefix(TsmxBaseCell(NewObj).ClassName));
+      //Kit.Change;
+    //end;
     RefreshFormObjectProps(NewObj, cObjectInspectorPages);
     if NewObj is TsmxBaseCell then
       RefreshFormObjectProps(TsmxBaseCell(NewObj).Owner, cObjectTreeViewPages);
@@ -528,7 +534,7 @@ begin
           'smxStdClasses.dll',
         True))
   else
-    FormClass := nil;      
+    FormClass := nil;
   if Assigned(FormClass) then
   begin
     Result := FormClass.Create(nil, smxConsts.cFormSlaveListID);
@@ -682,7 +688,14 @@ begin
   Form := FindFormSlaveList(Kit);
   if not Assigned(Form) then
   begin
-    Form := CreateFormSlaveList(smxClassFuncs.GetAccessoryForm(Tree), Kit);
+    if Obj is TsmxBaseCell then
+    begin
+      Form := smxClassFuncs.GetAccessoryForm(TsmxBaseCell(Obj));
+      if (Form.ID <> smxConsts.cFormCellViewID) then
+        Form := GetForm(Form.CfgID, smxConsts.cFormCellViewID);
+      Form := CreateFormSlaveList(Form, Kit);
+    end else
+      Form := CreateFormSlaveList(smxClassFuncs.GetAccessoryForm(Tree), Kit);
     if Obj is TsmxBaseCell then
     begin
       CfgID := TsmxBaseCell(Obj).CfgID;
@@ -825,7 +838,7 @@ begin
             ObjOwner := TsmxBaseCell(Obj).Owner
           else
             ObjOwner := Obj;
-          smxClassProcs.AllCells(TsmxBaseCell(ObjOwner), FindList, []);
+          smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
         s := Tree.TreeCaptions[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
@@ -983,8 +996,9 @@ procedure BeforeEditTreeObjectEventsPage(Sender: TsmxComponent);
         for i := 0 to AFindList.Count - 1 do
           if (TObject(AFindList[i]) is TsmxCustomAlgorithm)
               and Assigned(TsmxCustomAlgorithm(AFindList[i]).OnExecute) then
-            TComboBox(ATree.Editor.Control).Items.AddObject(Format('%s.%s',
+            TComboBox(ATree.Editor.Control).Items.AddObject(Format('%s%s%s',
               [TsmxCustomAlgorithm(AFindList[i]).Name,
+               smxConsts.cDelimiterObjAndMethName,
                TsmxCustomAlgorithm(AFindList[i]).MethodName(TMethod(TsmxCustomAlgorithm(AFindList[i]).OnExecute).Code)]), AFindList[i]);
         TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
       end;
@@ -1024,7 +1038,7 @@ begin
             ObjOwner := TsmxBaseCell(Obj).Owner
           else
             ObjOwner := Obj;
-          smxClassProcs.AllCells(TsmxBaseCell(ObjOwner), FindList, []);
+          smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
         s := Tree.TreeCaptions[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
@@ -1236,7 +1250,7 @@ begin
         begin
           Form := GetForm(CfgID, smxConsts.cFormCellViewID);
           if not Assigned(Form) then
-          begin  
+          begin
             Form := CreateFormCellView(FormParent, CfgID);
             Obj := smxClassFuncs.NewCell(Form, CfgID);
             TsmxBaseCell(Obj).CellParent := Form;
