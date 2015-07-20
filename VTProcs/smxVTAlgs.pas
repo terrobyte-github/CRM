@@ -55,10 +55,22 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
     end else
     if Cls.InheritsFrom(TsmxBaseCell) then
     begin
-      // add box
-      AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
-      if Assigned(Obj) then
-        ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
+      if Assigned(APropInfo^.SetProc) then
+      begin
+        // add box
+        AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
+        if Assigned(Obj) then
+          ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
+      end else
+      begin
+        // add blank
+        AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
+        if Assigned(Obj) then
+        begin
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+          AddObjectProps(Obj, ATree, ARow);
+        end;
+      end;
     end else
     begin
       // add blank
@@ -79,9 +91,33 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
   begin
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
-    if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
+    if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent) then
     begin
-      if (AObject is TsmxBaseCell)
+      if Assigned(APropInfo^.SetProc) then
+      begin
+        AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
+        if SysUtils.Supports(Intf, IsmxRefComponent) then
+          ATree.TreeCaptions[1, ARow] := IsmxRefComponent(Intf).GetReference.Name;
+      end else
+      begin
+        if SysUtils.Supports(Intf, IsmxRefComponent) then
+        begin
+          AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
+          ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefComponent(Intf).GetReference.ClassName]);
+          AddObjectProps(IsmxRefComponent(Intf).GetReference, ATree, ARow);
+        end;
+      end;
+    end else
+    if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefPersistent) then
+    begin
+      if SysUtils.Supports(Intf, IsmxRefPersistent) then
+      begin
+        AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
+        ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
+        AddObjectProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow);
+      end;
+    end;
+      (*if (AObject is TsmxBaseCell)
           and (TsmxBaseCell(AObject).IsImplementedIntf(IsmxRefComponent(Intf))) then
       begin
         AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
@@ -97,7 +133,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
           ATree.TreeCaptions[1, ARow] := IsmxRefComponent(Intf).GetReference.Name; //TsmxBaseCell(Obj).Name;
         //end;
       end;
-    end;
+    end;*)
   end;
 
   procedure AddEnumeration(APropInfo: PPropInfo; ARow: Pointer);
@@ -328,7 +364,10 @@ begin
   if Sender is TsmxCustomForm then
   begin
     Form := TsmxCustomForm(Sender);
-    NewObj := Form.Cells[0];
+    if Form.CellCount > 0 then
+      NewObj := Form.Cells[0]
+    else
+      NewObj := nil;
     CurObj := GetObjectFormObjectProps;
     if CurObj <> NewObj then
       RefreshFormObjectProps(NewObj, cAllObjectPages);
@@ -732,12 +771,14 @@ procedure BeforeEditTreeObjectPropsPage(Sender: TsmxComponent);
     if ATree.Editor.Control is TComboBox then
     begin
       if Cls.InheritsFrom(TsmxBaseCell) then
-      begin
-        for i := 0 to AFindList.Count - 1 do
-          if TObject(AFindList[i]).InheritsFrom(Cls) then
-            TComboBox(ATree.Editor.Control).Items.AddObject(TsmxBaseCell(AFindList[i]).Name, AFindList[i]);
-        TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
-      end;
+        if Assigned(APropInfo^.SetProc) then
+        begin
+          TComboBox(ATree.Editor.Control).Items.AddObject('', nil);
+          for i := 0 to AFindList.Count - 1 do
+            if TObject(AFindList[i]).InheritsFrom(Cls) then
+              TComboBox(ATree.Editor.Control).Items.AddObject(TsmxBaseCell(AFindList[i]).Name, AFindList[i]);
+          TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
+        end;
     end else
     if ATree.Editor.Control is TsmxButtonMaskEdit then
     begin
@@ -762,13 +803,15 @@ procedure BeforeEditTreeObjectPropsPage(Sender: TsmxComponent);
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     if ATree.Editor.Control is TComboBox then
     begin
-      if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent{IsmxRefPersistent}) then
-      begin
-        for i := 0 to AFindList.Count - 1 do
-          if SysUtils.Supports(TObject(AFindList[i]), GUID) then
-            TComboBox(ATree.Editor.Control).Items.AddObject(IsmxRefComponent(AFindList[i]).GetReference.Name, AFindList[i]);
-        TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
-      end;
+      if smxFuncs.IntfInheritsFrom(APropInfo^.PropType^, IsmxRefComponent) then
+        if Assigned(APropInfo^.SetProc) then
+        begin
+          TComboBox(ATree.Editor.Control).Items.AddObject('', nil);
+          for i := 0 to AFindList.Count - 1 do
+            if SysUtils.Supports(TObject(AFindList[i]), GUID) then
+              TComboBox(ATree.Editor.Control).Items.AddObject(IsmxRefComponent(AFindList[i]).GetReference.Name, AFindList[i]);
+          TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
+        end;
     end;
   end;
 
@@ -993,13 +1036,15 @@ procedure BeforeEditTreeObjectEventsPage(Sender: TsmxComponent);
     begin
       if AObject is TsmxBaseCell then
       begin
+        TComboBox(ATree.Editor.Control).Items.AddObject('', nil);
         for i := 0 to AFindList.Count - 1 do
           if (TObject(AFindList[i]) is TsmxCustomAlgorithm)
               and Assigned(TsmxCustomAlgorithm(AFindList[i]).OnExecute) then
             TComboBox(ATree.Editor.Control).Items.AddObject(Format('%s%s%s',
-              [TsmxCustomAlgorithm(AFindList[i]).Name,
-               smxConsts.cDelimiterObjAndMethName,
-               TsmxCustomAlgorithm(AFindList[i]).MethodName(TMethod(TsmxCustomAlgorithm(AFindList[i]).OnExecute).Code)]), AFindList[i]);
+                [TsmxCustomAlgorithm(AFindList[i]).Name,
+                 smxConsts.cDelimiterObjAndMethName,
+                 TsmxCustomAlgorithm(AFindList[i]).MethodName(TMethod(TsmxCustomAlgorithm(AFindList[i]).OnExecute).Code)]),
+               AFindList[i]);
         TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
       end;
     end;
@@ -1252,7 +1297,7 @@ begin
           if not Assigned(Form) then
           begin
             Form := CreateFormCellView(FormParent, CfgID);
-            Obj := smxClassFuncs.NewCell(Form, CfgID);
+            Obj := smxClassFuncs.NewCell(nil, CfgID);
             TsmxBaseCell(Obj).CellParent := Form;
             TsmxBaseCell(Obj).CfgID := CfgID;
             TsmxBaseCell(Obj).Initialize;
@@ -1260,8 +1305,10 @@ begin
 
             Form.CellCaption := Format('%s(%s) [%d]',
               [TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName, CfgID]);
-          end;
+          end;// else
+            //Obj := Form.Cells[0];
           Form.Show;
+          //TsmxBaseCell(Obj).IsDesigning := True;
         end;
       finally
         if Assigned(Obj) and (CfgType = 100) then

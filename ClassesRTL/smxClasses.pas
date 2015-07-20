@@ -3049,15 +3049,18 @@ end;
   end;}
 
 procedure TsmxBaseCell.SetIsDesigning(Value: Boolean);
-//var
-  //i: Integer;
+var
+  i: Integer;
 begin
   FIsDesigning := Value;
-  {if TObject(GetInternalRef) is TComponent then
-    TsmxBaseCell(GetInternalRef).SetDesigning(Value, False);
   if Assigned(FCellList) then
     for i := 0 to FCellList.Count - 1 do
-      TsmxBaseCell(FCellList[i]).IsDesigning := Value;}
+      TsmxBaseCell(FCellList[i]).IsDesigning := FIsDesigning;
+  //if TObject(GetInternalRef) is TComponent then
+    //TsmxBaseCell(GetInternalRef).SetDesigning(FIsDesigning, False);
+  {if (TObject(GetInternalRef) is TControl) and FIsDesigning then
+    TControl(GetInternalRef).Refresh;}
+    //TControl(GetInternalRef).Visible := True;
 end;
 
 procedure TsmxBaseCell.SetIsRecieveCfg(Value: Boolean);

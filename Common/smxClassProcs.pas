@@ -31,7 +31,8 @@ var
 implementation
 
 uses
-  Variants, SysUtils, TypInfo, smxProcs, smxFuncs, smxConsts, smxBaseIntf;
+  Variants, SysUtils, TypInfo, smxProcs, smxFuncs, smxConsts, smxBaseIntf,
+  smxTypes;
 
 procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxBaseCellClass;
   AIsOnlyActive: Boolean = False; AIncludeChildForm: Boolean = False);
@@ -57,7 +58,8 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxB
   var
     i: Integer;
   begin
-    if not AIncludeChildForm and (ACurCell is TsmxCustomForm) then
+    if not AIncludeChildForm and (ACurCell is TsmxCustomForm)
+        and not (foFrameForm in TsmxCustomForm(ACurCell).FormOptions) then
       Exit;
     if (AIsEmpty or IsClass(ACurCell))
         and (not AIsOnlyActive or IsActive(ACurCell))

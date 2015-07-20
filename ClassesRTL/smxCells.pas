@@ -351,7 +351,7 @@ type
     procedure SetImageList(Value: TCustomImageList); override;
     //procedure SetIsFrameForm(Value: Boolean); override;
     //procedure SetIsMainForm(Value: Boolean); override;
-    //procedure SetIsDesigning(Value: Boolean); override;
+    procedure SetIsDesigning(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
     procedure SetModalResult(Value: TModalResult); override;
     procedure SetPopupMenu(Value: TsmxCustomPopupMenu); override;
@@ -2687,10 +2687,10 @@ procedure TsmxForm.SetFormOptions(Value: TsmxFormOptions);
 var
   Obj: TObject;
 begin
-  if (foFrameForm in FormOptions) and Assigned(CellParent) then
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
     Form.Parent := nil;
   inherited SetFormOptions(Value);
-  if (foFrameForm in FormOptions) and Assigned(CellParent) then
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
@@ -2706,6 +2706,21 @@ begin
   if Assigned(ImageList) and Assigned(Form) then
     if FFormImageIndex <> -1 then
       ImageList.GetIcon(FFormImageIndex, Form.Icon);
+end;
+
+procedure TsmxForm.SetIsDesigning(Value: Boolean);
+var
+  Obj: TObject;
+begin
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+    Form.Parent := nil;
+  inherited SetIsDesigning(Value);
+  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  begin
+    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
+    if Obj is TWinControl then
+      Form.Parent := TWinControl(Obj);
+  end;
 end;
 
 {procedure TsmxForm.SetIsFrameForm(Value: Boolean);
