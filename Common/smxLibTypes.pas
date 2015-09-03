@@ -1,9 +1,16 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{            Library types             }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxLibTypes;
 
 interface
-
-uses
-  Classes;
 
 type
   TsmxFuncCallBack = function(Index: Integer): Variant of object;

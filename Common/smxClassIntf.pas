@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{         Interface interfaces         }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxClassIntf;
 
 interface
@@ -11,7 +21,6 @@ const
   IID_IsmxTreeEditor: TGUID = '{3F6C125A-EA34-48B4-9219-74B2160ED237}';
   IID_IsmxObjectItem: TGUID = '{488FD65F-FEC5-4619-9251-BEC32DC20578}';
   IID_IsmxObjectList: TGUID = '{DF8EF255-3625-486A-903B-CAC224AF6837}';
-  //IID_IsmxMultipleObjectList: TGUID = '{945A3E25-4BAE-4546-8E31-85B8C14C0488}';
 
 type
   { IsmxOuterEditor }
@@ -52,31 +61,20 @@ type
 
   { IsmxObjectItem }
 
-  //IsmxObjectList = interface;
-
   IsmxObjectItem = interface(IsmxBaseInterface)
     ['{488FD65F-FEC5-4619-9251-BEC32DC20578}']
     procedure ChangeObjectIndex(Value: Integer);
-    procedure ChangeObjectOwner({const Value: IsmxObjectList}Value: TPersistent);
+    procedure ChangeObjectOwner(Value: TPersistent);
   end;
 
   { IsmxObjectList }
 
   IsmxObjectList = interface(IsmxBaseInterface)
     ['{DF8EF255-3625-486A-903B-CAC224AF6837}']
-    //procedure CheckObjectClass(ObjectClass: TPersistentClass);
     procedure CreateObject(Item: TObject); overload;
     procedure CreateObject(Item: TObject; ObjectClass: TPersistentClass); overload;
     procedure DestroyObject(Item: TObject);
   end;
-
-  { IsmxMultipleObjectList }
-
-  (*IsmxMultipleObjectList = interface(IsmxObjectList)
-    ['{945A3E25-4BAE-4546-8E31-85B8C14C0488}']
-    procedure CreateObject(Item: TObject; ObjectClass: TPersistentClass);
-    procedure CheckObjectClass(ObjectClass: TPersistentClass);
-  end;*)
 
 implementation
 

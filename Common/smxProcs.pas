@@ -1,18 +1,24 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{           Base procedures            }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxProcs;
 
 interface
 
 uses
-  Classes, ImgList, XMLIntf, smxBaseClasses, smxTypes, smxManagerIntf;
+  Classes, ImgList, XMLIntf, smxBaseClasses, smxManagerIntf;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 procedure LoadImagesFromStream(AImageList: TCustomImageList; AStream: TStream);
 procedure StreamToStr(AStream: TStream; var AStr: String);
 procedure StrToStream(const AStr: String; AStream: TStream);
-{procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
-procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
-procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
-procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);}
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 procedure ParamsToVar(AParams: TsmxParams; var AValue: Variant);
 procedure SplitByDelimiter(const AStr, ADelimiter: String;
@@ -32,8 +38,7 @@ var
 implementation
 
 uses
-  Windows, Graphics, SysUtils, CommCtrl, Variants, TypInfo, smxFuncs, smxConsts,
-  smxBaseIntf, Forms;
+  Windows, SysUtils, CommCtrl, Variants;
 
 procedure GetFileFullVersion(const AFileName: String; var AVersMost, AVersLeast: Cardinal);
 var
@@ -97,52 +102,6 @@ begin
     WriteBuffer(Pointer(AStr)^, Len);
   end;
 end;
-
-{procedure ReadFont(const ANode: IXMLNode; var AFont: TsmxCellFont);
-begin
-  AFont := smxFuncs.DefCellFont;
-  if not Assigned(ANode) then
-    Exit;
-  AFont.Color := ANode.Attributes['Color'];
-  AFont.Name := ANode.Attributes['Name'];
-  AFont.Size := ANode.Attributes['Size'];
-  AFont.Style := TFontStyles(smxFuncs.StrToSet(TypeInfo(TFontStyle), ANode.Attributes['Style']));
-end;
-
-procedure WriteFont(const ANode: IXMLNode; const AFont: TsmxCellFont);
-begin
-  if not Assigned(ANode) then
-    Exit;
-  ANode.ChildNodes.Clear;
-  ANode.AttributeNodes.Clear;
-  ANode.Attributes['Color'] := AFont.Color;
-  ANode.Attributes['Name'] := AFont.Name;
-  ANode.Attributes['Size'] := AFont.Size;
-  ANode.Attributes['Style'] := smxFuncs.SetToStr(TypeInfo(TFontStyle), Byte(AFont.Style), True);
-end;
-
-procedure ReadText(const ANode: IXMLNode; var AText: TsmxCellText);
-begin
-  AText := smxFuncs.DefCellText;
-  if not Assigned(ANode) then
-    Exit;
-  AText.Caption := ANode.Attributes['Caption'];
-  AText.Alignment := TAlignment(TypInfo.GetEnumValue(TypeInfo(TAlignment), ANode.Attributes['Alignment']));
-  AText.Color := ANode.Attributes['Color'];
-  ReadFont(ANode.ChildNodes.FindNode(smxConsts.cFontNodeName), AText.Font);
-end;
-
-procedure WriteText(const ANode: IXMLNode; const AText: TsmxCellText);
-begin
-  if not Assigned(ANode) then
-    Exit;
-  ANode.ChildNodes.Clear;
-  ANode.AttributeNodes.Clear;
-  ANode.Attributes['Caption'] := AText.Caption;
-  ANode.Attributes['Alignment'] := TypInfo.GetEnumName(TypeInfo(TAlignment), Integer(AText.Alignment));
-  ANode.Attributes['Color'] := AText.Color;
-  WriteFont(ANode.AddChild(smxConsts.cFontNodeName), AText.Font);
-end;}
 
 procedure VarToParams(const AValue: Variant; AParams: TsmxParams);
 var
@@ -217,7 +176,7 @@ begin
     else
       ModuleName := '';
     for i := Low(AClasses) to High(AClasses) do
-      if ModuleName <> ''{IsLibrary} then
+      if ModuleName <> '' then
         gClassTypeManagerIntf.RegisterClassTypeName(
           SysUtils.Format('%s%s%s', [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]),
           AClasses[i])
@@ -241,7 +200,7 @@ begin
     else
       ModuleName := '';
     for i := Low(AClasses) to High(AClasses) do
-      if ModuleName <> ''{IsLibrary} then
+      if ModuleName <> '' then
         gClassTypeManagerIntf.UnRegisterClassTypeName(SysUtils.Format('%s%s%s',
           [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
       else

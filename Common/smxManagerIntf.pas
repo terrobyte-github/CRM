@@ -1,9 +1,19 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{          Manager interfaces          }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxManagerIntf;
 
 interface
 
 uses
-  Classes, Controls, ImgList, smxBaseIntf, {smxDBIntf,} smxLibTypes;
+  Classes, Controls, ImgList, smxBaseIntf, smxLibTypes;
 
 const
   IID_IsmxCallBackManager: TGUID = '{402AC1B6-6DEB-4CD2-93FB-7528D6DEA805}';
@@ -42,13 +52,9 @@ type
 
   IsmxLibraryManager = interface(IsmxBaseInterface)
     ['{F778C1C0-A698-4EF0-8DCB-904A7AF1E6C0}']
-    //function CallLibrary(const LibName: String): THandle;
-    //function CheckLibraryComp(LibHandle: THandle): Boolean; overload;
-    //function CheckLibraryComp(const LibName: String): Boolean; overload;
     function AddLibrary(const LibName: String): Integer;
     procedure DeleteLibrary(const LibName: String);
     function FindByName(const LibName: String): THandle;
-    //function GetCallBackManager: IsmxCallBackManager;
     function GetCheckHandle: Longword;
     function GetIsCheckComp: Boolean;
     function GetLibInfoProcName: String;
@@ -59,17 +65,13 @@ type
     function GetLibraryInfo(const LibName: String; var LibInfo: TsmxLibInfo): Boolean; overload;
     function GetProcedure(LibHandle: THandle; const ProcName: String): Pointer; overload;
     function GetProcedure(const LibName, ProcName: String): Pointer; overload;
-    //function IndexOfName(const LibName: String): Integer;
-    //function IndexOfHandle(LibHandle: THandle): Integer;
     function InsertLibrary(Handle: THandle): Integer;
     procedure RemoveLibrary(Handle: THandle);
-    //procedure SetCallBackManager(const Value: IsmxCallBackManager);
     procedure SetCheckHandle(Value: Longword);
     procedure SetIsCheckComp(Value: Boolean);
     procedure SetLibInfoProcName(const Value: String);
     procedure SetLibPath(const Value: String);
 
-    //property CallBackManager: IsmxCallBackManager read GetCallBackManager write SetCallBackManager;
     property CheckHandle: Longword read GetCheckHandle write SetCheckHandle;
     property IsCheckComp: Boolean read GetIsCheckComp write SetIsCheckComp;
     property LibInfoProcName: String read GetLibInfoProcName write SetLibInfoProcName;
@@ -80,28 +82,12 @@ type
 
   { IsmxDataEntity }
 
-  //IsmxDatabaseManager = interface;
-
   IsmxDataEntity = interface(IsmxRefComponent)
     ['{24415658-D331-48A8-8560-1845F3076622}']
-    //procedure ChangeDatabaseManager(const Value: IsmxDatabaseManager);
-    //procedure Connect;
-    //procedure Disconnect;
-    //procedure FreeConnection;
-    //function GetConnected: Boolean;
-    //function GetDatabase: IsmxDatabase;
     function GetDataEntityName: String;
-    //function GetDatabaseManager: IsmxDatabaseManager;
-    //function GetInternalRef: Pointer;
-    //procedure SetConnected(Value: Boolean);
-    //procedure SetDatabase(const Value: IsmxDatabase);
     procedure SetDataEntityName(const Value: String);
-    //procedure SetDatabaseManager(const Value: IsmxDatabaseManager);
 
-    //property Connected: Boolean read GetConnected write SetConnected;
-    //property Database: IsmxDatabase read GetDatabase;// write SetDatabase;
     property DataEntityName: String read GetDataEntityName write SetDataEntityName;
-    //property DatabaseManager: IsmxDatabaseManager read GetDatabaseManager write SetDatabaseManager;
   end;
 
   { IsmxDatabaseManager }
@@ -116,41 +102,18 @@ type
 
     property DataEntityCount: Integer read GetDataEntityCount;
     property DataEntities[Index: Integer]: IsmxDataEntity read GetDataEntity; default;
-
-    {function FindByName(const DatabaseEntityName: String): IsmxDatabaseEntity;
-    function GetConnectionCount: Integer;
-    function GetConnection(Index: Integer): IsmxDatabaseEntity;
-    procedure InsertConnection(const Connection: IsmxDatabaseEntity);
-    procedure RemoveConnection(const Connection: IsmxDatabaseEntity);
-
-    property ConnectionCount: Integer read GetConnectionCount;
-    property Connections[Index: Integer]: IsmxDatabaseEntity read GetConnection; default;}
   end;
 
   { IsmxFormControl }
 
-  //IsmxFormManager = interface;
-
   IsmxFormControl = interface(IsmxRefComponent)
     ['{6A6AE753-A9BB-4617-B65E-4BC0DD271966}']
-    //procedure ChangeFormManager(const Value: IsmxFormManager);
-    //procedure Close;
-    //procedure FreeForm;
     function GetCfgID: Integer;
-    //function GetFormManager: IsmxFormControlManager;
     function GetID: Integer;
-    //function GetInternalRef: Pointer;
-    //function GetModalResult: TModalResult;
     procedure SetCfgID(Value: Integer);
-    //procedure SetFormManager(const Value: IsmxFormControlManager);
-    //procedure SetModalResult(Value: TModalResult);
-    //procedure Show;
-    //function ShowModal: TModalResult;
 
     property CfgID: Integer read GetCfgID write SetCfgID;
-    //property FormManager: IsmxFormControlManager read GetFormManager write SetFormManager;
     property ID: Integer read GetID;
-    //property ModalResult: TModalResult read GetModalResult write SetModalResult;
   end;
 
   { IsmxFormManager }
@@ -172,29 +135,19 @@ type
   IsmxImageListManager = interface(IsmxBaseInterface)
     ['{2557DE80-5DF0-4474-B686-D340690E6E54}']
     // ImageListName = format text: "ResName[(Delimiter)LibName]"
-    //function AddImageList(const ImageListName: String): Integer;
-    //procedure DeleteImageList(const ImageListName: String);
     function FindByName(const ImageListName: String): TCustomImageList;
     function GetDelimiter: String;
     function GetImageList(Index: Integer): TCustomImageList;
     function GetImageListCount: Integer;
-    //function GetLibraryManager: IsmxLibraryManager;
-    //function GetNewResourceFuncName: String;
-    //procedure InsertImageList(ImageList: TCustomImageList);
     procedure RegisterImageListName(const ImageListName: String; ImageList: TCustomImageList = nil);
-    //procedure RemoveImageList(ImageList: TCustomImageList);
     function ResolvedImageList(ImageList: TCustomImageList): String;
     function ResolvedImageListName(const ImageListName: String; IsRegister: Boolean = False): TCustomImageList;
     procedure SetDelimiter(const Value: String);
-    //procedure SetLibraryManager(const Value: IsmxLibraryManager);
-    //procedure SetNewResourceFuncName(const Value: String);
     procedure UnRegisterImageListName(const ImageListName: String);
 
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
-    //property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
-    //property NewResourceFuncName: String read GetNewResourceFuncName write SetNewResourceFuncName;
   end;
 
   { IsmxClassTypeManager }
@@ -202,32 +155,19 @@ type
   IsmxClassTypeManager = interface(IsmxBaseInterface)
     ['{400CCBF0-9EC5-48AC-B432-1CFE30B6AF0C}']
     // ClassTypeName = format text: "ClassName[(Delimiter)LibName]"
-    //function AddClassType(const ClassTypeName: String): Integer;
-    //procedure DeleteClassType(const ClassTypeName: String);
     function FindByName(const ClassTypeName: String): TPersistentClass;
     function GetClassType(Index: Integer): TPersistentClass;
     function GetClassTypeCount: Integer;
     function GetDelimiter: String;
-    //function GetLibraryManager: IsmxLibraryManager;
-    //procedure InsertClasses(const Classes: array of TPersistentClass);
-    //procedure RemoveClasses(const Classes: array of TPersistentClass);
-    //procedure InsertClassType(ClassType: TPersistentClass);
-    //procedure RemoveClassType(ClassType: TPersistentClass);
     procedure RegisterClassTypeName(const ClassTypeName: String; ClassType: TPersistentClass = nil);
-    //function ResolvedClassType(ClassType: TPersistentClass;
-    //  out ClassTypeName: String): Boolean;
-    //function ResolvedClassTypeName(const ClassTypeName: String;
-    //  out ClassType: TPersistentClass): Boolean;
     function ResolvedClassType(ClassType: TPersistentClass): String;
     function ResolvedClassTypeName(const ClassTypeName: String; IsRegister: Boolean = False): TPersistentClass;
     procedure SetDelimiter(const Value: String);
-    //procedure SetLibraryManager(const Value: IsmxLibraryManager);
     procedure UnRegisterClassTypeName(const ClassTypeName: String);
 
     property ClassTypeCount: Integer read GetClassTypeCount;
     property ClassTypes[Index: Integer]: TPersistentClass read GetClassType; default;
     property Delimiter: String read GetDelimiter write SetDelimiter;
-    //property LibraryManager: IsmxLibraryManager read GetLibraryManager write SetLibraryManager;
   end;
 
 implementation

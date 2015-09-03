@@ -96,16 +96,17 @@ Item2=$(DELPHI)\Source
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=9
+Count=10
 Item0=..\..\dcp
-Item1=..\dcp
-Item2=$(DELPHI)\Lib\Debug
-Item3=$(DELPHI)\Lib\Debug;C:\Work\DELPHI~1\JCL198~1.253\JCL-19~1.253\lib\d6\debug
-Item4=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src;C:\Program Files\Borland\Delphi7\Source\ehlib
-Item5=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src
-Item6=$(DELPHI)\Lib\Debug;..\..\temp
-Item7=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source
-Item8=$(DELPHI)\Lib\Debug;C:\work\Units
+Item1=$(DELPHI)\Lib\Debug;..\..\dcp
+Item2=..\dcp
+Item3=$(DELPHI)\Lib\Debug
+Item4=$(DELPHI)\Lib\Debug;C:\Work\DELPHI~1\JCL198~1.253\JCL-19~1.253\lib\d6\debug
+Item5=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src;C:\Program Files\Borland\Delphi7\Source\ehlib
+Item6=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source\RXLib\Src
+Item7=$(DELPHI)\Lib\Debug;..\..\temp
+Item8=$(DELPHI)\Lib\Debug;..\..\temp;$(DELPHI)\Source
+Item9=$(DELPHI)\Lib\Debug;C:\work\Units
 [HistoryLists\hlUnitOutputDirectory]
 Count=6
 Item0=..\..\tmp
@@ -116,8 +117,8 @@ Item4=C:\Works\temp
 Item5=..\dcu
 [HistoryLists\hlOutputDirectorry]
 Count=8
-Item0=$(CRM)\lib
-Item1=$(CRM)\bin
+Item0=$(CRM)\bin
+Item1=$(CRM)\lib
 Item2=..\..\bin
 Item3=..\..\..\bin
 Item4=..\Bin

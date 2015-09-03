@@ -1,20 +1,28 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{            Database types            }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxDBTypes;
 
 interface
 
 uses
-  smxBaseIntf, smxDBIntf, smxTypes;
+  smxDBIntf;
 
 type
-  TsmxFuncNewDatabase = function({const Controller: IsmxBaseInterface = nil}): IsmxDatabase;
+  TsmxFuncNewDatabase = function: IsmxDatabase;
 
-  TsmxFuncNewDataSet = function({const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
+  TsmxFuncNewDataSet = function: IsmxDataSet;
 
   TsmxParamArray = array of IsmxParam;
 
   TsmxFieldArray = array of IsmxField;
-
-  //TsmxBaseSense = fsKey .. fsForeignKey;
 
 implementation
 

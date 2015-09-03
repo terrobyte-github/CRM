@@ -1,15 +1,24 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{          Library procedures          }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxLibProcs;
 
 interface
 
 uses
-  Classes, smxLibTypes;
+  smxLibTypes;
 
 procedure LibInfo(var ALibInfo: TsmxLibInfo);
 procedure InitLib(ACall: TsmxFuncCallBack);
 procedure FillInfo(ACompMajor, ACompMinor: Word; AProc: TsmxProcInitLib = nil;
   ATypes: TsmxLibTypes = [ltAlgorithm]; const ADesc: String = '');
-//procedure RegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
 
 var
   Call: TsmxFuncCallBack = nil;
@@ -17,7 +26,7 @@ var
 implementation
 
 uses
-  Forms, Windows, SysUtils, smxProcs;
+  SysUtils, smxProcs;
 
 var
   Info: TsmxLibInfo;
@@ -62,29 +71,5 @@ begin
     ProcInitLib := AProc;
   end;
 end;
-
-{procedure RegisterClasses(AClasses: array of TPersistentClass; AInstance: Cardinal = 0);
-var
-  i: Integer;
-  ModuleName: String;
-  BInstance: Cardinal;
-  b: Boolean;
-begin
-  Classes.RegisterClasses(AClasses);
-  if Assigned(smxProcs.gClassTypeManagerIntf) then
-  begin
-    if AInstance = 0 then
-      BInstance := HInstance else
-      BInstance := AInstance;
-    ModuleName := SysUtils.ExtractFileName(SysUtils.GetModuleName(BInstance));
-    b := System.IsLibrary;
-    for i := Low(AClasses) to High(AClasses) do
-      if b then
-        smxProcs.gClassTypeManagerIntf.RegisterClassTypeName(SysUtils.Format('%s%s%s',
-          [AClasses[i].ClassName, gClassTypeManagerIntf.Delimiter, ModuleName]))
-      else
-        smxProcs.gClassTypeManagerIntf.RegisterClassTypeName(AClasses[i].ClassName);
-  end;
-end;}
 
 end.

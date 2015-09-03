@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{         Database interfaces          }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxDBIntf;
 
 interface
@@ -21,18 +31,15 @@ type
     procedure AssignDatabase(const Source: IsmxDatabase);
     procedure CommitTransaction;
     function GetConnected: Boolean;
-    //function GetInternalRef: Pointer;
     function GetDatabaseName: String;
     function GetDriverName: String;
     function GetInTransaction: Boolean;
-    //function GetParams: TStrings;
     function GetParamText: String;
-    function NewDataSet(DataSetType: TsmxDataSetType{; const Controller: IsmxBaseInterface = nil}): IsmxDataSet;
+    function NewDataSet(DataSetType: TsmxDataSetType): IsmxDataSet;
     procedure RollbackTransaction;
     procedure SetConnected(Value: Boolean);
     procedure SetDatabaseName(const Value: String);
     procedure SetDriverName(const Value: String);
-    //procedure SetParams(Value: TStrings);
     procedure SetParamText(const Value: String);
     procedure StartTransaction;
 
@@ -40,7 +47,6 @@ type
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
     property DriverName: String read GetDriverName write SetDriverName;
     property InTransaction: Boolean read GetInTransaction;
-    //property Params: TStrings read GetParams write SetParams;
     property ParamText: String read GetParamText write SetParamText;
   end;
 
@@ -56,7 +62,6 @@ type
     function GetDisplayFormat: String;
     function GetFieldName: String;
     function GetFieldIndex: Integer;
-    //function GetInternalRef: Pointer;
     function GetPrecision: Integer;
     function GetSize: Integer;
     function GetValue: Variant;
@@ -69,7 +74,6 @@ type
     procedure SetDisplayFormat(const Value: String);
     procedure SetFieldIndex(Value: Integer);
     procedure SetFieldName(const Value: String);
-    //procedure SetInternalRef(Value: Pointer);
     procedure SetPrecision(Value: Integer);
     procedure SetSize(Value: Integer);
     procedure SetValue(const Value: Variant);
@@ -80,7 +84,6 @@ type
     property DisplayFormat: String read GetDisplayFormat write SetDisplayFormat;
     property FieldName: String read GetFieldName write SetFieldName;
     property FieldIndex: Integer read GetFieldIndex write SetFieldIndex;
-    //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
     property Precision: Integer read GetPrecision write SetPrecision;
     property Size: Integer read GetSize write SetSize;
     property Value: Variant read GetValue write SetValue;
@@ -97,8 +100,6 @@ type
     function GetDataSense: TsmxDataSense;
     function GetDataSet: IsmxDataSet;
     function GetDataType: TsmxDataType;
-    //function GetDefValue: Variant;
-    //function GetInternalRef: Pointer;
     function GetNumericScale: Integer;
     function GetParamIndex: Integer;
     function GetParamName: String;
@@ -113,8 +114,6 @@ type
     procedure SetDataLocation(Value: TsmxDataLocation);
     procedure SetDataSense(Value: TsmxDataSense);
     procedure SetDataType(Value: TsmxDataType);
-    //procedure SetDefValue(const Value: Variant);
-    //procedure SetInternalRef(Value: Pointer);
     procedure SetNumericScale(Value: Integer);
     procedure SetParamIndex(Value: Integer);
     procedure SetParamName(const Value: String);
@@ -127,7 +126,6 @@ type
     property DataSense: TsmxDataSense read GetDataSense write SetDataSense;
     property DataSet: IsmxDataSet read GetDataSet;
     property DataType: TsmxDataType read GetDataType write SetDataType;
-    //property InternalRef: Pointer read GetInternalRef write SetInternalRef;
     property NumericScale: Integer read GetNumericScale write SetNumericScale;
     property ParamName: String read GetParamName write SetParamName;
     property ParamIndex: Integer read GetParamIndex write SetParamIndex;
@@ -142,10 +140,6 @@ type
   IsmxDataSet = interface(IsmxRefComponent)
     ['{BF4B869C-77FA-4714-B4B1-E8CDFC08FECB}']
     procedure Add;
-    //function AddField(const FieldName: String): IsmxField;
-    //function AddParam(const ParamName: String): IsmxParam;
-    //function AddField(DataType: TsmxDataType): IsmxField;
-    //function AddParam(DataType: TsmxDataType): IsmxParam;
     function AddField: IsmxField;
     function AddParam: IsmxParam;
     procedure AssignDataSet(const Source: IsmxDataSet);
@@ -155,35 +149,28 @@ type
     procedure ClearParams;
     procedure Close;
     procedure Delete;
-    procedure DeleteParam(const Param: IsmxParam);
-    procedure DeleteField(const Field: IsmxField);
-    //procedure DisableControls;
+    procedure DeleteParam(Index: Integer);
+    procedure DeleteField(Index: Integer);
     procedure Edit;
-    //procedure EnalbleControls;
     function Eof: Boolean;
     procedure Execute;
     function FieldByName(const FieldName: String): IsmxField;
     function FindField(const FieldName: String): IsmxField;
     function FindParam(const ParamName: String): IsmxParam;
     procedure First;
-    //procedure FreeBookmark(Bookmark: Pointer);
     function GetActive: Boolean;
-    //function GetBookmark: Pointer;
     function GetDatabase: IsmxDatabase;
     function GetDataSetName: String;
     function GetDataSetType: TsmxDataSetType;
     function GetField(Index: Integer): IsmxField;
     function GetFieldCount: Integer;
-    //function GetInternalRef: Pointer;
     function GetParamCount: Integer;
     function GetParam(Index: Integer): IsmxParam;
     function GetPerformanceMode: TsmxPerformanceMode;
     function GetPrepare: Boolean;
     function GetRecordNo: Integer;
     function GetRecordCount: Integer;
-    //function GetSQL: TStrings;
     function GetSQLText: String;
-    //procedure GotoBookmark(Bookmark: Pointer);
     function IsEmpty: Boolean;
     procedure Last;
     function Locate(const KeyFields: String; const KeyValues: Variant;
@@ -202,7 +189,6 @@ type
     procedure SetPerformanceMode(Value: TsmxPerformanceMode);
     procedure SetPrepare(Value: Boolean);
     procedure SetRecordNo(Value: Integer);
-    //procedure SetSQL(Value: TStrings);
     procedure SetSQLText(const Value: String);
 
     property Active: Boolean read GetActive write SetActive;
@@ -217,7 +203,6 @@ type
     property Prepared: Boolean read GetPrepare write SetPrepare;
     property RecordNo: Integer read GetRecordNo write SetRecordNo;
     property RecordCount: Integer read GetRecordCount;
-    //property SQL: TStrings read GetSQL write SetSQL;
     property SQLText: String read GetSQLText write SetSQLText;
   end;
 

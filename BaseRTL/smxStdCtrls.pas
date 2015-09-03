@@ -1,7 +1,7 @@
 {**************************************}
 {                                      }
 {            SalesMan v1.0             }
-{       StandardControls classes       }
+{      Standard Controls classes       }
 {                                      }
 {          Copyright (c) 2010          }
 {          Polyakov Àleksandr          }

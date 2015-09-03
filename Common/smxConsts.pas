@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{            Base constants            }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxConsts;
 
 interface
@@ -8,10 +18,7 @@ uses
 const
   { XML }
   cRootNodeName = 'Root';
-  //cParentNodeName = 'Parent';
   cCellNodeName = 'Cell';
-  //cInfoNodeName = 'Info';
-  //cOwnerNodeName = 'Owner';
   cSlaveNodeName = 'Slave';
   cTypeNodeName = 'Type';
   cFontNodeName = 'Font';
@@ -19,9 +26,7 @@ const
   cItemNodeName = 'Item';
   cCfgIDAttributeName = 'CfgID';
   cNameAttributeName = 'Name';
-  //cProcNameAttributeName = 'ProcName';
   cClassNameAttributeName = 'ClassName';
-  //cIClassNameAttributeName = 'IClassName';
   cXMLDocVersion = '1.0';
   cXMLDocEncoding = 'UTF-8';
   cXMLDocTextDef =
@@ -34,7 +39,7 @@ const
   cSuffixTextFieldName = 'Text';
   cDelimiterObjAndMethName = '.';
   cPrefixClassName = 'Tsmx';
-  
+
   { Global objects }
   cApplicationHandle = 0;
   cStorageManager = 1;
@@ -43,8 +48,6 @@ const
   cFormManager = 4;
   cImageListManager = 5;
   cClassTypeManager = 6;
-  //cMainConnection = 7;
-  //cMainForm = 8;
 
   { Constructor }
   cFormObjectPropsID = -100;

@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{         Cell class functions         }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxClassFuncs;
 
 interface
@@ -8,12 +18,10 @@ uses
 
 function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
 function CfgIDToCellClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
-//function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCell;
-//function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0;
   AIsRegister: Boolean = False): TsmxCustomForm;
@@ -34,7 +42,6 @@ function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomReque
 function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest; overload;
 function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
 function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
-//function GetCellClassName(ACell: TsmxBaseCell): String;
 
 implementation
 
@@ -50,18 +57,16 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
-    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
-        {ASelectRequest.PerformanceMode,} dsKey, dsForeignKey) then
+    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey, dsKey, dsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
         TypeCfg.CfgID := ForeignKey;
-        //TypeCfg.SelectRequest := ASelectRequest;
         TypeCfg.SelectDataSet := DataSet;
-        //TypeCfg.Receive;
         TypeCfg.Load;
         TypeCfg.Read;
         Result := TypeCfg.CfgClass;
@@ -79,17 +84,16 @@ var
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
-    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
-        {ASelectRequest.PerformanceMode,} dsKey, dsForeignKey) then
+    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey, dsKey, dsForeignKey) then
     begin
       TypeCfg := TsmxTypeCfg.Create(nil);
       try
         TypeCfg.CfgID := ForeignKey;
         TypeCfg.SelectDataSet := DataSet;
-        //TypeCfg.Receive;
         TypeCfg.Load;
         TypeCfg.Read;
         Result := TypeCfg.CellClass;
@@ -99,34 +103,6 @@ begin
     end;
 end;
 
-(*function CfgIDToIntfClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxInterfacedPersistentClass;
-var
-  TypeCfg: TsmxTypeCfg;
-  ForeignKey: Variant;
-  DataSet: IsmxDataSet;
-begin
-  Result := nil;
-  if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
-    DataSet := ASelectDataSet;
-  if Assigned(DataSet) then
-    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey,
-        {ASelectRequest.PerformanceMode,} dsKey, dsForeignKey) then
-    begin
-      TypeCfg := TsmxTypeCfg.Create(nil);
-      try
-        TypeCfg.CfgID := ForeignKey;
-        TypeCfg.SelectDataSet := DataSet;
-        //TypeCfg.Receive;
-        TypeCfg.Load;
-        TypeCfg.Read;
-        Result := TypeCfg.IntfClass;
-      finally
-        TypeCfg.Free;
-      end;
-    end;
-end;*)
-
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfg;
 var
@@ -134,7 +110,8 @@ var
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf
+   else
     DataSet := ASelectDataSet;
   CfgClass := CfgIDToCfgClass(ACfgID, DataSet);
   if Assigned(CfgClass) then
@@ -151,88 +128,40 @@ function NewCell(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCell;
 var
   CellClass: TsmxBaseCellClass;
-  //IntfClass: TsmxInterfacedPersistentClass;
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) then
   begin
-    //IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-    //if Assigned(IntfClass) then
-      Result := CellClass.Create(AOwner{, IntfClass});
-    //else
-      //Result := CellClass.Create(AOwner);
+    Result := CellClass.Create(AOwner);
     Result.CfgID := ACfgID;
-    //Result.SelectRequest := ASelectRequest;
-    //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
-    //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
-    //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
-    //Result.FormManager := smxClassProcs.gFormManagerIntf;
-    //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,
       ['nil', ACfgID, 'create']);
 end;
-
-{function NewIntf(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): IsmxRefPersistent;
-var
-  IntfClass: TsmxInterfacedPersistentClass;
-  DataSet: IsmxDataSet;
-begin
-  if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gCfgSelectDataSet else
-    DataSet := ASelectDataSet;
-  IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-  if Assigned(IntfClass) then
-    Result := IntfClass.Create as IsmxRefPersistent
-  else
-    raise EsmxCellError.CreateByCfgID(@smxConsts.rsCellIDActionError,
-      ['nil', ACfgID, 'create'], ACfgID);
-end;}
 
 function NewForm(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil; AID: Integer = 0;
   AIsRegister: Boolean = False): TsmxCustomForm;
 var
   CellClass: TsmxBaseCellClass;
-  //IntfClass: TsmxInterfacedPersistentClass;
   DataSet: IsmxDataSet;
 begin
   if not Assigned(ASelectDataSet) then
-    DataSet := smxClassProcs.gSelectDataSetIntf else
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
     DataSet := ASelectDataSet;
   CellClass := CfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomForm) then
   begin
-    //IntfClass := CfgIDToIntfClass(ACfgID, DataSet);
-    Result := TsmxCustomFormClass(CellClass).Create(AOwner{, IntfClass}, AID);
-    {if AID = 0 then
-    begin
-      if Assigned(IntfClass) then
-        Result := TsmxCustomFormClass(CellClass).CreateByImpl(AOwner, IntfClass.Create as IsmxRefPersistent)
-      else
-        Result := TsmxCustomFormClass(CellClass).Create(AOwner);
-    end else
-    begin
-      if Assigned(IntfClass) then
-        Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID, IntfClass.Create as IsmxRefPersistent)
-      else
-        Result := TsmxCustomFormClass(CellClass).CreateByID(AOwner, AID);
-    end;}
+    Result := TsmxCustomFormClass(CellClass).Create(AOwner, AID);
     Result.CfgID := ACfgID;
-    //Result.SelectRequest := ASelectRequest;
-    //Result.StorageManager := smxClassProcs.gStorageManagerIntf;
-    //Result.LibraryManager := smxClassProcs.gLibraryManagerIntf;
-    //Result.DatabaseManager := smxClassProcs.gDatabaseManagerIntf;
-
     if AIsRegister and Assigned(smxProcs.gFormManagerIntf) then
       smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
-      //Result.FormManager := smxProcs.gFormManagerIntf;
-
-    //Result.ImageListManager := smxClassProcs.gImageListManagerIntf;
   end else
     raise EsmxCellError.CreateResFmt(@smxConsts.rsCellIDActionError,
       ['nil', ACfgID, 'create']);
@@ -304,10 +233,8 @@ begin
         if Assigned(Cell) then
           Break;
       end;
-    //if Assigned(ASection.Grid) then
-      //Cell := ASection.Grid.FindSlaveByName(AName);
   if Assigned(Cell) then
-  begin                                  
+  begin
     if coHasValue in TsmxCustomColumn(Cell).ColumnOptions then
       AValue := TsmxCustomColumn(Cell).ColumnValue
     else
@@ -365,25 +292,15 @@ begin
 end;
 
 function GetAccessoryForm(ACell: TsmxBaseCell): TsmxCustomForm;
-//var
-  //Cell: TsmxBaseCell;
 begin
   Result := nil;
-  //if not Assigned(ACell) then
-  //  Exit;
-  //Cell := ACell.CellParent;
-  while Assigned(ACell) {and not Assigned(Result)} do
+  while Assigned(ACell) do
   begin
     if ACell is TsmxCustomForm then
     begin
       Result := TsmxCustomForm(ACell);
       Break;
     end;
-    {if Assigned(ACell.CellParent) then
-      ACell := ACell.CellParent else
-    if ACell is TsmxOwnerCell then
-      ACell := TsmxOwnerCell(ACell).CellOwner else
-      ACell := nil;}
     ACell := ACell.CellParent;
   end;
 end;
@@ -402,7 +319,8 @@ var
 begin
   Algorithm := GetAlgorithmForm(AForm, ACfgID);
   if Assigned(Algorithm) then
-    Result := Algorithm.OnExecute else
+    Result := Algorithm.OnExecute
+  else
     Result := nil;
 end;
 
@@ -420,7 +338,8 @@ var
 begin
   Request := GetRequestForm(AForm, ACfgID);
   if Assigned(Request) then
-    Result := Request.DataSet else
+    Result := Request.DataSet
+  else
     Result := nil;
 end;
 
@@ -455,28 +374,5 @@ begin
         if AForm.RequestList[i].DataSet = ADataSet then
           Result := AForm.RequestList[i];
 end;
-
-{function GetCellClassName(ACell: TsmxBaseCell): String;
-begin
-  Result := '';
-  if (not Assigned(smxProcs.gClassTypeManagerIntf))
-      or (Assigned(smxProcs.gClassTypeManagerIntf)
-        and not smxProcs.gClassTypeManagerIntf.ResolvedClassType(TPersistentClass(ACell.ClassType), Result)) then
-    Result := ACell.ClassName;
-end;
-
-function GetCellClassType(const ACellClassTypeName: String): TsmxBaseCellClass;
-var
-  AClass: TPersistentClass;
-begin
-  Result := nil;
-  if (not Assigned(smxProcs.gClassTypeManagerIntf))
-      or (Assigned(smxProcs.gClassTypeManagerIntf)
-        and not smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(ACellClassTypeName, AClass)) then
-    AClass := Classes.GetClass(ACellClassTypeName);
-  if Assigned(AClass) then
-    if AClass.InheritsFrom(TsmxBaseCell) then
-      Result := TsmxBaseCellClass(AClass);
-end;}
 
 end.

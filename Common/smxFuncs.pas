@@ -1,3 +1,13 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{            Base functions            }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxFuncs;
 
 interface
@@ -17,11 +27,8 @@ function NewXMLDoc(const AVersion: String = smxConsts.cXMLDocVersion;
   const AEncoding: String = smxConsts.cXMLDocEncoding): IXMLDocument;
 function FormatXMLText(const AText: String): String;
 function UnFormatXMLText(const AText: String): String;
-//function NewResource(const AName: String): TResourceStream;
 function GetSingleValue(const AValues: Variant; const ADefValue: Variant;
   AIndex: Integer = 0): Variant;
-//function DefCellFont: TsmxCellFont;
-//function DefCellText: TsmxCellText;
 function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
 function StrToSet(PTI: PTypeInfo; const Value: String): Byte;
 function GetValueFieldName(const AFieldName: String): String;
@@ -32,9 +39,6 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: String): String; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: Extended): Extended; overload;
 function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const ADefValue: TDateTime): TDateTime; overload;
-//function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
-//function IsImplIntf(AObject: TObject; const AIntf: IsmxRefComponent{IsmxRefPersistent}): Boolean;
-//function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
 function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
 function GetRootControl(AControl: TWinControl): TWinControl;
 function FindUniqueName(AOwner: TComponent; const AName: String): String;
@@ -66,7 +70,8 @@ begin
   if SysUtils.AnsiCompareText(AStr, 'Time') = 0 then
     Result := SysUtils.Time else
   if SysUtils.AnsiCompareText(AStr, 'Now') = 0 then
-    Result := SysUtils.Now else
+    Result := SysUtils.Now
+  else
     Result := SysUtils.StrToDateDef(AStr, SysUtils.StrToDate('30.12.1899'));
 end;
 
@@ -96,7 +101,8 @@ end;
 function StrToVar(const AValue: String): Variant;
 begin
   if AValue = '' then
-    Result := Variants.Null else
+    Result := Variants.Null
+  else
     Result := AValue;
 end;
 
@@ -133,12 +139,6 @@ begin
   end;
 end;
 
-{function NewResource(const AName: String): TResourceStream;
-begin
-  Result := TResourceStream.Create(HInstance, AName, RT_RCDATA);
-  //Result.Position := 0;
-end;}
-
 function GetSingleValue(const AValues: Variant; const ADefValue: Variant;
   AIndex: Integer = 0): Variant;
 begin
@@ -147,28 +147,6 @@ begin
     if AIndex <= Variants.VarArrayHighBound(AValues, 1) then
       Result := AValues[AIndex];
 end;
-
-{function DefCellFont: TsmxCellFont;
-begin
-  with Result do
-  begin
-    Color := Integer(Graphics.clWindowText);
-    Name := 'MS Sans Serif';
-    Size := 8;
-    Style := [];
-  end;
-end;
-
-function DefCellText: TsmxCellText;
-begin
-  with Result do
-  begin
-    Caption := '';
-    Alignment := taLeftJustify;
-    Color := Integer(Graphics.clWindow);
-    Font := DefCellFont;
-  end;
-end;}
 
 function SetToStr(PTI: PTypeInfo; Value: Byte; Brackets: Boolean = False): String;
 var
@@ -238,7 +216,8 @@ begin
   if AFieldName = '' then
     Exit;
   if IsTextFieldName(AFieldName) then
-    Result := Copy(AFieldName, 1, Pos(smxConsts.cSuffixTextFieldName, AFieldName) - 1) else
+    Result := Copy(AFieldName, 1, Pos(smxConsts.cSuffixTextFieldName, AFieldName) - 1)
+  else
     Result := AFieldName;
 end;
 
@@ -248,7 +227,8 @@ begin
   if AFieldName = '' then
     Exit;
   if IsTextFieldName(AFieldName) then
-    Result := AFieldName else
+    Result := AFieldName
+  else
     Result := AFieldName + smxConsts.cSuffixTextFieldName;
 end;
 
@@ -296,42 +276,6 @@ function GetParamValueAs(AParams: TsmxParams; const AParamName: String; const AD
 begin
   Result := SysUtils.StrToDateTimeDef(Variants.VarToStrDef(GetParamValue(AParams, AParamName, Variants.Null), ''), ADefValue);
 end;
-
-{function GetRefComponent(AImplementor: TPersistent; out AController: TComponent): Boolean;
-begin
-  AController := nil;
-  if AImplementor is TsmxInterfacedPersistent then
-    if Assigned(TsmxInterfacedPersistent(AImplementor).Controller) then
-      AController := TsmxInterfacedPersistent(AImplementor).Controller.GetReference;
-  Result := Assigned(AController);
-end;}
-
-(*function IsImplIntf(AObject: TObject; const AIntf: IsmxRefComponent{IsmxRefPersistent}): Boolean;
-var
-  Intf: IsmxRefComponent{IsmxRefPersistent};
-begin
-  Result := ((Assigned(AObject)
-      and AObject.GetInterface(IsmxRefComponent{IsmxRefPersistent}, Intf)
-      and Assigned(AIntf)
-      and (Intf.GetReference = AIntf.GetReference))
-    or ((AIntf.GetReference is TsmxInterfacedComponent)
-      and SysUtils.Supports(TsmxInterfacedComponent(AIntf.GetReference).Controller, IsmxRefComponent, Intf)
-      and (AObject = Intf.GetReference)));
-end;*)
-
-{function IsInheritsFrom(ADescendant, AAnsector: PTypeInfo): Boolean;
-var
-  TypeDataDesc, TypeDataAns: PTypeData;
-begin
-  Result := False;
-  TypeDataDesc := TypInfo.GetTypeData(ADescendant);
-  TypeDataAns := TypInfo.GetTypeData(AAnsector);
-  while Assigned(TypeDataDesc) and not Result do
-  begin
-    Result := SysUtils.IsEqualGUID(TypeDataDesc^.Guid, TypeDataAns^.Guid);
-    TypeDataDesc := TypInfo.GetTypeData(TypeDataDesc^.IntfParent^);
-  end;
-end;}
 
 function IntfInheritsFrom(AIntfInfo: PTypeInfo; const IID: TGUID): Boolean;
 var

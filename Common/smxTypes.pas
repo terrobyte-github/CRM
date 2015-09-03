@@ -1,58 +1,27 @@
+{**************************************}
+{                                      }
+{            SalesMan v1.0             }
+{             Base types               }
+{                                      }
+{          Copyright (c) 2010          }
+{          Polyakov Àleksandr          }
+{                                      }
+{**************************************}
+
 unit smxTypes;
 
 interface
 
 uses
-  Classes, Controls, Graphics, DB, Types;
+  DB;
 
 type
-  {TsmxCellFont = record
-    Color: Integer;
-    Name: String;
-    Size: Integer;
-    Style: TFontStyles;
-  end;
-
-  TsmxCellText = record
-    Caption: String;
-    Alignment: TAlignment;
-    Color: Integer;
-    Font: TsmxCellFont;
-  end;}
-
   TsmxOperationMode = (omManual, omAutomatic);
 
-  {TsmxRequestSetting = record
-    CfgID: Integer;
-    Operation: TsmxOperationMode;
-    DatabaseName: String;
-  end;}
-
   TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
-    {goOwnerDrawHeader,} goEditing);
+    goEditing);
 
   TsmxGridOptions = set of TsmxGridOption;
-
-  {TsmxControlCellSetting = record
-    CfgID: Integer;
-    Align: TAlign;
-    Enable, Visible: Boolean;
-    Position: TRect;
-  end;}
-
-  {TsmxAlgorithmListSetting = record
-    CfgID: Integer;
-    IsCreateMenuItem: Boolean;
-    IsCreateToolButton: Boolean;
-  end;}
-
-  {TsmxAlgorithmSetting = record
-    CfgID: Integer;
-    Caption: String;
-    Hint: String;
-    HotKey: Integer;
-    ImageIndex: Integer;
-  end;}
 
   TsmxGenerationMode = (gmFunction, gmCOM, gmClass);
 
@@ -72,19 +41,10 @@ type
 
   TsmxFuncDatabaseCLSID = function: TGUID;
 
-  //TsmxFuncNewResource = function(Name: String): TResourceStream;
-
-  {TsmxModifySetting = record
-    InsertCfgID,
-    UpdateCfgID,
-    DeleteCfgID: Integer;
-  end;}
-
-  TsmxChangeMode = (cmReplace, cmAdd{, cmUnique});
+  TsmxChangeMode = (cmReplace, cmAdd, cmUnique);
 
   TsmxRequestType = (rtSelect, rtDelete, rtInsert, rtUpdate);
 
-  //TsmxModifyRequest = (mrDelete, mrInsert, mrUpdate);
   TsmxModifyRequest = rtDelete .. rtUpdate;
 
   TsmxColumnOption = (coEditing, coHasValue);
@@ -92,7 +52,7 @@ type
   TsmxColumnOptions = set of TsmxColumnOption;
 
   TsmxTreeOption = (toColLines, toRowLines, toRowSelect, toShowHeader,
-    {toOwnerDrawHeader,} toEditing, toTreeLines);
+    toEditing, toTreeLines);
 
   TsmxTreeOptions = set of TsmxTreeOption;
 
@@ -121,14 +81,13 @@ type
   TsmxEditorType = (etNone, etString, etNumber, etDate, etPickString,
     etButtonString);
 
-  TsmxCellState = ({Created, }csInitialized, csFinalized, {csModified, }csEventParam{, csDesigning});
+  TsmxCellState = (csInitialized, csFinalized, csEventParam);
 
-  TsmxCellStates = set of TsmxCellState; {not need if csModified will}
+  TsmxCellStates = set of TsmxCellState;
 
   TsmxCellStyle = (csRecieveCfg, csIsDesigning);
-  //TsmxCellOption = (coRecieveCfg, coIsDesigning); //, coEventParam must be alone
+
   TsmxCellStyles = set of TsmxCellStyle;
-  //TsmxCellOptions = set of TsmxCellOption;
 
   TsmxDataSetType = (dstQuery, dstStoredProc);
 
@@ -139,8 +98,7 @@ type
 
   TsmxParamType = TParamType;
 
-  TsmxDataLocation = (dlAssigned{, plKey, plValue, plResult, plMessage,
-    plForeignKey, plInput, plOutput, plInOutput}, dlStorageParam, dlCellParam,
+  TsmxDataLocation = (dlAssigned, dlStorageParam, dlCellParam,
     dlParentCellParam, dlEventParam, dlParentEventParam, dlWorkCell,
     dlParentWorkCell, dlFilterDesk, dlParentFilterDesk, dlGrid, dlParentGrid,
     dlTree, dlParentTree);

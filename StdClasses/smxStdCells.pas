@@ -1,7 +1,7 @@
 {**************************************}
 {                                      }
 {            SalesMan v1.0             }
-{        StandardCells classes         }
+{        Standard cell classes         }
 {                                      }
 {          Copyright (c) 2010          }
 {          Polyakov Àleksandr          }
