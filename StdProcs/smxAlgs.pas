@@ -93,7 +93,7 @@ begin
       List := TList.Create;
       try
         smxClassProcs.AllCells(TsmxCustomAlgorithm(Sender).CellEvent,
-          List, [TsmxWorkCell], TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).CellVisible);
+          List, [TsmxWorkCell], TsmxCustomForm(TsmxCustomAlgorithm(Sender).CellEvent).Visible);
         for i := 0 to List.Count - 1 do
           TsmxWorkCell(List[i]).Prepare;
       finally
@@ -129,8 +129,8 @@ var
 begin
   if Sender is TsmxCustomAlgorithm then
   begin
-    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
-    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ID', 0);
     if CfgID <> 0 then
     begin
       AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));
@@ -155,8 +155,8 @@ var
 begin
   if Sender is TsmxCustomAlgorithm then
   begin
-    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
-    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ID', 0);
     if CfgID <> 0 then
     begin
       FormIntf := smxProcs.gFormManagerIntf.FindByComboID(CfgID, ID);
@@ -197,8 +197,8 @@ var
 begin
   if Sender is TsmxCustomAlgorithm then
   begin
-    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0);
-    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ID', 0);
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfID', 0);
+    ID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ID', 0);
     //OkAlgCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'OkAlgCfgID', 0);
     //CancelAlgCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'CancelAlgCfgID', 0);
     if CfgID <> 0 then
@@ -627,8 +627,9 @@ begin
       RowIndex := Grid.FocusedRowIndex;
       if RowIndex <> -1 then
         if not ((Grid.GridCaptions[2, RowIndex] = '2') or (Grid.GridCaptions[2, RowIndex] = '3')) then
-          Grid.Slaves[2].ColumnOptions := Grid.Slaves[2].ColumnOptions + [coEditing] else
-          Grid.Slaves[2].ColumnOptions := Grid.Slaves[2].ColumnOptions - [coEditing];
+          Grid.Slaves[2].Options := Grid.Slaves[2].Options + [coEditing]
+        else
+          Grid.Slaves[2].Options := Grid.Slaves[2].Options - [coEditing];
     end;
 end;
 
@@ -648,8 +649,8 @@ begin
       Cfg := nil;
       if Assigned(Column.CellOwner) and Assigned(Cfg) then
       begin
-        PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'PropKit', 0);
-        FormCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'FormCfgID', 0);
+        PropKit := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'PropKit', 0);
+        FormCfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'FormCfgID', 0);
         if (PropKit in [2, 3]) and (FormCfgID <> 0) then
         begin
           AccessoryForm := smxClassFuncs.GetAccessoryForm(TsmxCustomAlgorithm(Sender));

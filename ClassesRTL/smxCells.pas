@@ -25,20 +25,20 @@ type
     function GetAction: TAction;
     procedure ActionExecute(Sender: TObject);
   protected
-    function GetAlgorithmCaption: TCaption; override;
-    function GetAlgorithmEnabled: Boolean; override;
-    function GetAlgorithmHint: String; override;
-    function GetAlgorithmHotKey: TShortCut; override;
-    function GetAlgorithmImageIndex: TImageIndex; override;
-    function GetAlgorithmVisible: Boolean; override;
+    function GetCaption: TCaption; override;
+    function GetEnabled: Boolean; override;
+    function GetHint: String; override;
+    function GetHotKey: TShortCut; override;
+    function GetImageIndex: TImageIndex; override;
+    function GetVisible: Boolean; override;
     function GetInternalRef: Pointer; override;
     procedure InternalRefreshParams; override;
-    procedure SetAlgorithmCaption(const Value: TCaption); override;
-    procedure SetAlgorithmEnabled(Value: Boolean); override;
-    procedure SetAlgorithmHint(const Value: String); override;
-    procedure SetAlgorithmHotKey(Value: TShortCut); override;
-    procedure SetAlgorithmImageIndex(Value: TImageIndex); override;
-    procedure SetAlgorithmVisible(Value: Boolean); override;
+    procedure SetCaption(const Value: TCaption); override;
+    procedure SetEnabled(Value: Boolean); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetHotKey(Value: TShortCut); override;
+    procedure SetImageIndex(Value: TImageIndex); override;
+    procedure SetVisible(Value: Boolean); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure ChangeObjectIndex(Value: Integer); override;
 
@@ -46,13 +46,13 @@ type
   public
     destructor Destroy; override;
   published
-    property AlgorithmCaption;
-    property AlgorithmEnabled;
-    property AlgorithmHint;
-    property AlgorithmHotKey;
-    property AlgorithmImageIndex;
-    property AlgorithmParams;
-    property AlgorithmVisible;
+    property Caption;
+    property Enabled;
+    property Hint;
+    property HotKey;
+    property ImageIndex;
+    property Params;
+    property Visible;
 
     property OnRefreshParams;
   end;
@@ -88,13 +88,13 @@ type
     function GetPanel: TPanel;
   protected
     function GetHeaderAlignment: TAlignment; override;
-    function GetCellCaption: TCaption; override;
+    function GetCaption: TCaption; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
     function GetInternalRef: Pointer; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
-    procedure SetCellCaption(const Value: TCaption); override;
+    procedure SetCaption(const Value: TCaption); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
 
@@ -103,14 +103,14 @@ type
   public
     destructor Destroy; override;
   published
-    property CellAlign;
-    property CellAnchors;
-    property CellEnabled;
-    property CellHeight;
-    property CellLeft;
-    property CellTop;
-    property CellVisible;
-    property CellWidth;
+    property Align;
+    property Anchors;
+    property Enabled;
+    property Height;
+    property Left;
+    property Top;
+    property Visible;
+    property Width;
     property HeaderAlignment;
     property HeaderCaption;
     property HeaderColor;
@@ -130,26 +130,26 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDeactivate(Sender: TObject);
   protected
-    function GetCellActive: Boolean; override;
-    function GetCellCaption: TCaption; override;
-    function GetCellHint: String; override;
-    function GetCellImageIndex: TImageIndex; override;
-    function GetFormBorder: TsmxFormBorder; override;
-    function GetFormPosition: TsmxFormPosition; override;
+    function GetActive: Boolean; override;
+    function GetCaption: TCaption; override;
+    function GetHint: String; override;
+    function GetImageIndex: TImageIndex; override;
+    function GetBorder: TsmxFormBorder; override;
+    function GetPosition: TsmxFormPosition; override;
     function GetInternalRef: Pointer; override;
     function GetIsMaximize: Boolean; override;
     function GetModalResult: TModalResult; override;
     procedure InternalClose; override;
     procedure InternalShow; override;
     function InternalShowModal: TModalResult; override;
-    procedure SetCellActive(Value: Boolean); override;
-    procedure SetCellCaption(const Value: TCaption); override;
-    procedure SetCellHint(const Value: String); override;
-    procedure SetCellImageIndex(Value: TImageIndex); override;
+    procedure SetActive(Value: Boolean); override;
+    procedure SetCaption(const Value: TCaption); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetImageIndex(Value: TImageIndex); override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
-    procedure SetFormBorder(Value: TsmxFormBorder); override;
-    procedure SetFormOptions(Value: TsmxFormOptions); override;
-    procedure SetFormPosition(Value: TsmxFormPosition); override;
+    procedure SetBorder(Value: TsmxFormBorder); override;
+    procedure SetOptions(Value: TsmxFormOptions); override;
+    procedure SetPosition(Value: TsmxFormPosition); override;
     procedure SetImageList(Value: TCustomImageList); override;
     procedure SetIsDesigning(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
@@ -161,21 +161,21 @@ type
   public
     destructor Destroy; override;
   published
-    property CellAlign;
-    property CellAnchors;
-    property CellCaption;
-    property CellCursor;
-    property CellEnabled;
-    property CellHeight;
-    property CellHint;
-    property CellImageIndex;
-    property CellLeft;
-    property CellTop;
-    property CellVisible;
-    property CellWidth;
-    property FormBorder;
-    property FormOptions;
-    property FormPosition;
+    property Align;
+    property Anchors;
+    property Caption;
+    property Cursor;
+    property Enabled;
+    property Height;
+    property Hint;
+    property ImageIndex;
+    property Left;
+    property Top;
+    property Visible;
+    property Width;
+    property Border;
+    property Options;
+    property Position;
     property ImageListName;
     property IsMaximize;
     property PopupMenu;
@@ -218,62 +218,62 @@ begin
   Result := FAction;
 end;
 
-function TsmxAction.GetAlgorithmCaption: TCaption;
+function TsmxAction.GetCaption: TCaption;
 begin
   Result := TCaption(Action.Caption);
 end;
 
-procedure TsmxAction.SetAlgorithmCaption(const Value: TCaption);
+procedure TsmxAction.SetCaption(const Value: TCaption);
 begin
   Action.Caption := String(Value);
 end;
 
-function TsmxAction.GetAlgorithmEnabled: Boolean;
+function TsmxAction.GetEnabled: Boolean;
 begin
   Result := Action.Enabled;
 end;
 
-procedure TsmxAction.SetAlgorithmEnabled(Value: Boolean);
+procedure TsmxAction.SetEnabled(Value: Boolean);
 begin
   Action.Enabled := Value;
 end;
 
-function TsmxAction.GetAlgorithmHint: String;
+function TsmxAction.GetHint: String;
 begin
   Result := Action.Hint;
 end;
 
-procedure TsmxAction.SetAlgorithmHint(const Value: String);
+procedure TsmxAction.SetHint(const Value: String);
 begin
   Action.Hint := Value;
 end;
 
-function TsmxAction.GetAlgorithmHotKey: TShortCut;
+function TsmxAction.GetHotKey: TShortCut;
 begin
   Result := Action.ShortCut;
 end;
 
-procedure TsmxAction.SetAlgorithmHotKey(Value: TShortCut);
+procedure TsmxAction.SetHotKey(Value: TShortCut);
 begin
   Action.ShortCut := Value;
 end;
 
-function TsmxAction.GetAlgorithmImageIndex: TImageIndex;
+function TsmxAction.GetImageIndex: TImageIndex;
 begin
   Result := Action.ImageIndex;
 end;
 
-procedure TsmxAction.SetAlgorithmImageIndex(Value: TImageIndex);
+procedure TsmxAction.SetImageIndex(Value: TImageIndex);
 begin
   Action.ImageIndex := Value;
 end;
 
-function TsmxAction.GetAlgorithmVisible: Boolean;
+function TsmxAction.GetVisible: Boolean;
 begin
   Result := Action.Visible;
 end;
 
-procedure TsmxAction.SetAlgorithmVisible(Value: Boolean);
+procedure TsmxAction.SetVisible(Value: Boolean);
 begin
   Action.Visible := Value;
 end;
@@ -294,39 +294,39 @@ begin
   Form := smxClassFuncs.GetAccessoryForm(Self);
   List := TList.Create;
   try
-    for i := 0 to AlgorithmParams.Count - 1 do
+    for i := 0 to Params.Count - 1 do
     begin
-      case AlgorithmParams[i].DataLocation of
+      case Params[i].DataLocation of
         dlFilterDesk:
         begin
           if CellAction is TsmxCustomFilterDesk then
           begin
-            Cell := TsmxCustomFilterDesk(CellAction).FindSlaveByName(AlgorithmParams[i].ParamName);
+            Cell := TsmxCustomFilterDesk(CellAction).FindSlaveByName(Params[i].ParamName);
             if Assigned(Cell) then
-              AlgorithmParams[i].ParamValue := TsmxCustomFilter(Cell).FilterValue;
+              Params[i].ParamValue := TsmxCustomFilter(Cell).Value;
           end else
-          if smxClassFuncs.FindFilterOnForm(Form, AlgorithmParams[i].ParamName, Value) then
-            AlgorithmParams[i].ParamValue := Value;
+          if smxClassFuncs.FindFilterOnForm(Form, Params[i].ParamName, Value) then
+            Params[i].ParamValue := Value;
         end;
         dlGrid:
         begin
           if CellAction is TsmxCustomGrid then
           begin
-            Cell := TsmxCustomGrid(CellAction).FindSlaveByName(AlgorithmParams[i].ParamName);
+            Cell := TsmxCustomGrid(CellAction).FindSlaveByName(Params[i].ParamName);
             if Assigned(Cell) then
-              AlgorithmParams[i].ParamValue := TsmxCustomColumn(Cell).ColumnValue;
+              Params[i].ParamValue := TsmxCustomColumn(Cell).Value;
           end else
-          if smxClassFuncs.FindColumnOnForm(Form, AlgorithmParams[i].ParamName, Value) then
-            AlgorithmParams[i].ParamValue := Value;
+          if smxClassFuncs.FindColumnOnForm(Form, Params[i].ParamName, Value) then
+            Params[i].ParamValue := Value;
         end;
         dlParentFilterDesk:
         begin
           List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), Params[i].ParamName, Value) then
             begin
-              AlgorithmParams[i].ParamValue := Value;
+              Params[i].ParamValue := Value;
               Break;
             end;
         end;
@@ -335,25 +335,25 @@ begin
           List.Clear;
           smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
           for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), AlgorithmParams[i].ParamName, Value) then
+            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), Params[i].ParamName, Value) then
             begin
-              AlgorithmParams[i].ParamValue := Value;
+              Params[i].ParamValue := Value;
               Break;
             end;
         end;
         dlStorageParam:
         begin
           if Assigned(smxProcs.gStorageManagerIntf) then
-            AlgorithmParams[i].ParamValue := smxProcs.gStorageManagerIntf.Values[AlgorithmParams[i].ParamName];
+            Params[i].ParamValue := smxProcs.gStorageManagerIntf.Values[Params[i].ParamName];
         end;
         dlParentCellParam:
         begin
           List.Clear;
           smxClassProcs.AllParents(Self, List, []);
           for j := 0 to List.Count - 1 do
-            if TsmxBaseCell(List[j]).CellParams(AlgorithmParams[i].ParamName, Value) then
+            if TsmxBaseCell(List[j]).CellParams(Params[i].ParamName, Value) then
             begin
-              AlgorithmParams[i].ParamValue := Value;
+              Params[i].ParamValue := Value;
               Break;
             end;
         end;
@@ -409,7 +409,7 @@ begin
           begin
             Cell := TsmxCustomFilterDesk(CellRequest).FindSlaveByName(CurDataSet.Params[i].ParamName);
             if Assigned(Cell) then
-              CurDataSet.Params[i].Value := TsmxCustomFilter(Cell).FilterValue;
+              CurDataSet.Params[i].Value := TsmxCustomFilter(Cell).Value;
           end else
           if smxClassFuncs.FindFilterOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
             CurDataSet.Params[i].Value := Value;
@@ -512,12 +512,12 @@ begin
   Header.Alignment := Value;
 end;
 
-function TsmxFilter.GetCellCaption: TCaption;
+function TsmxFilter.GetCaption: TCaption;
 begin
   Result := Header.Caption;
 end;
 
-procedure TsmxFilter.SetCellCaption(const Value: TCaption);
+procedure TsmxFilter.SetCaption(const Value: TCaption);
 begin
   Header.Caption := Value;
 end;
@@ -589,7 +589,7 @@ begin
   begin
     if not (fsModal in (Form.FormState)) then
     begin
-      if (foFreeOnClose in FormOptions) and not IsDesigning then
+      if (foFreeOnClose in Options) and not IsDesigning then
         Free
       else
         Form.Hide;
@@ -625,12 +625,12 @@ begin
   Close;
 end;
 
-function TsmxForm.GetCellActive: Boolean;
+function TsmxForm.GetActive: Boolean;
 begin
   Result := Form.Active;
 end;
 
-procedure TsmxForm.SetCellActive(Value: Boolean);
+procedure TsmxForm.SetActive(Value: Boolean);
 begin
   if Value then
     Form.Perform(WM_ACTIVATE, WA_ACTIVE, 0)
@@ -638,32 +638,32 @@ begin
     Form.Perform(WM_ACTIVATE, WA_INACTIVE, 0);
 end;
 
-function TsmxForm.GetCellCaption: TCaption;
+function TsmxForm.GetCaption: TCaption;
 begin
   Result := Form.Caption;
 end;
 
-procedure TsmxForm.SetCellCaption(const Value: TCaption);
+procedure TsmxForm.SetCaption(const Value: TCaption);
 begin
   Form.Caption := Value;
 end;
 
-function TsmxForm.GetCellHint: String;
+function TsmxForm.GetHint: String;
 begin
   Result := Form.Hint;
 end;
 
-procedure TsmxForm.SetCellHint(const Value: String);
+procedure TsmxForm.SetHint(const Value: String);
 begin
   Form.Hint := Value;
 end;
 
-function TsmxForm.GetCellImageIndex: TImageIndex;
+function TsmxForm.GetImageIndex: TImageIndex;
 begin
   Result := FFormImageIndex;
 end;
 
-procedure TsmxForm.SetCellImageIndex(Value: TImageIndex);
+procedure TsmxForm.SetImageIndex(Value: TImageIndex);
 begin
   if FFormImageIndex <> -1 then
     Form.Icon := nil;
@@ -693,7 +693,7 @@ begin
   Result := FForm;
 end;
 
-function TsmxForm.GetFormBorder: TsmxFormBorder;
+function TsmxForm.GetBorder: TsmxFormBorder;
 const
   InOutBorder: array[TFormBorderStyle] of TsmxFormBorder =
     (fbNone, fbDialog, fbSizeable, fbDialog, fbDialog, fbSizeable);
@@ -701,7 +701,7 @@ begin
   Result := InOutBorder[Form.BorderStyle];
 end;
 
-procedure TsmxForm.SetFormBorder(Value: TsmxFormBorder);
+procedure TsmxForm.SetBorder(Value: TsmxFormBorder);
 const
   OutInBorder: array[TsmxFormBorder] of TFormBorderStyle =
     (bsNone, bsDialog, bsSizeable);
@@ -709,7 +709,7 @@ begin
   Form.BorderStyle := OutInBorder[Value];
 end;
 
-function TsmxForm.GetFormPosition: TsmxFormPosition;
+function TsmxForm.GetPosition: TsmxFormPosition;
 const
   InOutPosition: array[TPosition] of TsmxFormPosition =
     (fpDesigned, fpDesigned, fpDesigned, fpDesigned, fpScreenCenter,
@@ -718,7 +718,7 @@ begin
   Result := InOutPosition[Form.Position];
 end;
 
-procedure TsmxForm.SetFormPosition(Value: TsmxFormPosition);
+procedure TsmxForm.SetPosition(Value: TsmxFormPosition);
 const
   OutInPosition: array[TsmxFormPosition] of TPosition =
     (poDesigned, poScreenCenter, poOwnerFormCenter);
@@ -754,14 +754,14 @@ begin
   Form.ModalResult := Value;
 end;
 
-procedure TsmxForm.SetFormOptions(Value: TsmxFormOptions);
+procedure TsmxForm.SetOptions(Value: TsmxFormOptions);
 var
   Obj: TObject;
 begin
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
     Form.Parent := nil;
-  inherited SetFormOptions(Value);
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  inherited SetOptions(Value);
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
@@ -783,10 +783,10 @@ procedure TsmxForm.SetIsDesigning(Value: Boolean);
 var
   Obj: TObject;
 begin
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
     Form.Parent := nil;
   inherited SetIsDesigning(Value);
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
@@ -798,10 +798,10 @@ procedure TsmxForm.SetCellParent(Value: TsmxBaseCell);
 var
   Obj: TObject;
 begin
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
     Form.Parent := nil;
   inherited SetCellParent(Value);
-  if ((foFrameForm in FormOptions) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then

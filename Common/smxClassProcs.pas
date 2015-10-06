@@ -55,7 +55,7 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxB
   begin
     Result := True;
     if ACurCell is TsmxControlCell then
-      Result := TsmxControlCell(ACurCell).CellActive;
+      Result := TsmxControlCell(ACurCell).Active;
   end;
 
   procedure AddChilds(ACurCell: TsmxBaseCell; AIsEmpty: Boolean);
@@ -63,7 +63,7 @@ procedure AllCells(ACell: TsmxBaseCell; AList: TList; AClassList: array of TsmxB
     i: Integer;
   begin
     if not AIncludeChildForm and (ACurCell is TsmxCustomForm)
-        and not (foFrameForm in TsmxCustomForm(ACurCell).FormOptions) then
+        and not (foFrameForm in TsmxCustomForm(ACurCell).Options) then
       Exit;
     if (AIsEmpty or IsClass(ACurCell))
         and (not AIsOnlyActive or IsActive(ACurCell))

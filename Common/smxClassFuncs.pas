@@ -208,10 +208,10 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    if foHasValue in TsmxCustomFilter(Cell).FilterOptions then
-      AValue := TsmxCustomFilter(Cell).FilterValue
+    if foHasValue in TsmxCustomFilter(Cell).Options then
+      AValue := TsmxCustomFilter(Cell).Value
     else
-      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).FilterText);
+      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).Text);
     Result := True;
   end;
 end;
@@ -235,10 +235,10 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    if coHasValue in TsmxCustomColumn(Cell).ColumnOptions then
-      AValue := TsmxCustomColumn(Cell).ColumnValue
+    if coHasValue in TsmxCustomColumn(Cell).Options then
+      AValue := TsmxCustomColumn(Cell).Value
     else
-      AValue := smxFuncs.StrToVar(TsmxCustomColumn(Cell).ColumnCaption);
+      AValue := smxFuncs.StrToVar(TsmxCustomColumn(Cell).Caption);
     Result := True;
   end;
 end;
@@ -255,7 +255,7 @@ begin
     Exit;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.CellVisible);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.Visible);
     for i := 0 to List.Count - 1 do
       if FindFilterOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin
@@ -279,7 +279,7 @@ begin
     Exit;
   List := TList.Create;
   try
-    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.CellVisible);
+    smxClassProcs.AllCells(AForm, List, [TsmxCustomSection], AForm.Visible);
     for i := 0 to List.Count - 1 do
       if FindColumnOnSection(TsmxCustomSection(List[i]), AName, AValue) then
       begin

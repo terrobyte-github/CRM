@@ -21,9 +21,8 @@ implementation
 
 uses
   Classes, Controls, Windows, Messages, TypInfo, Variants, StdCtrls, SysUtils,
-  {VirtualTrees,} smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxProcs,
-  smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes,
-  smxManagerIntf, smxConsts;
+  smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxProcs, smxClassProcs,
+  smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes, smxManagerIntf, smxConsts;
 
 type
   TsmxObjectPage = (opProperties, opEvents, opTreeView);
@@ -45,8 +44,7 @@ begin
   ATree.TreeValues[ACol, ARow] := V;
 end;
 
-procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer{;
-  AFindList: TList});
+procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Pointer);
 
   procedure AddClass(APropInfo: PPropInfo; ARow: Pointer);
   var
@@ -88,7 +86,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
       if Assigned(Obj) then
       begin
         ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
-        AddObjectProps(Obj, ATree, ARow{, AFindList});
+        AddObjectProps(Obj, ATree, ARow);
       end;
     end;
   end;
@@ -97,7 +95,6 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
   var
     Intf: IInterface;
     GUID: TGUID;
-    //Obj: TObject;
   begin
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     Intf := TypInfo.GetInterfaceProp(AObject, APropInfo);
@@ -127,23 +124,6 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
         AddObjectProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow);
       end;
     end;
-      (*if (AObject is TsmxBaseCell)
-          and (TsmxBaseCell(AObject).IsImplementedIntf(IsmxRefComponent(Intf))) then
-      begin
-        AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
-        ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference.ClassName]);
-        AddObjectProps(IsmxRefComponent{IsmxRefPersistent}(Intf).GetReference, ATree, ARow{, AFindList});
-      end else
-      begin
-        AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
-        //Obj := nil;
-        if Assigned(Intf) then
-        //begin
-          //Obj := IsmxRefComponent(Intf).GetReference;
-          ATree.TreeCaptions[1, ARow] := IsmxRefComponent(Intf).GetReference.Name; //TsmxBaseCell(Obj).Name;
-        //end;
-      end;
-    end;*)
   end;
 
   procedure AddEnumeration(APropInfo: PPropInfo; ARow: Pointer);
@@ -313,9 +293,9 @@ begin
       Tree.RowCount[Tree.RootRow] := 0;
       if Assigned(AObject) then
       begin
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options + [coEditing];
         AddObjectProps(AObject, Tree, Tree.RootRow);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options - [coEditing];
       end;
     end;
 
@@ -325,9 +305,9 @@ begin
       Tree.RowCount[Tree.RootRow] := 0;
       if Assigned(AObject) then
       begin
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options + [coEditing];
         AddObjectEvents(AObject, Tree, Tree.RootRow);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options - [coEditing];
       end;
     end;
 
@@ -337,9 +317,9 @@ begin
       Tree.RowCount[Tree.RootRow] := 0;
       if Assigned(AObject) then
       begin
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions + [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options + [coEditing];
         AddCells(AObject, Tree, Tree.RootRow, True);
-        Tree.Slaves[0].ColumnOptions := Tree.Slaves[0].ColumnOptions - [coEditing];
+        Tree.Slaves[0].Options := Tree.Slaves[0].Options - [coEditing];
       end;
     end;
   end;
@@ -358,11 +338,11 @@ begin
     Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[0].Cells[0].Cells[0].Cells[0]);
     if Tree.RowCount[Tree.RootRow] <> 0 then
     begin
-      V := Tree.TreeValues[1, Tree.Rows[Tree.RootRow, 0]]; 
+      V := Tree.TreeValues[1, Tree.Rows[Tree.RootRow, 0]];
       if Variants.VarIsArray(V) then
         Result := TObject(Integer(V[0]));
     end;
-  end; 
+  end;
 end;
 
 procedure ActiveFormCellView(Sender: TsmxComponent);
@@ -396,7 +376,7 @@ begin
   CurObj := GetObjectFormObjectProps;
   if CurObj is TsmxBaseCell then
     TsmxBaseCell(CurObj).Finalize;
-  RefreshFormObjectProps(nil, cAllObjectPages);  
+  RefreshFormObjectProps(nil, cAllObjectPages);
 end;
 
 function CreateFormCellView(AFormParent: TsmxCustomForm; ACfgID: Integer): TsmxCustomForm;
@@ -405,7 +385,6 @@ var
   Method: TMethod;
 begin
   Result := nil;
-  //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
   if Assigned(smxProcs.gClassTypeManagerIntf) then
     FormClass := TsmxCustomFormClass(
       smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -421,8 +400,8 @@ begin
     if Assigned(smxProcs.gFormManagerIntf) then
       smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
-    Result.CellLeft := 500;
-    Result.CellTop := 100;
+    Result.Left := 500;
+    Result.Top := 100;
     Method.Code := @ActiveFormCellView;
     Method.Data := Result;
     Result.OnActivate := TsmxComponentEvent(Method);
@@ -432,7 +411,7 @@ begin
     Method.Code := @CloseFormCellView;
     Method.Data := Result;
     Result.OnClose := TsmxComponentEvent(Method);
-    Result.FormOptions := [foFreeOnClose];
+    Result.Options := [foFreeOnClose];
     Result.CfgID := ACfgID;
   end;
 end;
@@ -444,7 +423,7 @@ var
   CurObj: TObject;
   NewObj: TObject;
   KitItem: TsmxKitItem;
-begin     
+begin
   if Sender is TsmxCustomForm then
   begin
     Form := TsmxCustomForm(Sender);
@@ -474,7 +453,7 @@ var
   NewObj: TObject;
   CurObj: TObject;
   KitItem: TsmxKitItem;
-begin 
+begin
   if Sender is TsmxCustomGrid then
   begin
     Grid := TsmxCustomGrid(Sender);
@@ -528,11 +507,8 @@ begin
       NewObj := DisplayObject;
     end;
     if NewObj is TsmxBaseCell then
-    //begin
       TsmxBaseCell(NewObj).Name :=
         smxFuncs.FindUniqueName(TsmxBaseCell(NewObj).Owner, smxFuncs.ClassNameWithoutPrefix(TsmxBaseCell(NewObj).ClassName));
-      //Kit.Change;
-    //end;
     RefreshFormObjectProps(NewObj, cObjectInspectorPages);
     if NewObj is TsmxBaseCell then
       RefreshFormObjectProps(TsmxBaseCell(NewObj).Owner, cObjectTreeViewPages);
@@ -574,7 +550,6 @@ var
   ToolItem: TsmxCustomToolItem;
 begin
   Result := nil;
-  //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
   if Assigned(smxProcs.gClassTypeManagerIntf) then
     FormClass := TsmxCustomFormClass(
       smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -590,18 +565,17 @@ begin
     if Assigned(smxProcs.gFormManagerIntf) then
       smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
-    Result.CellLeft := 300;
-    Result.CellTop := 50;
+    Result.Left := 300;
+    Result.Top := 50;
     Method.Code := @ActivateFormSlaveList;
     Method.Data := Result;
     Result.OnActivate := TsmxComponentEvent(Method);
     Method.Code := @DeactiveFormSlaveList;
     Method.Data := Result;
     Result.OnDeactivate := TsmxComponentEvent(Method);
-    Result.FormOptions := [foFreeOnClose];
+    Result.Options := [foFreeOnClose];
     Result.Tag := Integer(AKit);
 
-    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTGrid'));
     if Assigned(smxProcs.gClassTypeManagerIntf) then
       CellClass := TsmxBaseCellClass(
         smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -615,17 +589,17 @@ begin
     begin
       Grid := TsmxCustomGrid(CellClass.Create(nil));
       Grid.CellParent := Result;
-      Grid.CellVisible := True;
-      Grid.CellAlign := alClient;
-      Grid.GridOptions := [goEditing];
+      Grid.Visible := True;
+      Grid.Align := alClient;
+      Grid.Options := [goEditing];
       Method.Code := @ChangeRowGridFormSlaveList;
       Method.Data := Grid;
       Grid.OnChangeRow := TsmxComponentEvent(Method);
       with Grid.AddSlave do
       begin
-        CellVisible := True;
-        CellWidth := Grid.CellWidth;
-        ColumnOptions := [coHasValue];
+        Visible := True;
+        Width := Grid.Width;
+        Options := [coHasValue];
       end;
     end;
 
@@ -643,15 +617,15 @@ begin
     begin
       ToolBar := TsmxCustomToolBoard(CellClass.Create(nil));
       ToolBar.CellParent := Result;
-      ToolBar.CellVisible := True;
-      ToolBar.CellAlign := alTop;
+      ToolBar.Visible := True;
+      ToolBar.Align := alTop;
       ToolItem := ToolBar.AddSlave;
-      ToolItem.CellHint := 'Add Slave';
+      ToolItem.Hint := 'Add Slave';
       Method.Code := @AddSlaveFormSlaveList;
       Method.Data := ToolItem;
       ToolItem.OnClick := TsmxComponentEvent(Method);
       ToolItem := ToolBar.AddSlave;
-      ToolItem.CellHint := 'Del Slave';
+      ToolItem.Hint := 'Del Slave';
       Method.Code := @DelSlaveFormSlaveList;
       Method.Data := ToolItem;
       ToolItem.OnClick := TsmxComponentEvent(Method);
@@ -691,13 +665,13 @@ begin
     Grid := TsmxCustomGrid(Form.Cells[0]);
     OldFocusedRowIndex := Grid.FocusedRowIndex;
     Grid.RowCount := AKit.Count;
-    Grid.Slaves[0].ColumnOptions := Grid.Slaves[0].ColumnOptions + [coEditing];
+    Grid.Slaves[0].Options := Grid.Slaves[0].Options + [coEditing];
     for i := 0 to AKit.Count - 1 do
     begin
       Grid.GridCaptions[0, i] := Format('%d - %s', [i, AKit.Items[i].DisplayName]);
       Grid.GridValues[0, i] := Integer(AKit.Items[i]);
     end;
-    Grid.Slaves[0].ColumnOptions := Grid.Slaves[0].ColumnOptions - [coEditing];
+    Grid.Slaves[0].Options := Grid.Slaves[0].Options - [coEditing];
     if (OldFocusedRowIndex <> -1) and (OldFocusedRowIndex < Grid.RowCount) then
       Grid.FocusedRowIndex := OldFocusedRowIndex else
     if Grid.RowCount > 0 then
@@ -754,7 +728,7 @@ begin
       CfgID := 0;
       CfgName := '';
     end;
-    Form.CellCaption := Format('%s(%s).%s(%s) [%d]',
+    Form.Caption := Format('%s(%s).%s(%s) [%d]',
       [CfgName,
        Obj.ClassName,
        PropInfo^.Name,
@@ -1131,22 +1105,21 @@ begin
     if Assigned(smxProcs.gFormManagerIntf) then
       smxProcs.gFormManagerIntf.InsertFormControl(Result as IsmxFormControl);
     Result.CellParent := AFormParent;
-    Result.CellLeft := 0;
-    Result.CellTop := 50;
-    Result.CellWidth := 220;
-    Result.CellHeight := 500;
-    Result.FormOptions := [foFreeOnClose];
+    Result.Left := 0;
+    Result.Top := 50;
+    Result.Width := 220;
+    Result.Height := 500;
+    Result.Options := [foFreeOnClose];
     with Result.AddSlave do
     begin
-      CellVisible := True;
-      CellAlign := alClient;
+      Visible := True;
+      Align := alClient;
       PagePosition := ppLeft;
     end;
 
     Page := Result.Slaves[0].AddSlave;
-    Page.CellCaption := 'Object Inspector';
+    Page.Caption := 'Object Inspector';
 
-    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxPageControl'));
     if Assigned(smxProcs.gClassTypeManagerIntf) then
       CellClass := TsmxBaseCellClass(
         smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -1160,13 +1133,12 @@ begin
     begin
       PageManager := TsmxCustomPageManager(CellClass.Create(nil));
       PageManager.CellParent := Page;
-      PageManager.CellVisible := True;
-      PageManager.CellAlign := alClient;
+      PageManager.Visible := True;
+      PageManager.Align := alClient;
 
       Page := PageManager.AddSlave;
-      Page.CellCaption := 'Properties';
+      Page.Caption := 'Properties';
 
-      //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
       if Assigned(smxProcs.gClassTypeManagerIntf) then
         CellClass := TsmxBaseCellClass(
           smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -1180,9 +1152,9 @@ begin
       begin
         Tree := TsmxCustomTree(CellClass.Create(nil));
         Tree.CellParent := Page;
-        Tree.CellVisible := True;
-        Tree.CellAlign := alClient;
-        Tree.TreeOptions := [toColLines, toRowLines, toEditing];
+        Tree.Visible := True;
+        Tree.Align := alClient;
+        Tree.Options := [toColLines, toRowLines, toEditing];
         Method.Code := @BeforeEditTreeObjectPropsPage;
         Method.Data := Tree;
         Tree.OnEditing := TsmxComponentEvent(Method);
@@ -1191,21 +1163,20 @@ begin
         Tree.OnEdited := TsmxComponentEvent(Method);
         with Tree.AddSlave do
         begin
-          CellVisible := True;
-          CellWidth := (Tree.CellWidth - 50) div 2;
+          Visible := True;
+          Width := (Tree.Width - 50) div 2;
         end;
         with Tree.AddSlave do
         begin
-          CellVisible := True;
-          CellWidth := (Tree.CellWidth - 50) div 2;
-          ColumnOptions := [coEditing, coHasValue];
+          Visible := True;
+          Width := (Tree.Width - 50) div 2;
+          Options := [coEditing, coHasValue];
         end;
       end;
 
       Page := PageManager.AddSlave;
-      Page.CellCaption := 'Events';
+      Page.Caption := 'Events';
 
-      //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
       if Assigned(smxProcs.gClassTypeManagerIntf) then
         CellClass := TsmxBaseCellClass(
           smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -1219,30 +1190,29 @@ begin
       begin
         Tree := TsmxCustomTree(CellClass.Create(nil));
         Tree.CellParent := Page;
-        Tree.CellVisible := True;
-        Tree.CellAlign := alClient;
-        Tree.TreeOptions := [toColLines, toRowLines, toEditing];
+        Tree.Visible := True;
+        Tree.Align := alClient;
+        Tree.Options := [toColLines, toRowLines, toEditing];
         Method.Code := @BeforeEditTreeObjectEventsPage;
         Method.Data := Tree;
         Tree.OnEditing := TsmxComponentEvent(Method);
         with Tree.AddSlave do
         begin
-          CellVisible := True;
-          CellWidth := (Tree.CellWidth - 50) div 2;
+          Visible := True;
+          Width := (Tree.Width - 50) div 2;
         end;
         with Tree.AddSlave do
         begin
-          CellVisible := True;
-          CellWidth := (Tree.CellWidth - 50) div 2;
-          ColumnOptions := [coEditing, coHasValue];
+          Visible := True;
+          Width := (Tree.Width - 50) div 2;
+          Options := [coEditing, coHasValue];
         end;
       end;
     end;
 
     Page := Result.Slaves[0].AddSlave;
-    Page.CellCaption := 'Object TreeView';
+    Page.Caption := 'Object TreeView';
 
-    //CellClass := TsmxBaseCellClass(Classes.GetClass('TsmxVTTree'));
     if Assigned(smxProcs.gClassTypeManagerIntf) then
       CellClass := TsmxBaseCellClass(
         smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
@@ -1256,17 +1226,17 @@ begin
     begin
       Tree := TsmxCustomTree(CellClass.Create(nil));
       Tree.CellParent := Page;
-      Tree.CellVisible := True;
-      Tree.CellAlign := alClient;
-      Tree.TreeOptions := [toEditing, toTreeLines];
+      Tree.Visible := True;
+      Tree.Align := alClient;
+      Tree.Options := [toEditing, toTreeLines];
       Method.Code := @ChangeRowTreePageTreeView;
       Method.Data := Tree;
       Tree.OnChangeRow := TsmxComponentEvent(Method);
       with Tree.AddSlave do
       begin
-        CellVisible := True;
-        CellWidth := Tree.CellWidth;
-        ColumnOptions := [coHasValue];
+        Visible := True;
+        Width := Tree.Width;
+        Options := [coHasValue];
       end;
     end;
   end;
@@ -1281,9 +1251,9 @@ var
 begin   
   if Sender is TsmxCustomAlgorithm then
   begin
-    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfID', 0); 
-    CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfType', 0);
-    CfgName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).AlgorithmParams, 'ConfName', '');
+    CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfID', 0);
+    CfgType := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfType', 0);
+    CfgName := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfName', '');
     if CfgID <> 0 then
     begin
       Obj := nil;
@@ -1313,12 +1283,10 @@ begin
             TsmxBaseCell(Obj).Initialize;
             TsmxBaseCell(Obj).IsDesigning := True;
 
-            Form.CellCaption := Format('%s(%s) [%d]',
+            Form.Caption := Format('%s(%s) [%d]',
               [TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName, CfgID]);
-          end;// else
-            //Obj := Form.Cells[0];
+          end;
           Form.Show;
-          //TsmxBaseCell(Obj).IsDesigning := True;
         end;
       finally
         if Assigned(Obj) and (CfgType = 100) then
