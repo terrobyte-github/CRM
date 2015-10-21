@@ -626,7 +626,7 @@ begin
       Grid := TsmxCustomGrid(TsmxCustomAlgorithm(Sender).CellEvent);
       RowIndex := Grid.FocusedRowIndex;
       if RowIndex <> -1 then
-        if not ((Grid.GridCaptions[2, RowIndex] = '2') or (Grid.GridCaptions[2, RowIndex] = '3')) then
+        if not ((Grid.GridTexts[2, RowIndex] = '2') or (Grid.GridTexts[2, RowIndex] = '3')) then
           Grid.Slaves[2].Options := Grid.Slaves[2].Options + [coEditing]
         else
           Grid.Slaves[2].Options := Grid.Slaves[2].Options - [coEditing];

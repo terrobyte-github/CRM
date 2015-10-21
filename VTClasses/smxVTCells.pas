@@ -38,26 +38,27 @@ type
     function GetVisible: Boolean; override;
     function GetWidth: Integer; override;
     function GetAlignment: TAlignment; override;
-    function GetCaption: String; override;
+    function GetText: String; override;
     function GetColor: TColor; override;
     function GetFont: TFont; override;
     function GetValue: Variant; override;
     function GetHeaderAlignment: TAlignment; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
-    function GetHeaderCaption: String; override;
+    function GetHeaderText: String; override;
     function GetInternalRef: Pointer; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetVisible(Value: Boolean); override;
     procedure SetWidth(Value: Integer); override;
     procedure SetAlignment(Value: TAlignment); override;
-    procedure SetCaption(const Value: String); override;
+    procedure SetOptions(Value: TsmxColumnOptions); override;
+    procedure SetText(const Value: String); override;
     procedure SetColor(Value: TColor); override;
     procedure SetFont(Value: TFont); override;
     procedure SetValue(const Value: Variant); override;
     procedure SetCellFeedBack; override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
-    procedure SetHeaderCaption(const Value: String); override;
+    procedure SetHeaderText(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
     procedure ChangeObjectIndex(Value: Integer); override;
@@ -76,7 +77,7 @@ type
     property Visible;
     property Width;
     property HeaderAlignment;
-    property HeaderCaption;
+    property HeaderText;
     property HeaderColor;
     property HeaderFont;
 
@@ -108,16 +109,16 @@ type
   private
     function GetItem(Index: Integer): TsmxVTNode;
     procedure SetItem(Index: Integer; Value: TsmxVTNode);
-    function GetNodeCaption(ColIndex: Integer; Node: PVirtualNode): String;
+    function GetNodeText(ColIndex: Integer; Node: PVirtualNode): String;
     function GetNodeValue(ColIndex: Integer; Node: PVirtualNode): Variant;
-    procedure SetNodeCaption(ColIndex: Integer; Node: PVirtualNode; const Value: String);
+    procedure SetNodeText(ColIndex: Integer; Node: PVirtualNode; const Value: String);
     procedure SetNodeValue(ColIndex: Integer; Node: PVirtualNode; const Value: Variant);
   public
     function Add: TsmxVTNode;
     function FindNodeByIndex(ColIndex: Integer; Node: PVirtualNode): TsmxVTNode;
 
     property Items[Index: Integer]: TsmxVTNode read GetItem write SetItem; default;
-    property NodeCaptions[ColIndex: Integer; Node: PVirtualNode]: String read GetNodeCaption write SetNodeCaption;
+    property NodeTexts[ColIndex: Integer; Node: PVirtualNode]: String read GetNodeText write SetNodeText;
     property NodeValues[ColIndex: Integer; Node: PVirtualNode]: Variant read GetNodeValue write SetNodeValue;
   end;
 
@@ -189,7 +190,7 @@ type
     function GetHint: String; override;
     function GetFocusedRowIndex: Integer; override;
     function GetFocusedColIndex: Integer; override;
-    function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
+    function GetGridText(ColIndex, RowIndex: Integer): String; override;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
     function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
@@ -200,8 +201,8 @@ type
     procedure SetHint(const Value: String); override;
     procedure SetFocusedColIndex(Value: Integer); override;
     procedure SetFocusedRowIndex(Value: Integer); override;
-    procedure SetGridCaption(ColIndex, RowIndex: Integer; const Value: String); override;
     procedure SetOptions(Value: TsmxGridOptions); override;
+    procedure SetGridText(ColIndex, RowIndex: Integer; const Value: String); override;
     procedure SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant); override;
     procedure SetRowCount(Value: Integer); override;
 
@@ -279,7 +280,7 @@ type
     function GetRow(RowIndex: Pointer; Index: Integer): Pointer; override;
     function GetRowCount(RowIndex: Pointer): Integer; override;
     function GetSlaveClass: TsmxBaseCellClass; override;
-    function GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String; override;
+    function GetTreeText(ColIndex: Integer; RowIndex: Pointer): String; override;
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetHint(const Value: String); override;
@@ -288,8 +289,8 @@ type
     procedure SetFocusedRowIndex(Value: Pointer); override;
     procedure SetParentRow(RowIndex, Value: Pointer); override;
     procedure SetRowCount(RowIndex: Pointer; Value: Integer); override;
-    procedure SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String); override;
     procedure SetOptions(Value: TsmxTreeOptions); override;
+    procedure SetTreeText(ColIndex: Integer; RowIndex: Pointer; const Value: String); override;
     procedure SetTreeValue(ColIndex: Integer; RowIndex: Pointer; const Value: Variant); override;
 
     property DBText[ColIndex: Integer; Node: PVirtualNode]: String read GetDBText write SetDBText;
@@ -469,32 +470,32 @@ begin
   end;
 end;
 
-function TsmxVTColumn.GetCaption: String;
+function TsmxVTColumn.GetText: String;
 begin
   Result := '';
   if CellOwner is TsmxCustomGrid then
   begin
     if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
-      Result := TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
+      Result := TsmxCustomGrid(CellOwner).GridTexts[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
   end else
   if CellOwner is TsmxCustomTree then
   begin
     if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
-      Result := TsmxCustomTree(CellOwner).TreeCaptions[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex];
+      Result := TsmxCustomTree(CellOwner).TreeTexts[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex];
   end;
 end;
 
-procedure TsmxVTColumn.SetCaption(const Value: String);
+procedure TsmxVTColumn.SetText(const Value: String);
 begin
   if CellOwner is TsmxCustomGrid then
   begin
     if TsmxCustomGrid(CellOwner).FocusedRowIndex <> -1 then
-      TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
+      TsmxCustomGrid(CellOwner).GridTexts[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
   end else
   if CellOwner is TsmxCustomTree then
   begin
     if Assigned(TsmxCustomTree(CellOwner).FocusedRowIndex) then
-      TsmxCustomTree(CellOwner).TreeCaptions[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex] := Value;
+      TsmxCustomTree(CellOwner).TreeTexts[SlaveIndex, TsmxCustomTree(CellOwner).FocusedRowIndex] := Value;
   end;
 end;
 
@@ -596,12 +597,12 @@ begin
   end;
 end;
 
-function TsmxVTColumn.GetHeaderCaption: String;
+function TsmxVTColumn.GetHeaderText: String;
 begin
   Result := String(VTColumn.Text);
 end;
 
-procedure TsmxVTColumn.SetHeaderCaption(const Value: String);
+procedure TsmxVTColumn.SetHeaderText(const Value: String);
 begin
   VTColumn.Text := WideString(Value);
 end;
@@ -700,6 +701,15 @@ begin
   VTColumn.Index := Value;
 end;
 
+procedure TsmxVTColumn.SetOptions(Value: TsmxColumnOptions);
+begin
+  inherited SetOptions(Value);
+  if coResize in Value then
+    VTColumn.Options := VTColumn.Options + [coResizable]
+  else
+    VTColumn.Options := VTColumn.Options - [coResizable];  
+end;
+
 { TsmxVTNode }
 
 procedure TsmxVTNode.Assign(Source: TsmxKitItem);
@@ -752,7 +762,7 @@ begin
   inherited Items[Index] := Value;
 end;
 
-function TsmxVTNodes.GetNodeCaption(ColIndex: Integer; Node: PVirtualNode): String;
+function TsmxVTNodes.GetNodeText(ColIndex: Integer; Node: PVirtualNode): String;
 var
   VTNode: TsmxVTNode;
 begin
@@ -766,7 +776,7 @@ begin
   Result := VTNode.ParamName;
 end;
 
-procedure TsmxVTNodes.SetNodeCaption(ColIndex: Integer; Node: PVirtualNode; const Value: String);
+procedure TsmxVTNodes.SetNodeText(ColIndex: Integer; Node: PVirtualNode; const Value: String);
 var
   VTNode: TsmxVTNode;
 begin
@@ -895,7 +905,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
               Result := Variants.VarToStr(Field.Value);
           end;
@@ -918,7 +928,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -946,7 +956,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
               Result := Field.Value;
           end;
@@ -969,7 +979,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1010,7 +1020,7 @@ begin
     VTGrid.FocusedNode := Node;
 end;
 
-function TsmxVTGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
+function TsmxVTGrid.GetGridText(ColIndex, RowIndex: Integer): String;
 var
   Node: PVirtualNode;
 begin
@@ -1021,11 +1031,11 @@ begin
     if Assigned(Request) then
       Result := DBText[ColIndex, Node]
     else
-      Result := VTNodes.NodeCaptions[ColIndex, Node];
+      Result := VTNodes.NodeTexts[ColIndex, Node];
   end;
 end;
 
-procedure TsmxVTGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
+procedure TsmxVTGrid.SetGridText(ColIndex, RowIndex: Integer; const Value: String);
 var
   Node: PVirtualNode;
 begin
@@ -1037,7 +1047,7 @@ begin
       if Assigned(Request) then
         DBText[ColIndex, Node] := Value
       else
-        VTNodes.NodeCaptions[ColIndex, Node] := Value;
+        VTNodes.NodeTexts[ColIndex, Node] := Value;
     end;
   end;
 end;
@@ -1047,16 +1057,13 @@ var
   Node: PVirtualNode;
 begin
   Result := Variants.Null;
-  if coHasValue in Slaves[ColIndex].Options then
+  Node := RowIndexToNode(RowIndex);
+  if Assigned(Node) then
   begin
-    Node := RowIndexToNode(RowIndex);
-    if Assigned(Node) then
-    begin
-      if Assigned(Request) then
-        Result := DBValue[ColIndex, Node]
-      else
-        Result := VTNodes.NodeValues[ColIndex, Node];
-    end;
+    if Assigned(Request) then
+      Result := DBValue[ColIndex, Node]
+    else
+      Result := VTNodes.NodeValues[ColIndex, Node];
   end;
 end;
 
@@ -1064,7 +1071,7 @@ procedure TsmxVTGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Vari
 var
   Node: PVirtualNode;
 begin
-  if [coEditing, coHasValue] * Slaves[ColIndex].Options = [coEditing, coHasValue] then
+  if coEditing in Slaves[ColIndex].Options then
   begin
     Node := RowIndexToNode(RowIndex);
     if Assigned(Node) then
@@ -1223,7 +1230,7 @@ begin
         if hpeText in Elements then
         begin
           TargetCanvas.Font := TsmxCustomColumn(Wrapper).HeaderFont;
-          TargetCanvas.TextOut(TextRectangle.Left, TextRectangle.Top, String(TsmxCustomColumn(Wrapper).HeaderCaption));
+          TargetCanvas.TextOut(TextRectangle.Left, TextRectangle.Top, String(TsmxCustomColumn(Wrapper).HeaderText));
         end;
       end;
     end;
@@ -1275,7 +1282,7 @@ begin
   if Assigned(Request) then
     Text := WideString(DBText[Column, Node])
   else
-    Text := WideString(VTNodes.NodeCaptions[Column, Node]);
+    Text := WideString(VTNodes.NodeTexts[Column, Node]);
 end;
 
 procedure TsmxVTGrid.VTGridHeaderClick(Sender: TVTHeader; Column: TColumnIndex;
@@ -1301,7 +1308,7 @@ begin
   if Assigned(Request) then
     DBText[Column, Node] := String(NewText)
   else
-    VTNodes.NodeCaptions[Column, Node] := String(NewText);
+    VTNodes.NodeTexts[Column, Node] := String(NewText);
 end;
 
 procedure TsmxVTGrid.VTGridPaintText(Sender: TBaseVirtualTree;
@@ -1366,7 +1373,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
               Result := Variants.VarToStr(Field.Value);
           end;
@@ -1389,7 +1396,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1417,7 +1424,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
               Result := Field.Value;
           end;
@@ -1440,7 +1447,7 @@ begin
         try
           if SetRecordNoByNode(Node) then
           begin
-            Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1488,7 +1495,7 @@ begin
   VTTree.FocusedNode := PVirtualNode(Value);
 end;
 
-function TsmxVTTree.GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String;
+function TsmxVTTree.GetTreeText(ColIndex: Integer; RowIndex: Pointer): String;
 begin
   Result := '';
   if Assigned(RowIndex) then
@@ -1496,11 +1503,11 @@ begin
     if Assigned(Request) then
       Result := DBText[ColIndex, RowIndex]
     else
-      Result := VTNodes.NodeCaptions[ColIndex, RowIndex];
+      Result := VTNodes.NodeTexts[ColIndex, RowIndex];
   end;
 end;
 
-procedure TsmxVTTree.SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String);
+procedure TsmxVTTree.SetTreeText(ColIndex: Integer; RowIndex: Pointer; const Value: String);
 begin
   if coEditing in Slaves[ColIndex].Options then
     if Assigned(RowIndex) then
@@ -1508,26 +1515,25 @@ begin
       if Assigned(Request) then
         DBText[ColIndex, RowIndex] := Value
       else
-        VTNodes.NodeCaptions[ColIndex, RowIndex] := Value;
+        VTNodes.NodeTexts[ColIndex, RowIndex] := Value;
     end;
 end;
 
 function TsmxVTTree.GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant;
 begin
   Result := Variants.Null;
-  if coHasValue in Slaves[ColIndex].Options then
-    if Assigned(RowIndex) then
-    begin
-      if Assigned(Request) then
-        Result := DBValue[ColIndex, RowIndex]
-      else
-        Result := VTNodes.NodeValues[ColIndex, RowIndex];
-    end;
+  if Assigned(RowIndex) then
+  begin
+    if Assigned(Request) then
+      Result := DBValue[ColIndex, RowIndex]
+    else
+      Result := VTNodes.NodeValues[ColIndex, RowIndex];
+  end;
 end;
 
 procedure TsmxVTTree.SetTreeValue(ColIndex: Integer; RowIndex: Pointer; const Value: Variant);
 begin
-  if [coEditing, coHasValue] * Slaves[ColIndex].Options = [coEditing, coHasValue] then
+  if coEditing in Slaves[ColIndex].Options then
     if Assigned(RowIndex) then
     begin
       if Assigned(Request) then
@@ -1727,7 +1733,7 @@ begin
         if hpeText in Elements then
         begin
           TargetCanvas.Font := TsmxCustomColumn(Wrapper).HeaderFont;
-          TargetCanvas.TextOut(TextRectangle.Left, TextRectangle.Top, String(TsmxCustomColumn(Wrapper).HeaderCaption));
+          TargetCanvas.TextOut(TextRectangle.Left, TextRectangle.Top, String(TsmxCustomColumn(Wrapper).HeaderText));
         end;
       end;
     end;
@@ -1815,7 +1821,7 @@ begin
   if Assigned(Request) then
     Text := WideString(DBText[Column, Node])
   else
-    Text := WideString(VTNodes.NodeCaptions[Column, Node]);
+    Text := WideString(VTNodes.NodeTexts[Column, Node]);
 end;
 
 procedure TsmxVTTree.VTTreeHeaderClick(Sender: TVTHeader; Column: TColumnIndex;
@@ -1841,7 +1847,7 @@ begin
   if Assigned(Request) then
     DBText[Column, Node] := String(NewText)
   else
-    VTNodes.NodeCaptions[Column, Node] := String(NewText);
+    VTNodes.NodeTexts[Column, Node] := String(NewText);
 end;
 
 procedure TsmxVTTree.VTTreePaintText(Sender: TBaseVirtualTree;

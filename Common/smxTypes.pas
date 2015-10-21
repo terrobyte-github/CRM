@@ -16,13 +16,6 @@ uses
   DB;
 
 type
-  TsmxOperationMode = (omManual, omAutomatic);
-
-  TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
-    goEditing);
-
-  TsmxGridOptions = set of TsmxGridOption;
-
   TsmxGenerationMode = (gmFunction, gmCOM, gmClass);
 
   TsmxProjectConnection = record
@@ -43,20 +36,27 @@ type
 
   TsmxChangeMode = (cmReplace, cmAdd, cmUnique);
 
+  TsmxOperationMode = (omManual, omAutomatic);
+
+  TsmxGridOption = (goColLines, goRowLines, goRowSelect, goShowHeader,
+    goEditing, goColResize);
+
+  TsmxGridOptions = set of TsmxGridOption;
+
   TsmxRequestType = (rtSelect, rtDelete, rtInsert, rtUpdate);
 
   TsmxModifyRequest = rtDelete .. rtUpdate;
 
-  TsmxColumnOption = (coEditing, coHasValue);
+  TsmxColumnOption = (coEditing, coResize);
 
   TsmxColumnOptions = set of TsmxColumnOption;
 
   TsmxTreeOption = (toColLines, toRowLines, toRowSelect, toShowHeader,
-    toEditing, toTreeLines);
+    toEditing, toTreeLines, toColResize);
 
   TsmxTreeOptions = set of TsmxTreeOption;
 
-  TsmxFilterOption = (foApply, foPrepare, foEditing, foHasValue);
+  TsmxFilterOption = (foApply, foPrepare, foEditing);
 
   TsmxFilterOptions = set of TsmxFilterOption;
 

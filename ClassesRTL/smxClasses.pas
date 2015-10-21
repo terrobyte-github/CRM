@@ -267,11 +267,11 @@ type
     property OnRestore: TsmxComponentEvent read FOnRestore write FOnRestore;
   end;
 
-  { TsmxActionCell }
+  { TsmxAlgorithmCell }
 
   TsmxCustomAlgorithm = class;
 
-  TsmxActionCell = class(TsmxControlCell)
+  TsmxAlgorithmCell = class(TsmxControlCell)
   private
     FAlgorithm: TsmxCustomAlgorithm;
     FIsSetAlgorithmEvents: Boolean;
@@ -304,7 +304,7 @@ type
 
   { TsmxWorkCell }
 
-  TsmxWorkCell = class(TsmxActionCell)
+  TsmxWorkCell = class(TsmxAlgorithmCell)
   private
     FOnApply: TsmxComponentEvent;
     FOnCancel: TsmxComponentEvent;
@@ -375,7 +375,7 @@ type
   TsmxCustomAlgorithm = class(TsmxOwnerCell)
   private
     FParams: TsmxAlgorithmParams;
-    FCellAction: TsmxBaseCell;
+    FCellAlgorithm: TsmxBaseCell;
     FCellEvent: TsmxBaseCell;
     FIsManualRefreshParams: Boolean;
     FOnExecute: TsmxComponentEvent;
@@ -402,7 +402,7 @@ type
     procedure SetImageIndex(Value: TImageIndex); virtual;
     procedure SetParams(Value: TsmxAlgorithmParams); virtual;
     procedure SetVisible(Value: Boolean); virtual;
-    procedure SetCellAction(Value: TsmxBaseCell); virtual;
+    procedure SetCellAlgorithm(Value: TsmxBaseCell); virtual;
     procedure SetCellEvent(Value: TsmxBaseCell); virtual;
     procedure SetIsManualRefreshParams(Value: Boolean); virtual;
   public
@@ -419,7 +419,7 @@ type
     property ImageIndex: TImageIndex read GetImageIndex write SetImageIndex;
     property Params: TsmxAlgorithmParams read GetParams write SetParams;
     property Visible: Boolean read GetVisible write SetVisible;
-    property CellAction: TsmxBaseCell read FCellAction write SetCellAction;
+    property CellAlgorithm: TsmxBaseCell read FCellAlgorithm write SetCellAlgorithm;
     property CellEvent: TsmxBaseCell read FCellEvent write SetCellEvent;
     property CellOwner: TsmxCustomAlgorithmList read GetCellOwner write SetCellOwner;
     property IsManualRefreshParams: Boolean read FIsManualRefreshParams write SetIsManualRefreshParams;
@@ -555,40 +555,40 @@ type
   protected
     procedure DoClickHeader; virtual;
     function GetAlignment: TAlignment; virtual;
-    function GetCaption: String; virtual;
+    function GetText: String; virtual;
     function GetColor: TColor; virtual;
     function GetFont: TFont; virtual;
     function GetValue: Variant; virtual;
     function GetHeaderAlignment: TAlignment; virtual;
     function GetHeaderColor: TColor; virtual;
     function GetHeaderFont: TFont; virtual;
-    function GetHeaderCaption: String; virtual;
+    function GetHeaderText: String; virtual;
     procedure InternalClickHeader; virtual;
     procedure SetAlignment(Value: TAlignment); virtual;
-    procedure SetCaption(const Value: String); virtual;
+    procedure SetText(const Value: String); virtual;
     procedure SetColor(Value: TColor); virtual;
     procedure SetFont(Value: TFont); virtual;
     procedure SetOptions(Value: TsmxColumnOptions); virtual;
     procedure SetValue(const Value: Variant); virtual;
     procedure SetHeaderAlignment(Value: TAlignment); virtual;
-    procedure SetHeaderCaption(const Value: String); virtual;
     procedure SetHeaderColor(Value: TColor); virtual;
     procedure SetHeaderFont(Value: TFont); virtual;
+    procedure SetHeaderText(const Value: String); virtual;
   public
     procedure Assign(Source: TPersistent); override;
     procedure ClickHeader;
 
     property CellOwner: TsmxCustomColumns read GetCellOwner write SetCellOwner;
     property Alignment: TAlignment read GetAlignment write SetAlignment;
-    property Caption: String read GetCaption write SetCaption;
+    property Text: String read GetText write SetText;
     property Color: TColor read GetColor write SetColor;
     property Font: TFont read GetFont write SetFont;
     property Options: TsmxColumnOptions read FOptions write SetOptions;
     property Value: Variant read GetValue write SetValue;
     property HeaderAlignment: TAlignment read GetHeaderAlignment write SetHeaderAlignment;
-    property HeaderCaption: String read GetHeaderCaption write SetHeaderCaption;
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor;
     property HeaderFont: TFont read GetHeaderFont write SetHeaderFont;
+    property HeaderText: String read GetHeaderText write SetHeaderText;
 
     property OnClickHeader: TsmxComponentEvent read FOnClickHeader write FOnClickHeader;
   end;
@@ -620,7 +620,7 @@ type
   protected
     procedure DoChangeRow; virtual;
     function GetFocusedRowIndex: Integer; virtual;
-    function GetGridCaption(ColIndex, RowIndex: Integer): String; virtual;
+    function GetGridText(ColIndex, RowIndex: Integer): String; virtual;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; virtual;
     function GetRowCount: Integer; virtual;
     procedure InternalApply; override;
@@ -630,7 +630,7 @@ type
     procedure InternalRefresh; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure SetFocusedRowIndex(Value: Integer); virtual;
-    procedure SetGridCaption(ColIndex, RowIndex: Integer; const Value: String); virtual;
+    procedure SetGridText(ColIndex, RowIndex: Integer; const Value: String); virtual;
     procedure SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant); virtual;
     procedure SetOptions(Value: TsmxGridOptions); virtual;
     procedure SetRequest(Value: TsmxCustomRequest); virtual;
@@ -640,7 +640,7 @@ type
     procedure ChangeRow;
 
     property FocusedRowIndex: Integer read GetFocusedRowIndex write SetFocusedRowIndex;
-    property GridCaptions[ColIndex, RowIndex: Integer]: String read GetGridCaption write SetGridCaption;
+    property GridTexts[ColIndex, RowIndex: Integer]: String read GetGridText write SetGridText;
     property GridValues[ColIndex, RowIndex: Integer]: Variant read GetGridValue write SetGridValue;
     property Options: TsmxGridOptions read FOptions write SetOptions;
     property Request: TsmxCustomRequest read FRequest write SetRequest;
@@ -673,7 +673,7 @@ type
     function GetRootRow: Pointer; virtual;
     function GetRow(RowIndex: Pointer; Index: Integer): Pointer; virtual;
     function GetRowCount(RowIndex: Pointer): Integer; virtual;
-    function GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String; virtual;
+    function GetTreeText(ColIndex: Integer; RowIndex: Pointer): String; virtual;
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; virtual;
     procedure InternalApply; override;
     procedure InternalCancel; override;
@@ -690,7 +690,7 @@ type
     procedure SetParentRow(RowIndex, Value: Pointer); virtual;
     procedure SetRequest(Value: TsmxCustomRequest); virtual;
     procedure SetRowCount(RowIndex: Pointer; Value: Integer); virtual;
-    procedure SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String); virtual;
+    procedure SetTreeText(ColIndex: Integer; RowIndex: Pointer; const Value: String); virtual;
     procedure SetOptions(Value: TsmxTreeOptions); virtual;
     procedure SetTreeValue(ColIndex: Integer; RowIndex: Pointer; const Value: Variant); virtual;
   public
@@ -711,8 +711,8 @@ type
     property RootRow: Pointer read GetRootRow;
     property RowCount[RowIndex: Pointer]: Integer read GetRowCount write SetRowCount;
     property Rows[RowIndex: Pointer; Index: Integer]: Pointer read GetRow;
-    property TreeCaptions[ColIndex: Integer; RowIndex: Pointer]: String read GetTreeCaption write SetTreeCaption;
     property Options: TsmxTreeOptions read FOptions write SetOptions;
+    property TreeTexts[ColIndex: Integer; RowIndex: Pointer]: String read GetTreeText write SetTreeText;
     property TreeValues[ColIndex: Integer; RowIndex: Pointer]: Variant read GetTreeValue write SetTreeValue;
 
     property OnChangeRow: TsmxComponentEvent read FOnChangeRow write FOnChangeRow;
@@ -726,7 +726,7 @@ type
 
   TsmxCustomFilterDesk = class;
 
-  TsmxCustomFilter = class(TsmxActionCell)
+  TsmxCustomFilter = class(TsmxAlgorithmCell)
   private
     FOptions: TsmxFilterOptions;
     FOnChangeFilter: TsmxComponentEvent;
@@ -743,7 +743,8 @@ type
     function GetHeaderAlignment: TAlignment; virtual;
     function GetHeaderColor: TColor; virtual;
     function GetHeaderFont: TFont; virtual;
-    function GetValueFormat: String; virtual;
+    function GetHeaderText: String; virtual;
+    function GetTextFormat: String; virtual;
     procedure InternalChangeFilter; virtual;
     procedure SetDisplayFormat(const Value: String); virtual;
     procedure SetAlignment(Value: TAlignment); virtual;
@@ -755,7 +756,8 @@ type
     procedure SetHeaderAlignment(Value: TAlignment); virtual;
     procedure SetHeaderColor(Value: TColor); virtual;
     procedure SetHeaderFont(Value: TFont); virtual;
-    procedure SetValueFormat(const Value: String); virtual;
+    procedure SetHeaderText(const Value: String); virtual;
+    procedure SetTextFormat(const Value: String); virtual;
   public
     procedure Assign(Source: TPersistent); override;
     procedure ChangeFilter;
@@ -769,10 +771,10 @@ type
     property Options: TsmxFilterOptions read FOptions write SetOptions;
     property Value: Variant read GetValue write SetValue;
     property HeaderAlignment: TAlignment read GetHeaderAlignment write SetHeaderAlignment;
-    property HeaderCaption: TCaption read GetCaption write SetCaption;
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor;
     property HeaderFont: TFont read GetHeaderFont write SetHeaderFont;
-    property ValueFormat: String read GetValueFormat write SetValueFormat;
+    property HeaderText: String read GetHeaderText write SetHeaderText;
+    property TextFormat: String read GetTextFormat write SetTextFormat;
 
     property OnChangeFilter: TsmxComponentEvent read FOnChangeFilter write FOnChangeFilter;
   end;
@@ -815,7 +817,7 @@ type
 
   TsmxCustomPageManager = class;
 
-  TsmxCustomPage = class(TsmxActionCell)
+  TsmxCustomPage = class(TsmxAlgorithmCell)
   private
     function GetCellOwner: TsmxCustomPageManager;
     function GetSlave(Index: Integer): TsmxCustomSection;
@@ -865,7 +867,7 @@ type
 
   { TsmxCustomMenuItem }
 
-  TsmxCustomMenuItem = class(TsmxActionCell)
+  TsmxCustomMenuItem = class(TsmxAlgorithmCell)
   private
     function GetCellOwner: TsmxControlCell;
     function GetSlave(Index: Integer): TsmxCustomMenuItem;
@@ -942,7 +944,7 @@ type
 
   TsmxCustomToolBoard = class;
 
-  TsmxCustomToolItem = class(TsmxActionCell)
+  TsmxCustomToolItem = class(TsmxAlgorithmCell)
   private
     function GetCellOwner: TsmxCustomToolBoard;
     procedure SetCellOwner(Value: TsmxCustomToolBoard);
@@ -1003,7 +1005,7 @@ type
 
   TsmxCustomStatusBoard = class;
 
-  TsmxCustomStatusItem = class(TsmxActionCell)
+  TsmxCustomStatusItem = class(TsmxAlgorithmCell)
   private
     FOnDrawPanel: TsmxComponentEvent;
     function GetCellOwner: TsmxCustomStatusBoard;
@@ -1042,7 +1044,7 @@ type
 
   { TsmxCustomForm }
 
-  TsmxCustomForm = class(TsmxActionCell, IsmxFormControl)
+  TsmxCustomForm = class(TsmxAlgorithmCell, IsmxFormControl)
   private
     FAlgorithmList: TsmxCustomAlgorithmList;
     FOptions: TsmxFormOptions;
@@ -2125,62 +2127,62 @@ begin
     FPopupMenu.FreeNotification(Self);
 end;
 
-{ TsmxActionCell }
+{ TsmxAlgorithmCell }
 
-procedure TsmxActionCell.Assign(Source: TPersistent);
+procedure TsmxAlgorithmCell.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
-  if Source is TsmxActionCell then
+  if Source is TsmxAlgorithmCell then
   begin
-    Caption := TsmxActionCell(Source).Caption;
-    Hint := TsmxActionCell(Source).Hint;
-    ImageIndex := TsmxActionCell(Source).ImageIndex;
-    IsSetAlgorithmEvents := TsmxActionCell(Source).IsSetAlgorithmEvents;
-    IsSetAlgorithmProps := TsmxActionCell(Source).IsSetAlgorithmProps;
+    Caption := TsmxAlgorithmCell(Source).Caption;
+    Hint := TsmxAlgorithmCell(Source).Hint;
+    ImageIndex := TsmxAlgorithmCell(Source).ImageIndex;
+    IsSetAlgorithmEvents := TsmxAlgorithmCell(Source).IsSetAlgorithmEvents;
+    IsSetAlgorithmProps := TsmxAlgorithmCell(Source).IsSetAlgorithmProps;
   end;
 end;
 
-function TsmxActionCell.GetCaption: TCaption;
+function TsmxAlgorithmCell.GetCaption: TCaption;
 begin
   Result := '';
 end;
 
-procedure TsmxActionCell.SetCaption(const Value: TCaption);
+procedure TsmxAlgorithmCell.SetCaption(const Value: TCaption);
 begin
 end;
 
-function TsmxActionCell.GetHint: String;
+function TsmxAlgorithmCell.GetHint: String;
 begin
   Result := '';
 end;
 
-procedure TsmxActionCell.SetHint(const Value: String);
+procedure TsmxAlgorithmCell.SetHint(const Value: String);
 begin
 end;
 
-function TsmxActionCell.GetImageIndex: TImageIndex;
+function TsmxAlgorithmCell.GetImageIndex: TImageIndex;
 begin
   Result := -1;
 end;
 
-procedure TsmxActionCell.SetImageIndex(Value: TImageIndex);
+procedure TsmxAlgorithmCell.SetImageIndex(Value: TImageIndex);
 begin
 end;
 
-procedure TsmxActionCell.InternalClick;
+procedure TsmxAlgorithmCell.InternalClick;
 begin
   if Assigned(FAlgorithm) then
-    FAlgorithm.CellAction := Self;
+    FAlgorithm.CellAlgorithm := Self;
 end;
 
-procedure TsmxActionCell.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TsmxAlgorithmCell.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
   if (AComponent = Algorithm) and (Operation = opRemove) then
     Algorithm := nil;
 end;
 
-procedure TsmxActionCell.SetAlgorithm(Value: TsmxCustomAlgorithm);
+procedure TsmxAlgorithmCell.SetAlgorithm(Value: TsmxCustomAlgorithm);
 begin
   FAlgorithm := Value;
   if Assigned(FAlgorithm) then
@@ -2193,13 +2195,13 @@ begin
   end;
 end;
 
-procedure TsmxActionCell.SetAlgorithmEvents(Algorithm: TsmxCustomAlgorithm);
+procedure TsmxAlgorithmCell.SetAlgorithmEvents(Algorithm: TsmxCustomAlgorithm);
 begin
   if Assigned(Algorithm) then
     OnClick := Algorithm.OnExecute;
 end;
 
-procedure TsmxActionCell.SetAlgorithmProps(Algorithm: TsmxCustomAlgorithm);
+procedure TsmxAlgorithmCell.SetAlgorithmProps(Algorithm: TsmxCustomAlgorithm);
 begin
   if Assigned(Algorithm) then
   begin
@@ -2209,7 +2211,7 @@ begin
   end;
 end;
 
-procedure TsmxActionCell.SetIsSetAlgorithmEvents(Value: Boolean);
+procedure TsmxAlgorithmCell.SetIsSetAlgorithmEvents(Value: Boolean);
 begin
   if FIsSetAlgorithmEvents <> Value then
   begin
@@ -2219,7 +2221,7 @@ begin
   end;
 end;
 
-procedure TsmxActionCell.SetIsSetAlgorithmProps(Value: Boolean);
+procedure TsmxAlgorithmCell.SetIsSetAlgorithmProps(Value: Boolean);
 begin
   if FIsSetAlgorithmProps <> Value then
   begin
@@ -2505,18 +2507,18 @@ begin
   inherited Notification(AComponent, Operation);
   if Operation = opRemove then
   begin
-    if AComponent = CellAction then
-      CellAction := nil else
+    if AComponent = CellAlgorithm then
+      CellAlgorithm := nil else
     if AComponent = CellEvent then
       CellEvent := nil;
   end;
 end;
 
-procedure TsmxCustomAlgorithm.SetCellAction(Value: TsmxBaseCell);
+procedure TsmxCustomAlgorithm.SetCellAlgorithm(Value: TsmxBaseCell);
 begin
-  FCellAction := Value;
-  if Assigned(FCellAction) then
-    FCellAction.FreeNotification(Self);
+  FCellAlgorithm := Value;
+  if Assigned(FCellAlgorithm) then
+    FCellAlgorithm.FreeNotification(Self);
 end;
 
 procedure TsmxCustomAlgorithm.SetCellEvent(Value: TsmxBaseCell);
@@ -2892,13 +2894,13 @@ begin
     Alignment := TsmxCustomColumn(Source).Alignment;
     Color := TsmxCustomColumn(Source).Color;
     Font := TsmxCustomColumn(Source).Font;
-    Caption := TsmxCustomColumn(Source).Caption;
+    Text := TsmxCustomColumn(Source).Text;
     Options := TsmxCustomColumn(Source).Options;
     Value := TsmxCustomColumn(Source).Value;
     HeaderAlignment := TsmxCustomColumn(Source).HeaderAlignment;
     HeaderColor := TsmxCustomColumn(Source).HeaderColor;
     HeaderFont := TsmxCustomColumn(Source).HeaderFont;
-    HeaderCaption := TsmxCustomColumn(Source).HeaderCaption;
+    HeaderText := TsmxCustomColumn(Source).HeaderText;
   end;
 end;
 
@@ -2955,12 +2957,12 @@ procedure TsmxCustomColumn.SetFont(Value: TFont);
 begin
 end;
 
-function TsmxCustomColumn.GetCaption: String;
+function TsmxCustomColumn.GetText: String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomColumn.SetCaption(const Value: String);
+procedure TsmxCustomColumn.SetText(const Value: String);
 begin
 end;
 
@@ -2987,12 +2989,12 @@ procedure TsmxCustomColumn.SetHeaderAlignment(Value: TAlignment);
 begin
 end;
 
-function TsmxCustomColumn.GetHeaderCaption: String;
+function TsmxCustomColumn.GetHeaderText: String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomColumn.SetHeaderCaption(const Value: String);
+procedure TsmxCustomColumn.SetHeaderText(const Value: String);
 begin
 end;
 
@@ -3079,12 +3081,12 @@ procedure TsmxCustomGrid.SetFocusedRowIndex(Value: Integer);
 begin
 end;
 
-function TsmxCustomGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
+function TsmxCustomGrid.GetGridText(ColIndex, RowIndex: Integer): String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
+procedure TsmxCustomGrid.SetGridText(ColIndex, RowIndex: Integer; const Value: String);
 begin
 end;
 
@@ -3295,12 +3297,12 @@ procedure TsmxCustomTree.SetRowCount(RowIndex: Pointer; Value: Integer);
 begin
 end;
 
-function TsmxCustomTree.GetTreeCaption(ColIndex: Integer; RowIndex: Pointer): String;
+function TsmxCustomTree.GetTreeText(ColIndex: Integer; RowIndex: Pointer): String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomTree.SetTreeCaption(ColIndex: Integer; RowIndex: Pointer; const Value: String);
+procedure TsmxCustomTree.SetTreeText(ColIndex: Integer; RowIndex: Pointer; const Value: String);
 begin
 end;
 
@@ -3373,12 +3375,13 @@ begin
     Color := TsmxCustomFilter(Source).Color;
     Font := TsmxCustomFilter(Source).Font;
     Options := TsmxCustomFilter(Source).Options;
+    Text := TsmxCustomFilter(Source).Text;
     Value := TsmxCustomFilter(Source).Value;
     HeaderAlignment := TsmxCustomFilter(Source).HeaderAlignment;
-    HeaderCaption := TsmxCustomFilter(Source).HeaderCaption;
     HeaderColor := TsmxCustomFilter(Source).HeaderColor;
     HeaderFont := TsmxCustomFilter(Source).HeaderFont;
-    ValueFormat := TsmxCustomFilter(Source).ValueFormat;
+    HeaderText := TsmxCustomFilter(Source).HeaderText;
+    TextFormat := TsmxCustomFilter(Source).TextFormat;
   end;
 end;
 
@@ -3489,12 +3492,21 @@ procedure TsmxCustomFilter.SetHeaderFont(Value: TFont);
 begin
 end;
 
-function TsmxCustomFilter.GetValueFormat: String;
+function TsmxCustomFilter.GetHeaderText: String;
 begin
   Result := '';
 end;
 
-procedure TsmxCustomFilter.SetValueFormat(const Value: String);
+procedure TsmxCustomFilter.SetHeaderText(const Value: String);
+begin
+end;
+
+function TsmxCustomFilter.GetTextFormat: String;
+begin
+  Result := '';
+end;
+
+procedure TsmxCustomFilter.SetTextFormat(const Value: String);
 begin
 end;
 

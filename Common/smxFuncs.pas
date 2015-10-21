@@ -47,6 +47,7 @@ function ResolvedClassTypeName(const AClassTypeName: String; AIsRegister: Boolea
 function VarToInt(const AValue: Variant): Integer;
 function IntToVar(AValue: Integer): Variant;
 function ClassNameWithoutPrefix(AClassName: ShortString): ShortString;
+function DateTimeToVar(AValue: TDateTime): Variant;
 
 implementation
 
@@ -360,6 +361,14 @@ begin
     Result := Copy(AClassName, Length(smxConsts.cPrefixClassName) + 1, MaxInt)
   else
     Result := AClassName;
+end;
+
+function DateTimeToVar(AValue: TDateTime): Variant;
+begin
+  if AValue = SysUtils.FloatToDateTime(0) then
+    Result := Variants.Null
+  else
+    Result := AValue;
 end;
 
 end.

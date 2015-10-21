@@ -75,26 +75,26 @@ type
     function GetVisible: Boolean; override;
     function GetWidth: Integer; override;
     function GetAlignment: TAlignment; override;
-    function GetCaption: String; override;
+    function GetText: String; override;
     function GetColor: TColor; override;
     function GetFont: TFont; override;
     function GetValue: Variant; override;
     function GetHeaderAlignment: TAlignment; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
-    function GetHeaderCaption: String; override;
+    function GetHeaderText: String; override;
     function GetInternalRef: Pointer; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetVisible(Value: Boolean); override;
     procedure SetWidth(Value: Integer); override;
     procedure SetAlignment(Value: TAlignment); override;
-    procedure SetCaption(const Value: String); override;
+    procedure SetText(const Value: String); override;
     procedure SetColor(Value: TColor); override;
     procedure SetFont(Value: TFont); override;
     procedure SetOptions(Value: TsmxColumnOptions); override;
     procedure SetValue(const Value: Variant); override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
-    procedure SetHeaderCaption(const Value: String); override;
+    procedure SetHeaderText(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
     procedure SetName(const NewName: TComponentName); override;
@@ -111,7 +111,7 @@ type
     property Visible;
     property Width;
     property HeaderAlignment;
-    property HeaderCaption;
+    property HeaderText;
     property HeaderColor;
     property HeaderFont;
 
@@ -132,7 +132,7 @@ type
     function GetHint: String; override;
     function GetFocusedColIndex: Integer; override;
     function GetFocusedRowIndex: Integer; override;
-    function GetGridCaption(ColIndex, RowIndex: Integer): String; override;
+    function GetGridText(ColIndex, RowIndex: Integer): String; override;
     function GetGridValue(ColIndex, RowIndex: Integer): Variant; override;
     function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
@@ -143,7 +143,7 @@ type
     procedure SetHint(const Value: String); override;
     procedure SetFocusedColIndex(Value: Integer); override;
     procedure SetFocusedRowIndex(Value: Integer); override;
-    procedure SetGridCaption(ColIndex, RowIndex: Integer; const Value: String); override;
+    procedure SetGridText(ColIndex, RowIndex: Integer; const Value: String); override;
     procedure SetOptions(Value: TsmxGridOptions); override;
     procedure SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant); override;
     procedure SetRequest(Value: TsmxCustomRequest); override;
@@ -176,46 +176,72 @@ type
   TsmxEditFilter = class(TsmxFilter)
   private
     FEdit: TEdit;
-    FValue: Variant;
     function GetEdit: TEdit;
     procedure EditChange(Sender: TObject);
   protected
-    function GetText: String; override;
-    function GetEnabled: Boolean; override;
-    function GetHint: String; override;
     function GetColor: TColor; override;
+    function GetEnabled: Boolean; override;
     function GetFont: TFont; override;
+    function GetHint: String; override;
+    function GetText: String; override;
     function GetValue: Variant; override;
-    procedure SetText(const Value: String); override;
-    procedure SetEnabled(Value: Boolean); override;
-    procedure SetHint(const Value: String); override;
     procedure SetColor(Value: TColor); override;
+    procedure SetEnabled(Value: Boolean); override;
     procedure SetFont(Value: TFont); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetText(const Value: String); override;
     procedure SetValue(const Value: Variant); override;
 
     property Edit: TEdit read GetEdit;
   public
     destructor Destroy; override;
+  published
+    property Text;
+    property Font;
+    property Options;
+
+    property OnChangeFilter;
+    property OnClick;
+    property OnDoubleClick;
   end;
 
   { TsmxDateTimeFilter }
 
-  {TsmxDateTimeFilter = class(TsmxFilter)
+  TsmxDateTimeFilter = class(TsmxFilter)
   private
     FDateTime: TDateTimePicker;
-    procedure SetFormat;
+    function GetDateTime: TDateTimePicker;
+    procedure DateTimeChange(Sender: TObject);
   protected
-    function GetCellEnabled: Boolean; override;
-    function GetFilterValue: Variant; override;
-    function GetInternalObject: TObject; override;
-    procedure SetCellEnabled(Value: Boolean); override;
-    procedure SetFilterValue(Value: Variant); override;
+    function GetColor: TColor; override;
+    function GetDisplayFormat: String; override;
+    function GetEnabled: Boolean; override;
+    function GetFont: TFont; override;
+    function GetHint: String; override;
+    function GetText: String; override;
+    function GetValue: Variant; override;
+    procedure SetColor(Value: TColor); override;
+    procedure SetDisplayFormat(const Value: String); override;
+    procedure SetEnabled(Value: Boolean); override;
+    procedure SetFont(Value: TFont); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetText(const Value: String); override;
+    procedure SetValue(const Value: Variant); override;
 
-    property DateTime: TDateTimePicker read FDateTime;
+    property DateTime: TDateTimePicker read GetDateTime;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-  end;}
+  published
+    property Text;
+    property Font;
+    property Options;
+    property DisplayFormat;
+    property TextFormat;
+
+    property OnChangeFilter;
+    property OnClick;
+    property OnDoubleClick;
+  end;
 
   { TsmxBitBtnFilter }
 
@@ -226,19 +252,19 @@ type
     FButtonImageIndex: TImageIndex;
     function GetBitBtn: TBitBtn;
   protected
-    function GetText: String; override;
+    function GetColor: TColor; override;
     function GetEnabled: Boolean; override;
+    function GetFont: TFont; override;
     function GetHint: String; override;
     function GetImageIndex: TImageIndex; override;
-    function GetColor: TColor; override;
-    function GetFont: TFont; override;
+    function GetText: String; override;
     function GetValue: Variant; override;
-    procedure SetText(const Value: String); override;
+    procedure SetColor(Value: TColor); override;
     procedure SetEnabled(Value: Boolean); override;
+    procedure SetFont(Value: TFont); override;
     procedure SetHint(const Value: String); override;
     procedure SetImageIndex(Value: TImageIndex); override;
-    procedure SetColor(Value: TColor); override;
-    procedure SetFont(Value: TFont); override;
+    procedure SetText(const Value: String); override;
     procedure SetValue(const Value: Variant); override;
     procedure SetImageList(Value: TCustomImageList); override;
 
@@ -250,49 +276,80 @@ type
     property Text;
     property Font;
     property Options;
-    property Value;
     property ImageListName;
 
+    property OnChangeFilter;
     property OnClick;
   end;
 
   { TsmxNumEditFilter }
 
-  {TsmxNumEditFilter = class(TsmxFilter)
+  TsmxNumEditFilter = class(TsmxFilter)
   private
-    FEdit: TEdit;
+    FNumEdit: TEdit;
+    function GetNumEdit: TEdit;
+    procedure NumEditKeyPress(Sender: TObject; var Key: Char);
+    procedure NumEditChange(Sender: TObject);
   protected
-    procedure ProcKeyPress(Sender: TObject; var Key: Char);
-    function GetCellEnabled: Boolean; override;
-    function GetFilterValue: Variant; override;
-    function GetInternalObject: TObject; override;
-    procedure SetCellEnabled(Value: Boolean); override;
-    procedure SetFilterValue(Value: Variant); override;
+    function GetColor: TColor; override;
+    function GetEnabled: Boolean; override;
+    function GetFont: TFont; override;
+    function GetHint: String; override;
+    function GetText: String; override;
+    function GetValue: Variant; override;
+    procedure SetColor(Value: TColor); override;
+    procedure SetEnabled(Value: Boolean); override;
+    procedure SetFont(Value: TFont); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetText(const Value: String); override;
+    procedure SetValue(const Value: Variant); override;
 
-    property Edit: TEdit read FEdit;
+    property NumEdit: TEdit read GetNumEdit;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-  end;}
+  published
+    property Text;
+    property Font;
+    property Options;
+    property DisplayFormat;
+    property TextFormat;
+
+    property OnChangeFilter;
+    property OnClick;
+    property OnDoubleClick;
+  end;
 
   { TsmxLabelFilter }
 
-  {TsmxLabelFilter = class(TsmxFilter)
+  TsmxLabelFilter = class(TsmxFilter)
   private
-    FSLabel: TLabel;
+    FLabel: TLabel;
     FValue: Variant;
+    function GetLabel: TLabel;
   protected
-    function GetFilterText: String; override;
-    function GetFilterValue: Variant; override;
-    function GetInternalObject: TObject; override;
-    procedure SetFilterText(Value: String); override;
-    procedure SetFilterValue(Value: Variant); override;
+    function GetColor: TColor; override;
+    function GetFont: TFont; override;
+    function GetHint: String; override;
+    function GetText: String; override;
+    function GetValue: Variant; override;
+    procedure SetColor(Value: TColor); override;
+    procedure SetFont(Value: TFont); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetText(const Value: String); override;
+    procedure SetValue(const Value: Variant); override;
 
-    property SLabel: TLabel read FSLabel;
+    property SLabel: TLabel read GetLabel;
   public
-    constructor Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer); override;
     destructor Destroy; override;
-  end;}
+  published
+    property Text;
+    property Font;
+    property Options;
+
+    property OnChangeFilter;
+    property OnClick;
+    property OnDoubleClick;
+  end;
 
   { TsmxPanelFilterDesk }
 
@@ -827,17 +884,17 @@ begin
   Column.Alignment := Value;
 end;
 
-function TsmxColumn.GetCaption: String;
+function TsmxColumn.GetText: String;
 begin
   Result := '';
   if CellOwner is TsmxCustomGrid then
-    Result := TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
+    Result := TsmxCustomGrid(CellOwner).GridTexts[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex];
 end;
 
-procedure TsmxColumn.SetCaption(const Value: String);
+procedure TsmxColumn.SetText(const Value: String);
 begin
   if CellOwner is TsmxCustomGrid then
-    TsmxCustomGrid(CellOwner).GridCaptions[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
+    TsmxCustomGrid(CellOwner).GridTexts[SlaveIndex, TsmxCustomGrid(CellOwner).FocusedRowIndex] := Value;
 end;
 
 function TsmxColumn.GetColor: TColor;
@@ -883,12 +940,12 @@ begin
   Column.Title.Alignment := Value;
 end;
 
-function TsmxColumn.GetHeaderCaption: String;
+function TsmxColumn.GetHeaderText: String;
 begin
   Result := Column.Title.Caption;
 end;
 
-procedure TsmxColumn.SetHeaderCaption(const Value: String);
+procedure TsmxColumn.SetHeaderText(const Value: String);
 begin
   Column.Title.Caption := Value;
 end;
@@ -1025,7 +1082,7 @@ begin
         Request.DataSet.RecordNo := Value;
 end;
 
-function TsmxDBGrid.GetGridCaption(ColIndex, RowIndex: Integer): String;
+function TsmxDBGrid.GetGridText(ColIndex, RowIndex: Integer): String;
 var
   Field: IsmxField;
   Bookmark: TBookmark;
@@ -1046,9 +1103,9 @@ begin
           if RowIndex <> -1 then
           begin
             if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
-              Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+              Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
           end else
-            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+            Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
           if Assigned(Field) then
             Result := Variants.VarToStr(Field.Value);
 
@@ -1064,7 +1121,7 @@ begin
       end;
 end;
 
-procedure TsmxDBGrid.SetGridCaption(ColIndex, RowIndex: Integer; const Value: String);
+procedure TsmxDBGrid.SetGridText(ColIndex, RowIndex: Integer; const Value: String);
 var
   Field: IsmxField;
   Bookmark: TBookmark;
@@ -1085,9 +1142,9 @@ begin
             if RowIndex <> -1 then
             begin
               if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
-                Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+                Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             end else
-              Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+              Field := Request.DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[ColIndex].Name));
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1112,37 +1169,36 @@ var
   Bookmark: TBookmark;
 begin
   Result := Variants.Null;
-  if coHasValue in Slaves[ColIndex].Options then
-    if Assigned(Request) then
-      if Assigned(Request.DataSet) then
-        if Request.DataSet.Active then
+  if Assigned(Request) then
+    if Assigned(Request.DataSet) then
+      if Request.DataSet.Active then
+      begin
+        Bookmark := nil;
+        if Assigned(DBGrid.DataSource.DataSet) then
         begin
-          Bookmark := nil;
+          DBGrid.DataSource.DataSet.DisableControls;
+          Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
+        end;
+        try
+          Field := nil;
+          if RowIndex <> -1 then
+          begin
+            if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
+              Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+          end else
+            Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
+          if Assigned(Field) then
+            Result := Field.Value;
+          if Assigned(DBGrid.DataSource.DataSet) then
+            DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
+        finally
           if Assigned(DBGrid.DataSource.DataSet) then
           begin
-            DBGrid.DataSource.DataSet.DisableControls;
-            Bookmark := DBGrid.DataSource.DataSet.GetBookmark;
-          end;
-          try
-            Field := nil;
-            if RowIndex <> -1 then
-            begin
-              if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
-                Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-            end else
-              Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
-            if Assigned(Field) then
-              Result := Field.Value;
-            if Assigned(DBGrid.DataSource.DataSet) then
-              DBGrid.DataSource.DataSet.GotoBookmark(Bookmark);
-          finally
-            if Assigned(DBGrid.DataSource.DataSet) then
-            begin
-              DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
-              DBGrid.DataSource.DataSet.EnableControls;
-            end;
+            DBGrid.DataSource.DataSet.FreeBookmark(Bookmark);
+            DBGrid.DataSource.DataSet.EnableControls;
           end;
         end;
+      end;
 end;
 
 procedure TsmxDBGrid.SetGridValue(ColIndex, RowIndex: Integer; const Value: Variant);
@@ -1150,7 +1206,7 @@ var
   Field: IsmxField;
   Bookmark: TBookmark;
 begin
-  if [coEditing, coHasValue] * Slaves[ColIndex].Options = [coEditing, coHasValue] then
+  if coEditing in Slaves[ColIndex].Options then
     if Assigned(Request) then
       if Assigned(Request.DataSet) then
         if Request.DataSet.Active then
@@ -1166,9 +1222,9 @@ begin
             if RowIndex <> -1 then
             begin
               if smxDBFuncs.SetNumberOfRecord(Request.DataSet, RowIndex) then
-                Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+                Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             end else
-              Field := Request.DataSet.FindField(smxFuncs.GetValueFieldName(Slaves[ColIndex].Name));
+              Field := Request.DataSet.FindField(Slaves[ColIndex].Name);
             if Assigned(Field) then
             begin
               Request.DataSet.Edit;
@@ -1290,6 +1346,10 @@ begin
     DBGrid.Options := DBGrid.Options + [dgEditing]
   else
     DBGrid.Options := DBGrid.Options - [dgEditing];
+  if goColResize in Value then
+    DBGrid.Options := DBGrid.Options + [dgColumnResize]
+  else
+    DBGrid.Options := DBGrid.Options - [dgColumnResize];
 end;
 
 procedure TsmxDBGrid.SetRequest(Value: TsmxCustomRequest);
@@ -1366,7 +1426,6 @@ begin
     FEdit.OnChange := EditChange;
     FEdit.OnClick := ControlClick;
     FEdit.OnDblClick := ControlDblClick;
-    FValue := Variants.Null;
   end;
   Result := FEdit;
 end;
@@ -1393,98 +1452,161 @@ end;
 
 function TsmxEditFilter.GetValue: Variant;
 begin
-  if foHasValue in Options then
-    Result := FValue
-  else
-    Result := Variants.Null;
+  Result := smxFuncs.StrToVar(String(Edit.Text));
 end;
 
 procedure TsmxEditFilter.SetValue(const Value: Variant);
 begin
-  if foHasValue in Options then
-    FValue := Value;
+  Edit.Text := TCaption(Variants.VarToStr(Value));
 end;
 
 { TsmxDateTimeFilter }
 
-{constructor TsmxDateTimeFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FDateTime := TDateTimePicker.Create(Self);
-  SetFormat;
-  FDateTime.Parent := Panel;
-  FDateTime.Width := Panel.Width - 8;
-  FDateTime.Anchors := [akLeft, akRight];
-  FDateTime.Left := 4;
-  FDateTime.Top := 20;
-  FDateTime.ShowCheckbox := True;
-  FDateTime.Font.Color := Cfg.FilterFont.Color;
-  FDateTime.Font.Name := Cfg.FilterFont.Name;
-  FDateTime.Font.Size := Cfg.FilterFont.Size;
-  FDateTime.Font.Style := Cfg.FilterFont.Style;
-  FDateTime.DateTime := Date;
-end;
-
 destructor TsmxDateTimeFilter.Destroy;
 begin
-  FDateTime.Parent := nil;
-  FDateTime.Free;
+  if Assigned(FDateTime) then
+    FDateTime.Free;
   inherited Destroy;
 end;
 
-function TsmxDateTimeFilter.GetCellEnabled: Boolean;
+procedure TsmxDateTimeFilter.DateTimeChange(Sender: TObject);
 begin
-  Result := FDateTime.Enabled;
+  ChangeFilter;
 end;
 
-function TsmxDateTimeFilter.GetFilterValue: Variant;
+function TsmxDateTimeFilter.GetColor: TColor;
 begin
-  Result := FDateTime.DateTime;
-  if (Result = StrToDate('30.12.1899')) or not(FDateTime.Checked) then
-    Result := Null else
-  if Cfg.ValueFormat <> '' then
-    Result := FormatDateTime(Cfg.ValueFormat, Result);
+  Result := DateTime.Color;
 end;
 
-function TsmxDateTimeFilter.GetInternalObject: TObject;
+procedure TsmxDateTimeFilter.SetColor(Value: TColor);
 begin
+  DateTime.Color := Value;
+end;
+
+function TsmxDateTimeFilter.GetDateTime: TDateTimePicker;
+begin
+  if not Assigned(FDateTime) then
+  begin
+    FDateTime := TDateTimePicker.Create(nil);
+    FDateTime.Parent := Panel;
+    FDateTime.Width := Panel.Width - 8;
+    FDateTime.Anchors := [akLeft, akRight];
+    FDateTime.Left := 4;
+    FDateTime.Top := 20;
+    FDateTime.ShowCheckbox := True;
+    FDateTime.DateTime := Date;
+    FDateTime.OnChange := DateTimeChange;
+    FDateTime.OnClick := ControlClick;
+    FDateTime.OnDblClick := ControlDblClick;
+  end;
   Result := FDateTime;
 end;
 
-procedure TsmxDateTimeFilter.SetCellEnabled(Value: Boolean);
+function TsmxDateTimeFilter.GetDisplayFormat: String;
 begin
-  FDateTime.Enabled := Value;
+  Result := DateTime.Format;
 end;
 
-procedure TsmxDateTimeFilter.SetFilterValue(Value: Variant);
-var d: TDateTime;
+procedure TsmxDateTimeFilter.SetDisplayFormat(const Value: String);
+var
+  Form: TForm;
 begin
-  if VarIsEmpty(Value) or VarIsNull(Value) then
-    d := StrToDate('30.12.1899') else
-    d := StrToDateTimeDef(Value, StrToDate('30.12.1899'));
-  if d = StrToDate('30.12.1899') then
+  if GetDisplayFormat <> Value then
   begin
-    FDateTime.DateTime := Date;
-    FDateTime.Checked := False;
+    Form := nil;
+    try
+      if not Assigned(DateTime.Parent) then
+      begin
+        Form := TForm.Create(nil);
+        DateTime.Parent := Form;
+      end;
+      DateTime.Format := Value;
+    finally
+      if Assigned(Form) then
+      begin
+        DateTime.Parent := nil;
+        Form.Free;
+      end;
+    end;
+  end;
+end;
+
+function TsmxDateTimeFilter.GetEnabled: Boolean;
+begin
+  Result := DateTime.Enabled;
+end;
+
+procedure TsmxDateTimeFilter.SetEnabled(Value: Boolean);
+begin
+  DateTime.Enabled := Value;
+end;
+
+function TsmxDateTimeFilter.GetFont: TFont;
+begin
+  Result := DateTime.Font;
+end;
+
+procedure TsmxDateTimeFilter.SetFont(Value: TFont);
+begin
+  DateTime.Font := Value;
+end;
+
+function TsmxDateTimeFilter.GetHint: String;
+begin
+  Result := DateTime.Hint;
+end;
+
+procedure TsmxDateTimeFilter.SetHint(const Value: String);
+begin
+  DateTime.Hint := Value;
+end;
+
+function TsmxDateTimeFilter.GetText: String;
+begin
+  if DateTime.Checked then
+  begin
+    if TextFormat <> '' then
+      Result := SysUtils.FormatDateTime(TextFormat, DateTime.DateTime)
+    else
+      Result := SysUtils.DateTimeToStr(DateTime.DateTime);
+  end else
+    Result := '';
+end;
+
+procedure TsmxDateTimeFilter.SetText(const Value: String);
+begin
+  if Value = '' then
+  begin
+    DateTime.DateTime := SysUtils.Date;
+    DateTime.Checked := False;
   end else
   begin
-    FDateTime.DateTime := d;
-    FDateTime.Checked := True;
+    DateTime.DateTime := smxFuncs.StrToDateTimeEx(Value);
+    DateTime.Checked := True;
   end;
 end;
 
-procedure TsmxDateTimeFilter.SetFormat;
-var f: TForm;
+function TsmxDateTimeFilter.GetValue: Variant;
 begin
-  f := TForm.Create(nil);
-  try
-    FDateTime.Parent := f;
-    FDateTime.Format := Cfg.DisplayFormat;
-    FDateTime.Parent := nil;
-  finally
-    f.Free;
+  if DateTime.Checked then
+    Result := smxFuncs.DateTimeToVar(DateTime.DateTime)
+  else
+    Result := Variants.Null;
+end;
+
+procedure TsmxDateTimeFilter.SetValue(const Value: Variant);
+begin
+  if Variants.VarIsNull(Value) then
+  begin
+    DateTime.DateTime := SysUtils.Date;
+    DateTime.Checked := False;
+  end else
+  begin
+    DateTime.DateTime := Variants.VarToDateTime(Value);
+    DateTime.Checked := True;
   end;
-end;}
+end;
 
 { TsmxBitBtnFilter }
 
@@ -1560,6 +1682,7 @@ end;
 procedure TsmxBitBtnFilter.SetText(const Value: String);
 begin
   BitBtn.Caption := TCaption(Value);
+  ChangeFilter;
 end;
 
 procedure TsmxBitBtnFilter.SetHint(const Value: String);
@@ -1578,10 +1701,7 @@ end;
 
 function TsmxBitBtnFilter.GetValue: Variant;
 begin
-  if foHasValue in Options then
-    Result := FValue
-  else
-    Result := Variants.Null;
+  Result := FValue;
 end;
 
 procedure TsmxBitBtnFilter.SetEnabled(Value: Boolean);
@@ -1607,142 +1727,214 @@ end;
 
 procedure TsmxBitBtnFilter.SetValue(const Value: Variant);
 begin
-  if foHasValue in Options then
-  begin
-    FValue := Value;
-    ChangeFilter;
-  end;  
+  FValue := Value;
+  ChangeFilter;  
 end;
 
 { TsmxNumEditFilter }
 
-{constructor TsmxNumEditFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FEdit := TEdit.Create(Self);
-  FEdit.Parent := Panel;
-  FEdit.AutoSize := False;
-  FEdit.Width := Panel.Width - 8;
-  FEdit.Anchors := [akLeft, akRight];
-  FEdit.Left := 4;
-  FEdit.Top := 20;
-  FEdit.OnKeyPress := ProcKeyPress;
-  FEdit.Font.Color := Cfg.FilterFont.Color;
-  FEdit.Font.Name := Cfg.FilterFont.Name;
-  FEdit.Font.Size := Cfg.FilterFont.Size;
-  FEdit.Font.Style := Cfg.FilterFont.Style;
-  FEdit.Text := '';
-end;
-
 destructor TsmxNumEditFilter.Destroy;
 begin
-  FEdit.OnKeyPress := nil;
-  FEdit.Parent := nil;
-  FEdit.Free;
+  if Assigned(FNumEdit) then
+    FNumEdit.Free;
   inherited Destroy;
 end;
 
-function TsmxNumEditFilter.GetCellEnabled: Boolean;
+function TsmxNumEditFilter.GetColor: TColor;
 begin
-  Result := FEdit.Enabled;
+  Result := NumEdit.Color;
 end;
 
-function TsmxNumEditFilter.GetFilterValue: Variant;
+function TsmxNumEditFilter.GetEnabled: Boolean;
 begin
-  Result := FEdit.Text;
-  if Result = '' then
-    Result := Null else
-  if Cfg.ValueFormat <> '' then
-    Result := FormatFloat(Cfg.ValueFormat, Result);
+  Result := NumEdit.Enabled;
 end;
 
-function TsmxNumEditFilter.GetInternalObject: TObject;
+function TsmxNumEditFilter.GetFont: TFont;
 begin
-  Result := FEdit;
+  Result := NumEdit.Font;
 end;
 
-procedure TsmxNumEditFilter.ProcKeyPress(Sender: TObject; var Key: Char);
+function TsmxNumEditFilter.GetHint: String;
+begin
+  Result := NumEdit.Hint;
+end;
 
-  function CountSep(s: String): Integer;
-  var i: Integer;
+function TsmxNumEditFilter.GetNumEdit: TEdit;
+begin
+  if not Assigned(FNumEdit) then
+  begin
+    FNumEdit := TEdit.Create(nil);
+    FNumEdit.Parent := Panel;
+    FNumEdit.AutoSize := False;
+    FNumEdit.Width := Panel.Width - 8;
+    FNumEdit.Anchors := [akLeft, akRight];
+    FNumEdit.Left := 4;
+    FNumEdit.Top := 20;
+    FNumEdit.Text := '';
+    FNumEdit.OnChange := NumEditChange;
+    FNumEdit.OnClick := ControlClick;
+    FNumEdit.OnDblClick := ControlDblClick;
+    FNumEdit.OnKeyPress := NumEditKeyPress;
+  end;
+  Result := FNumEdit;
+end;
+
+function TsmxNumEditFilter.GetText: String;
+begin
+  if NumEdit.Text <> '' then
+  begin
+    if TextFormat <> '' then
+      Result := SysUtils.FormatFloat(TextFormat, SysUtils.StrToFloat(String(NumEdit.Text)))
+    else
+      Result := String(NumEdit.Text);
+  end else
+    Result := '';
+end;
+
+function TsmxNumEditFilter.GetValue: Variant;
+begin
+  Result := smxFuncs.StrToVar(String(NumEdit.Text));
+end;
+
+procedure TsmxNumEditFilter.NumEditChange(Sender: TObject);
+begin
+  ChangeFilter;
+end;
+
+procedure TsmxNumEditFilter.NumEditKeyPress(Sender: TObject; var Key: Char);
+
+  function CountSep: Integer;
+  var
+    i: Integer;
   begin
     Result := 0;
-    for i := 1 to Length(s) do
-      if s[i] in ['.', ','] then
+    for i := 1 to Length(NumEdit.Text) do
+      if NumEdit.Text[i] = SysUtils.DecimalSeparator then
         Result := Result + 1;
   end;
 
-var s: String;
 begin
-  s := FEdit.Text;
-  if not(Key in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', #8]) then
-    Key := #0;
-  if (Key in ['.', ',']) and (CountSep(s) > 0) then
+  if not(Key in ['0' .. '9', SysUtils.DecimalSeparator, #8]) then
+    Key := #0 else
+  if (Key = SysUtils.DecimalSeparator) and (CountSep > 0) then
     Key := #0;
 end;
 
-procedure TsmxNumEditFilter.SetCellEnabled(Value: Boolean);
+procedure TsmxNumEditFilter.SetColor(Value: TColor);
 begin
-  FEdit.Enabled := Value;
+  NumEdit.Color := Value;
 end;
 
-procedure TsmxNumEditFilter.SetFilterValue(Value: Variant);
+procedure TsmxNumEditFilter.SetEnabled(Value: Boolean);
 begin
-  if VarIsEmpty(Value) or VarIsNull(Value) then
-    FEdit.Text := '' else
-    FEdit.Text := FloatToStr(StrToFloatDef(Value, 0));
-end;}
+  NumEdit.Enabled := Value;
+end;
+
+procedure TsmxNumEditFilter.SetFont(Value: TFont);
+begin
+  NumEdit.Font := Value;
+end;
+
+procedure TsmxNumEditFilter.SetHint(const Value: String);
+begin
+  NumEdit.Hint := Value;
+end;
+
+procedure TsmxNumEditFilter.SetText(const Value: String);
+begin
+  if Value = '' then
+    NumEdit.Text := ''
+  else
+    NumEdit.Text := TCaption(SysUtils.FloatToStr(SysUtils.StrToFloatDef(Value, 0)));
+end;
+
+procedure TsmxNumEditFilter.SetValue(const Value: Variant);
+begin
+  if Variants.VarIsNull(Value) then
+    NumEdit.Text := ''
+  else
+    NumEdit.Text := TCaption(SysUtils.FloatToStr(SysUtils.StrToFloatDef(Variants.VarToStr(Value), 0)));
+end;
 
 { TsmxLabelFilter }
 
-{constructor TsmxLabelFilter.Create(AOwner: TComponent; const ADatabase: IsmxDatabase; ACfgID: Integer);
-begin
-  inherited Create(AOwner, ADatabase, ACfgID);
-  FSLabel := TLabel.Create(Self);
-  FSLabel.Parent := Panel;
-  FSLabel.Width := Panel.Width - 8;
-  FSLabel.Anchors := [akLeft, akRight];
-  FSLabel.Left := 4;
-  FSLabel.Top := 20;
-  FSLabel.Font.Color := Cfg.FilterFont.Color;
-  FSLabel.Font.Name := Cfg.FilterFont.Name;
-  FSLabel.Font.Size := Cfg.FilterFont.Size;
-  FSLabel.Font.Style := Cfg.FilterFont.Style;
-  FValue := Null;
-  FSLabel.Caption := '';
-end;
-
 destructor TsmxLabelFilter.Destroy;
 begin
-  FSLabel.Parent := nil;
-  FSLabel.Free;
+  if Assigned(FLabel) then
+    FLabel.Free;
   inherited Destroy;
 end;
 
-function TsmxLabelFilter.GetFilterText: String;
+function TsmxLabelFilter.GetColor: TColor;
 begin
-  Result := String(FSLabel.Caption);
+  Result := SLabel.Color;
 end;
 
-function TsmxLabelFilter.GetFilterValue: Variant;
+function TsmxLabelFilter.GetFont: TFont;
+begin
+  Result := SLabel.Font;
+end;
+
+function TsmxLabelFilter.GetHint: String;
+begin
+  Result := SLabel.Hint;
+end;
+
+function TsmxLabelFilter.GetLabel: TLabel;
+begin
+  if not Assigned(FLabel) then
+  begin
+    FLabel := TLabel.Create(nil);
+    FLabel.Parent := Panel;
+    FLabel.Width := Panel.Width - 8;
+    FLabel.Anchors := [akLeft, akRight];
+    FLabel.Left := 4;
+    FLabel.Top := 20;
+    FLabel.Caption := '';
+    FLabel.OnClick := ControlClick;
+    FLabel.OnDblClick := ControlDblClick;
+    FValue := Variants.Null;
+  end;
+  Result := FLabel;
+end;
+
+function TsmxLabelFilter.GetText: String;
+begin
+  Result := String(SLabel.Caption);
+end;
+
+function TsmxLabelFilter.GetValue: Variant;
 begin
   Result := FValue;
 end;
 
-function TsmxLabelFilter.GetInternalObject: TObject;
+procedure TsmxLabelFilter.SetColor(Value: TColor);
 begin
-  Result := FSLabel;
+  SLabel.Color := Value;
 end;
 
-procedure TsmxLabelFilter.SetFilterText(Value: String);
+procedure TsmxLabelFilter.SetFont(Value: TFont);
 begin
-  FSLabel.Caption := TCaption(Value);
+  SLabel.Font := Value;
 end;
 
-procedure TsmxLabelFilter.SetFilterValue(Value: Variant);
+procedure TsmxLabelFilter.SetHint(const Value: String);
+begin
+  SLabel.Hint := Value;
+end;
+
+procedure TsmxLabelFilter.SetText(const Value: String);
+begin
+  SLabel.Caption := TCaption(Value);
+  ChangeFilter;
+end;
+
+procedure TsmxLabelFilter.SetValue(const Value: Variant);
 begin
   FValue := Value;
-end;}
+  ChangeFilter;
+end;
 
 { TsmxPanelFilterDesk }
 
@@ -3104,17 +3296,17 @@ end;
 initialization
   Classes.RegisterClasses([TsmxLibAction, TsmxActionList, TsmxRequestList,
     TsmxColumn, TsmxDBGrid, TsmxEditFilter, TsmxBitBtnFilter,
-    TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet, TsmxPageControl,
-    TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList, TsmxToolItem,
-    TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar,
-    TsmxStandardForm]);
+    TsmxDateTimeFilter, TsmxNumEditFilter, TsmxPanelFilterDesk,
+    TsmxPanelSection, TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu,
+    TsmxPopupMenu, TsmxPopupList, TsmxToolItem, TsmxToolBar, TsmxControlBar,
+    TsmxStatusPanel, TsmxStatusBar, TsmxStandardForm]);
 
 finalization
   Classes.UnRegisterClasses([TsmxLibAction, TsmxActionList, TsmxRequestList,
     TsmxColumn, TsmxDBGrid, TsmxEditFilter, TsmxBitBtnFilter,
-    TsmxPanelFilterDesk, TsmxPanelSection, TsmxTabSheet, TsmxPageControl,
-    TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList, TsmxToolItem,
-    TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar,
-    TsmxStandardForm]);
+    TsmxDateTimeFilter, TsmxNumEditFilter, TsmxPanelFilterDesk,
+    TsmxPanelSection, TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu,
+    TsmxPopupMenu, TsmxPopupList, TsmxToolItem, TsmxToolBar, TsmxControlBar,
+    TsmxStatusPanel, TsmxStatusBar, TsmxStandardForm]);
 
 end.

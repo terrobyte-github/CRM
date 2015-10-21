@@ -88,13 +88,13 @@ type
     function GetPanel: TPanel;
   protected
     function GetHeaderAlignment: TAlignment; override;
-    function GetCaption: TCaption; override;
+    function GetHeaderText: String; override;
     function GetHeaderColor: TColor; override;
     function GetHeaderFont: TFont; override;
     function GetInternalRef: Pointer; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetHeaderAlignment(Value: TAlignment); override;
-    procedure SetCaption(const Value: TCaption); override;
+    procedure SetHeaderText(const Value: String); override;
     procedure SetHeaderColor(Value: TColor); override;
     procedure SetHeaderFont(Value: TFont); override;
 
@@ -112,9 +112,9 @@ type
     property Visible;
     property Width;
     property HeaderAlignment;
-    property HeaderCaption;
     property HeaderColor;
     property HeaderFont;
+    property HeaderText;
     property PopupMenu;
   end;
 
@@ -299,9 +299,9 @@ begin
       case Params[i].DataLocation of
         dlFilterDesk:
         begin
-          if CellAction is TsmxCustomFilterDesk then
+          if CellAlgorithm is TsmxCustomFilterDesk then
           begin
-            Cell := TsmxCustomFilterDesk(CellAction).FindSlaveByName(Params[i].ParamName);
+            Cell := TsmxCustomFilterDesk(CellAlgorithm).FindSlaveByName(Params[i].ParamName);
             if Assigned(Cell) then
               Params[i].ParamValue := TsmxCustomFilter(Cell).Value;
           end else
@@ -310,9 +310,9 @@ begin
         end;
         dlGrid:
         begin
-          if CellAction is TsmxCustomGrid then
+          if CellAlgorithm is TsmxCustomGrid then
           begin
-            Cell := TsmxCustomGrid(CellAction).FindSlaveByName(Params[i].ParamName);
+            Cell := TsmxCustomGrid(CellAlgorithm).FindSlaveByName(Params[i].ParamName);
             if Assigned(Cell) then
               Params[i].ParamValue := TsmxCustomColumn(Cell).Value;
           end else
@@ -512,14 +512,14 @@ begin
   Header.Alignment := Value;
 end;
 
-function TsmxFilter.GetCaption: TCaption;
+function TsmxFilter.GetHeaderText: String;
 begin
-  Result := Header.Caption;
+  Result := String(Header.Caption);
 end;
 
-procedure TsmxFilter.SetCaption(const Value: TCaption);
+procedure TsmxFilter.SetHeaderText(const Value: String);
 begin
-  Header.Caption := Value;
+  Header.Caption := TCaption(Value);
 end;
 
 function TsmxFilter.GetHeaderColor: TColor;

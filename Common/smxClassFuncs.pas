@@ -208,10 +208,7 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    if foHasValue in TsmxCustomFilter(Cell).Options then
-      AValue := TsmxCustomFilter(Cell).Value
-    else
-      AValue := smxFuncs.StrToVar(TsmxCustomFilter(Cell).Text);
+    AValue := TsmxCustomFilter(Cell).Value;
     Result := True;
   end;
 end;
@@ -235,10 +232,7 @@ begin
       end;
   if Assigned(Cell) then
   begin
-    if coHasValue in TsmxCustomColumn(Cell).Options then
-      AValue := TsmxCustomColumn(Cell).Value
-    else
-      AValue := smxFuncs.StrToVar(TsmxCustomColumn(Cell).Caption);
+    AValue := TsmxCustomColumn(Cell).Value;
     Result := True;
   end;
 end;

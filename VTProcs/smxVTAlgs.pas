@@ -59,7 +59,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
       // add ...
       AddValue(AObject, APropInfo, ATree, 1, ARow, etButtonString);
       if Assigned(Obj) then
-        ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+        ATree.TreeTexts[1, ARow] := Format('(%s)', [Obj.ClassName]);
     end else
     if Cls.InheritsFrom(TsmxBaseCell) then
     begin
@@ -68,14 +68,14 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
         // add box
         AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
         if Assigned(Obj) then
-          ATree.TreeCaptions[1, ARow] := TsmxBaseCell(Obj).Name;
+          ATree.TreeTexts[1, ARow] := TsmxBaseCell(Obj).Name;
       end else
       begin
         // add blank
         AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
         if Assigned(Obj) then
         begin
-          ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+          ATree.TreeTexts[1, ARow] := Format('(%s)', [Obj.ClassName]);
           AddObjectProps(Obj, ATree, ARow);
         end;
       end;
@@ -85,7 +85,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
       AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
       if Assigned(Obj) then
       begin
-        ATree.TreeCaptions[1, ARow] := Format('(%s)', [Obj.ClassName]);
+        ATree.TreeTexts[1, ARow] := Format('(%s)', [Obj.ClassName]);
         AddObjectProps(Obj, ATree, ARow);
       end;
     end;
@@ -104,13 +104,13 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
       begin
         AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
         if SysUtils.Supports(Intf, IsmxRefComponent) then
-          ATree.TreeCaptions[1, ARow] := IsmxRefComponent(Intf).GetReference.Name;
+          ATree.TreeTexts[1, ARow] := IsmxRefComponent(Intf).GetReference.Name;
       end else
       begin
         if SysUtils.Supports(Intf, IsmxRefComponent) then
         begin
           AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
-          ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefComponent(Intf).GetReference.ClassName]);
+          ATree.TreeTexts[1, ARow] := Format('(%s)', [IsmxRefComponent(Intf).GetReference.ClassName]);
           AddObjectProps(IsmxRefComponent(Intf).GetReference, ATree, ARow);
         end;
       end;
@@ -120,7 +120,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
       if SysUtils.Supports(Intf, IsmxRefPersistent) then
       begin
         AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
-        ATree.TreeCaptions[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
+        ATree.TreeTexts[1, ARow] := Format('(%s)', [IsmxRefPersistent(Intf).GetReference.ClassName]);
         AddObjectProps(IsmxRefPersistent(Intf).GetReference, ATree, ARow);
       end;
     end;
@@ -129,7 +129,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
   procedure AddEnumeration(APropInfo: PPropInfo; ARow: Pointer);
   begin
     AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
-    ATree.TreeCaptions[1, ARow] := TypInfo.GetEnumProp(AObject, APropInfo);
+    ATree.TreeTexts[1, ARow] := TypInfo.GetEnumProp(AObject, APropInfo);
   end;
 
   procedure AddSet(APropInfo: PPropInfo; ARow: Pointer);
@@ -141,7 +141,7 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
   begin
     AddValue(AObject, APropInfo, ATree, 1, ARow, etNone);
     SetStr := TypInfo.GetSetProp(AObject, APropInfo, True);
-    ATree.TreeCaptions[1, ARow] := SetStr;
+    ATree.TreeTexts[1, ARow] := SetStr;
     TypeInfo := TypInfo.GetTypeData(APropInfo^.PropType^)^.CompType^;
     TypeData := TypInfo.GetTypeData(TypeInfo);
     ATree.RowCount[ARow] := TypeData^.MaxValue - TypeData^.MinValue + 1;
@@ -149,8 +149,8 @@ procedure AddObjectProps(AObject: TObject; ATree: TsmxCustomTree; AParentRow: Po
     begin
       AddValue(AObject, APropInfo, ATree, 1, ATree.Rows[ARow, i], etPickString);
       EnumStr := TypInfo.GetEnumName(TypeInfo, i);
-      ATree.TreeCaptions[0, ATree.Rows[ARow, i]] := EnumStr;
-      ATree.TreeCaptions[1, ATree.Rows[ARow, i]] := SysUtils.BoolToStr(Pos(EnumStr, SetStr) > 0, True);
+      ATree.TreeTexts[0, ATree.Rows[ARow, i]] := EnumStr;
+      ATree.TreeTexts[1, ATree.Rows[ARow, i]] := SysUtils.BoolToStr(Pos(EnumStr, SetStr) > 0, True);
     end;
   end;
 
@@ -172,7 +172,7 @@ begin
       for i := 0 to Count - 1 do
       begin
         PropInfo := PropList^[i];
-        ATree.TreeCaptions[0, ATree.Rows[AParentRow, i]] := PropInfo^.Name;
+        ATree.TreeTexts[0, ATree.Rows[AParentRow, i]] := PropInfo^.Name;
         case PropInfo^.PropType^^.Kind of
           tkClass:
             AddClass(PropInfo, ATree.Rows[AParentRow, i]);
@@ -185,7 +185,7 @@ begin
           else
           begin
             AddValue(AObject, PropInfo, ATree, 1, ATree.Rows[AParentRow, i], etString);
-            ATree.TreeCaptions[1, ATree.Rows[AParentRow, i]] :=
+            ATree.TreeTexts[1, ATree.Rows[AParentRow, i]] :=
               Variants.VarToStr(TypInfo.GetPropValue(AObject, PropInfo^.Name));
           end;
         end;
@@ -209,7 +209,7 @@ procedure AddObjectEvents(AObject: TObject; ATree: TsmxCustomTree; AParentRow: P
     if Obj is TsmxComponent then
     begin
       AddValue(AObject, APropInfo, ATree, 1, ARow, etPickString);
-      ATree.TreeCaptions[1, ARow] :=
+      ATree.TreeTexts[1, ARow] :=
         Format('%s%s%s', [TsmxComponent(Obj).Name, smxConsts.cDelimiterObjAndMethName, TsmxComponent(Obj).MethodName(Method.Code)]);
     end;
   end;
@@ -232,7 +232,7 @@ begin
       for i := 0 to Count - 1 do
       begin
         PropInfo := PropList^[i];
-        ATree.TreeCaptions[0, ATree.Rows[AParentRow, i]] := PropInfo^.Name;
+        ATree.TreeTexts[0, ATree.Rows[AParentRow, i]] := PropInfo^.Name;
         AddMethod(PropInfo, ATree.Rows[AParentRow, i]);
       end;
     finally
@@ -253,14 +253,14 @@ begin
     if AIsAddSelf then
     begin
       ATree.RowCount[AParentRow] := 1;
-      ATree.TreeCaptions[0, ATree.Rows[AParentRow, 0]] := Format('%s(%s) [%d]', [Cell.Name, Cell.ClassName, Cell.CfgID]);
+      ATree.TreeTexts[0, ATree.Rows[AParentRow, 0]] := Format('%s(%s) [%d]', [Cell.Name, Cell.ClassName, Cell.CfgID]);
       ATree.TreeValues[0, ATree.Rows[AParentRow, 0]] := Integer(Cell);
       AParentRow := ATree.Rows[AParentRow, 0];
     end;
     ATree.RowCount[AParentRow] := Cell.CellCount;
     for i := 0 to Cell.CellCount - 1 do
     begin
-      ATree.TreeCaptions[0, ATree.Rows[AParentRow, i]] := Format('%s(%s) [%d]', [Cell.Cells[i].Name, Cell.Cells[i].ClassName, Cell.Cells[i].CfgID]);
+      ATree.TreeTexts[0, ATree.Rows[AParentRow, i]] := Format('%s(%s) [%d]', [Cell.Cells[i].Name, Cell.Cells[i].ClassName, Cell.Cells[i].CfgID]);
       ATree.TreeValues[0, ATree.Rows[AParentRow, i]] := Integer(Cell.Cells[i]);
       if Cell.Cells[i].CellCount > 0 then
         AddCells(Cell.Cells[i], ATree, ATree.Rows[AParentRow, i]);
@@ -599,7 +599,6 @@ begin
       begin
         Visible := True;
         Width := Grid.Width;
-        Options := [coHasValue];
       end;
     end;
 
@@ -668,7 +667,7 @@ begin
     Grid.Slaves[0].Options := Grid.Slaves[0].Options + [coEditing];
     for i := 0 to AKit.Count - 1 do
     begin
-      Grid.GridCaptions[0, i] := Format('%d - %s', [i, AKit.Items[i].DisplayName]);
+      Grid.GridTexts[0, i] := Format('%d - %s', [i, AKit.Items[i].DisplayName]);
       Grid.GridValues[0, i] := Integer(AKit.Items[i]);
     end;
     Grid.Slaves[0].Options := Grid.Slaves[0].Options - [coEditing];
@@ -868,7 +867,7 @@ begin
           smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
-        s := Tree.TreeCaptions[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
+        s := Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
         case PropInfo^.PropType^^.Kind of
           tkClass:
             FillClassProp(Obj, PropInfo, Tree, s, FindList);
@@ -947,14 +946,14 @@ procedure AfterEditTreeObjectPropsPage(Sender: TsmxComponent);
       Value := TComboBox(ATree.Editor.Control).Text;
       s := '';
       for i := 0 to ATree.RowCount[ATree.ParentRow[ATree.Editor.RowIndex]] - 1 do
-        if (((ATree.TreeCaptions[ATree.Editor.ColIndex, ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]] = SysUtils.DefaultTrueBoolStr)
+        if (((ATree.TreeTexts[ATree.Editor.ColIndex, ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]] = SysUtils.DefaultTrueBoolStr)
             and (ATree.Editor.RowIndex <> ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]))
           or ((Value = SysUtils.DefaultTrueBoolStr)
             and (ATree.Editor.RowIndex = ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]))) then
-          s := s + ATree.TreeCaptions[0, ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]] + ',';
+          s := s + ATree.TreeTexts[0, ATree.Rows[ATree.ParentRow[ATree.Editor.RowIndex], i]] + ',';
       if s <> '' then
         Delete(s, Length(s), 1);
-      ATree.TreeCaptions[ATree.Editor.ColIndex, ATree.ParentRow[ATree.Editor.RowIndex]] :=
+      ATree.TreeTexts[ATree.Editor.ColIndex, ATree.ParentRow[ATree.Editor.RowIndex]] :=
         SysUtils.Format('[%s]', [s]);
       TypInfo.SetSetProp(AObject, APropInfo, s);
     end;
@@ -1004,7 +1003,7 @@ begin
         else
           SaveVarProp(Obj, PropInfo, Tree, s);
       end;
-      Tree.TreeCaptions[Tree.Editor.ColIndex, Tree.Editor.RowIndex] := s;
+      Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex] := s;
     end;
   end;
 end;
@@ -1070,7 +1069,7 @@ begin
           smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
-        s := Tree.TreeCaptions[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
+        s := Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
         FillMethodProp(Obj, PropInfo, Tree, s, FindList);
       finally
         FindList.Free;
@@ -1170,7 +1169,7 @@ begin
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
-          Options := [coEditing, coHasValue];
+          Options := [coEditing];
         end;
       end;
 
@@ -1205,7 +1204,7 @@ begin
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
-          Options := [coEditing, coHasValue];
+          Options := [coEditing];
         end;
       end;
     end;
@@ -1236,7 +1235,6 @@ begin
       begin
         Visible := True;
         Width := Tree.Width;
-        Options := [coHasValue];
       end;
     end;
   end;
@@ -1281,7 +1279,7 @@ begin
             TsmxBaseCell(Obj).CellParent := Form;
             TsmxBaseCell(Obj).CfgID := CfgID;
             TsmxBaseCell(Obj).Initialize;
-            TsmxBaseCell(Obj).IsDesigning := True;
+            //TsmxBaseCell(Obj).IsDesigning := True;
 
             Form.Caption := Format('%s(%s) [%d]',
               [TsmxBaseCell(Obj).Name, TsmxBaseCell(Obj).ClassName, CfgID]);
