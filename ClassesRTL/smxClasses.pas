@@ -1046,7 +1046,6 @@ type
 
   TsmxCustomForm = class(TsmxAlgorithmCell, IsmxFormControl)
   private
-    FAlgorithmList: TsmxCustomAlgorithmList;
     FOptions: TsmxFormOptions;
     FID: Integer;
     FIntfID: Integer;
@@ -1054,8 +1053,6 @@ type
     FOnClose: TsmxComponentEvent;
     FOnDeactivate: TsmxComponentEvent;
     FOnShow: TsmxComponentEvent;
-    FPopupList: TsmxCustomPopupList;
-    FRequestList: TsmxCustomRequestList;
     function GetSlave(Index: Integer): TsmxCustomPageManager;
     procedure SetSlave(Index: Integer; Value: TsmxCustomPageManager);
   protected
@@ -1074,16 +1071,12 @@ type
     procedure InternalDeactivate; virtual;
     procedure InternalShow; virtual;
     function InternalShowModal: TModalResult; virtual;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure SetAlgorithmList(Value: TsmxCustomAlgorithmList); virtual;
     procedure SetBorder(Value: TsmxFormBorder); virtual;
     procedure SetOptions(Value: TsmxFormOptions); virtual;
     procedure SetPosition(Value: TsmxFormPosition); virtual;
     procedure SetIntfID(Value: Integer); virtual;
     procedure SetIsMaximize(Value: Boolean); virtual;
     procedure SetModalResult(Value: TModalResult); virtual;
-    procedure SetPopupList(Value: TsmxCustomPopupList); virtual;
-    procedure SetRequestList(Value: TsmxCustomRequestList); virtual;
   public
     constructor Create(AOwner: TComponent; AID: Integer); reintroduce; overload; virtual;
     function AddSlave: TsmxCustomPageManager;
@@ -1095,7 +1088,6 @@ type
     procedure Show;
     function ShowModal: TModalResult;
 
-    property AlgorithmList: TsmxCustomAlgorithmList read FAlgorithmList write SetAlgorithmList;
     property Border: TsmxFormBorder read GetBorder write SetBorder;
     property ID: Integer read GetID;
     property IntfID: Integer read FIntfID write SetIntfID;
@@ -1103,8 +1095,6 @@ type
     property ModalResult: TModalResult read GetModalResult write SetModalResult;
     property Options: TsmxFormOptions read FOptions write SetOptions;
     property Position: TsmxFormPosition read GetPosition write SetPosition;
-    property PopupList: TsmxCustomPopupList read FPopupList write SetPopupList;
-    property RequestList: TsmxCustomRequestList read FRequestList write SetRequestList;
     property Slaves[Index: Integer]: TsmxCustomPageManager read GetSlave write SetSlave; default;
 
     property OnActivate: TsmxComponentEvent read FOnActivate write FOnActivate;
@@ -1376,7 +1366,7 @@ begin
             CellClass := nil;
           if Assigned(CellClass) then
           begin
-            Cell := CellClass.Create(TsmxCellCfg(SrcCfg).CellOwner);
+            Cell := CellClass.Create(Owner);
             Cell.CellParent := Self;
             TsmxCellCfg(SrcCfg).CurNode := n;
             TsmxCellCfg(SrcCfg).ReadCell(Cell);
@@ -1618,7 +1608,8 @@ begin
   if not Assigned(ObjectClass) or not ObjectClass.InheritsFrom(GetSlaveClass) then
   begin
     if Assigned(ObjectClass) then
-      ObjectClassName := ObjectClass.ClassName else
+      ObjectClassName := ObjectClass.ClassName
+    else
       ObjectClassName := 'nil';
     raise EsmxCellError.CreateResFmt(@smxConsts.rsListItemClassError,
       [ObjectClassName, ClassName]);
@@ -4194,13 +4185,6 @@ begin
   Result := FID;
 end;
 
-procedure TsmxCustomForm.SetAlgorithmList(Value: TsmxCustomAlgorithmList);
-begin
-  FAlgorithmList := Value;
-  if Assigned(FAlgorithmList) then
-    FAlgorithmList.FreeNotification(Self);
-end;
-
 function TsmxCustomForm.GetBorder: TsmxFormBorder;
 begin
   Result := fbNone;
@@ -4234,20 +4218,6 @@ begin
   Result := TsmxCustomPageManager;
 end;
 
-procedure TsmxCustomForm.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-  begin
-    if AComponent = AlgorithmList then
-      AlgorithmList := nil else
-    if AComponent = PopupList then
-      PopupList := nil else
-    if AComponent = RequestList then
-      RequestList := nil;
-  end;
-end;
-
 procedure TsmxCustomForm.SetOptions(Value: TsmxFormOptions);
 begin
   FOptions := Value;
@@ -4256,20 +4226,6 @@ end;
 procedure TsmxCustomForm.SetIntfID(Value: Integer);
 begin
   FIntfID := Value;
-end;
-
-procedure TsmxCustomForm.SetPopupList(Value: TsmxCustomPopupList);
-begin
-  FPopupList := Value;
-  if Assigned(FPopupList) then
-    FPopupList.FreeNotification(Self);
-end;
-
-procedure TsmxCustomForm.SetRequestList(Value: TsmxCustomRequestList);
-begin
-  FRequestList := Value;
-  if Assigned(FRequestList) then
-    FRequestList.FreeNotification(Self);
 end;
 
 end.

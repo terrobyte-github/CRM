@@ -35,13 +35,6 @@ function FindFilterOnForm(AForm: TsmxCustomForm; const AName: String;
 function FindColumnOnForm(AForm: TsmxCustomForm; const AName: String;
   var AValue: Variant): Boolean;
 function GetAccessoryForm(ACell: TsmxBaseCell): TsmxCustomForm;
-function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm; overload;
-function GetAlgorithmForm(AForm: TsmxCustomForm; AEvent: TsmxComponentEvent): TsmxCustomAlgorithm; overload;
-function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEvent;
-function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest; overload;
-function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest; overload;
-function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
-function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
 
 implementation
 
@@ -297,76 +290,6 @@ begin
     end;
     ACell := ACell.CellParent;
   end;
-end;
-
-function GetAlgorithmForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomAlgorithm;
-begin
-  Result := nil;
-  if Assigned(AForm) and (ACfgID <> 0) then
-    if Assigned(AForm.AlgorithmList) then
-      Result := TsmxCustomAlgorithm(AForm.AlgorithmList.FindSlaveByCfgID(ACfgID));
-end;
-
-function GetEventForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxComponentEvent;
-var
-  Algorithm: TsmxCustomAlgorithm;
-begin
-  Algorithm := GetAlgorithmForm(AForm, ACfgID);
-  if Assigned(Algorithm) then
-    Result := Algorithm.OnExecute
-  else
-    Result := nil;
-end;
-
-function GetRequestForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomRequest;
-begin
-  Result := nil;
-  if Assigned(AForm) and (ACfgID <> 0) then
-    if Assigned(AForm.RequestList) then
-      Result := TsmxCustomRequest(AForm.RequestList.FindSlaveByCfgID(ACfgID));
-end;
-
-function GetDataSetForm(AForm: TsmxCustomForm; ACfgID: Integer): IsmxDataSet;
-var
-  Request: TsmxCustomRequest;
-begin
-  Request := GetRequestForm(AForm, ACfgID);
-  if Assigned(Request) then
-    Result := Request.DataSet
-  else
-    Result := nil;
-end;
-
-function GetPopupMenuForm(AForm: TsmxCustomForm; ACfgID: Integer): TsmxCustomPopupMenu;
-begin
-  Result := nil;
-  if Assigned(AForm) and (ACfgID <> 0) then
-    if Assigned(AForm.PopupList) then
-      Result := TsmxCustomPopupMenu(AForm.PopupList.FindSlaveByCfgID(ACfgID));
-end;
-
-function GetAlgorithmForm(AForm: TsmxCustomForm; AEvent: TsmxComponentEvent): TsmxCustomAlgorithm;
-var
-  i: Integer;
-begin
-  Result := nil;
-  if Assigned(AForm) and Assigned(AEvent) then
-    if Assigned(AForm.AlgorithmList) then
-      for i := 0 to AForm.AlgorithmList.SlaveCount - 1 do
-        if @AForm.AlgorithmList[i].OnExecute = @AEvent then
-          Result := AForm.AlgorithmList[i];
-end;
-
-function GetRequestForm(AForm: TsmxCustomForm; const ADataSet: IsmxDataSet): TsmxCustomRequest;
-var
-  i: Integer;
-begin
-  Result := nil;
-  if Assigned(AForm) and Assigned(ADataSet) then
-    if Assigned(AForm.RequestList) then
-      for i := 0 to AForm.RequestList.SlaveCount - 1 do
-        if AForm.RequestList[i].DataSet = ADataSet then
-          Result := AForm.RequestList[i];
 end;
 
 end.

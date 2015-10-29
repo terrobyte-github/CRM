@@ -721,24 +721,10 @@ type
   { TsmxStandardForm }
 
   TsmxStandardForm = class(TsmxStateForm)
-  private
-    FControlBoard: TsmxCustomControlBoard;
-    FMainMenu: TsmxCustomMainMenu;
-    FStatusBoard: TsmxCustomStatusBoard;
   protected
     function GetSlaveClass: TsmxBaseCellClass; override;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure SetControlBoard(Value: TsmxCustomControlBoard); virtual;
-    procedure SetMainMenu(Value: TsmxCustomMainMenu); virtual;
-    procedure SetStatusBoard(Value: TsmxCustomStatusBoard); virtual;
   published
-    property AlgorithmList;
-    property ControlBoard: TsmxCustomControlBoard read FControlBoard write SetControlBoard;
-    property MainMenu: TsmxCustomMainMenu read FMainMenu write SetMainMenu;
-    property PopupList;
-    property RequestList;
     property SlaveList;
-    property StatusBoard: TsmxCustomStatusBoard read FStatusBoard write SetStatusBoard;
   end;
 
 implementation
@@ -3153,7 +3139,7 @@ end;
 destructor TsmxStateForm.Destroy;
 begin
   if Assigned(FStateCfg) then
-    FStateCfg.Free;  
+    FStateCfg.Free;
   inherited Destroy;
 end;
 
@@ -3262,35 +3248,6 @@ end;
 function TsmxStandardForm.GetSlaveClass: TsmxBaseCellClass;
 begin
   Result := TsmxPageControl;
-end;
-
-procedure TsmxStandardForm.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-  begin
-    if AComponent = ControlBoard then
-      ControlBoard := nil else
-    if AComponent = MainMenu then
-      MainMenu := nil else
-    if AComponent = StatusBoard then
-      StatusBoard := nil;
-  end;
-end;
-
-procedure TsmxStandardForm.SetControlBoard(Value: TsmxCustomControlBoard);
-begin
-  FControlBoard := Value;
-end;
-
-procedure TsmxStandardForm.SetMainMenu(Value: TsmxCustomMainMenu);
-begin
-  FMainMenu := Value;
-end;
-
-procedure TsmxStandardForm.SetStatusBoard(Value: TsmxCustomStatusBoard);
-begin
-  FStatusBoard := Value;
 end;
 
 initialization

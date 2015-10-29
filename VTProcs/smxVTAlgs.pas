@@ -345,6 +345,21 @@ begin
   end;
 end;
 
+function GetObjectFormTreeView: TObject;
+var
+  FormObjectProps: TsmxCustomForm;
+  Tree: TsmxCustomTree;
+begin
+  Result := nil;
+  FormObjectProps := GetForm(0, smxConsts.cFormObjectPropsID);
+  if Assigned(FormObjectProps) then
+  begin
+    Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[1].Cells[0]);
+    if Tree.RowCount[Tree.RootRow] <> 0 then
+      Result := TObject(Integer(Tree.TreeValues[0, Tree.Rows[Tree.RootRow, 0]]));
+  end;
+end;
+
 procedure ActiveFormCellView(Sender: TsmxComponent);
 var
   Form: TsmxCustomForm;
@@ -860,11 +875,9 @@ begin
       try
         if Obj is TsmxBaseCell then
         begin
-          if TsmxBaseCell(Obj).Owner is TsmxBaseCell then
-            ObjOwner := TsmxBaseCell(Obj).Owner
-          else
-            ObjOwner := Obj;
-          smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
+          ObjOwner := GetObjectFormTreeView;
+          if ObjOwner is TsmxBaseCell then
+            smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
         s := Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
@@ -1059,14 +1072,12 @@ begin
         EditorType := TsmxEditorType(Integer(V[2]));
       end;
       FindList := TList.Create;
-      try
+      try           
         if Obj is TsmxBaseCell then
         begin
-          if TsmxBaseCell(Obj).Owner is TsmxBaseCell then
-            ObjOwner := TsmxBaseCell(Obj).Owner
-          else
-            ObjOwner := Obj;
-          smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
+          ObjOwner := GetObjectFormTreeView;
+          if ObjOwner is TsmxBaseCell then
+            smxClassProcs.RefList(TsmxBaseCell(ObjOwner), FindList);
         end;
         Tree.Editor.EditorType := EditorType;
         s := Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
@@ -1164,12 +1175,13 @@ begin
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
+          Options := [coResize];
         end;
         with Tree.AddSlave do
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
-          Options := [coEditing];
+          Options := [coEditing, coResize];
         end;
       end;
 
@@ -1199,12 +1211,13 @@ begin
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
+          Options := [coResize];
         end;
         with Tree.AddSlave do
         begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
-          Options := [coEditing];
+          Options := [coEditing, coResize];
         end;
       end;
     end;
@@ -1235,6 +1248,7 @@ begin
       begin
         Visible := True;
         Width := Tree.Width;
+        Options := [coResize];
       end;
     end;
   end;
