@@ -78,8 +78,7 @@ type
 
   TsmxStatusItemStyle = (sisText, sisDraw);
 
-  TsmxEditorType = (etNone, etString, etNumber, etDate, etPickString,
-    etButtonString);
+  TsmxEditorType = (etNone, etString, etPickString, etButtonString);
 
   TsmxCellState = (csInitialized, csFinalized, csEventParam);
 
