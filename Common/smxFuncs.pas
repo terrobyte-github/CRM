@@ -23,6 +23,7 @@ function Ask(const AMsg: String; AType: Cardinal): Integer; overload;
 function Ask(const AMsg: String): Boolean; overload;
 function Inf(const AMsg: String; AType: Cardinal = MB_OK + MB_ICONINFORMATION): Integer;
 function StrToVar(const AValue: String): Variant;
+function VarToStr(const AValue: Variant): String;
 function NewXMLDoc(const AVersion: String = smxConsts.cXMLDocVersion;
   const AEncoding: String = smxConsts.cXMLDocEncoding): IXMLDocument;
 function FormatXMLText(const AText: String): String;
@@ -48,6 +49,8 @@ function VarToInt(const AValue: Variant): Integer;
 function IntToVar(AValue: Integer): Variant;
 function ClassNameWithoutPrefix(AClassName: ShortString): ShortString;
 function DateTimeToVar(AValue: TDateTime): Variant;
+function VarToDateTime(const AValue: Variant): TDateTime;
+function ImplementedIntf(AClass: TClass; var AGUIDs: TsmxGUIDArray): Integer;
 
 implementation
 
@@ -105,6 +108,11 @@ begin
     Result := Variants.Null
   else
     Result := AValue;
+end;
+
+function VarToStr(const AValue: Variant): String;
+begin
+  Result := Variants.VarToStr(AValue);
 end;
 
 function NewXMLDoc(const AVersion: String = smxConsts.cXMLDocVersion;
@@ -303,16 +311,14 @@ function FindUniqueName(AOwner: TComponent; const AName: String): String;
 var
   i: Integer;
 begin
-  Result := AName;
+  i := 1;
+  Result := SysUtils.Format('%s%d', [AName, i]);
   if Assigned(AOwner) then
-  begin
-    i := 0;
     while Assigned(AOwner.FindComponent(Result)) do
     begin
       Inc(i);
-      Result := SysUtils.Format('%s_%d', [AName, i]);
+      Result := SysUtils.Format('%s%d', [AName, i]);
     end;
-  end;
 end;
 
 function ResolvedClassType(AClassType: TPersistentClass): String;
@@ -369,6 +375,35 @@ begin
     Result := Variants.Null
   else
     Result := AValue;
+end;
+
+function VarToDateTime(const AValue: Variant): TDateTime;
+begin
+  if Variants.VarIsNull(AValue) then
+    Result := SysUtils.FloatToDateTime(0)
+  else
+    Result := Variants.VarToDateTime(AValue);
+end;
+
+function ImplementedIntf(AClass: TClass; var AGUIDs: TsmxGUIDArray): Integer;
+var
+  PIT: PInterfaceTable;
+  i: Integer;
+begin
+  Result := 0;
+  SetLength(AGUIDs, 0);
+  while Assigned(AClass) do
+  begin
+    PIT := AClass.GetInterfaceTable;
+    if Assigned(PIT) then
+    begin
+      SetLength(AGUIDs, Result + PIT^.EntryCount);
+      for i := 0 to PIT^.EntryCount - 1 do
+        AGUIDs[Result + i] := PIT^.Entries[i].IID;
+      Inc(Result, PIT^.EntryCount);
+    end;
+    AClass := AClass.ClassParent;
+  end;
 end;
 
 end.

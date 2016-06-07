@@ -467,7 +467,7 @@ begin
   end;
 end;
 
-procedure RefList(ACell: TsmxBaseCell; AList: TList);
+{procedure RefList(ACell: TsmxBaseCell; AList: TList);
 
   procedure RefClass(AObject: TObject; APropInfo: PPropInfo);
   var
@@ -528,6 +528,29 @@ begin
         FreeMem(PropList);
       end;
     end;
+  end;
+end;}
+
+procedure RefList(ACell: TsmxBaseCell; AList: TList);
+var
+  i, j: Integer;
+  Count: Integer;
+  GUIDs: TsmxGUIDArray;
+  Intf: IInterface;
+  RefIntf: IsmxRefComponent;
+begin
+  if not Assigned(ACell) or not Assigned(AList) then
+    Exit;
+  AllCells(ACell, AList, []);
+  for j := 0 to AList.Count - 1 do
+  begin
+    Count := smxFuncs.ImplementedIntf(TObject(AList[j]).ClassType, GUIDs);
+    if Count > 0 then
+      for i := 0 to Count - 1 do
+        if TObject(AList[j]).GetInterface(GUIDs[i], Intf) then
+          if SysUtils.Supports(Intf, IsmxRefComponent, RefIntf) then
+            if AList.IndexOf(RefIntf.GetReference) = -1 then
+              AList.Add(RefIntf.GetReference);
   end;
 end;
 

@@ -106,6 +106,8 @@ type
 
   TsmxPerformanceMode = (pmOpen, pmExecute);
 
+  TsmxGUIDArray = array of TGUID;
+
 implementation
 
 end.

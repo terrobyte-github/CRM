@@ -15,8 +15,8 @@ unit smxBDEDB;
 interface
 
 uses
-  Classes, Windows, ActiveX, ComObj, DB, DBTables, smxBaseClasses, smxDBClasses,
-  smxCells, smxDBIntf, smxBaseIntf, smxTypes;
+  Classes, Windows, ActiveX, ComObj, DB, DBTables, smxBaseClasses, smxClasses,
+  smxDBClasses, smxCells, smxDBIntf, smxBaseIntf, smxTypes;
 
 const
   CLSID_smxCoBDEDatabase: TGUID = '{61272B45-B747-473C-8ECA-8148E607B057}';
@@ -163,18 +163,32 @@ type
     property SQLText: String read GetSQLText write SetSQLText;
   end;
 
-  { TsmxReqBDEQuery }
+  { TsmxBDEQueryRequest }
 
-  TsmxReqBDEQuery = class(TsmxRequest)
+  TsmxBDEQueryRequest = class(TsmxRequest)
   protected
     function GetDataSetClass: TsmxInterfacedComponentClass; override;
   end;
 
-  { TsmxReqBDEStoredProc }
+  { TsmxBDEStoredProcRequest }
 
-  TsmxReqBDEStoredProc = class(TsmxRequest)
+  TsmxBDEStoredProcRequest = class(TsmxRequest)
   protected
     function GetDataSetClass: TsmxInterfacedComponentClass; override;
+  end;
+
+  { TsmxBDEQueryRequestList }
+
+  TsmxBDEQueryRequestList = class(TsmxRequestList)
+  protected
+    function GetSlaveClass: TsmxBaseCellClass; override;
+  end;
+
+  { TsmxBDEStoredProcRequestList }
+
+  TsmxBDEStoredProcRequestList = class(TsmxRequestList)
+  protected
+    function GetSlaveClass: TsmxBaseCellClass; override;
   end;
 
 function DatabaseCLSID: TGUID;
@@ -650,28 +664,44 @@ begin
   Result := FParams;
 end;
 
-{ TsmxReqBDEQuery }
+{ TsmxBDEQueryRequest }
 
-function TsmxReqBDEQuery.GetDataSetClass: TsmxInterfacedComponentClass;
+function TsmxBDEQueryRequest.GetDataSetClass: TsmxInterfacedComponentClass;
 begin
   Result := TsmxBDEQuery;
 end;
 
-{ TsmxReqBDEStoredProc }
+{ TsmxBDEStoredProcRequest }
 
-function TsmxReqBDEStoredProc.GetDataSetClass: TsmxInterfacedComponentClass;
+function TsmxBDEStoredProcRequest.GetDataSetClass: TsmxInterfacedComponentClass;
 begin
   Result := TsmxBDEStoredProc;
 end;
 
+{ TsmxBDEQueryRequestList }
+
+function TsmxBDEQueryRequestList.GetSlaveClass: TsmxBaseCellClass;
+begin
+  Result := TsmxBDEQueryRequest;
+end;
+
+{ TsmxBDEStoredProcRequestList }
+
+function TsmxBDEStoredProcRequestList.GetSlaveClass: TsmxBaseCellClass;
+begin
+  Result := TsmxBDEStoredProcRequest;
+end;
+
 initialization
   Classes.RegisterClasses([TsmxBDEDatabase, TsmxBDEParam, TsmxBDEQuery,
-    TsmxBDEStoredProc, TsmxReqBDEQuery, TsmxReqBDEStoredProc]);
+    TsmxBDEStoredProc, TsmxBDEQueryRequest, TsmxBDEStoredProcRequest,
+    TsmxBDEQueryRequestList, TsmxBDEStoredProcRequestList]);
   TComObjectFactory.Create(ComServer, TsmxCoBDEDatabase, CLSID_smxCoBDEDatabase,
     'smxCoBDEDatabase', '', ciMultiInstance, tmApartment);
 
 finalization
   Classes.UnRegisterClasses([TsmxBDEDatabase, TsmxBDEParam, TsmxBDEQuery,
-    TsmxBDEStoredProc, TsmxReqBDEQuery, TsmxReqBDEStoredProc]);
+    TsmxBDEStoredProc, TsmxBDEQueryRequest, TsmxBDEStoredProcRequest,
+    TsmxBDEQueryRequestList, TsmxBDEStoredProcRequestList]);
 
 end.

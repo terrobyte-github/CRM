@@ -774,7 +774,8 @@ procedure BeforeEditTreeObjectPropsPage(Sender: TsmxComponent);
           TComboBox(ATree.Editor.Control).Items.AddObject('', nil);
           for i := 0 to AFindList.Count - 1 do
             if TObject(AFindList[i]).InheritsFrom(Cls) then
-              TComboBox(ATree.Editor.Control).Items.AddObject(TsmxBaseCell(AFindList[i]).Name, AFindList[i]);
+              if TComboBox(ATree.Editor.Control).Items.IndexOfObject(TObject(AFindList[i])) = -1 then
+                TComboBox(ATree.Editor.Control).Items.AddObject(TsmxBaseCell(AFindList[i]).Name, AFindList[i]);
           TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
         end;
     end else
@@ -797,6 +798,7 @@ procedure BeforeEditTreeObjectPropsPage(Sender: TsmxComponent);
   var
     GUID: TGUID;
     i: Integer;
+    Intf: IInterface;
   begin
     GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
     if ATree.Editor.Control is TComboBox then
@@ -806,8 +808,9 @@ procedure BeforeEditTreeObjectPropsPage(Sender: TsmxComponent);
         begin
           TComboBox(ATree.Editor.Control).Items.AddObject('', nil);
           for i := 0 to AFindList.Count - 1 do
-            if SysUtils.Supports(TObject(AFindList[i]), GUID) then
-              TComboBox(ATree.Editor.Control).Items.AddObject(IsmxRefComponent(AFindList[i]).GetReference.Name, AFindList[i]);
+            if SysUtils.Supports(TObject(AFindList[i]), GUID, Intf) then
+              if TComboBox(ATree.Editor.Control).Items.IndexOfObject(IsmxRefComponent(Intf).GetReference) = -1 then
+                TComboBox(ATree.Editor.Control).Items.AddObject(IsmxRefComponent(Intf).GetReference.Name, IsmxRefComponent(Intf).GetReference);
           TComboBox(ATree.Editor.Control).ItemIndex := TComboBox(ATree.Editor.Control).Items.IndexOf(Value);
         end;
     end;
@@ -909,7 +912,7 @@ procedure AfterEditTreeObjectPropsPage(Sender: TsmxComponent);
   begin
     if ATree.Editor.Control is TComboBox then
     begin
-      if TComboBox(ATree.Editor.Control).ItemIndex <> -1 then
+      if (TComboBox(ATree.Editor.Control).ItemIndex <> -1) and (TComboBox(ATree.Editor.Control).Text <> '') then
         Obj := TComboBox(ATree.Editor.Control).Items.Objects[TComboBox(ATree.Editor.Control).ItemIndex]
       else
         Obj := nil;
@@ -925,12 +928,14 @@ procedure AfterEditTreeObjectPropsPage(Sender: TsmxComponent);
   procedure SaveIntfProp(AObject: TObject; APropInfo: PPropInfo; ATree: TsmxCustomTree;
     var Value: String);
   var
+    GUID: TGUID;
     Intf: IInterface;
   begin
     if ATree.Editor.Control is TComboBox then
     begin
-      if TComboBox(ATree.Editor.Control).ItemIndex <> -1 then
-        TComboBox(ATree.Editor.Control).Items.Objects[TComboBox(ATree.Editor.Control).ItemIndex].GetInterface(IInterface, Intf)
+      GUID := TypInfo.GetTypeData(APropInfo^.PropType^)^.Guid;
+      if (TComboBox(ATree.Editor.Control).ItemIndex <> -1) and (TComboBox(ATree.Editor.Control).Text <> '') then
+        TComboBox(ATree.Editor.Control).Items.Objects[TComboBox(ATree.Editor.Control).ItemIndex].GetInterface(GUID, Intf)
       else
         Intf := nil;
       TypInfo.SetInterfaceProp(AObject, APropInfo, Intf);

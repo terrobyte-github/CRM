@@ -57,6 +57,25 @@ type
     property OnRefreshParams;
   end;
 
+  { TsmxActionList }
+
+  TsmxActionList = class(TsmxCustomAlgorithmList)
+  private
+    FActionList: TActionList;
+    function GetActionList: TActionList;
+  protected
+    function GetInternalRef: Pointer; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
+    procedure SetImageList(Value: TCustomImageList); override;
+
+    property ActionList: TActionList read GetActionList;
+  public
+    destructor Destroy; override;
+  published
+    property ImageListName;
+    property SlaveList;
+  end;
+
   { TsmxRequest }
 
   TsmxRequest = class(TsmxCustomRequest)
@@ -76,6 +95,15 @@ type
     property OnPrepare;
     property OnRefreshParams;
     property OnUpdate;
+  end;
+
+  { TsmxRequestList }
+
+  TsmxRequestList = class(TsmxCustomRequestList)
+  protected
+    function GetSlaveClass: TsmxBaseCellClass; override;
+  published
+    property SlaveList;
   end;
 
   { TsmxFilter }
@@ -116,6 +144,47 @@ type
     property HeaderFont;
     property HeaderText;
     property PopupMenu;
+  end;
+
+  { TsmxFilterDesk }
+
+  TsmxFilterDesk = class(TsmxCustomFilterDesk)
+  private
+    FPanel: TPanel;
+    function GetPanel: TPanel;
+    procedure RefreshValueParams(DataSet: IsmxDataSet);
+  protected
+    function GetCaption: TCaption; override;
+    function GetHint: String; override;
+    function GetInternalRef: Pointer; override;
+    function GetSlaveClass: TsmxBaseCellClass; override;
+    procedure InternalApply; override;
+    procedure InternalPrepare; override;
+    procedure InternalRefresh; override;
+    procedure SetCaption(const Value: TCaption); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetCellParent(Value: TsmxBaseCell); override;
+
+    property Panel: TPanel read GetPanel;
+  public
+    destructor Destroy; override;
+  published
+    property Align;
+    property Anchors;
+    property Caption;
+    property Cursor;
+    property Enabled;
+    property Height;
+    property Hint;
+    property Left;
+    property Top;
+    property Visible;
+    property Width;
+    property PopupMenu;
+    property SlaveList;
+
+    property OnDoubleClick;
+    property OnClick;
   end;
 
   { TsmxForm }
@@ -384,6 +453,41 @@ begin
   Action.Index := Value;
 end;
 
+{ TsmxActionList }
+
+destructor TsmxActionList.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FActionList) then
+    FActionList.Free;
+end;
+
+function TsmxActionList.GetActionList: TActionList;
+begin
+  if not Assigned(FActionList) then
+    FActionList := TActionList.Create(nil);
+  Result := FActionList;
+end;
+
+function TsmxActionList.GetInternalRef: Pointer;
+begin
+  Result := Pointer(ActionList);
+end;
+
+function TsmxActionList.GetSlaveClass: TsmxBaseCellClass;
+begin
+  Result := TsmxAction;
+end;
+
+procedure TsmxActionList.SetImageList(Value: TCustomImageList);
+begin
+  if Assigned(ImageList) then
+    ActionList.Images := nil;
+  inherited SetImageList(Value);
+  if Assigned(ImageList) then
+    ActionList.Images := ImageList;
+end;
+
 { TsmxRequest }
 
 procedure TsmxRequest.InternalRefreshParams;
@@ -477,6 +581,13 @@ begin
   end;
 end;
 
+{ TsmxRequestList }
+
+function TsmxRequestList.GetSlaveClass: TsmxBaseCellClass;
+begin
+  Result := TsmxRequest;
+end;
+
 { TsmxFilter }
 
 destructor TsmxFilter.Destroy;
@@ -560,6 +671,229 @@ begin
 end;
 
 procedure TsmxFilter.SetCellParent(Value: TsmxBaseCell);
+var
+  Obj: TObject;
+begin
+  if Assigned(CellParent) then
+    Panel.Parent := nil;
+  inherited SetCellParent(Value);
+  if Assigned(CellParent) then
+  begin
+    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
+    if Obj is TWinControl then
+      Panel.Parent := TWinControl(Obj);
+  end;
+end;
+
+{ TsmxFilterDesk }
+
+destructor TsmxFilterDesk.Destroy;
+begin
+  inherited Destroy;
+  if Assigned(FPanel) then
+    FPanel.Free;
+end;
+
+procedure TsmxFilterDesk.InternalApply;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalApply;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.UpdateDataSet;
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        for i := 0 to SlaveCount - 1 do
+        begin
+          if foApply in Slaves[i].Options then
+          begin
+            DataSet.ParamByName(Slaves[i].Name).Value :=
+              Slaves[i].Value;
+            DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value :=
+              smxFuncs.StrToVar(Slaves[i].Text);
+          end;
+        end;
+        Request.Update;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxFilterDesk.InternalPrepare;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.DataSet;
+    if Assigned(DataSet) then
+    begin
+      DataSet.Close;
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        Request.Prepare;
+        if DataSet.Active then
+          for i := 0 to SlaveCount - 1 do
+          begin
+            if foPrepare in Slaves[i].Options then
+              case DataSet.PerformanceMode of
+                pmOpen:
+                begin
+                  Slaves[i].Value :=
+                    DataSet.FieldByName(Slaves[i].Name).Value;
+                  Slaves[i].Text :=
+                    Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
+                end;
+                pmExecute:
+                begin
+                  Slaves[i].Value :=
+                    DataSet.ParamByName(Slaves[i].Name).Value;
+                  Slaves[i].Text :=
+                    Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
+                end;
+              end;
+          end;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+procedure TsmxFilterDesk.InternalRefresh;
+var
+  DataSet: IsmxDataSet;
+  OldIsManualRefreshParams: Boolean;
+  i: Integer;
+begin
+  inherited InternalPrepare;
+  if Assigned(Request) then
+  begin
+    DataSet := Request.DataSet;
+    if Assigned(DataSet) then
+    begin
+      OldIsManualRefreshParams := Request.IsManualRefreshParams;
+      try
+        Request.IsManualRefreshParams := True;
+        RefreshValueParams(DataSet);
+        Request.Execute;
+        for i := 0 to SlaveCount - 1 do
+        begin
+          if foPrepare in Slaves[i].Options then
+            case DataSet.PerformanceMode of
+              pmOpen:
+              begin
+                Slaves[i].Value :=
+                  DataSet.FieldByName(Slaves[i].Name).Value;
+                Slaves[i].Text :=
+                  Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
+              end;
+              pmExecute:
+              begin
+                Slaves[i].Value :=
+                  DataSet.ParamByName(Slaves[i].Name).Value;
+                Slaves[i].Text :=
+                  Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
+              end;
+            end;
+        end;
+      finally
+        Request.IsManualRefreshParams := OldIsManualRefreshParams;
+      end;
+    end;
+  end;
+end;
+
+function TsmxFilterDesk.GetCaption: TCaption;
+begin
+  Result := Panel.Caption;
+end;
+
+procedure TsmxFilterDesk.SetCaption(const Value: TCaption);
+begin
+  Panel.Caption := Value;
+end;
+
+function TsmxFilterDesk.GetHint: String;
+begin
+  Result := Panel.Hint;
+end;
+
+procedure TsmxFilterDesk.SetHint(const Value: String);
+begin
+  Panel.Hint := Value;
+end;
+
+function TsmxFilterDesk.GetInternalRef: Pointer;
+begin
+  Result := Pointer(Panel);
+end;
+
+function TsmxFilterDesk.GetPanel: TPanel;
+begin
+  if not Assigned(FPanel) then
+  begin
+    FPanel := TPanel.Create(nil);
+    FPanel.Caption := '';
+    FPanel.BevelOuter := bvNone;
+  end;
+  Result := FPanel;
+end;
+
+function TsmxFilterDesk.GetSlaveClass: TsmxBaseCellClass;
+begin
+  Result := TsmxFilter;
+end;
+
+procedure TsmxFilterDesk.RefreshValueParams(DataSet: IsmxDataSet);
+var
+  i, j: Integer;
+  List: TList;
+  Value: Variant;
+begin
+  List := TList.Create;
+  try
+    for i := 0 to DataSet.ParamCount - 1 do
+      case DataSet.Params[i].DataLocation of
+        dlStorageParam:
+        begin
+          if Assigned(smxProcs.gStorageManagerIntf) then
+            DataSet.Params[i].Value := smxProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
+        end;
+        dlParentCellParam:
+        begin
+          List.Clear;
+          smxClassProcs.AllParents(Self, List, []);
+          for j := 0 to List.Count - 1 do
+            if TsmxBaseCell(List[j]).CellParams(DataSet.Params[i].ParamName, Value) then
+            begin
+              DataSet.Params[i].Value := Value;
+              Break;
+            end;
+        end;
+        else
+          DataSet.Params[i].Value := Variants.Null;
+      end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TsmxFilterDesk.SetCellParent(Value: TsmxBaseCell);
 var
   Obj: TObject;
 begin
