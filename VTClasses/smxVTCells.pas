@@ -195,6 +195,8 @@ type
     function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
     function GetSlaveClass: TsmxBaseCellClass; override;
+    procedure InternalApply; override;
+    procedure InternalCancel; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
@@ -282,6 +284,10 @@ type
     function GetSlaveClass: TsmxBaseCellClass; override;
     function GetTreeText(ColIndex: Integer; RowIndex: Pointer): String; override;
     function GetTreeValue(ColIndex: Integer; RowIndex: Pointer): Variant; override;
+    procedure InternalApply; override;
+    procedure InternalCancel; override;
+    procedure InternalPrepare; override;
+    procedure InternalRefresh; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
     procedure SetHint(const Value: String); override;
     procedure SetExpanded(RowIndex: Pointer; Value: Boolean); override;
@@ -829,27 +835,35 @@ begin
     FVTGrid.Free;
 end;
 
-procedure TsmxVTGrid.InternalPrepare;
+procedure TsmxVTGrid.InternalApply;
 var
-  OldIsManualRefreshParams: Boolean;
+  Form: TsmxCustomForm;
+begin
+  inherited InternalApply;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
+  if Assigned(Request) then
+    if Assigned(Form) and (Form.ID = 0) then
+      Request.Insert
+    else
+      Request.Update;
+end;
+
+procedure TsmxVTGrid.InternalCancel;
+begin
+  inherited InternalCancel;
+  if Assigned(Request) then
+    Request.Delete;
+end;
+
+procedure TsmxVTGrid.InternalPrepare;
 begin
   inherited InternalPrepare;
   VTGrid.Clear;
   if Assigned(Request) then
   begin
-    if Assigned(Request.DataSet) then
-    begin
-      Request.DataSet.Close;
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := False;
-        Request.Prepare;
-        if Request.DataSet.Active then
-          VTGrid.RootNodeCount := Request.DataSet.RecordCount;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
+    Request.Prepare;
+    if Assigned(Request.DataSet) and Request.DataSet.Active then
+      VTGrid.RootNodeCount := Request.DataSet.RecordCount;
   end else
   begin
     VTNodes.Clear;
@@ -857,24 +871,14 @@ begin
 end;
 
 procedure TsmxVTGrid.InternalRefresh;
-var
-  OldIsManualRefreshParams: Boolean;
 begin
   inherited InternalRefresh;
   VTGrid.Clear;
   if Assigned(Request) then
   begin
+    Request.Execute;
     if Assigned(Request.DataSet) then
-    begin
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := False;
-        Request.Execute;
-        VTGrid.RootNodeCount := Request.DataSet.RecordCount;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
+      VTGrid.RootNodeCount := Request.DataSet.RecordCount;
   end else
   begin
     VTNodes.Clear;
@@ -1648,6 +1652,56 @@ begin
   if not Assigned(FVTNodes) then
     FVTNodes := TsmxVTNodes.Create(TsmxVTNode);
   Result := FVTNodes;
+end;
+
+procedure TsmxVTTree.InternalApply;
+var
+  Form: TsmxCustomForm;
+begin
+  inherited InternalApply;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
+  if Assigned(Request) then
+    if Assigned(Form) and (Form.ID = 0) then
+      Request.Insert
+    else
+      Request.Update;
+end;
+
+procedure TsmxVTTree.InternalCancel;
+begin
+  inherited InternalCancel;
+  if Assigned(Request) then
+    Request.Delete;
+end;
+
+procedure TsmxVTTree.InternalPrepare;
+begin
+  inherited InternalPrepare;
+  VTTree.Clear;
+  if Assigned(Request) then
+  begin
+    Request.Prepare;
+    if Assigned(Request.DataSet) and Request.DataSet.Active then
+      VTTree.RootNodeCount := Request.DataSet.RecordCount;
+  end else
+  begin
+    VTNodes.Clear;
+  end;
+end;
+
+procedure TsmxVTTree.InternalRefresh;
+begin
+  inherited InternalRefresh;
+  VTTree.Clear;
+  if Assigned(Request) then
+  begin
+    Request.Execute;
+    if Assigned(Request.DataSet) then
+      VTTree.RootNodeCount := Request.DataSet.RecordCount;
+  end else
+  begin
+    VTNodes.Clear;
+  end;
 end;
 
 function TsmxVTTree.RowLevel(RowIndex: Pointer): Integer;

@@ -1094,6 +1094,69 @@ begin
   end;
 end;
 
+procedure AfterEditTreeObjectEventsPage(Sender: TsmxComponent);
+
+  procedure SaveMethodProp(AObject: TObject; APropInfo: PPropInfo; ATree: TsmxCustomTree;
+    var Value: String);
+  var
+    Obj: TObject;
+    Method: TMethod;
+    ObjName, MethName: String;
+  begin
+    if ATree.Editor.Control is TComboBox then
+    begin
+      if (TComboBox(ATree.Editor.Control).ItemIndex <> -1) and (TComboBox(ATree.Editor.Control).Text <> '') then
+      begin
+        Obj := TComboBox(ATree.Editor.Control).Items.Objects[TComboBox(ATree.Editor.Control).ItemIndex];
+        smxProcs.SplitByDelimiter(TComboBox(ATree.Editor.Control).Text, smxConsts.cDelimiterObjAndMethName, ObjName, MethName);
+      end else
+      begin
+        Obj := nil;
+        ObjName := '';
+        MethName := '';
+      end;
+      if Assigned(Obj) and (MethName <> '') then
+      begin
+        Method.Data := Obj;
+        Method.Code := Obj.MethodAddress(MethName);
+      end else
+      begin
+        Method.Data := nil;
+        Method.Code := nil;
+      end;
+      TypInfo.SetMethodProp(AObject, APropInfo, Method);
+      Value := TComboBox(ATree.Editor.Control).Text;
+    end;
+  end;
+
+var
+  Tree: TsmxCustomTree;
+  V: Variant;
+  Obj: TObject;
+  PropInfo: PPropInfo;
+  s: String;
+begin
+  if Sender is TsmxCustomTree then
+  begin
+    Tree := TsmxCustomTree(Sender);
+    if Assigned(Tree.Editor) then
+    begin
+      V := Tree.TreeValues[Tree.Editor.ColIndex, Tree.Editor.RowIndex];
+      if not Variants.VarIsArray(V) then
+      begin
+        Exit;
+      end else
+      begin
+        Obj := TObject(Integer(V[0]));
+        PropInfo := PPropInfo(Integer(V[1]));
+      end;
+      s := '';
+      SaveMethodProp(Obj, PropInfo, Tree, s);
+      Tree.TreeTexts[Tree.Editor.ColIndex, Tree.Editor.RowIndex] := s;
+    end;
+  end;
+end;
+
 function CreateFormObjectProps(AFormParent: TsmxCustomForm): TsmxCustomForm;
 var
   FormClass: TsmxCustomFormClass;
@@ -1212,6 +1275,9 @@ begin
         Method.Code := @BeforeEditTreeObjectEventsPage;
         Method.Data := Tree;
         Tree.OnEditing := TsmxComponentEvent(Method);
+        Method.Code := @AfterEditTreeObjectEventsPage;
+        Method.Data := Tree;
+        Tree.OnEdited := TsmxComponentEvent(Method);
         with Tree.AddSlave do
         begin
           Visible := True;

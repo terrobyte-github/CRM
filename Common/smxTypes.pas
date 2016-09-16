@@ -56,13 +56,13 @@ type
 
   TsmxTreeOptions = set of TsmxTreeOption;
 
-  TsmxFilterOption = (foApply, foPrepare, foEditing);
+  TsmxFilterOption = (foEditing, foResize);
 
   TsmxFilterOptions = set of TsmxFilterOption;
 
   TsmxFormPosition = (fpDesigned, fpScreenCenter, fpOwnerFormCenter);
 
-  TsmxFormBorder = (fbNone, fbDialog, fbSizeable);
+  TsmxFormBorder = (fbNone, fbDialog, fbResize);
 
   TsmxFormOption = (foFrameForm, foFreeOnClose);
 
@@ -80,13 +80,13 @@ type
 
   TsmxEditorType = (etNone, etString, etPickString, etButtonString);
 
-  TsmxCellState = (csInitialized, csFinalized, csEventParam);
+  TsmxCellState = (csInitialized, csFinalized, csEventParam, csDesigning);
 
   TsmxCellStates = set of TsmxCellState;
 
-  TsmxCellStyle = (csRecieveCfg, csIsDesigning);
+  //TsmxCellStyle = (csNotRecieveCfg, csIsDesigning);
 
-  TsmxCellStyles = set of TsmxCellStyle;
+  //TsmxCellStyles = set of TsmxCellStyle;
 
   TsmxDataSetType = (dstQuery, dstStoredProc);
 
@@ -107,6 +107,10 @@ type
   TsmxPerformanceMode = (pmOpen, pmExecute);
 
   TsmxGUIDArray = array of TGUID;
+
+  TsmxAlgorithmCellOption = (acoProperties, acoEvents);
+
+  TsmxAlgorithmCellOptions = set of TsmxAlgorithmCellOption;
 
 implementation
 

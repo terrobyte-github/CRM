@@ -152,13 +152,14 @@ type
   private
     FPanel: TPanel;
     function GetPanel: TPanel;
-    procedure RefreshValueParams(DataSet: IsmxDataSet);
+    procedure RefreshFilters;
   protected
     function GetCaption: TCaption; override;
     function GetHint: String; override;
     function GetInternalRef: Pointer; override;
     function GetSlaveClass: TsmxBaseCellClass; override;
     procedure InternalApply; override;
+    procedure InternalCancel; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
     procedure SetCaption(const Value: TCaption); override;
@@ -181,6 +182,7 @@ type
     property Visible;
     property Width;
     property PopupMenu;
+    property Request;
     property SlaveList;
 
     property OnDoubleClick;
@@ -220,7 +222,6 @@ type
     procedure SetOptions(Value: TsmxFormOptions); override;
     procedure SetPosition(Value: TsmxFormPosition); override;
     procedure SetImageList(Value: TCustomImageList); override;
-    procedure SetIsDesigning(Value: Boolean); override;
     procedure SetIsMaximize(Value: Boolean); override;
     procedure SetModalResult(Value: TModalResult); override;
     procedure SetPopupMenu(Value: TsmxCustomPopupMenu); override;
@@ -353,84 +354,8 @@ begin
 end;
 
 procedure TsmxAction.InternalRefreshParams;
-var
-  i, j: Integer;
-  Form: TsmxCustomForm;
-  Value: Variant;
-  List: TList;
-  Cell: TsmxOwnerCell;
 begin
-  Form := smxClassFuncs.GetAccessoryForm(Self);
-  List := TList.Create;
-  try
-    for i := 0 to Params.Count - 1 do
-    begin
-      case Params[i].DataLocation of
-        dlFilterDesk:
-        begin
-          if CellAlgorithm is TsmxCustomFilterDesk then
-          begin
-            Cell := TsmxCustomFilterDesk(CellAlgorithm).FindSlaveByName(Params[i].ParamName);
-            if Assigned(Cell) then
-              Params[i].ParamValue := TsmxCustomFilter(Cell).Value;
-          end else
-          if smxClassFuncs.FindFilterOnForm(Form, Params[i].ParamName, Value) then
-            Params[i].ParamValue := Value;
-        end;
-        dlGrid:
-        begin
-          if CellAlgorithm is TsmxCustomGrid then
-          begin
-            Cell := TsmxCustomGrid(CellAlgorithm).FindSlaveByName(Params[i].ParamName);
-            if Assigned(Cell) then
-              Params[i].ParamValue := TsmxCustomColumn(Cell).Value;
-          end else
-          if smxClassFuncs.FindColumnOnForm(Form, Params[i].ParamName, Value) then
-            Params[i].ParamValue := Value;
-        end;
-        dlParentFilterDesk:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
-          for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), Params[i].ParamName, Value) then
-            begin
-              Params[i].ParamValue := Value;
-              Break;
-            end;
-        end;
-        dlParentGrid:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
-          for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), Params[i].ParamName, Value) then
-            begin
-              Params[i].ParamValue := Value;
-              Break;
-            end;
-        end;
-        dlStorageParam:
-        begin
-          if Assigned(smxProcs.gStorageManagerIntf) then
-            Params[i].ParamValue := smxProcs.gStorageManagerIntf.Values[Params[i].ParamName];
-        end;
-        dlParentCellParam:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Self, List, []);
-          for j := 0 to List.Count - 1 do
-            if TsmxBaseCell(List[j]).CellParams(Params[i].ParamName, Value) then
-            begin
-              Params[i].ParamValue := Value;
-              Break;
-            end;
-        end;
-      end;
-    end;
-  finally
-    List.Free;
-  end;
+  smxClassFuncs.RefreshAlgorithmParams(Self, []);
 end;
 
 procedure TsmxAction.SetCellParent(Value: TsmxBaseCell);
@@ -491,94 +416,8 @@ end;
 { TsmxRequest }
 
 procedure TsmxRequest.InternalRefreshParams;
-var
-  i, j: integer;
-  Form: TsmxCustomForm;
-  Value: Variant;
-  List: TList;
-  Cell: TsmxOwnerCell;
 begin
-  inherited InternalRefreshParams;
-  if not Assigned(CurDataSet) then
-    Exit;
-  Form := smxClassFuncs.GetAccessoryForm(Self);
-  List := TList.Create;
-  try
-    for i := 0 to CurDataSet.ParamCount - 1 do
-    begin
-      case CurDataSet.Params[i].DataLocation of
-        dlFilterDesk:
-        begin
-          if CellRequest is TsmxCustomFilterDesk then
-          begin
-            Cell := TsmxCustomFilterDesk(CellRequest).FindSlaveByName(CurDataSet.Params[i].ParamName);
-            if Assigned(Cell) then
-              CurDataSet.Params[i].Value := TsmxCustomFilter(Cell).Value;
-          end else
-          if smxClassFuncs.FindFilterOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
-            CurDataSet.Params[i].Value := Value;
-        end;
-        dlGrid:
-        begin
-          if CellRequest is TsmxCustomGrid then
-          begin
-            if CellRequest.CellParent is TsmxCustomSection then
-              if CellRequest.CellParent.CellParent is TsmxCustomPage then
-                with TsmxCustomPage(CellRequest.CellParent.CellParent) do
-                  for j := 0 to SlaveCount - 1 do
-                    if CellRequest.CellParent <> Slaves[j] then
-                      if smxClassFuncs.FindColumnOnSection(Slaves[j], CurDataSet.Params[i].ParamName, Value) then
-                      begin
-                        CurDataSet.Params[i].Value := Value;
-                        Break;
-                      end;
-          end else
-          if smxClassFuncs.FindColumnOnForm(Form, CurDataSet.Params[i].ParamName, Value) then
-            CurDataSet.Params[i].Value := Value;
-        end;
-        dlParentFilterDesk:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
-          for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindFilterOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
-            begin
-              CurDataSet.Params[i].Value := Value;
-              Break;
-            end;
-        end;
-        dlParentGrid:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Form, List, [TsmxCustomForm], True);
-          for j := 0 to List.Count - 1 do
-            if smxClassFuncs.FindColumnOnForm(TsmxCustomForm(List[j]), CurDataSet.Params[i].ParamName, Value) then
-            begin
-              CurDataSet.Params[i].Value := Value;
-              Break;
-            end;
-        end;
-        dlStorageParam:
-        begin
-          if Assigned(smxProcs.gStorageManagerIntf) then
-            CurDataSet.Params[i].Value := smxProcs.gStorageManagerIntf.Values[CurDataSet.Params[i].ParamName];
-        end;
-        dlParentCellParam:
-        begin
-          List.Clear;
-          smxClassProcs.AllParents(Self, List, []);
-          for j := 0 to List.Count - 1 do
-            if TsmxBaseCell(List[j]).CellParams(CurDataSet.Params[i].ParamName, Value) then
-            begin
-              CurDataSet.Params[i].Value := Value;
-              Break;
-            end;
-        end;
-      end;
-    end;
-  finally
-    List.Free;
-  end;
+  smxClassFuncs.RefreshRequstParams(Self, CurDataSet, []);
 end;
 
 { TsmxRequestList }
@@ -696,126 +535,38 @@ end;
 
 procedure TsmxFilterDesk.InternalApply;
 var
-  DataSet: IsmxDataSet;
-  OldIsManualRefreshParams: Boolean;
-  i: Integer;
+  Form: TsmxCustomForm;
 begin
   inherited InternalApply;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
   if Assigned(Request) then
-  begin
-    DataSet := Request.UpdateDataSet;
-    if Assigned(DataSet) then
-    begin
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := True;
-        RefreshValueParams(DataSet);
-        for i := 0 to SlaveCount - 1 do
-        begin
-          if foApply in Slaves[i].Options then
-          begin
-            DataSet.ParamByName(Slaves[i].Name).Value :=
-              Slaves[i].Value;
-            DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value :=
-              smxFuncs.StrToVar(Slaves[i].Text);
-          end;
-        end;
-        Request.Update;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
-  end;
+    if Assigned(Form) and (Form.ID = 0) then
+      Request.Insert
+    else
+      Request.Update;
+end;
+
+procedure TsmxFilterDesk.InternalCancel;
+begin
+  inherited InternalCancel;
+  if Assigned(Request) then
+    Request.Delete;
 end;
 
 procedure TsmxFilterDesk.InternalPrepare;
-var
-  DataSet: IsmxDataSet;
-  OldIsManualRefreshParams: Boolean;
-  i: Integer;
 begin
   inherited InternalPrepare;
   if Assigned(Request) then
-  begin
-    DataSet := Request.DataSet;
-    if Assigned(DataSet) then
-    begin
-      DataSet.Close;
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := True;
-        RefreshValueParams(DataSet);
-        Request.Prepare;
-        if DataSet.Active then
-          for i := 0 to SlaveCount - 1 do
-          begin
-            if foPrepare in Slaves[i].Options then
-              case DataSet.PerformanceMode of
-                pmOpen:
-                begin
-                  Slaves[i].Value :=
-                    DataSet.FieldByName(Slaves[i].Name).Value;
-                  Slaves[i].Text :=
-                    Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
-                end;
-                pmExecute:
-                begin
-                  Slaves[i].Value :=
-                    DataSet.ParamByName(Slaves[i].Name).Value;
-                  Slaves[i].Text :=
-                    Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
-                end;
-              end;
-          end;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
-  end;
+    Request.Prepare;
+  RefreshFilters;
 end;
 
 procedure TsmxFilterDesk.InternalRefresh;
-var
-  DataSet: IsmxDataSet;
-  OldIsManualRefreshParams: Boolean;
-  i: Integer;
 begin
-  inherited InternalPrepare;
+  inherited InternalRefresh;
   if Assigned(Request) then
-  begin
-    DataSet := Request.DataSet;
-    if Assigned(DataSet) then
-    begin
-      OldIsManualRefreshParams := Request.IsManualRefreshParams;
-      try
-        Request.IsManualRefreshParams := True;
-        RefreshValueParams(DataSet);
-        Request.Execute;
-        for i := 0 to SlaveCount - 1 do
-        begin
-          if foPrepare in Slaves[i].Options then
-            case DataSet.PerformanceMode of
-              pmOpen:
-              begin
-                Slaves[i].Value :=
-                  DataSet.FieldByName(Slaves[i].Name).Value;
-                Slaves[i].Text :=
-                  Variants.VarToStr(DataSet.FieldByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
-              end;
-              pmExecute:
-              begin
-                Slaves[i].Value :=
-                  DataSet.ParamByName(Slaves[i].Name).Value;
-                Slaves[i].Text :=
-                  Variants.VarToStr(DataSet.ParamByName(smxFuncs.GetTextFieldName(Slaves[i].Name)).Value);
-              end;
-            end;
-        end;
-      finally
-        Request.IsManualRefreshParams := OldIsManualRefreshParams;
-      end;
-    end;
-  end;
+    Request.Execute;
+  RefreshFilters;
 end;
 
 function TsmxFilterDesk.GetCaption: TCaption;
@@ -859,37 +610,52 @@ begin
   Result := TsmxFilter;
 end;
 
-procedure TsmxFilterDesk.RefreshValueParams(DataSet: IsmxDataSet);
+procedure TsmxFilterDesk.RefreshFilters;
 var
-  i, j: Integer;
-  List: TList;
-  Value: Variant;
+  DataSet: IsmxDataSet;
+  i: Integer;
+  Field: IsmxField;
+  Param: IsmxParam;
 begin
-  List := TList.Create;
-  try
-    for i := 0 to DataSet.ParamCount - 1 do
-      case DataSet.Params[i].DataLocation of
-        dlStorageParam:
+  if Assigned(Request) and Assigned(Request.DataSet) and Request.DataSet.Active then
+  begin
+    DataSet := Request.DataSet;
+    for i := 0 to SlaveCount - 1 do
+      case DataSet.PerformanceMode of
+        pmOpen:
         begin
-          if Assigned(smxProcs.gStorageManagerIntf) then
-            DataSet.Params[i].Value := smxProcs.gStorageManagerIntf.Values[DataSet.Params[i].ParamName];
+          Field := DataSet.FindField(Slaves[i].Name);
+          if Assigned(Field) then
+            Slaves[i].Value := Field.Value
+          else
+            Slaves[i].Value := Variants.Null;
+          Field := DataSet.FindField(smxFuncs.GetTextFieldName(Slaves[i].Name));
+          if Assigned(Field) then
+            Slaves[i].Text := smxFuncs.VarToStr(Field.Value)
+          else
+            Slaves[i].Text := smxFuncs.VarToStr(Slaves[i].Value);
         end;
-        dlParentCellParam:
+        pmExecute:
         begin
-          List.Clear;
-          smxClassProcs.AllParents(Self, List, []);
-          for j := 0 to List.Count - 1 do
-            if TsmxBaseCell(List[j]).CellParams(DataSet.Params[i].ParamName, Value) then
-            begin
-              DataSet.Params[i].Value := Value;
-              Break;
-            end;
+          Param := DataSet.FindParam(Slaves[i].Name);
+          if Assigned(Param) then
+            Slaves[i].Value := Param.Value
+          else
+            Slaves[i].Value := Variants.Null;
+          Param := DataSet.FindParam(smxFuncs.GetTextFieldName(Slaves[i].Name));
+          if Assigned(Param) then
+            Slaves[i].Text := smxFuncs.VarToStr(Param.Value)
+          else
+            Slaves[i].Text := smxFuncs.VarToStr(Slaves[i].Value);
         end;
-        else
-          DataSet.Params[i].Value := Variants.Null;
       end;
-  finally
-    List.Free;
+  end else
+  begin
+    for i := 0 to SlaveCount - 1 do
+    begin
+      Slaves[i].Value := Variants.Null;
+      Slaves[i].Text := '';
+    end;
   end;
 end;
 
@@ -923,7 +689,7 @@ begin
   begin
     if not (fsModal in (Form.FormState)) then
     begin
-      if (foFreeOnClose in Options) and not IsDesigning then
+      if (foFreeOnClose in Options) and not (csDesigning in CellStates) then
         Free
       else
         Form.Hide;
@@ -1030,7 +796,7 @@ end;
 function TsmxForm.GetBorder: TsmxFormBorder;
 const
   InOutBorder: array[TFormBorderStyle] of TsmxFormBorder =
-    (fbNone, fbDialog, fbSizeable, fbDialog, fbDialog, fbSizeable);
+    (fbNone, fbDialog, fbResize, fbDialog, fbDialog, fbResize);
 begin
   Result := InOutBorder[Form.BorderStyle];
 end;
@@ -1092,10 +858,10 @@ procedure TsmxForm.SetOptions(Value: TsmxFormOptions);
 var
   Obj: TObject;
 begin
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or (csDesigning in CellStates)) and Assigned(CellParent) then
     Form.Parent := nil;
   inherited SetOptions(Value);
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or (csDesigning in CellStates)) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then
@@ -1113,29 +879,14 @@ begin
       ImageList.GetIcon(FFormImageIndex, Form.Icon);
 end;
 
-procedure TsmxForm.SetIsDesigning(Value: Boolean);
-var
-  Obj: TObject;
-begin
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
-    Form.Parent := nil;
-  inherited SetIsDesigning(Value);
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
-  begin
-    Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
-    if Obj is TWinControl then
-      Form.Parent := TWinControl(Obj);
-  end;
-end;
-
 procedure TsmxForm.SetCellParent(Value: TsmxBaseCell);
 var
   Obj: TObject;
 begin
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or (csDesigning in CellStates)) and Assigned(CellParent) then
     Form.Parent := nil;
   inherited SetCellParent(Value);
-  if ((foFrameForm in Options) or IsDesigning) and Assigned(CellParent) then
+  if ((foFrameForm in Options) or (csDesigning in CellStates)) and Assigned(CellParent) then
   begin
     Obj := TObject((CellParent as IsmxRefComponent).GetInternalRef);
     if Obj is TWinControl then

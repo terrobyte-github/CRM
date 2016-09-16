@@ -116,6 +116,8 @@ type
     function GetInternalRef: Pointer; override;
     function GetRowCount: Integer; override;
     function GetSlaveClass: TsmxBaseCellClass; override;
+    procedure InternalApply; override;
+    procedure InternalCancel; override;
     procedure InternalPrepare; override;
     procedure InternalRefresh; override;
     procedure SetCellParent(Value: TsmxBaseCell); override;
@@ -175,9 +177,9 @@ type
   public
     destructor Destroy; override;
   published
-    property Text;
     property Font;
     property Options;
+    property Text;
 
     property OnChangeFilter;
     property OnClick;
@@ -218,10 +220,10 @@ type
   public
     destructor Destroy; override;
   published
-    property Text;
+    property DisplayFormat;
     property Font;
     property Options;
-    property DisplayFormat;
+    property Text;
     property TextFormat;
 
     property OnChangeFilter;
@@ -258,11 +260,11 @@ type
   public
     destructor Destroy; override;
   published
-    property ImageIndex;
-    property Text;
     property Font;
-    property Options;
+    property ImageIndex;
     property ImageListName;
+    property Options;
+    property Text;
 
     property OnChangeFilter;
     property OnClick;
@@ -294,10 +296,10 @@ type
   public
     destructor Destroy; override;
   published
-    property Text;
+    property DisplayFormat;
     property Font;
     property Options;
-    property DisplayFormat;
+    property Text;
     property TextFormat;
 
     property OnChangeFilter;
@@ -328,9 +330,48 @@ type
   public
     destructor Destroy; override;
   published
-    property Text;
     property Font;
     property Options;
+    property Text;
+
+    property OnChangeFilter;
+    property OnClick;
+    property OnDoubleClick;
+  end;
+
+  { TsmxComboBoxFilter }
+
+  TsmxComboBoxFilter = class(TsmxFilter)
+  private
+    FComboBox: TComboBox;
+    FRequest: TsmxCustomRequest;
+    procedure FillComboBox;
+    function GetComboBox: TComboBox;
+    procedure ComboBoxChange(Sender: TObject);
+  protected
+    function GetColor: TColor; override;
+    function GetEnabled: Boolean; override;
+    function GetFont: TFont; override;
+    function GetHint: String; override;
+    function GetText: String; override;
+    function GetValue: Variant; override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure SetColor(Value: TColor); override;
+    procedure SetEnabled(Value: Boolean); override;
+    procedure SetFont(Value: TFont); override;
+    procedure SetHint(const Value: String); override;
+    procedure SetRequest(Value: TsmxCustomRequest); virtual;
+    procedure SetText(const Value: String); override;
+    procedure SetValue(const Value: Variant); override;
+
+    property ComboBox: TComboBox read GetComboBox;
+  public
+    destructor Destroy; override;
+  published
+    property Font;
+    property Options;
+    property Request: TsmxCustomRequest read FRequest write SetRequest;
+    property Text;
 
     property OnChangeFilter;
     property OnClick;
@@ -675,8 +716,8 @@ type
 implementation
 
 uses
-  SysUtils, Variants, ToolWin, Messages,smxFuncs, smxProcs, smxDBFuncs,
-  smxClassFuncs, smxConsts, smxClassProcs, smxBaseIntf;
+  SysUtils, Variants, ToolWin, Messages, smxBaseIntf, smxConsts, smxFuncs,
+  smxProcs, smxDBTypes, smxDBFuncs, smxClassFuncs,  smxClassProcs;
 
 type
   { _TMenuItem }
@@ -915,40 +956,38 @@ begin
   end;
 end;
 
-procedure TsmxDBGrid.InternalPrepare;
+procedure TsmxDBGrid.InternalApply;
 var
-  OldIsManualRefreshParams: Boolean;
+  Form: TsmxCustomForm;
+begin
+  inherited InternalApply;
+  Form := smxClassFuncs.GetAccessoryForm(Self);
+  if Assigned(Request) then
+    if Assigned(Form) and (Form.ID = 0) then
+      Request.Insert
+    else
+      Request.Update;
+end;
+
+procedure TsmxDBGrid.InternalCancel;
+begin
+  inherited InternalCancel;
+  if Assigned(Request) then
+    Request.Delete;
+end;
+
+procedure TsmxDBGrid.InternalPrepare;
 begin
   inherited InternalPrepare;
   if Assigned(Request) then
-  begin 
-    if Assigned(Request.DataSet) then
-      Request.DataSet.Close;
-    OldIsManualRefreshParams := Request.IsManualRefreshParams;
-    try
-      Request.IsManualRefreshParams := False;
-      Request.Prepare;
-    finally
-      Request.IsManualRefreshParams := OldIsManualRefreshParams;
-    end;
-  end;
+    Request.Prepare;
 end;
 
 procedure TsmxDBGrid.InternalRefresh;
-var
-  OldIsManualRefreshParams: Boolean;
 begin
   inherited InternalRefresh;
   if Assigned(Request) then
-  begin
-    OldIsManualRefreshParams := Request.IsManualRefreshParams;
-    try
-      Request.IsManualRefreshParams := False;
-      Request.Execute;
-    finally
-      Request.IsManualRefreshParams := OldIsManualRefreshParams;
-    end;
-  end;
+    Request.Execute;
 end;
 
 function TsmxDBGrid.GetFocusedColIndex: Integer;
@@ -1837,6 +1876,150 @@ procedure TsmxLabelFilter.SetValue(const Value: Variant);
 begin
   FValue := Value;
   ChangeFilter;
+end;
+
+{ TsmxComboBoxFilter }
+
+destructor TsmxComboBoxFilter.Destroy;
+begin
+  if Assigned(FComboBox) then
+    FComboBox.Free;
+  inherited Destroy;
+end;
+
+procedure TsmxComboBoxFilter.ComboBoxChange(Sender: TObject);
+begin
+  ChangeFilter;
+end;
+
+procedure TsmxComboBoxFilter.FillComboBox;
+var
+  Fields: TsmxFieldArray;
+  KeyFieldName, ValueFieldName: String;
+begin
+  ComboBox.Clear;
+  FRequest.CellRequest := Self;
+  FRequest.Execute;
+  KeyFieldName := '';
+  ValueFieldName := '';
+  if smxDBFuncs.FindFieldBySense(FRequest.DataSet, dsKey, Fields) = 1 then
+    KeyFieldName := Fields[0].FieldName;
+  if smxDBFuncs.FindFieldBySense(FRequest.DataSet, dsValue, Fields) = 1 then
+    ValueFieldName := Fields[0].FieldName;
+  if (KeyFieldName <> '') and (ValueFieldName <> '') then
+  begin
+    FRequest.DataSet.First;
+    while not FRequest.DataSet.Eof do
+    begin
+      ComboBox.AddItem(smxFuncs.VarToStr(FRequest.DataSet.FieldByName(ValueFieldName).Value),
+        TObject(smxFuncs.VarToInt(FRequest.DataSet.FieldByName(KeyFieldName).Value)));
+      FRequest.DataSet.Next;
+    end;
+  end;
+end;
+
+function TsmxComboBoxFilter.GetColor: TColor;
+begin
+  Result := ComboBox.Color;
+end;
+
+procedure TsmxComboBoxFilter.SetColor(Value: TColor);
+begin
+  ComboBox.Color := Value;
+end;
+
+function TsmxComboBoxFilter.GetComboBox: TComboBox;
+begin
+  if not Assigned(FComboBox) then
+  begin
+    FComboBox := TComboBox.Create(nil);
+    FComboBox.Parent := Panel;
+    FComboBox.Left := 4;
+    FComboBox.Style := csDropDownList;
+    FComboBox.Top := 20;
+    FComboBox.Width := Panel.Width - 8;
+    FComboBox.Anchors := [akLeft, akRight];
+    FComboBox.OnChange := ComboBoxChange;
+    FComboBox.OnClick := ControlClick;
+    FComboBox.OnDblClick := ControlDblClick;
+  end;
+  Result := FComboBox;
+end;
+
+function TsmxComboBoxFilter.GetEnabled: Boolean;
+begin
+  Result := ComboBox.Enabled;
+end;
+
+procedure TsmxComboBoxFilter.SetEnabled(Value: Boolean);
+begin
+  ComboBox.Enabled := Value;
+end;
+
+function TsmxComboBoxFilter.GetFont: TFont;
+begin
+  Result := ComboBox.Font;
+end;
+
+procedure TsmxComboBoxFilter.SetFont(Value: TFont);
+begin
+  ComboBox.Font := Value;
+end;
+
+function TsmxComboBoxFilter.GetHint: String;
+begin
+  Result := ComboBox.Hint;
+end;
+
+procedure TsmxComboBoxFilter.SetHint(const Value: String);
+begin
+  ComboBox.Hint := Value;
+end;
+
+function TsmxComboBoxFilter.GetText: String;
+begin
+  if ComboBox.ItemIndex <> -1 then
+    Result := ComboBox.Items[ComboBox.ItemIndex]
+  else
+    Result := '';
+end;
+
+procedure TsmxComboBoxFilter.SetText(const Value: String);
+begin
+  if Assigned(FRequest) and Assigned(FRequest.DataSet)
+      and not FRequest.DataSet.Active then
+    FillComboBox;
+  ComboBox.ItemIndex := ComboBox.Items.IndexOf(Value);
+end;
+
+function TsmxComboBoxFilter.GetValue: Variant;
+begin
+  if ComboBox.ItemIndex <> -1 then
+    Result := Integer(ComboBox.Items.Objects[ComboBox.ItemIndex])
+  else
+    Result := 0;
+end;
+
+procedure TsmxComboBoxFilter.SetValue(const Value: Variant);
+begin
+  if Assigned(FRequest) and Assigned(FRequest.DataSet)
+      and not FRequest.DataSet.Active then
+    FillComboBox;
+  ComboBox.ItemIndex := ComboBox.Items.IndexOfObject(TObject(smxFuncs.VarToInt(Value)));
+end;
+
+procedure TsmxComboBoxFilter.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (AComponent = Request) and (Operation = opRemove) then
+    Request := nil;
+end;
+
+procedure TsmxComboBoxFilter.SetRequest(Value: TsmxCustomRequest);
+begin
+  FRequest := Value;
+  if Assigned(FRequest) then
+    FRequest.FreeNotification(Self);
 end;
 
 { TsmxPanelSection }
@@ -2947,17 +3130,17 @@ end;
 initialization
   Classes.RegisterClasses([TsmxLibAction, TsmxLibActionList, TsmxColumn,
     TsmxDBGrid, TsmxEditFilter, TsmxBitBtnFilter, TsmxDateTimeFilter,
-    TsmxNumEditFilter, TsmxEditFilterDesk, TsmxPanelSection, TsmxTabSheet,
-    TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList,
-    TsmxToolItem, TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar,
-    TsmxStandardForm]);
+    TsmxNumEditFilter, TsmxLabelFilter, TsmxComboBoxFilter, TsmxEditFilterDesk,
+    TsmxPanelSection, TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu,
+    TsmxPopupMenu, TsmxPopupList, TsmxToolItem, TsmxToolBar, TsmxControlBar,
+    TsmxStatusPanel, TsmxStatusBar, TsmxStandardForm]);
 
 finalization
   Classes.UnRegisterClasses([TsmxLibAction, TsmxLibActionList, TsmxColumn,
     TsmxDBGrid, TsmxEditFilter, TsmxBitBtnFilter, TsmxDateTimeFilter,
-    TsmxNumEditFilter, TsmxEditFilterDesk, TsmxPanelSection, TsmxTabSheet,
-    TsmxPageControl, TsmxMenuItem, TsmxMainMenu, TsmxPopupMenu, TsmxPopupList,
-    TsmxToolItem, TsmxToolBar, TsmxControlBar, TsmxStatusPanel, TsmxStatusBar,
-    TsmxStandardForm]);
+    TsmxNumEditFilter, TsmxLabelFilter, TsmxComboBoxFilter, TsmxEditFilterDesk,
+    TsmxPanelSection, TsmxTabSheet, TsmxPageControl, TsmxMenuItem, TsmxMainMenu,
+    TsmxPopupMenu, TsmxPopupList, TsmxToolItem, TsmxToolBar, TsmxControlBar,
+    TsmxStatusPanel, TsmxStatusBar, TsmxStandardForm]);
 
 end.

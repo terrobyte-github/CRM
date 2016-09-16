@@ -54,6 +54,11 @@ const
   cFormSlaveListID = -101;
   cFormCellViewID = -102;
 
+  { CellParam }
+  cCfgIDCellParamName = 'CfgID';
+  cIDCellParamName = 'ID';
+  cIntfIDCellParamName = 'IntfID';
+
 resourcestring
   rsActionError = 'A ClassName %s %s error';
   rsAssignError = 'Cannot assign a ClassName %s to a ClassName %s';
