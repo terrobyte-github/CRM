@@ -197,6 +197,7 @@ type
 
   TsmxControlCell = class(TsmxOwnerCell)
   private
+    FControlVisible: Boolean;
     FOnBackup: TsmxComponentEvent;
     FOnRestore: TsmxComponentEvent;
     FOnDoubleClick: TsmxComponentEvent;
@@ -230,6 +231,7 @@ type
     procedure SetActive(Value: Boolean); virtual;
     procedure SetAlign(Value: TAlign); virtual;
     procedure SetAnchors(Value: TAnchors); virtual;
+    procedure SetCellStateDesigning(Value: Boolean);
     procedure SetCursor(Value: TCursor); virtual;
     procedure SetEnabled(Value: Boolean); virtual;
     procedure SetHeight(Value: Integer); virtual;
@@ -238,6 +240,8 @@ type
     procedure SetVisible(Value: Boolean); virtual;
     procedure SetWidth(Value: Integer); virtual;
     procedure SetPopupMenu(Value: TsmxCustomPopupMenu); virtual;
+
+    property ControlVisible: Boolean read FControlVisible write FControlVisible;
   public
     function AddSlave: TsmxControlCell;
     procedure Assign(Source: TPersistent); override;
@@ -2056,15 +2060,24 @@ end;
 function TsmxControlCell.GetVisible: Boolean;
 begin
   if TObject(GetInternalRef) is TControl then
-    Result := TControl(GetInternalRef).Visible
-  else
+  begin
+    if csDesigning in FCellStates then
+      Result := ControlVisible
+    else
+      Result := TControl(GetInternalRef).Visible;
+  end else
     Result := False;
 end;
 
 procedure TsmxControlCell.SetVisible(Value: Boolean);
 begin
   if TObject(GetInternalRef) is TControl then
-    TControl(GetInternalRef).Visible := Value;
+  begin
+    if csDesigning in FCellStates then
+      ControlVisible := Value
+    else
+      TControl(GetInternalRef).Visible := Value;
+  end;
 end;
 
 function TsmxControlCell.GetWidth: Integer;
@@ -2101,6 +2114,14 @@ begin
   inherited Notification(AComponent, Operation);
   if (AComponent = PopupMenu) and (Operation = opRemove) then
     PopupMenu := nil;
+end;
+
+procedure TsmxControlCell.SetCellStateDesigning(Value: Boolean);
+begin
+  inherited SetCellStateDesigning(Value);
+  if TObject(GetInternalRef) is TControl then
+    if Value then
+      TControl(GetInternalRef).Visible := True;
 end;
 
 procedure TsmxControlCell.SetPopupMenu(Value: TsmxCustomPopupMenu);
