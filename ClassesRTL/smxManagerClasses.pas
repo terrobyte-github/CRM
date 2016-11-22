@@ -140,6 +140,7 @@ type
     function GetLibPath: String;
     function GetLibrary(Index: Integer): THandle;
     function GetLibraryCount: Integer;
+    function GetLibraryName(Index: Integer): String;
     function IndexOf(LibHandle: THandle): Integer;
     procedure SetCheckHandle(Value: LongWord);
     procedure SetIsCheckComp(Value: Boolean);
@@ -165,6 +166,7 @@ type
     property LibInfoProcName: String read GetLibInfoProcName write SetLibInfoProcName;
     property Libraries[Index: Integer]: THandle read GetLibrary; default;
     property LibraryCount: Integer read GetLibraryCount;
+    property LibraryNames[Index: Integer]: String read GetLibraryName;
   end;
 
   { TsmxDatabaseManager }
@@ -226,6 +228,7 @@ type
     function GetDelimiter: String;
     function GetImageListCount: Integer;
     function GetImageList(Index: Integer): TCustomImageList;
+    function GetImageListName(Index: Integer): String;
     function IndexOf(ImageList: TCustomImageList): Integer;
     procedure SetDelimiter(const Value: String);
 
@@ -240,6 +243,7 @@ type
 
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
+    property ImageListNames[Index: Integer]: String read GetImageListName;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
   end;
 
@@ -254,8 +258,9 @@ type
     function LoadClassType(const ClassTypeName: String): TPersistentClass;
   protected
     function GetDelimiter: String;
-    function GetClassTypeCount: Integer;
     function GetClassType(Index: Integer): TPersistentClass;
+    function GetClassTypeCount: Integer;
+    function GetClassTypeName(Index: Integer): String;
     function IndexOf(ClassType: TPersistentClass): Integer;
     procedure SetDelimiter(const Value: String);
 
@@ -270,6 +275,7 @@ type
 
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ClassTypeCount: Integer read GetClassTypeCount;
+    property ClassTypeNames[Index: Integer]: String read GetClassTypeName;
     property ClassTypes[Index: Integer]: TPersistentClass read GetClassType; default;
   end;
 
@@ -726,6 +732,11 @@ begin
   Result := FLibraryList;
 end;
 
+function TsmxLibraryManager.GetLibraryName(Index: Integer): String;
+begin
+  Result := LibraryList[Index].ParamName;
+end;
+
 function TsmxLibraryManager.GetProcedure(LibHandle: THandle; const ProcName: String): Pointer;
 begin
   if (LibHandle > Windows.HINSTANCE_ERROR) and (ProcName <> '') then
@@ -1081,6 +1092,11 @@ begin
   Result := ImageListRegister.Count;
 end;
 
+function TsmxImageListManager.GetImageListName(Index: Integer): String;
+begin
+  Result := ImageListRegister[Index].ParamName;
+end;
+
 function TsmxImageListManager.GetImageListRegister: TsmxParams;
 begin
   if not Assigned(FImageListRegister) then
@@ -1170,7 +1186,7 @@ begin
 end;
 
 function TsmxImageListManager.ResolvedImageListName(const ImageListName: String;
-  IsRegister: Boolean): TCustomImageList;
+  IsRegister: Boolean = False): TCustomImageList;
 var
   Item: TsmxParam;
 begin
@@ -1231,6 +1247,11 @@ begin
   if not Assigned(FClassTypeList) then
     FClassTypeList := TsmxParams.Create(TsmxParam);
   Result := FClassTypeList;
+end;
+
+function TsmxClassTypeManager.GetClassTypeName(Index: Integer): String;
+begin
+  Result := ClassTypeList[Index].ParamName;
 end;
 
 function TsmxClassTypeManager.GetDelimiter: String;

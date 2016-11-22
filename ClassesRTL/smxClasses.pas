@@ -158,7 +158,6 @@ type
     procedure CreateObject(Item: TObject; ObjectClass: TPersistentClass); overload; virtual;
     procedure DestroyObject(Item: TObject); virtual;
     function FindSlaveByInternalRef(Ref: Pointer): TsmxOwnerCell;
-    function GetBaseSlaveClass: TsmxBaseCellClass; virtual;
     function GetSlaveClass: TsmxBaseCellClass; virtual;
     procedure ChangeObjectIndex(Value: Integer); virtual;
     procedure ChangeObjectOwner(Value: TPersistent); virtual;
@@ -178,6 +177,7 @@ type
     procedure DeleteSlave(Index: Integer);
     function FindSlaveByCfgID(CfgID: Integer): TsmxOwnerCell;
     function FindSlaveByName(const Name: String): TsmxOwnerCell;
+    function GetBaseSlaveClass: TsmxBaseCellClass; virtual;
     procedure GetProperties(DestCfg: TsmxBaseCfg); override;
     procedure SetProperties(SrcCfg: TsmxBaseCfg); override;
 
@@ -231,7 +231,6 @@ type
     procedure SetActive(Value: Boolean); virtual;
     procedure SetAlign(Value: TAlign); virtual;
     procedure SetAnchors(Value: TAnchors); virtual;
-    procedure SetCellStateDesigning(Value: Boolean);
     procedure SetCursor(Value: TCursor); virtual;
     procedure SetEnabled(Value: Boolean); virtual;
     procedure SetHeight(Value: Integer); virtual;
@@ -447,12 +446,11 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomAlgorithm;
     procedure SetSlave(Index: Integer; Value: TsmxCustomAlgorithm);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomAlgorithm;
     function GetAlgorithmParamValue(CfgID: Integer; const ParamName: String;
       var ParamValue: Variant): Boolean; virtual;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
 
     property Slaves[Index: Integer]: TsmxCustomAlgorithm read GetSlave write SetSlave; default;
   end;
@@ -542,10 +540,9 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomRequest;
     procedure SetSlave(Index: Integer; Value: TsmxCustomRequest);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomRequest;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     function GetRequestParamValue(CfgID: Integer; const ParamName: String;
       var ParamValue: Variant): Boolean; virtual;
 
@@ -611,10 +608,10 @@ type
     procedure SetSlave(Index: Integer; Value: TsmxCustomColumn);
   protected
     function GetFocusedColIndex: Integer; virtual;
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure SetFocusedColIndex(Value: Integer); virtual;
   public
     function AddSlave: TsmxCustomColumn;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     function WorkParams(const Name: String; var Value: Variant): Boolean; override;
 
     property FocusedColIndex: Integer read GetFocusedColIndex write SetFocusedColIndex;
@@ -780,10 +777,9 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomFilter;
     procedure SetSlave(Index: Integer; Value: TsmxCustomFilter);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomFilter;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     function WorkParams(const Name: String; var Value: Variant): Boolean; override;
 
     property Slaves[Index: Integer]: TsmxCustomFilter read GetSlave write SetSlave; default;
@@ -811,11 +807,10 @@ type
     function GetSlave(Index: Integer): TsmxCustomSection;
     procedure SetCellOwner(Value: TsmxCustomPageManager);
     procedure SetSlave(Index: Integer; Value: TsmxCustomSection);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomSection;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property CellOwner: TsmxCustomPageManager read GetCellOwner write SetCellOwner;
     property Slaves[Index: Integer]: TsmxCustomSection read GetSlave write SetSlave; default;
   end;
@@ -833,7 +828,6 @@ type
     function GetIsMultiLine: Boolean; virtual;
     function GetStyle: TsmxPageManagerStyle; virtual;
     function GetPagePosition: TsmxPagePosition; virtual;
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure InternalChangePage; virtual;
     procedure SetActivePageIndex(Value: Integer); virtual;
     procedure SetIsMultiLine(Value: Boolean); virtual;
@@ -843,7 +837,8 @@ type
     function AddSlave: TsmxCustomPage;
     procedure Assign(Source: TPersistent); override;
     procedure ChangePage;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property ActivePageIndex: Integer read GetActivePageIndex write SetActivePageIndex;
     property IsMultiLine: Boolean read GetIsMultiLine write SetIsMultiLine;
     property Style: TsmxPageManagerStyle read GetStyle write SetStyle;
@@ -865,7 +860,6 @@ type
     function GetHotKey: Integer; virtual;
     function GetIsChecked: Boolean; virtual;
     function GetStyle: TsmxMenuItemStyle; virtual;
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure SetAlgorithm(Value: TsmxCustomAlgorithm); override;
     procedure SetHotKey(Value: Integer); virtual;
     procedure SetIsChecked(Value: Boolean); virtual;
@@ -873,7 +867,8 @@ type
   public
     function AddSlave: TsmxCustomMenuItem;
     procedure Assign(Source: TPersistent); override;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property CellOwner: TsmxControlCell read GetCellOwner write SetCellOwner;
     property HotKey: Integer read GetHotKey write SetHotKey;
     property IsChecked: Boolean read GetIsChecked write SetIsChecked;
@@ -887,11 +882,10 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomMenuItem;
     procedure SetSlave(Index: Integer; Value: TsmxCustomMenuItem);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomMenuItem;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property Slaves[Index: Integer]: TsmxCustomMenuItem read GetSlave write SetSlave; default;
   end;
 
@@ -905,11 +899,10 @@ type
     function GetSlave(Index: Integer): TsmxCustomMenuItem;
     procedure SetCellOwner(Value: TsmxCustomPopupList);
     procedure SetSlave(Index: Integer; Value: TsmxCustomMenuItem);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomMenuItem;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property CellOwner: TsmxCustomPopupList read GetCellOwner write SetCellOwner;
     property Slaves[Index: Integer]: TsmxCustomMenuItem read GetSlave write SetSlave; default;
   end;
@@ -920,11 +913,10 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomPopupMenu;
     procedure SetSlave(Index: Integer; Value: TsmxCustomPopupMenu);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomPopupMenu;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property Slaves[Index: Integer]: TsmxCustomPopupMenu read GetSlave write SetSlave; default;
   end;
 
@@ -962,13 +954,13 @@ type
   protected
     function GetIsFlat: Boolean; virtual;
     function GetIsShowCaptions: Boolean; virtual;
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure SetIsFlat(Value: Boolean); virtual;
     procedure SetIsShowCaptions(Value: Boolean); virtual;
   public
     function AddSlave: TsmxCustomToolItem;
     procedure Assign(Source: TPersistent); override;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property CellOwner: TsmxCustomControlBoard read GetCellOwner write SetCellOwner;
     property IsFlat: Boolean read GetIsFlat write SetIsFlat;
     property IsShowCaptions: Boolean read GetIsShowCaptions write SetIsShowCaptions;
@@ -981,11 +973,10 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomToolBoard;
     procedure SetSlave(Index: Integer; Value: TsmxCustomToolBoard);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomToolBoard;
-
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
+    
     property Slaves[Index: Integer]: TsmxCustomToolBoard read GetSlave write SetSlave; default;
   end;
 
@@ -1022,10 +1013,9 @@ type
   private
     function GetSlave(Index: Integer): TsmxCustomStatusItem;
     procedure SetSlave(Index: Integer; Value: TsmxCustomStatusItem);
-  protected
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
   public
     function AddSlave: TsmxCustomStatusItem;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
 
     property Slaves[Index: Integer]: TsmxCustomStatusItem read GetSlave write SetSlave; default;
   end;
@@ -1053,7 +1043,6 @@ type
     function GetID: Integer;
     function GetIsMaximize: Boolean; virtual;
     function GetModalResult: TModalResult; virtual;
-    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure InternalActivate; virtual;
     procedure InternalClose; virtual;
     procedure InternalDeactivate; virtual;
@@ -1073,6 +1062,7 @@ type
     procedure Activate;
     procedure Close;
     procedure Deactivate;
+    function GetBaseSlaveClass: TsmxBaseCellClass; override;
     procedure Show;
     function ShowModal: TModalResult;
 
@@ -1330,7 +1320,7 @@ var
   CurNode, n: IXMLNode;
   ClsName: String;
   Cell: TsmxBaseCell;
-  CellClass: TsmxBaseCellClass;
+  ObjClass: TPersistentClass;
 begin
   ClearCells;
   if SrcCfg is TsmxCellCfg then
@@ -1349,12 +1339,12 @@ begin
           else
             ClsName := '';
           if ClsName <> '' then
-            CellClass := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(ClsName, True))
+            ObjClass := smxFuncs.ResolvedClassTypeName(ClsName, True)
           else
-            CellClass := nil;
-          if Assigned(CellClass) then
+            ObjClass := nil;
+          if Assigned(ObjClass) and ObjClass.InheritsFrom(TsmxBaseCell) then
           begin
-            Cell := CellClass.Create(Owner);
+            Cell := TsmxBaseCellClass(ObjClass).Create(Owner);
             Cell.CellParent := Self;
             TsmxCellCfg(SrcCfg).CurNode := n;
             TsmxCellCfg(SrcCfg).ReadCell(Cell);
@@ -1726,7 +1716,7 @@ var
   CurNode, n: IXMLNode;
   ClsName: String;
   Cell: TsmxOwnerCell;
-  CellClass: TsmxBaseCellClass;
+  ObjClass: TPersistentClass;
 begin
   inherited SetProperties(SrcCfg);
   ClearSlaves;
@@ -1744,12 +1734,12 @@ begin
           else
             ClsName := '';
           if ClsName <> '' then
-            CellClass := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(ClsName, True))
+            ObjClass := smxFuncs.ResolvedClassTypeName(ClsName, True)
           else
-            CellClass := nil;
-          if Assigned(CellClass) then
+            ObjClass := nil;
+          if Assigned(ObjClass) and ObjClass.InheritsFrom(TsmxBaseCell) then
           begin
-            Cell := AddSlaveAsClass(CellClass);
+            Cell := AddSlaveAsClass(TsmxBaseCellClass(ObjClass));
             TsmxCellCfg(SrcCfg).CurNode := n;
             TsmxCellCfg(SrcCfg).ReadCell(Cell);
           end else
@@ -2114,14 +2104,6 @@ begin
   inherited Notification(AComponent, Operation);
   if (AComponent = PopupMenu) and (Operation = opRemove) then
     PopupMenu := nil;
-end;
-
-procedure TsmxControlCell.SetCellStateDesigning(Value: Boolean);
-begin
-  inherited SetCellStateDesigning(Value);
-  if TObject(GetInternalRef) is TControl then
-    if Value then
-      TControl(GetInternalRef).Visible := True;
 end;
 
 procedure TsmxControlCell.SetPopupMenu(Value: TsmxCustomPopupMenu);

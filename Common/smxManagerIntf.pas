@@ -63,6 +63,7 @@ type
     function GetLibraryCount: Integer;
     function GetLibraryInfo(LibHandle: THandle; var LibInfo: TsmxLibInfo): Boolean; overload;
     function GetLibraryInfo(const LibName: String; var LibInfo: TsmxLibInfo): Boolean; overload;
+    function GetLibraryName(Index: Integer): String;
     function GetProcedure(LibHandle: THandle; const ProcName: String): Pointer; overload;
     function GetProcedure(const LibName, ProcName: String): Pointer; overload;
     function InsertLibrary(Handle: THandle): Integer;
@@ -78,6 +79,7 @@ type
     property LibPath: String read GetLibPath write SetLibPath;
     property Libraries[Index: Integer]: THandle read GetLibrary; default;
     property LibraryCount: Integer read GetLibraryCount;
+    property LibraryNames[Index: Integer]: String read GetLibraryName;
   end;
 
   { IsmxDataEntity }
@@ -139,6 +141,7 @@ type
     function GetDelimiter: String;
     function GetImageList(Index: Integer): TCustomImageList;
     function GetImageListCount: Integer;
+    function GetImageListName(Index: Integer): String;
     procedure RegisterImageListName(const ImageListName: String; ImageList: TCustomImageList = nil);
     function ResolvedImageList(ImageList: TCustomImageList): String;
     function ResolvedImageListName(const ImageListName: String; IsRegister: Boolean = False): TCustomImageList;
@@ -147,6 +150,7 @@ type
 
     property Delimiter: String read GetDelimiter write SetDelimiter;
     property ImageListCount: Integer read GetImageListCount;
+    property ImageListNames[Index: Integer]: String read GetImageListName;
     property ImageLists[Index: Integer]: TCustomImageList read GetImageList; default;
   end;
 
@@ -158,6 +162,7 @@ type
     function FindByName(const ClassTypeName: String): TPersistentClass;
     function GetClassType(Index: Integer): TPersistentClass;
     function GetClassTypeCount: Integer;
+    function GetClassTypeName(Index: Integer): String;
     function GetDelimiter: String;
     procedure RegisterClassTypeName(const ClassTypeName: String; ClassType: TPersistentClass = nil);
     function ResolvedClassType(ClassType: TPersistentClass): String;
@@ -166,6 +171,7 @@ type
     procedure UnRegisterClassTypeName(const ClassTypeName: String);
 
     property ClassTypeCount: Integer read GetClassTypeCount;
+    property ClassTypeNames[Index: Integer]: String read GetClassTypeName;
     property ClassTypes[Index: Integer]: TPersistentClass read GetClassType; default;
     property Delimiter: String read GetDelimiter write SetDelimiter;
   end;

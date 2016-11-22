@@ -21,8 +21,9 @@ implementation
 
 uses
   Classes, Controls, Windows, Messages, TypInfo, Variants, StdCtrls, SysUtils,
-  smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxProcs, smxClassProcs,
-  smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes, smxManagerIntf, smxConsts;
+  VirtualTrees, smxClasses, smxCfgs, smxStdCtrls, smxFuncs, smxProcs,
+  smxClassProcs, smxClassFuncs, smxTypes, smxBaseIntf, smxBaseTypes,
+  smxManagerIntf, smxConsts, smxCells, smxDBFuncs;
 
 type
   TsmxObjectPage = (opProperties, opEvents, opTreeView);
@@ -555,6 +556,82 @@ begin
   end;
 end;
 
+function GetSlaveClass(AKit: TsmxKit): TsmxBaseCellClass;
+var
+  Form: TsmxCustomForm;
+  SlaveClass: TsmxBaseCellClass;
+  Filter: TsmxMultiFilter;
+  i: Integer;
+  PersistentClass: TPersistentClass;
+  Request: TsmxCustomRequest;
+  TypeCfgID: Variant;
+begin
+  Result := nil;
+  if (AKit is TsmxObjectList) and Assigned(TsmxObjectList(AKit).Owner)
+      and (TsmxObjectList(AKit).Owner is TsmxOwnerCell) then
+    SlaveClass := TsmxOwnerCell(TsmxObjectList(AKit).Owner).GetBaseSlaveClass
+  else
+    SlaveClass := nil;
+
+  if Assigned(SlaveClass) and Assigned(smxProcs.gClassTypeManagerIntf) then
+  begin
+    Form := smxClassFuncs.NewForm(nil, 1000078);
+    Form.Initialize;
+    Request := TsmxCustomRequest(Form.FindChildByName('RL1').FindChildByName('BDEQueryRequest1'));
+    Request.Execute;
+    Request.DataSet.First;
+    while not Request.DataSet.Eof do
+    begin
+      if smxDBFuncs.GetFieldSenseValue(Request.DataSet, dsKey, 0, TypeCfgID) then
+        smxProcs.gClassTypeManagerIntf.RegisterClassTypeName(smxClassFuncs.TypeCfgIDToCellClassName(TypeCfgID));
+      Request.DataSet.Next;
+    end;
+    Filter := TsmxMultiFilter(Form.FindChildByName('FD1').FindChildByName('ComboBoxFilter1'));
+    for i := 0 to smxProcs.gClassTypeManagerIntf.ClassTypeCount - 1 do
+    begin
+      PersistentClass := smxProcs.gClassTypeManagerIntf.ClassTypes[i];
+      if not Assigned(PersistentClass) then
+        PersistentClass := smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(smxProcs.gClassTypeManagerIntf.ClassTypeNames[i]);
+      if Assigned(PersistentClass) and PersistentClass.InheritsFrom(SlaveClass) then
+        Filter.AddItem(smxProcs.gClassTypeManagerIntf.ClassTypeNames[i],
+                       Integer(smxProcs.gClassTypeManagerIntf.ClassTypes[i]));
+    end;
+    if Form.ShowModal = mrOk then
+      Result := TsmxBaseCellClass(smxFuncs.VarToInt(Filter.Value));
+  end;
+end;
+
+procedure AddSlaveAsFormSlaveList(Sender: TsmxComponent);
+var
+  Form: TsmxCustomForm;
+  Grid: TsmxCustomGrid;
+  Kit: TsmxKit;
+  NewObj: TObject;
+  SlaveClass: TsmxBaseCellClass;
+begin
+  if Sender is TsmxCustomToolItem then
+  begin
+    Form := smxClassFuncs.GetAccessoryForm(TsmxCustomToolItem(Sender));
+    Grid := TsmxCustomGrid(Form.Cells[0]);
+    Kit := TsmxKit(Form.Tag);
+    SlaveClass := GetSlaveClass(Kit);
+    if Assigned(SlaveClass) then
+    begin
+      with TsmxObjectList(Kit).Add(SlaveClass) do
+      begin
+        Grid.FocusedRowIndex := ItemIndex;
+        NewObj := DisplayObject;
+      end;
+      if NewObj is TsmxBaseCell then
+        TsmxBaseCell(NewObj).Name :=
+          smxFuncs.FindUniqueName(TsmxBaseCell(NewObj).Owner, smxFuncs.ClassNameWithoutPrefix(TsmxBaseCell(NewObj).ClassName));
+      RefreshFormObjectProps(NewObj, cObjectInspectorPages);
+      if NewObj is TsmxBaseCell then
+        RefreshFormObjectProps(TsmxBaseCell(NewObj).Owner, cObjectTreeViewPages);
+    end;
+  end;
+end;
+
 function CreateFormSlaveList(AFormParent: TsmxCustomForm; AKit: TsmxKit): TsmxCustomForm;
 var
   FormClass: TsmxCustomFormClass;
@@ -641,6 +718,11 @@ begin
       ToolItem := ToolBar.AddSlave;
       ToolItem.Hint := 'Del Slave';
       Method.Code := @DelSlaveFormSlaveList;
+      Method.Data := ToolItem;
+      ToolItem.OnClick := TsmxComponentEvent(Method);
+      ToolItem := ToolBar.AddSlave;
+      ToolItem.Hint := 'Add Slave as...';
+      Method.Code := @AddSlaveAsFormSlaveList;
       Method.Data := ToolItem;
       ToolItem.OnClick := TsmxComponentEvent(Method);
     end;
@@ -1094,6 +1176,27 @@ begin
   end;
 end;
 
+procedure ClickColumnTreeObjectPropsPage(Sender: TsmxComponent);
+begin
+  {if Sender is TsmxCustomColumn then
+    if coEditing in TsmxCustomColumn(Sender).Options then
+      with TVirtualStringTree((TsmxCustomColumn(Sender).CellOwner as IsmxRefComponent).GetInternalRef) do
+      begin
+        EditNode(FocusedNode, TsmxCustomColumn(Sender).SlaveIndex);
+      end;}
+end;
+
+procedure ClickColumnTreeObjectEventsPage(Sender: TsmxComponent);
+begin
+  if Sender is TsmxCustomTree then
+    //if coEditing in TsmxCustomColumn(Sender).Options then
+      with TVirtualStringTree((TsmxCustomTree(Sender) as IsmxRefComponent).GetInternalRef) do
+      begin
+        if Assigned(FocusedNode) then
+          EditNode(FocusedNode, FocusedColumn);
+      end;
+end;
+
 procedure AfterEditTreeObjectEventsPage(Sender: TsmxComponent);
 
   procedure SaveMethodProp(AObject: TObject; APropInfo: PPropInfo; ATree: TsmxCustomTree;
@@ -1250,6 +1353,9 @@ begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
           Options := [coEditing, coResize];
+          Method.Code := @ClickColumnTreeObjectPropsPage;
+          Method.Data := Tree;
+          OnClick := TsmxComponentEvent(Method);
         end;
       end;
 
@@ -1289,6 +1395,9 @@ begin
           Visible := True;
           Width := (Tree.Width - 50) div 2;
           Options := [coEditing, coResize];
+          Method.Code := @ClickColumnTreeObjectEventsPage;
+          Method.Data := Tree;
+          OnClick := TsmxComponentEvent(Method);
         end;
       end;
     end;
@@ -1331,7 +1440,7 @@ var
   CfgName: String;
   Obj: TObject;
   Form, FormParent: TsmxCustomForm;
-begin   
+begin
   if Sender is TsmxCustomAlgorithm then
   begin
     CfgID := smxFuncs.GetParamValueAs(TsmxCustomAlgorithm(Sender).Params, 'ConfID', 0);
@@ -1360,9 +1469,8 @@ begin
           if not Assigned(Form) then
           begin
             Form := CreateFormCellView(FormParent, CfgID);
-            Obj := smxClassFuncs.NewCell(nil, CfgID);
+            Obj := smxClassFuncs.NewCell(Form, CfgID);
             TsmxBaseCell(Obj).CellParent := Form;
-            TsmxBaseCell(Obj).CfgID := CfgID;
             TsmxBaseCell(Obj).Initialize;
             //TsmxBaseCell(Obj).IsDesigning := True;
 

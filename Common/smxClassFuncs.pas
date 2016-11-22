@@ -16,8 +16,10 @@ uses
   Classes, smxBaseClasses, smxClasses, smxTypes, smxBaseIntf, smxDBIntf,
   smxBaseTypes;
 
-function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
-function CfgIDToCellClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
+function TypeCfgIDToCfgClassName(ATypeCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): String;
+function TypeCfgIDToCellClassName(ATypeCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): String;
+function CellCfgIDToCfgClass(ACellCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
+function CellCfgIDToCellClass(ACellCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
 function NewCfg(AOwner: TComponent; ACfgID: Integer;
   const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfg;
 function NewCell(AOwner: TComponent; ACfgID: Integer;
@@ -40,11 +42,61 @@ uses
   Variants, smxCfgs, smxFuncs, smxConsts, smxClassProcs, smxProcs, smxDBTypes,
   smxDBFuncs, smxManagerIntf;
 
-function CfgIDToCfgClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
+function TypeCfgIDToCfgClassName(ATypeCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): String;
 var
-  TypeCfg: TsmxTypeCfg;
-  ForeignKey: Variant;
   DataSet: IsmxDataSet;
+  TypeCfg: TsmxTypeCfg;
+begin
+  Result := '';
+  if not Assigned(ASelectDataSet) then
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
+    DataSet := ASelectDataSet;
+  if Assigned(DataSet) then
+  begin
+    TypeCfg := TsmxTypeCfg.Create(nil);
+    try
+      TypeCfg.CfgID := ATypeCfgID;
+      TypeCfg.SelectDataSet := DataSet;
+      TypeCfg.Load;
+      TypeCfg.Read;
+      Result := TypeCfg.CfgClassName;
+    finally
+      TypeCfg.Free;
+    end;
+  end;
+end;
+
+function TypeCfgIDToCellClassName(ATypeCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): String;
+var
+  DataSet: IsmxDataSet;
+  TypeCfg: TsmxTypeCfg;
+begin
+  Result := '';
+  if not Assigned(ASelectDataSet) then
+    DataSet := smxClassProcs.gSelectDataSetIntf
+  else
+    DataSet := ASelectDataSet;
+  if Assigned(DataSet) then
+  begin
+    TypeCfg := TsmxTypeCfg.Create(nil);
+    try
+      TypeCfg.CfgID := ATypeCfgID;
+      TypeCfg.SelectDataSet := DataSet;
+      TypeCfg.Load;
+      TypeCfg.Read;
+      Result := TypeCfg.CellClassName;
+    finally
+      TypeCfg.Free;
+    end;
+  end;
+end;
+
+function CellCfgIDToCfgClass(ACellCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCfgClass;
+var
+  DataSet: IsmxDataSet;
+  ForeignKey: Variant;
+  CfgClassName: String;
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
@@ -52,26 +104,19 @@ begin
   else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
-    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey, dsKey, dsForeignKey) then
+    if smxDBFuncs.GetValueByKey(DataSet, ACellCfgID, ForeignKey, dsKey, dsForeignKey) then
     begin
-      TypeCfg := TsmxTypeCfg.Create(nil);
-      try
-        TypeCfg.CfgID := ForeignKey;
-        TypeCfg.SelectDataSet := DataSet;
-        TypeCfg.Load;
-        TypeCfg.Read;
-        Result := TypeCfg.CfgClass;
-      finally
-        TypeCfg.Free;
-      end;
+      CfgClassName := TypeCfgIDToCfgClassName(ForeignKey, DataSet);
+      if CfgClassName <> '' then
+        Result := TsmxBaseCfgClass(smxFuncs.ResolvedClassTypeName(CfgClassName, True));
     end;
 end;
 
-function CfgIDToCellClass(ACfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
+function CellCfgIDToCellClass(ACellCfgID: Integer; const ASelectDataSet: IsmxDataSet = nil): TsmxBaseCellClass;
 var
-  TypeCfg: TsmxTypeCfg;
-  ForeignKey: Variant;
   DataSet: IsmxDataSet;
+  ForeignKey: Variant;
+  CellClassName: String;
 begin
   Result := nil;
   if not Assigned(ASelectDataSet) then
@@ -79,18 +124,11 @@ begin
   else
     DataSet := ASelectDataSet;
   if Assigned(DataSet) then
-    if smxDBFuncs.GetValueByKey(DataSet, ACfgID, ForeignKey, dsKey, dsForeignKey) then
+    if smxDBFuncs.GetValueByKey(DataSet, ACellCfgID, ForeignKey, dsKey, dsForeignKey) then
     begin
-      TypeCfg := TsmxTypeCfg.Create(nil);
-      try
-        TypeCfg.CfgID := ForeignKey;
-        TypeCfg.SelectDataSet := DataSet;
-        TypeCfg.Load;
-        TypeCfg.Read;
-        Result := TypeCfg.CellClass;
-      finally
-        TypeCfg.Free;
-      end;
+      CellClassName := TypeCfgIDToCellClassName(ForeignKey, DataSet);
+      if CellClassName <> '' then
+        Result := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(CellClassName, True));
     end;
 end;
 
@@ -104,7 +142,7 @@ begin
     DataSet := smxClassProcs.gSelectDataSetIntf
    else
     DataSet := ASelectDataSet;
-  CfgClass := CfgIDToCfgClass(ACfgID, DataSet);
+  CfgClass := CellCfgIDToCfgClass(ACfgID, DataSet);
   if Assigned(CfgClass) then
   begin
     Result := CfgClass.Create(AOwner);
@@ -125,7 +163,7 @@ begin
     DataSet := smxClassProcs.gSelectDataSetIntf
   else
     DataSet := ASelectDataSet;
-  CellClass := CfgIDToCellClass(ACfgID, DataSet);
+  CellClass := CellCfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) then
   begin
     Result := CellClass.Create(AOwner);
@@ -146,7 +184,7 @@ begin
     DataSet := smxClassProcs.gSelectDataSetIntf
   else
     DataSet := ASelectDataSet;
-  CellClass := CfgIDToCellClass(ACfgID, DataSet);
+  CellClass := CellCfgIDToCellClass(ACfgID, DataSet);
   if Assigned(CellClass) and CellClass.InheritsFrom(TsmxCustomForm) then
   begin
     Result := TsmxCustomFormClass(CellClass).Create(AOwner, AID);

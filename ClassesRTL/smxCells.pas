@@ -146,6 +146,28 @@ type
     property PopupMenu;
   end;
 
+  { TsmxMultiFilter }
+
+  TsmxMultiFilter = class(TsmxFilter)
+  protected
+    function GetItemCount: Integer; virtual;
+    function GetItemSelected(Index: Integer): Boolean; virtual;
+    function GetItemText(Index: Integer): String; virtual;
+    function GetItemValue(Index: Integer): Variant; virtual;
+    procedure SetItemSelected(Index: Integer; Value: Boolean); virtual;
+    procedure SetItemText(Index: Integer; const Value: String); virtual;
+    procedure SetItemValue(Index: Integer; const Value: Variant); virtual;
+  public
+    procedure AddItem(const Text: String; const Value: Variant); virtual;
+    procedure ClearItems; virtual;
+    procedure DeleteItem(Index: Integer); virtual;
+
+    property ItemCount: Integer read GetItemCount;
+    property ItemSelected[Index: Integer]: Boolean read GetItemSelected write SetItemSelected;
+    property ItemTexts[Index: Integer]: String read GetItemText write SetItemText;
+    property ItemValues[Index: Integer]: Variant read GetItemValue write SetItemValue;
+  end;
+
   { TsmxFilterDesk }
 
   TsmxFilterDesk = class(TsmxCustomFilterDesk)
@@ -522,6 +544,52 @@ begin
     if Obj is TWinControl then
       Panel.Parent := TWinControl(Obj);
   end;
+end;
+
+{ TsmxMultiFilter }
+
+procedure TsmxMultiFilter.AddItem(const Text: String; const Value: Variant);
+begin
+end;
+
+procedure TsmxMultiFilter.DeleteItem(Index: Integer);
+begin
+end;
+
+procedure TsmxMultiFilter.ClearItems;
+begin
+end;
+
+function TsmxMultiFilter.GetItemCount: Integer;
+begin
+  Result := 0;
+end;
+
+function TsmxMultiFilter.GetItemSelected(Index: Integer): Boolean;
+begin
+  Result := False;
+end;
+
+procedure TsmxMultiFilter.SetItemSelected(Index: Integer; Value: Boolean);
+begin
+end;
+
+function TsmxMultiFilter.GetItemText(Index: Integer): String;
+begin
+  Result := '';
+end;
+
+procedure TsmxMultiFilter.SetItemText(Index: Integer; const Value: String);
+begin
+end;
+
+function TsmxMultiFilter.GetItemValue(Index: Integer): Variant;
+begin
+  Result := Variants.Null;
+end;
+
+procedure TsmxMultiFilter.SetItemValue(Index: Integer; const Value: Variant);
+begin
 end;
 
 { TsmxFilterDesk }

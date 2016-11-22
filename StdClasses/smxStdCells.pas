@@ -341,7 +341,7 @@ type
 
   { TsmxComboBoxFilter }
 
-  TsmxComboBoxFilter = class(TsmxFilter)
+  TsmxComboBoxFilter = class(TsmxMultiFilter)
   private
     FComboBox: TComboBox;
     FRequest: TsmxCustomRequest;
@@ -353,6 +353,10 @@ type
     function GetEnabled: Boolean; override;
     function GetFont: TFont; override;
     function GetHint: String; override;
+    function GetItemCount: Integer; override;
+    function GetItemSelected(Index: Integer): Boolean; override;
+    function GetItemText(Index: Integer): String; override;
+    function GetItemValue(Index: Integer): Variant; override;
     function GetText: String; override;
     function GetValue: Variant; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -360,6 +364,9 @@ type
     procedure SetEnabled(Value: Boolean); override;
     procedure SetFont(Value: TFont); override;
     procedure SetHint(const Value: String); override;
+    procedure SetItemSelected(Index: Integer; Value: Boolean); override;
+    procedure SetItemText(Index: Integer; const Value: String); override;
+    procedure SetItemValue(Index: Integer; const Value: Variant); override;
     procedure SetRequest(Value: TsmxCustomRequest); virtual;
     procedure SetText(const Value: String); override;
     procedure SetValue(const Value: Variant); override;
@@ -367,6 +374,9 @@ type
     property ComboBox: TComboBox read GetComboBox;
   public
     destructor Destroy; override;
+    procedure AddItem(const Text: String; const Value: Variant); override;
+    procedure ClearItems; override;
+    procedure DeleteItem(Index: Integer); override;
   published
     property Font;
     property Options;
@@ -1887,6 +1897,21 @@ begin
   inherited Destroy;
 end;
 
+procedure TsmxComboBoxFilter.AddItem(const Text: String; const Value: Variant);
+begin
+  ComboBox.Items.AddObject(Text, TObject(smxFuncs.VarToInt(Value)));
+end;
+
+procedure TsmxComboBoxFilter.DeleteItem(Index: Integer);
+begin
+  ComboBox.Items.Delete(Index);
+end;
+
+procedure TsmxComboBoxFilter.ClearItems;
+begin
+  ComboBox.Items.Clear;
+end;
+
 procedure TsmxComboBoxFilter.ComboBoxChange(Sender: TObject);
 begin
   ChangeFilter;
@@ -1974,6 +1999,44 @@ end;
 procedure TsmxComboBoxFilter.SetHint(const Value: String);
 begin
   ComboBox.Hint := Value;
+end;
+
+function TsmxComboBoxFilter.GetItemCount: Integer;
+begin
+  Result := ComboBox.Items.Count;
+end;
+
+function TsmxComboBoxFilter.GetItemSelected(Index: Integer): Boolean;
+begin
+  Result := ComboBox.ItemIndex = Index;
+end;
+
+procedure TsmxComboBoxFilter.SetItemSelected(Index: Integer; Value: Boolean);
+begin
+  if Value then
+    ComboBox.ItemIndex := Index
+  else
+    ComboBox.ItemIndex := -1;
+end;
+
+function TsmxComboBoxFilter.GetItemText(Index: Integer): String;
+begin
+  Result := ComboBox.Items[Index];
+end;
+
+procedure TsmxComboBoxFilter.SetItemText(Index: Integer; const Value: String);
+begin
+  ComboBox.Items[Index] := Value;
+end;
+
+function TsmxComboBoxFilter.GetItemValue(Index: Integer): Variant;
+begin
+  Result := smxFuncs.IntToVar(Integer(ComboBox.Items.Objects[Index]));
+end;
+
+procedure TsmxComboBoxFilter.SetItemValue(Index: Integer; const Value: Variant);
+begin
+  ComboBox.Items.Objects[Index] := TObject(smxFuncs.VarToInt(Value));
 end;
 
 function TsmxComboBoxFilter.GetText: String;

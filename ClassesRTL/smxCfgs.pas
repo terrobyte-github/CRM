@@ -20,16 +20,16 @@ type
 
   TsmxTypeCfg = class(TsmxBaseCfg)
   private
-    FCellClass: TsmxBaseCellClass;
+    //FCellClass: TsmxBaseCellClass;
     FCellClassName: String;
-    FCfgClass: TsmxBaseCfgClass;
+    //FCfgClass: TsmxBaseCfgClass;
     FCfgClassName: String;
   protected
     procedure AssignTo(Dest: TPersistent); override;
     procedure ReadType(const Node: IXMLNode); virtual;
-    procedure SetCellClass(Value: TsmxBaseCellClass); virtual;
+    //procedure SetCellClass(Value: TsmxBaseCellClass); virtual;
     procedure SetCellClassName(const Value: String); virtual;
-    procedure SetCfgClass(Value: TsmxBaseCfgClass); virtual;
+    //procedure SetCfgClass(Value: TsmxBaseCfgClass); virtual;
     procedure SetCfgClassName(const Value: String); virtual;
     procedure WriteType(const Node: IXMLNode); virtual;
   public
@@ -37,8 +37,8 @@ type
     procedure Read; override;
     procedure Write; override;
 
-    property CellClass: TsmxBaseCellClass read FCellClass write SetCellClass;
-    property CfgClass: TsmxBaseCfgClass read FCfgClass write SetCfgClass;
+    //property CellClass: TsmxBaseCellClass read FCellClass write SetCellClass;
+    //property CfgClass: TsmxBaseCfgClass read FCfgClass write SetCfgClass;
   published
     property CellClassName: String read FCellClassName write SetCellClassName;
     property CfgClassName: String read FCfgClassName write SetCfgClassName;
@@ -238,8 +238,10 @@ begin
   inherited AssignTo(Dest);
   if Dest is TsmxTypeCfg then
   begin
-    TsmxTypeCfg(Dest).CellClass := CellClass;
-    TsmxTypeCfg(Dest).CfgClass := CfgClass;
+    //TsmxTypeCfg(Dest).CellClass := CellClass;
+    //TsmxTypeCfg(Dest).CfgClass := CfgClass;
+    TsmxTypeCfg(Dest).CellClassName := CellClassName;
+    TsmxTypeCfg(Dest).CfgClassName := CfgClassName;
   end;
 end;
 
@@ -281,40 +283,40 @@ begin
   Node.Attributes['CfgClassName'] := CfgClassName;
 end;
 
-procedure TsmxTypeCfg.SetCellClass(Value: TsmxBaseCellClass);
+{procedure TsmxTypeCfg.SetCellClass(Value: TsmxBaseCellClass);
 begin
   if Assigned(FCellClass) then
     FCellClassName := '';
   FCellClass := Value;
   if Assigned(FCellClass) then
     FCellClassName := smxFuncs.ResolvedClassType(FCellClass);
-end;
+end;}
 
 procedure TsmxTypeCfg.SetCellClassName(const Value: String);
 begin
-  if FCellClassName <> '' then
-    FCellClass := nil;
+  //if FCellClassName <> '' then
+    //FCellClass := nil;
   FCellClassName := Value;
-  if FCellClassName <> '' then
-    FCellClass := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(FCellClassName, True));
+  //if FCellClassName <> '' then
+    //FCellClass := TsmxBaseCellClass(smxFuncs.ResolvedClassTypeName(FCellClassName, True));
 end;
 
-procedure TsmxTypeCfg.SetCfgClass(Value: TsmxBaseCfgClass);
+{procedure TsmxTypeCfg.SetCfgClass(Value: TsmxBaseCfgClass);
 begin
   if Assigned(FCfgClass) then
     FCfgClassName := '';
   FCfgClass := Value;
   if Assigned(FCfgClass) then
     FCfgClassName := smxFuncs.ResolvedClassType(FCfgClass);
-end;
+end;}
 
 procedure TsmxTypeCfg.SetCfgClassName(const Value: String);
 begin
-  if FCfgClassName <> '' then
-    FCfgClass := nil;
+  //if FCfgClassName <> '' then
+    //FCfgClass := nil;
   FCfgClassName := Value;
-  if FCfgClassName <> '' then
-    FCfgClass := TsmxBaseCfgClass(smxFuncs.ResolvedClassTypeName(FCfgClassName, True));
+  //if FCfgClassName <> '' then
+    //FCfgClass := TsmxBaseCfgClass(smxFuncs.ResolvedClassTypeName(FCfgClassName, True));
 end;
 
 { TsmxResolvedItem }
