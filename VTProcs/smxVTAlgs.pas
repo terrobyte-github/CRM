@@ -314,7 +314,7 @@ begin
 
     if opTreeView in AObjectPages then
     begin
-      Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[1].Cells[0]);
+      Tree := TsmxCustomTree(FormObjectProps.Cells[0].Cells[1].Cells[1]);
       Tree.RowCount[Tree.RootRow] := 0;
       if Assigned(AObject) then
       begin
@@ -1260,6 +1260,14 @@ begin
   end;
 end;
 
+procedure AddCellFormObjectProps(Sender: TsmxComponent);
+begin
+end;
+
+procedure DelCellFormObjectProps(Sender: TsmxComponent);
+begin
+end;
+
 function CreateFormObjectProps(AFormParent: TsmxCustomForm): TsmxCustomForm;
 var
   FormClass: TsmxCustomFormClass;
@@ -1268,6 +1276,8 @@ var
   PageManager: TsmxCustomPageManager;
   Page: TsmxCustomPage;
   Tree: TsmxCustomTree;
+  ToolBar: TsmxCustomToolBoard;
+  ToolItem: TsmxCustomToolItem;
 begin
   Result := nil;
   //FormClass := TsmxCustomFormClass(Classes.GetClass('TsmxStandardForm'));
@@ -1404,6 +1414,33 @@ begin
 
     Page := Result.Slaves[0].AddSlave;
     Page.Caption := 'Object TreeView';
+
+    if Assigned(smxProcs.gClassTypeManagerIntf) then
+      CellClass := TsmxBaseCellClass(
+        smxProcs.gClassTypeManagerIntf.ResolvedClassTypeName(
+          'TsmxToolBar' +
+            smxProcs.gClassTypeManagerIntf.Delimiter +
+            'smxStdClasses.dll',
+          True))
+    else
+      CellClass := nil;
+    if Assigned(CellClass) then
+    begin
+      ToolBar := TsmxCustomToolBoard(CellClass.Create(nil));
+      ToolBar.CellParent := Page;
+      ToolBar.Visible := True;
+      ToolBar.Align := alTop;
+      ToolItem := ToolBar.AddSlave;
+      ToolItem.Hint := 'Add Cell';
+      Method.Code := @AddCellFormObjectProps;
+      Method.Data := ToolItem;
+      ToolItem.OnClick := TsmxComponentEvent(Method);
+      ToolItem := ToolBar.AddSlave;
+      ToolItem.Hint := 'Del Cell';
+      Method.Code := @DelCellFormObjectProps;
+      Method.Data := ToolItem;
+      ToolItem.OnClick := TsmxComponentEvent(Method);
+    end;
 
     if Assigned(smxProcs.gClassTypeManagerIntf) then
       CellClass := TsmxBaseCellClass(
